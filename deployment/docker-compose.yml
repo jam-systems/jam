@@ -20,9 +20,9 @@ services:
     image: registry.gitlab.com/jam-systems/jam/pantry:master
     restart: always
     labels:
-      - traefik.http.routers.signalhub.rule=Host(`pantry.jam.systems`)
-      - traefik.http.routers.signalhub.tls=true
-      - traefik.http.routers.signalhub.tls.certresolver=letsencrypt
+      - traefik.http.routers.pantry.rule=Host(`pantry.jam.systems`)
+      - traefik.http.routers.pantry.tls=true
+      - traefik.http.routers.pantry.tls.certresolver=letsencrypt
       - traefik.enable=true
   signalhub:
     image: registry.gitlab.com/jam-systems/jam/signalhub:master
