@@ -12,8 +12,10 @@
   },
   "license": "MIT",
   "dependencies": {
+    "compact-base64": "^2.1.2",
     "hark": "^1.2.3",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react-dom": "^17.0.1",
+    "tweetnacl": "^1.0.3"
   }
 }

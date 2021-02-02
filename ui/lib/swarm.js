@@ -1,10 +1,9 @@
 import SimplePeer from 'https://esm.run/simple-peer-light';
 import State from './minimal-state.js';
 import signalhub from './signalhub.js';
-// if (import.meta.hot) import.meta.hot.decline();
-if (!sessionStorage.myPeerId) {
-  sessionStorage.myPeerId = randomHex4();
-}
+import {getId} from "./identity";
+
+console.log(getId())
 
 const LOGGING = false;
 
@@ -13,7 +12,7 @@ const LOGGING = false;
 const swarm = State({
   // state
   peers: {},
-  myPeerId: sessionStorage.myPeerId,
+  myPeerId: getId(),
   connected: false,
   remoteStreams: [], // {stream, name, peerId}, only one per (name, peerId) if name is set
   // internal
