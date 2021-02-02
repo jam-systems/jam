@@ -22,7 +22,7 @@ window.addEventListener('load', () => {
   secret = secret || 'secret';
   console.log('secret', secret);
   state.secret = secret;
-  swarm.config('https://signalhub.preview.realest8.at/', `jam-` + secret);
+  swarm.config('https://signalhub.jam.systems/', `jam-` + secret);
   swarm.connect();
 });
 
