@@ -1,3 +1,3 @@
 # Jam
 
-serve ui locally: `npx serve -s ui`
+build & serve page in development: `yarn start`
