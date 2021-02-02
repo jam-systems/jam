@@ -97,41 +97,7 @@
     </style>
   </head>
   <body>
-    <div class="container">
-      <div class="child">
-        <h1>Reddit vs Hedge Funds</h1>
-
-        <h3 style="margin-top: 80px">stage</h3>
-        <table class="stage">
-          <tr>
-            <td><img src="sonic.png" /></td>
-            <td><img src="tosh.jpg" /></td>
-            <td class="speaking"><img src="sonic.png" /></td>
-          </tr>
-        </table>
-
-        <h3 style="margin-top: 80px">audience</h3>
-        <table class="audience">
-          <tr>
-            <td><img src="sonic.png" /></td>
-            <td><img src="tosh.jpg" /></td>
-            <td><img src="sonic.png" /></td>
-            <td><img src="tosh.jpg" /></td>
-          </tr>
-        </table>
-
-        <div class="navigation" style="margin-top: 80px">
-          <button>🚪 Leave quietly</button>
-
-          <button style="float: right">✋🏽 Raise hand</button>
-        </div>
-
-        <div>
-          <button onclick="enterJamRoom()">Enter Room</button>
-          <button onclick="leaveJamRoom()">Leave Room</button>
-        </div>
-      </div>
-    </div>
-    <script type="module" src="./main.js"></script>
+    <div id="root"></div>
+    <script type="module" src="./bundle.js"></script>
   </body>
 </html>

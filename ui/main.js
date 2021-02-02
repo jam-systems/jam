@@ -7,15 +7,15 @@ const state = State({
 });
 window.state = state; // for debugging
 
-window.enterJamRoom = () => {
+export function enterJamRoom() {
   requestAudio();
   state.set('soundMuted', false);
-};
+}
 
-window.leaveJamRoom = () => {
+export function leaveJamRoom() {
   stopAudio();
   state.set('soundMuted', true);
-};
+}
 
 window.addEventListener('load', () => {
   let [secret] = location.pathname.split('/').filter(x => x);
