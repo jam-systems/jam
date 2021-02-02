@@ -1,9 +1,11 @@
 import swarm from './lib/swarm.js';
 import State from './lib/minimal-state.js';
+import hark from 'hark';
 
 export const state = State({
   soundMuted: true,
   myAudio: null,
+  speaking: new Set(),
 });
 window.state = state; // for debugging
 
@@ -52,6 +54,7 @@ swarm.on('stream', (stream, name, peer) => {
   audio.addEventListener('canplay', () => {
     audio.play();
   });
+  listenIfSpeaking(id, stream);
 });
 
 async function requestAudio() {
@@ -69,6 +72,7 @@ async function requestAudio() {
     });
   if (!stream) return;
   state.set('myAudio', stream);
+  listenIfSpeaking('me', stream);
   return stream;
 }
 
@@ -77,4 +81,19 @@ async function stopAudio() {
     state.myAudio.getTracks().forEach(track => track.stop());
   }
   state.set('myAudio', undefined);
+}
+
+function listenIfSpeaking(peerId, stream) {
+  let options = {};
+  let speechEvents = hark(stream, options);
+
+  speechEvents.on('speaking', () => {
+    state.speaking.add(peerId);
+    state.update('speaking');
+  });
+
+  speechEvents.on('stopped_speaking', () => {
+    state.speaking.delete(peerId);
+    state.update('speaking');
+  });
 }

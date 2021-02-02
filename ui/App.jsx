@@ -8,6 +8,7 @@ render(<App />, document.querySelector('#root'));
 
 function App() {
   let myStream = use(state, 'myAudio');
+  let speaking = use(state, 'speaking');
   let streams = use(swarm, 'remoteStreams');
   return (
     <div className="container">
@@ -18,12 +19,12 @@ function App() {
         <table className="stage">
           <tr>
             {myStream && (
-              <td>
+              <td className={speaking.has('me') && 'speaking'}>
                 <img src="tosh.jpg" />
               </td>
             )}
-            {streams.map(streamObj => (
-              <td key={streamObj.peerId}>
+            {streams.map(({peerId}) => (
+              <td key={peerId} className={speaking.has(peerId) && 'speaking'}>
                 <img src="sonic.png" />
               </td>
             ))}
