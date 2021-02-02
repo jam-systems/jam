@@ -17,43 +17,47 @@ function App() {
 
         <h3 style={{marginTop: '80px'}}>stage</h3>
         <table className="stage">
-          <tr>
-            {myStream && (
-              <td className={speaking.has('me') ? 'speaking' : undefined}>
-                <img src="img/avatars/tosh.jpg" />
-              </td>
-            )}
-            {streams.map(({stream, peerId}) =>
-              !stream ? undefined : (
-                <td
-                  key={peerId}
-                  className={speaking.has(peerId) ? 'speaking' : undefined}
-                  title={peerId}
-                  alt={peerId}
-                >
-                  <img src="img/avatars/sonic.jpg" />
+          <tbody>
+            <tr>
+              {myStream && (
+                <td className={speaking.has('me') ? 'speaking' : undefined}>
+                  <img src="img/avatars/tosh.jpg" />
                 </td>
-              )
-            )}
-          </tr>
+              )}
+              {streams.map(({stream, peerId}) =>
+                !stream ? undefined : (
+                  <td
+                    key={peerId}
+                    className={speaking.has(peerId) ? 'speaking' : undefined}
+                    title={peerId}
+                    alt={peerId}
+                  >
+                    <img src="img/avatars/sonic.jpg" />
+                  </td>
+                )
+              )}
+            </tr>
+          </tbody>
         </table>
 
         <h3 style={{marginTop: '80px'}}>audience</h3>
         <table className="audience">
-          <tr>
-            <td>
-              <img src="img/avatars/sonic.jpg" />
-            </td>
-            <td>
-              <img src="img/avatars/gregor.jpg" />
-            </td>
-            <td>
-              <img src="img/avatars/christoph.jpg" />
-            </td>
-            <td>
-              <img src="img/avatars/tosh.jpg" />
-            </td>
-          </tr>
+          <tbody>
+            <tr>
+              <td>
+                <img src="img/avatars/sonic.jpg" />
+              </td>
+              <td>
+                <img src="img/avatars/gregor.jpg" />
+              </td>
+              <td>
+                <img src="img/avatars/christoph.jpg" />
+              </td>
+              <td>
+                <img src="img/avatars/tosh.jpg" />
+              </td>
+            </tr>
+          </tbody>
         </table>
 
         <div className="navigation" style={{marginTop: '80px'}}>
