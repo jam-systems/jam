@@ -1,0 +1,52 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:12
+    restart: always
+    environment:
+      POSTGRES_USER: jam
+      POSTGRES_PASSWORD: jam
+    volumes:
+      - ../data/postgres:/var/lib/postgresql/data
+  ui:
+    image: registry.gitlab.com/jam/jam/ui:master
+    restart: always
+    labels:
+      - traefik.http.routers.ui.rule=Host(`jam.systems`)
+      - traefik.http.routers.ui.tls=true
+      - traefik.http.routers.ui.tls.certresolver=letsencrypt
+      - traefik.enable=true
+  signalhub:
+    image: registry.gitlab.com/jam/signalhub:master
+    restart: always
+    labels:
+      - traefik.http.routers.signalhub.rule=Host(`signalhub.jam.systems`)
+      - traefik.http.routers.signalhub.tls=true
+      - traefik.http.routers.signalhub.tls.certresolver=letsencrypt
+      - traefik.enable=true
+  traefik:
+    hostname: traefik
+    image: traefik
+    restart: always
+    command:
+      - "--entryPoints.web.address=:80"
+      - "--entryPoints.websecure.address=:443"
+      - "--certificatesResolvers.letsencrypt.acme.email=christoph@doublemalt.net"
+      - "--certificatesResolvers.letsencrypt.acme.storage=/acme/acme.json"
+      - "--certificatesResolvers.letsencrypt.acme.httpChallenge.entryPoint=web"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedByDefault=false"
+    labels:
+      traefik.http.routers.http-catchall.rule: hostregexp(`{host:.+}`)
+      traefik.http.routers.http-catchall.entrypoints: web
+      traefik.http.routers.http-catchall.middlewares: redirect-to-https@docker
+      traefik.http.middlewares.redirect-to-https.redirectscheme.scheme: https
+      traefik.enable: "true"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../data/traefik/acme:/acme
+
+
