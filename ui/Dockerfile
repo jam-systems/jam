@@ -8,4 +8,4 @@ RUN npx esbuild --bundle ./App.jsx --outfile=./bundle.js --format=esm --define:p
 
 FROM nginx:alpine
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder /index.html /bundle.js sonic.png tosh.jpg /usr/share/nginx/html/
+COPY --from=builder /index.html /bundle.js /img /usr/share/nginx/html/
