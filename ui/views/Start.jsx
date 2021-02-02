@@ -10,7 +10,7 @@ export default function Start() {
         <p>
           <img alt="Jam Logo" src="/img/jam-logo.jpg" />
         </p>
-        <form action={roomHref} method="get">
+        <form action={roomHref} method="post">
           <button href={roomHref}>🌱 Create a new room</button>
         </form>
       </div>
