@@ -25,7 +25,7 @@ function App() {
             )}
             {streams.map(({peerId}) => (
               <td key={peerId} className={speaking.has(peerId) && 'speaking'}>
-                <img src="mg/avatars/gregor.jpg" />
+                <img src="img/avatars/gregor.jpg" />
               </td>
             ))}
             {/* <td className="speaking">
