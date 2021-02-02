@@ -19,18 +19,20 @@ function App() {
         <table className="stage">
           <tr>
             {myStream && (
-              <td className={speaking.has('me') && 'speaking'}>
-                <img src="img/avatars/sonic.jpg" />
+              <td className={speaking.has('me') ? 'speaking' : undefined}>
+                <img src="img/avatars/tosh.jpg" />
               </td>
             )}
-            {streams.map(({peerId}) => (
-              <td key={peerId} className={speaking.has(peerId) && 'speaking'}>
-                <img src="img/avatars/gregor.jpg" />
-              </td>
-            ))}
-            {/* <td className="speaking">
-              <img src="sonic.png" />
-            </td> */}
+            {streams.map(({stream, peerId}) =>
+              !stream ? undefined : (
+                <td
+                  key={peerId}
+                  className={speaking.has(peerId) ? 'speaking' : undefined}
+                >
+                  <img src="img/avatars/sonic.jpg" />
+                </td>
+              )
+            )}
           </tr>
         </table>
 
@@ -38,13 +40,13 @@ function App() {
         <table className="audience">
           <tr>
             <td>
-            <img src="img/avatars/sonic.jpg" />
+              <img src="img/avatars/sonic.jpg" />
             </td>
             <td>
-            <img src="img/avatars/gregor.jpg" />
+              <img src="img/avatars/gregor.jpg" />
             </td>
             <td>
-            <img src="img/avatars/christoph.jpg" />
+              <img src="img/avatars/christoph.jpg" />
             </td>
             <td>
               <img src="img/avatars/tosh.jpg" />
