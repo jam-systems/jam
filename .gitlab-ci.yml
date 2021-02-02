@@ -5,7 +5,7 @@ services:
 variables:
   DOCKER_NAMESPACE: registry.gitlab.com/jam-systems/jam
   DEPLOYMENT_HOST: jam.systems
-  DEPLOYMENT_PATH: /jam/deployment
+  DEPLOYMENT_PATH: /root/jam/deployment
 
 stages:
   - build
