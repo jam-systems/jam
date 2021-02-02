@@ -37,16 +37,16 @@ function App() {
         <table className="audience">
           <tr>
             <td>
-              <img src="sonic.png" />
+            <img src="img/avatars/sonic.jpg" />
             </td>
             <td>
-              <img src="tosh.jpg" />
+            <img src="img/avatars/gregor.jpg" />
             </td>
             <td>
-              <img src="sonic.png" />
+            <img src="img/avatars/christoph.jpg" />
             </td>
             <td>
-              <img src="tosh.jpg" />
+              <img src="img/avatars/tosh.jpg" />
             </td>
           </tr>
         </table>
