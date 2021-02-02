@@ -1,4 +1,7 @@
 image: docker:git
+services:
+  - docker:dind
+
 variables:
   DOCKER_NAMESPACE: registry.gitlab.com/jam-systems/jam
   DEPLOYMENT_HOST: jam.systems
