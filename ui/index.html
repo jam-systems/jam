@@ -1,21 +1,21 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta property="og:title" content="Room">
-    <meta property="og:description" content="Jam">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://jam.systems/">
-    <meta property="og:image" content="https://jam.systems/og.png">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" type="image/png" href="/favicon.png">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta property="og:title" content="Room" />
+    <meta property="og:description" content="Jam" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://jam.systems/" />
+    <meta property="og:image" content="https://jam.systems/og.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" type="image/png" href="/favicon.png" />
     <title>🍯 Jam</title>
     <style>
-      body{
-        margin:0;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-      "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
-      "Droid Sans", "Helvetica Neue", sans-serif;
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+          'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
+          'Helvetica Neue', sans-serif;
         background-color: rgb(243, 242, 239);
       }
       .container {
@@ -25,7 +25,9 @@
         border-radius: 30px 30px 0 0;
         background: white;
       }
-      h1, h2, h3 {
+      h1,
+      h2,
+      h3 {
         color: black;
         width: 100%;
         font-weight: normal;
@@ -74,13 +76,13 @@
         font-size: 18px;
         cursor: pointer;
         -webkit-appearance: none;
-        background:rgb(230, 230, 230)
+        background: rgb(230, 230, 230);
       }
       a {
         color: #505050;
       }
 
-      @media (max-width:640px) {
+      @media (max-width: 640px) {
         h1 {
           font-size: 38px;
         }
@@ -88,49 +90,48 @@
           font-size: 16px;
           margin: -12% 0 60% 0;
         }
-        input[type="submit"] {
+        input[type='submit'] {
           width: 100%;
         }
       }
     </style>
-</head>
+  </head>
   <body>
     <div class="container">
       <div class="child">
-
         <h1>Reddit vs Hedge Funds</h1>
 
-        <h3 style="margin-top: 80px;">stage</h3>
+        <h3 style="margin-top: 80px">stage</h3>
         <table class="stage">
           <tr>
-            <td><img src="sonic.png"></td>
-            <td><img src="tosh.jpg"></td>
-            <td class="speaking"><img src="sonic.png"></td>
+            <td><img src="sonic.png" /></td>
+            <td><img src="tosh.jpg" /></td>
+            <td class="speaking"><img src="sonic.png" /></td>
           </tr>
         </table>
 
-
-        <h3 style="margin-top: 80px;">audience</h3>
+        <h3 style="margin-top: 80px">audience</h3>
         <table class="audience">
           <tr>
-            <td><img src="sonic.png"></td>
-            <td><img src="tosh.jpg"></td>
-            <td><img src="sonic.png"></td>
-            <td><img src="tosh.jpg"></td>
+            <td><img src="sonic.png" /></td>
+            <td><img src="tosh.jpg" /></td>
+            <td><img src="sonic.png" /></td>
+            <td><img src="tosh.jpg" /></td>
           </tr>
         </table>
 
-        <div class="navigation" style="margin-top: 80px;">
-          <button>
-            🚪 Leave quietly
-          </button>
+        <div class="navigation" style="margin-top: 80px">
+          <button>🚪 Leave quietly</button>
 
-          <button style="float: right;">
-            ✋🏽 Raise hand
-          </button>
+          <button style="float: right">✋🏽 Raise hand</button>
         </div>
 
+        <div>
+          <button onclick="enterJamRoom()">Enter Room</button>
+          <button onclick="leaveJamRoom()">Leave Room</button>
+        </div>
       </div>
     </div>
+    <script type="module" src="./main.js"></script>
   </body>
 </html>

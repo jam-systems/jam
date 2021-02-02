@@ -18,7 +18,7 @@ window.leaveJamRoom = () => {
 };
 
 window.addEventListener('load', () => {
-  let [, , secret] = location.pathname.split('/').filter(x => x);
+  let [secret] = location.pathname.split('/').filter(x => x);
   secret = secret || 'secret';
   console.log('secret', secret);
   state.secret = secret;
