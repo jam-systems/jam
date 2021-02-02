@@ -11,21 +11,16 @@
     <link rel="shortcut icon" type="image/png" href="/favicon.png">
     <title>Room — crystal clear conversations</title>
     <style>
-      body{ margin:0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      body{
+        margin:0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
       "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
       "Droid Sans", "Helvetica Neue", sans-serif;
-            background-color: rgb(247, 247, 247);}
-      #container {
-        position: static;
+        background-color: rgb(247, 247, 247);
       }
-      #container .child {
-        position: relative;
-        top: 200px;
-        left: 50%;
-        width: 50%;
-        transform: translate(-50%, -50%);
-        text-align: center;
+      .container {
+        width: 640px;
+        margin: 0 auto 0 auto;
       }
       h1, h2 {
         color: #505050;
@@ -42,6 +37,9 @@
         font-size: 20px;
         margin: -4% 0 6% 0;
       }
+      h3 {
+        text-align: left;
+      }
       input {
         padding: 10px;
         font-size: 18px;
@@ -49,8 +47,16 @@
         border-radius: 3px;
       }
       table.stage img {
+        margin: 16px;
         width: 120px;
         height: 120px;
+        border-radius: 42%;
+        border: 1px solid rgb(213, 213, 213);
+      }
+      table.audience img {
+        margin: 16px;
+        width: 80px;
+        height: 80px;
         border-radius: 42%;
         border: 1px solid rgb(213, 213, 213);
       }
@@ -83,18 +89,31 @@
     </style>
 </head>
   <body>
-    <div id="container">
+    <div class="container">
       <div class="child">
 
         <h1 style="padding-top: 40px">Reddit vs Hedge Funds</h1>
         <h2>Crystal&nbsp;clear&nbsp;conversations.</h2>
 
+
+        <h3>stage</h3>
         <table class="stage">
-          <tr><td><img src="sonic.png"></td><td><img src="tosh.jpg"></td><td><img src="sonic.png"></td></tr>
+          <tr>
+            <td><img src="sonic.png"></td>
+            <td><img src="tosh.jpg"></td>
+            <td><img src="sonic.png"></td>
+          </tr>
         </table>
 
+
+        <h3 style="margin-top: 80px;">audience</h3>
         <table class="audience">
-          <tr><td></td><td></td><td></td></tr>
+          <tr>
+            <td><img src="sonic.png"></td>
+            <td><img src="tosh.jpg"></td>
+            <td><img src="sonic.png"></td>
+            <td><img src="tosh.jpg"></td>
+          </tr>
         </table>
 
       </div>
