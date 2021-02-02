@@ -20,12 +20,12 @@ function App() {
           <tr>
             {myStream && (
               <td className={speaking.has('me') && 'speaking'}>
-                <img src="tosh.jpg" />
+                <img src="img/avatars/sonic.jpg" />
               </td>
             )}
             {streams.map(({peerId}) => (
               <td key={peerId} className={speaking.has(peerId) && 'speaking'}>
-                <img src="sonic.png" />
+                <img src="mg/avatars/gregor.jpg" />
               </td>
             ))}
             {/* <td className="speaking">
