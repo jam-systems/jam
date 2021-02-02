@@ -1,21 +1,26 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {render} from 'react-dom';
 import Start from './views/Start.jsx';
 import Room from './views/Room.jsx';
-import NewRoom from './views/NewRoom.jsx';
 import {useIsRoomNew} from './backend.js';
+import {useLocation} from './lib/use-location.js';
 
 render(<App />, document.querySelector('#root'));
 
 function App() {
+  useLocation();
   const [roomId] = location.pathname.split('/').filter(x => x);
-  let [isNew, isLoading] = useIsRoomNew(roomId);
+  let [doDisplayRoom, setDoDisplayRoom] = useState(false);
+  let displayRoom = () => setDoDisplayRoom(true);
+  let [isNew, isLoading] = useIsRoomNew(roomId, !doDisplayRoom);
   if (roomId) {
     if (isLoading) return null;
-    // TODO: create room
-    // return isNew ? <NewRoom /> : <Room />;
-    return <Room />;
+    return isNew && !doDisplayRoom ? (
+      <Start urlRoomId={roomId} displayRoom={displayRoom} />
+    ) : (
+      <Room />
+    );
   } else {
-    return <Start />;
+    return <Start displayRoom={displayRoom} />;
   }
 }

@@ -18,6 +18,8 @@
         "react"
     ],
     "rules": {
-        "no-empty": "off"
+        "no-empty": "off",
+        "no-unused-vars": "warn",
+        "react/prop-types": "off"
     }
 }
