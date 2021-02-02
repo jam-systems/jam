@@ -64,10 +64,24 @@
       table td {
         padding: 0;
         border: 5px solid transparent;
+        vertical-align: top;
       }
       .speaking {
         border-radius: 42%;
         border: 5px solid rgb(213, 213, 213);
+      }
+      .muted:after {
+        content: "";
+        height: 24px;
+        width: 24px;
+        display: inline-block;
+        position: relative;
+        top: -34px;
+        left: 80px;
+        border: 4px solid white;
+        border-radius: 50%;
+        background: white url(img/muted.png) no-repeat;
+        background-size: cover;
       }
       button {
         padding: 16px 20px 16px 20px;
