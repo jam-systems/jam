@@ -9,7 +9,7 @@ services:
     volumes:
       - ../data/postgres:/var/lib/postgresql/data
   ui:
-    image: registry.gitlab.com/jam/jam/ui:master
+    image: registry.gitlab.com/jam-systems/jam/ui:master
     restart: always
     labels:
       - traefik.http.routers.ui.rule=Host(`jam.systems`)
@@ -17,7 +17,7 @@ services:
       - traefik.http.routers.ui.tls.certresolver=letsencrypt
       - traefik.enable=true
   signalhub:
-    image: registry.gitlab.com/jam/signalhub:master
+    image: registry.gitlab.com/jam-systems/jam/signalhub:master
     restart: always
     labels:
       - traefik.http.routers.signalhub.rule=Host(`signalhub.jam.systems`)
