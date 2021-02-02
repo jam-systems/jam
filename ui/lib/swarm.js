@@ -6,6 +6,8 @@ if (!sessionStorage.myPeerId) {
   sessionStorage.myPeerId = randomHex4();
 }
 
+const LOGGING = false;
+
 // public API starts here
 
 const swarm = State({
@@ -36,7 +38,7 @@ swarm.disconnect = disconnect;
 swarm.reconnect = reconnect;
 
 swarm.addLocalStream = (stream, name) => {
-  console.log('addlocalstream', stream, name);
+  log('addlocalstream', stream, name);
   if (!name) name = randomHex4();
   swarm.localStreams[name] = stream;
   addStreamToPeers(stream, name);
@@ -44,16 +46,20 @@ swarm.addLocalStream = (stream, name) => {
 
 // public API ends here
 
+function log(...args) {
+  if (LOGGING) console.log(...args);
+}
+
 function createPeer(peerId, connId, initiator) {
   let {hub, localStreams, peers, myPeerId} = swarm;
   if (!myPeerId || peerId === myPeerId) return;
   // destroy any existing peer
   let peer = peers[peerId];
   if (peer) {
-    console.log('destroying old peer', peerId);
+    log('destroying old peer', peerId);
     peer.destroy();
   }
-  console.log('creating peer', peerId, connId);
+  log('creating peer', peerId, connId);
 
   let streams = Object.values(localStreams).filter(x => x);
   peer = new SimplePeer({
@@ -68,7 +74,7 @@ function createPeer(peerId, connId, initiator) {
   swarm.update('peers');
 
   peer.on('signal', data => {
-    console.log('signaling to', peerId, connId, data.type);
+    log('signaling to', peerId, connId, data.type);
     // tell peer how to identify streams
     // TODO: it may at one point become necessary to use transceiver.mid instead of stream.id
     let remoteStreamIds = [];
@@ -87,12 +93,12 @@ function createPeer(peerId, connId, initiator) {
     });
   });
   peer.on('connect', () => {
-    console.log('connected peer', peerId);
+    log('connected peer', peerId);
     swarm.update('peers');
   });
 
   peer.on('data', rawData => {
-    console.log('data (channel) from', peerId);
+    log('data (channel) from', peerId);
     swarm.emit('data', rawData);
   });
 
@@ -113,12 +119,11 @@ function createPeer(peerId, connId, initiator) {
   });
   // WARNING: this uses undocumented internals of simple-peer
   peer._pc.addEventListener('track', ({track, transceiver}) => {
-    if (track.kind === 'video')
-      console.log('got remote video mid', transceiver.mid);
+    if (track.kind === 'video') log('got remote video mid', transceiver.mid);
   });
 
   peer.on('error', err => {
-    console.log('error', err);
+    log('error', err);
   });
   peer.on('close', () => {
     removePeer(peerId, peer);
@@ -129,7 +134,7 @@ function createPeer(peerId, connId, initiator) {
 function removePeer(peerId, peer) {
   let {peers} = swarm;
   if (!peers[peerId] || (peer && peer !== peers[peerId])) return;
-  console.log('removing peer', peerId);
+  log('removing peer', peerId);
   delete peers[peerId];
   let {remoteStreams} = swarm;
   if (remoteStreams.find(streamObj => streamObj.peerId === peerId)) {
@@ -144,7 +149,7 @@ function removePeer(peerId, peer) {
 function addPeerMetaData(peer, data) {
   if (!data) return;
   try {
-    console.log('adding metadata', data);
+    log('adding metadata', data);
     for (let key in data) {
       peer[key] = data[key];
     }
@@ -154,19 +159,19 @@ function addPeerMetaData(peer, data) {
 }
 
 function addStreamToPeers(stream, name) {
-  console.log('addStreamToPeers', stream, name);
+  log('addStreamToPeers', stream, name);
   let {peers} = swarm;
-  console.log('peers', peers);
+  log('peers', peers);
   for (let peerId in peers) {
     let peer = peers[peerId];
     // TODO maybe some condition for what peers we will add stream? (e.g. only connected peers)
     let oldStream = peer.streams[name];
     let addStream = () => {
-      console.log('adding stream to', peerId, name);
+      log('adding stream to', peerId, name);
       peer.streams[name] = stream;
       if (stream) peer.addStream(stream);
     };
-    // console.log(kind, 'old', oldStream, 'new', stream);
+    // log(kind, 'old', oldStream, 'new', stream);
     if (oldStream) {
       if (oldStream === stream) return; // avoid error if listener is called twice
       peer.removeStream(oldStream);
@@ -190,7 +195,7 @@ function connect() {
     );
   }
   let myConnId = randomHex4();
-  console.log('connecting. peers', swarm.peers, 'conn id', myConnId);
+  log('connecting. peers', swarm.peers, 'conn id', myConnId);
   let hub = signalhub(swarm.room, swarm.url);
   let {myPeerId} = swarm;
   hub
@@ -212,18 +217,18 @@ function connect() {
 
   hub.subscribe('connect-me', ({peerId, connId}) => {
     if (peerId === myPeerId) return;
-    console.log('got connect-me', peerId, {peerId, connId});
+    log('got connect-me', peerId, {peerId, connId});
     if (myPeerId > peerId) {
-      console.log('i initiate, and override any previous peer!');
+      log('i initiate, and override any previous peer!');
       createPeer(peerId, connId, true);
     } else {
-      console.log('i dont initiate, but will prepare a new peer');
+      log('i dont initiate, but will prepare a new peer');
       hub.broadcast(`no-you-connect-${peerId}`, {
         peerId: myPeerId,
         connId: myConnId,
         yourConnId: connId,
       });
-      console.log('sent no-you-connect', peerId);
+      log('sent no-you-connect', peerId);
       createPeer(peerId, connId, false);
     }
   });
@@ -232,34 +237,34 @@ function connect() {
     `no-you-connect-${myPeerId}`,
     ({peerId, connId, yourConnId}) => {
       if (peerId === myPeerId) return;
-      console.log('got no-you-connect', peerId, {peerId, connId, yourConnId});
+      log('got no-you-connect', peerId, {peerId, connId, yourConnId});
       if (yourConnId !== myConnId) {
         console.warn('no-you-connect to old connection, should be ignored');
-        console.log('ignoring msg to old connection', yourConnId);
+        log('ignoring msg to old connection', yourConnId);
       } else {
         // only accept back-connection if connect request was made
-        console.log('i initiate, but dont override if i already have a peer');
+        log('i initiate, but dont override if i already have a peer');
         // (because no-you-connect can only happen after i sent connect, at which point i couldn't have had peers,
         // so the peer i already have comes from a racing connect from the other peer)
         let {peers} = swarm;
         if (!peers[peerId]) {
-          console.log('creating peer because i didnt have one');
+          log('creating peer because i didnt have one');
           createPeer(peerId, connId, true);
         } else if (peers[peerId].connId !== connId) {
-          console.log('creating peer because the connId was outdated');
+          log('creating peer because the connId was outdated');
           createPeer(peerId, connId, true);
         } else {
-          console.log('not creating peer');
+          log('not creating peer');
         }
       }
     }
   );
 
   hub.subscribe(`signal-${myPeerId}`, ({peerId, data, connId, yourConnId}) => {
-    console.log('signal received from', peerId, connId, data.type);
+    log('signal received from', peerId, connId, data.type);
     if (yourConnId !== myConnId) {
       console.warn('signal to old connection, should be ignored');
-      console.log('ignoring msg to old connection', yourConnId);
+      log('ignoring msg to old connection', yourConnId);
       return;
     }
     let peer = swarm.peers[peerId];
@@ -267,9 +272,9 @@ function connect() {
       addPeerMetaData(peer, data.meta);
       peer.signal(data);
     } else {
-      console.log('no peer to receive signal');
+      log('no peer to receive signal');
       if (data && data.type === 'offer') {
-        console.log('i got an offer and will create a new peer to receive it');
+        log('i got an offer and will create a new peer to receive it');
         peer = createPeer(peerId, connId, false);
         addPeerMetaData(peer, data.meta);
         peer.signal(data);

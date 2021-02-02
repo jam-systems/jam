@@ -48,7 +48,7 @@ swarm.on('stream', (stream, name, peer) => {
   let audio = new Audio();
   audios[id] = audio;
   audio.srcObject = stream;
-  audio.muted = true;
+  audio.muted = state.soundMuted;
   audio.addEventListener('canplay', () => {
     audio.play();
   });
