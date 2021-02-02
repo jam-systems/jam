@@ -28,6 +28,8 @@ function App() {
                 <td
                   key={peerId}
                   className={speaking.has(peerId) ? 'speaking' : undefined}
+                  title={peerId}
+                  alt={peerId}
                 >
                   <img src="img/avatars/sonic.jpg" />
                 </td>
