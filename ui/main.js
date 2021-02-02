@@ -1,7 +1,7 @@
 import swarm from './lib/swarm.js';
 import State from './lib/minimal-state.js';
 
-const state = State({
+export const state = State({
   soundMuted: true,
   myAudio: null,
 });
@@ -30,11 +30,11 @@ state.on('myAudio', () => {
   swarm.addLocalStream(state.myAudio, 'audio');
 });
 
-let audios = {};
+let speaker = {};
 state.on('soundMuted', () => {
   let muted = state.soundMuted;
-  for (let id in audios) {
-    audios[id].muted = muted;
+  for (let id in speaker) {
+    speaker[id].muted = muted;
   }
 });
 
@@ -42,11 +42,11 @@ swarm.on('stream', (stream, name, peer) => {
   console.log('remote stream', name, stream);
   let id = peer.peerId;
   if (!stream) {
-    delete audios[id];
+    delete speaker[id];
     return;
   }
   let audio = new Audio();
-  audios[id] = audio;
+  speaker[id] = audio;
   audio.srcObject = stream;
   audio.muted = state.soundMuted;
   audio.addEventListener('canplay', () => {

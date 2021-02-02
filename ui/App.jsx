@@ -1,10 +1,14 @@
-import React, {createElement as h} from 'react';
+import React from 'react';
 import {render} from 'react-dom';
-import {enterJamRoom, leaveJamRoom} from './main.js';
+import {enterJamRoom, leaveJamRoom, state} from './main.js';
+import use from './lib/use-state.js';
+import swarm from './lib/swarm.js';
 
-render(h(App), document.querySelector('#root'));
+render(<App />, document.querySelector('#root'));
 
 function App() {
+  let myStream = use(state, 'myAudio');
+  let streams = use(swarm, 'remoteStreams');
   return (
     <div className="container">
       <div className="child">
@@ -13,15 +17,19 @@ function App() {
         <h3 style={{marginTop: '80px'}}>stage</h3>
         <table className="stage">
           <tr>
-            <td>
+            {myStream && (
+              <td>
+                <img src="tosh.jpg" />
+              </td>
+            )}
+            {streams.map(streamObj => (
+              <td key={streamObj.peerId}>
+                <img src="sonic.png" />
+              </td>
+            ))}
+            {/* <td className="speaking">
               <img src="sonic.png" />
-            </td>
-            <td>
-              <img src="tosh.jpg" />
-            </td>
-            <td className="speaking">
-              <img src="sonic.png" />
-            </td>
+            </td> */}
           </tr>
         </table>
 
