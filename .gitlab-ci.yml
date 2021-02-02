@@ -15,7 +15,7 @@ build-signalhub:
   stage: build
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker build -t $DOCKER_NAMESPACE/signalhub:${CI_COMMIT_REF_SLUG} .
+    - docker build -t $DOCKER_NAMESPACE/signalhub:${CI_COMMIT_REF_SLUG} signalhub
     - docker push $DOCKER_NAMESPACE/signalhub:${CI_COMMIT_REF_SLUG}
   only:
     - master
