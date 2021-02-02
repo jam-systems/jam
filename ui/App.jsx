@@ -9,8 +9,8 @@ render(<App />, document.querySelector('#root'));
 function App() {
   const [roomId] = location.pathname.split('/').filter(x => x);
   if(roomId) {
-    return Room()
+    return <Room />
   } else {
-    return Start();
+    return <Start />
   }
 }

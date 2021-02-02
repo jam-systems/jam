@@ -2,7 +2,7 @@ import {enterJamRoom, leaveJamRoom, state} from "../main";
 import use from "../lib/use-state";
 import swarm from "../lib/swarm";
 
-function Room() {
+export default function Room() {
     let myStream = use(state, 'myAudio');
     let speaking = use(state, 'speaking');
     let streams = use(swarm, 'remoteStreams');
