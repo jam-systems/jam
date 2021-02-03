@@ -91,7 +91,7 @@ export default function Start({urlRoomId, displayRoom}) {
             if it is a future/scheduled room this button could be replaced with
         */}
         <button className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400">
-          ⏰ Alert me 5 minutes before
+          ⏰ Alert me 5 min before
         </button>
 
         <button className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400">
