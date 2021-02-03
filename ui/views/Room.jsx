@@ -12,7 +12,7 @@ export default function Room() {
       <div className="child">
         <h1>Reddit vs Hedge Funds</h1>
 
-        <h3 style={{marginTop: '80px'}}>stage</h3>
+        <h3 style={{marginTop: '80px'}}>Stage</h3>
         <table className="stage">
           <tbody>
             <tr>
@@ -37,7 +37,7 @@ export default function Room() {
           </tbody>
         </table>
 
-        <h3 style={{marginTop: '80px'}}>audience</h3>
+        <h3 style={{marginTop: '80px'}}>Audience</h3>
         <table className="audience">
           <tbody>
             <tr>
@@ -58,14 +58,19 @@ export default function Room() {
         </table>
 
         <div className="navigation" style={{marginTop: '80px'}}>
-          <button>🚪 Leave quietly</button>
+          <button className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400" onClick={leaveJamRoom}>
+            🚪 Leave quietly
+          </button>
 
-          <button style={{float: 'right'}}>✋🏽 Raise hand</button>
+          <button className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400" style={{float: 'right'}}>
+            ✋🏽 Raise hand
+          </button>
         </div>
 
-        <div style={{display: 'flex', justifyContent: 'space-between'}}>
-          <button onClick={enterJamRoom}>Enter Room</button>
-          <button onClick={leaveJamRoom}>Leave Room</button>
+        <div className="flex">
+          <button onClick={enterJamRoom}  className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400 flex-grow mt-10">
+            🔊 Allow microphone access and join audio
+          </button>
         </div>
       </div>
     </div>
