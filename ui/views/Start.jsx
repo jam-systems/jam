@@ -41,7 +41,6 @@ export default function Start({urlRoomId, displayRoom}) {
       <div className="child">
         <br/><br/><br/><br/><br/><br/><hr/><br/>
         <h1>Name of Room to Enter</h1>
-        <p style={{color: 'grey'}}>This is a description of the Room you are about to Enter so you have more context. This description is optional.</p>
         {/*
             re-using the "audience" class here for now to display speakers
             might make sense to switch to more generic names
@@ -68,6 +67,7 @@ export default function Start({urlRoomId, displayRoom}) {
             </tr>
           </tbody>
         </table>
+        <p style={{color: 'grey'}}>This is a description of the Room you are about to Enter so you have more context. This description is optional.</p>
         {/*
             optional (for future events:)
             when is this event?
