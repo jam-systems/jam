@@ -16,6 +16,11 @@ services:
       - traefik.http.routers.ui.tls=true
       - traefik.http.routers.ui.tls.certresolver=letsencrypt
       - traefik.enable=true
+  pantryredis:
+    image: library/redis
+    volumes:
+      - "../pantryredis:/data"
+    command: "redis.js-server --appendonly yes"
   pantry:
     image: registry.gitlab.com/jam-systems/jam/pantry:master
     restart: always
