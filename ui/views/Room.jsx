@@ -19,6 +19,10 @@ export default function Room() {
               {myStream && (
                 <td className={speaking.has('me') ? 'speaking' : undefined}>
                   <img src="img/avatars/tosh.jpg" />
+                  <span className={speaking.has('me') ? 'visible animate-ping flex h-3 w-10 relative top-0 right-0 -mt-6' : 'invisible animate-ping flex h-3 w-10 relative top-0 right-0 -mt-6'}>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-600 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-10 bg-green-800"></span>
+                  </span>
                 </td>
               )}
               {streams.map(({stream, peerId}) =>
@@ -29,7 +33,7 @@ export default function Room() {
                     title={peerId}
                     alt={peerId}
                   >
-                    <img src="img/avatars/sonic.jpg" />
+                    <img className={speaking.has(peerId) ? 'animate-ping' : undefined} src="img/avatars/sonic.jpg" />
                   </td>
                 )
               )}
