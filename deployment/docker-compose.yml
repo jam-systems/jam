@@ -20,7 +20,7 @@ services:
     image: library/redis
     volumes:
       - "../pantryredis:/data"
-    command: "redis.js-server --appendonly yes"
+    command: "redis-server --appendonly yes"
   pantry:
     image: registry.gitlab.com/jam-systems/jam/pantry:master
     restart: always
