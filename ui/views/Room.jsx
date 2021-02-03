@@ -65,11 +65,15 @@ export default function Room() {
           <button className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400">
             ✋🏽 Raise hand
           </button>
+
+          <button onClick={function(e) {navigator.share({title: "Room Name", text: "Hi, join me in this room on Jam.", url: window.location.href})}} className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400">
+            ✉️ Share room
+          </button>
         </div>
 
         <div className="flex">
           <button onClick={enterJamRoom}  className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400 flex-grow mt-10">
-            🔊 Allow microphone access and join audio
+            🔊 Open microphone and join audio
           </button>
         </div>
       </div>
