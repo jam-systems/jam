@@ -38,6 +38,62 @@ export default function Start({urlRoomId, displayRoom}) {
           <button onClick={submit}>🌱 Create a new room</button>
         </form>
       </div>
+      <div className="child">
+        <br/><br/><br/><br/><br/><br/><hr/><br/>
+        <h1>Name of Room to Enter</h1>
+        <p style={{color: 'grey'}}>This is a description of the Room you are about to Enter so you have more context. This description is optional.</p>
+        {/*
+            re-using the "audience" class here for now to display speakers
+            might make sense to switch to more generic names
+            like avatar-big, avatar-medium and so on
+
+            this can be a snapshot of current speakers or a snapshot of
+            anticipated speakers for scheduled (future) rooms
+        */}
+        <table className="audience">
+          <tbody>
+            <tr>
+              <td>
+                <img src="img/avatars/sonic.jpg" />
+              </td>
+              <td>
+                <img src="img/avatars/gregor.jpg" />
+              </td>
+              <td>
+                <img src="img/avatars/christoph.jpg" />
+              </td>
+              <td>
+                <img src="img/avatars/tosh.jpg" />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        {/*
+            optional (for future events:)
+            when is this event?
+        */}
+        <p>🗓 February 3rd 2021 at ⌚️ 14:06 (Vienna Time)</p>
+        {/*
+            button for entering this room
+            for now this is possible without
+
+            * auth
+            * without picking a name
+            * without access to microphone
+
+            think: "Tasty Strawberry" (Google Docs et al)
+            this makes it easy to join and tune in less intimate (identity)
+            but a decent baseline. we can add other rules (informal + formal)
+            in the future
+        */ }
+        <button>🚪 Join this room</button>
+        {/*
+            if it is a future/scheduled room this button could be replaced with
+        */}
+        <button>🔔 Alert me when this room goes live</button>
+
+        <button>🗓 Add a reminder to my calendar</button>
+      </div>
     </div>
   );
 }
