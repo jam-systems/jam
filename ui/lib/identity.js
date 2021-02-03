@@ -15,3 +15,9 @@ if (!sessionStorage.identity) {
 export function getId() {
     return JSON.parse(sessionStorage.identity).publicKey;
 }
+
+export function sign(data) {
+    const secretKeyB64 = JSON.parse(sessionStorage.identity).secretKey
+    const secretKey = Uint8Array.from(base64.decodeUrl(secretKeyB64, 'binary'));
+    return base64.encodeUrl(nacl.sign(data, secretKey), 'binary');
+}
