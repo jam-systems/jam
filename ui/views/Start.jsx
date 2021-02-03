@@ -40,7 +40,7 @@ export default function Start({urlRoomId, displayRoom}) {
       </div>
       <div className="child">
         <br/><br/><br/><br/><br/><br/><hr/><br/>
-        <h1>Name of Room to Enter</h1>
+        <h1 className="font-book text-black text-xl3">Name of Room to Enter</h1>
         {/*
             re-using the "audience" class here for now to display speakers
             might make sense to switch to more generic names
@@ -49,30 +49,26 @@ export default function Start({urlRoomId, displayRoom}) {
             this can be a snapshot of current speakers or a snapshot of
             anticipated speakers for scheduled (future) rooms
         */}
-        <table className="audience">
-          <tbody>
-            <tr>
-              <td>
-                <img src="img/avatars/sonic.jpg" />
-              </td>
-              <td>
-                <img src="img/avatars/gregor.jpg" />
-              </td>
-              <td>
-                <img src="img/avatars/christoph.jpg" />
-              </td>
-              <td>
-                <img src="img/avatars/tosh.jpg" />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <p style={{color: 'grey'}}>This is a description of the Room you are about to Enter so you have more context. This description is optional.</p>
+        <ol className="flex space-x-4 pt-6">
+        <li className="flex-shrink w-28 h-28 ring-yellow-500">
+            <img className="rounded-full" src="img/avatars/sonic.jpg" />
+          </li>
+          <li className="flex-shrink w-28 h-28">
+            <img className="rounded-full" src="img/avatars/gregor.jpg" />
+            </li>
+          <li className="flex-shrink w-28 h-28">
+            <img className="rounded-full" src="img/avatars/christoph.jpg" />
+          </li>
+          <li className="flex-shrink w-28 h-28">
+            <img className="rounded-full" src="img/avatars/tosh.jpg" />
+          </li>
+        </ol>
+        <p className="text-gray-500">This is a description of the Room you are about to Enter so you have more context. This description is optional.</p>
         {/*
             optional (for future events:)
             when is this event?
         */}
-        <p>🗓 February 3rd 2021 at ⌚️ 14:06 (Vienna Time)</p>
+        <p className="pt-4 pb-4">🗓 February 3rd 2021 at ⌚️ 14:06 (Vienna Time)</p>
         {/*
             button for entering this room
             for now this is possible without
