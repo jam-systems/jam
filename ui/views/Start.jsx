@@ -34,8 +34,9 @@ export default function Start({urlRoomId, displayRoom}) {
               }}
             ></input>
           </p>
-
-          <button onClick={submit}>🌱 Create a new room</button>
+          <button onClick={submit} className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400">
+            🌱 Create a new room
+          </button>
         </form>
       </div>
       <div className="child">
@@ -82,13 +83,19 @@ export default function Start({urlRoomId, displayRoom}) {
             but a decent baseline. we can add other rules (informal + formal)
             in the future
         */ }
-        <button>🚪 Join this room</button>
+        <button className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400">
+          🚪 Join this room
+        </button>
         {/*
             if it is a future/scheduled room this button could be replaced with
         */}
-        <button>🔔 Alert me when this room goes live</button>
+        <button className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400">
+          ⏰ Alert me when this room goes live
+        </button>
 
-        <button>🗓 Add a reminder to my calendar</button>
+        <button className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400">
+          🗓 Add a reminder to my calendar
+        </button>
       </div>
     </div>
   );
