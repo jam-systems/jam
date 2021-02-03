@@ -1,5 +1,0 @@
-{
-	"name": "signalhub",
-	"description": "Simple signalling server that can be used to coordinate handshaking with webrtc or other fun stuff.",
-	"repository": "https://github.com/mafintosh/signalhub"
-}
