@@ -24,6 +24,7 @@ export default function Start({urlRoomId, displayRoom}) {
         <form onSubmit={submit}>
           <p>
             <input
+              className="rounded m-2 placeholder-gray-600"
               type="text"
               placeholder={randomId}
               value={customId}
@@ -35,7 +36,7 @@ export default function Start({urlRoomId, displayRoom}) {
             ></input>
           </p>
           <button onClick={submit} className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400">
-            🌱 Create a new room
+            🌱 Start room
           </button>
         </form>
       </div>
