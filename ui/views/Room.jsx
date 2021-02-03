@@ -62,7 +62,7 @@ export default function Room() {
             🚪 Leave quietly
           </button>
 
-          <button className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400" style={{float: 'right'}}>
+          <button className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400">
             ✋🏽 Raise hand
           </button>
         </div>
