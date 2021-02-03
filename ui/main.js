@@ -20,12 +20,12 @@ export function leaveJamRoom() {
 }
 
 window.addEventListener('load', () => {
-  let [secret] = location.pathname.split('/').filter(x => x);
-  secret = secret || 'secret';
-  console.log('secret', secret);
-  state.secret = secret;
-  swarm.config('https://signalhub.jam.systems/', `jam-` + secret);
-  swarm.connect();
+  const [roomId] = location.pathname.split('/').filter(x => x);
+  if(roomId) {
+    state.roomId = roomId;
+    swarm.config('https://signalhub.jam.systems/', roomId);
+    swarm.connect();
+  }
 });
 
 state.on('myAudio', () => {
