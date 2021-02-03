@@ -53,16 +53,16 @@ export default function Start({urlRoomId, displayRoom}) {
         */}
         <ol className="flex space-x-4 pt-6">
         <li className="flex-shrink w-28 h-28 ring-yellow-500">
-            <img className="rounded-full" src="img/avatars/sonic.jpg" />
+            <img className="human-radius" src="img/avatars/sonic.jpg" />
           </li>
           <li className="flex-shrink w-28 h-28">
-            <img className="rounded-full" src="img/avatars/gregor.jpg" />
+            <img className="human-radius" src="img/avatars/gregor.jpg" />
             </li>
           <li className="flex-shrink w-28 h-28">
-            <img className="rounded-full" src="img/avatars/christoph.jpg" />
+            <img className="human-radius" src="img/avatars/christoph.jpg" />
           </li>
           <li className="flex-shrink w-28 h-28">
-            <img className="rounded-full" src="img/avatars/tosh.jpg" />
+            <img className="human-radius" src="img/avatars/tosh.jpg" />
           </li>
         </ol>
         <p className="text-gray-500">This is a description of the Room you are about to Enter so you have more context. This description is optional.</p>
