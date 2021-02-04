@@ -6,11 +6,12 @@ import {navigate} from '../lib/use-location';
 export default function Start({urlRoomId, displayRoom}) {
   let randomId = useMemo(() => Math.random().toString(36).substr(2, 6), []);
   let [customId, setRoomId] = useState(urlRoomId || '');
+  let [name, setName] = useState("");
   let roomId = customId || randomId;
 
   let submit = async e => {
     e.preventDefault();
-    await createRoom(roomId, swarm.myPeerId);
+    await createRoom(roomId, name, swarm.myPeerId);
     if (urlRoomId !== roomId) navigate('/' + roomId);
     displayRoom();
   };
@@ -24,11 +25,21 @@ export default function Start({urlRoomId, displayRoom}) {
         <form onSubmit={submit}>
           <p>
             <input
+              autoFocus
+              className="rounded m-2 placeholder-gray-600"
+              type="text"
+              placeholder="Room name"
+              value={name}
+              onChange={e => {
+                e.preventDefault();
+                setName(e.target.value);
+              }}
+            ></input>
+            <input
               className="rounded m-2 placeholder-gray-600"
               type="text"
               placeholder={randomId}
               value={customId}
-              autoFocus
               onChange={e => {
                 e.preventDefault();
                 setRoomId(e.target.value);
