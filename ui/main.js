@@ -25,16 +25,11 @@ export function leaveRoom(roomId) {
   state.set('soundMuted', true);
 }
 
-// TODO: this doesnt work; the UI has to be able to update the room we're in
-// put in useEffect in App.jsx or Room.jsx
-window.addEventListener('load', () => {
-  const [roomId] = location.pathname.split('/').filter(x => x);
-  if (roomId) {
-    state.roomId = roomId;
-    swarm.config('https://signalhub.jam.systems/', roomId);
-    swarm.connect();
-  }
-});
+export function connectRoom(roomId) {
+  swarm.config('https://signalhub.jam.systems/', roomId);
+  if (swarm.connected) swarm.disconnect();
+  swarm.connect();
+}
 
 state.on('myAudio', () => {
   swarm.addLocalStream(state.myAudio, 'audio');
