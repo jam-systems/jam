@@ -1,5 +1,6 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {enterJamRoom, leaveJamRoom, state} from '../main';
+import {fetchRoom} from '../backend';
 import use from '../lib/use-state';
 import swarm from '../lib/swarm';
 
@@ -13,10 +14,22 @@ export default function Room() {
   let myStream = use(state, 'myAudio');
   let speaking = use(state, 'speaking');
   let streams = use(swarm, 'remoteStreams');
+
+  let [name, setName] = useState("");
+
+  useEffect(() => {
+    (async function grabRoomName() {
+      // TODO: there is probably a more robust way to get the room id
+      let roomId = window.location.pathname.substring(1);
+      let room = await fetchRoom(roomId);
+      setName(room.name);
+    })();
+  }, []);
+
   return (
     <div className="container">
       <div className="child">
-        <h1>Reddit vs Hedge Funds</h1>
+        <h1>{name}</h1>
 
         <h3 style={{marginTop: '80px'}}>Stage</h3>
         <ol className="flex space-x-4 pt-6">
