@@ -80,6 +80,38 @@ export default function Room() {
             🔊 Open microphone and join audio
           </button>
         </div>
+
+        <br/><br/><br/><br/>
+
+        <h3 className="pb-6">Raised their hand</h3>
+
+        <div class="p-2 max-w-sm mx-auto flex items-center space-x-4">
+          <div class="flex-shrink-0">
+            <img class="h-12 w-12 human-radius" src="/img/avatars/christoph.jpg" alt="Sonic"/>
+          </div>
+          <div>
+            <div class="text-xl font-book text-black">Christoph Witzany</div>
+            <p class="text-gray-500">Product, UX, StarCraft, Clojure, …</p>
+          </div>
+        </div>
+        <div class="p-2 max-w-sm mx-auto flex items-center space-x-4">
+          <div class="flex-shrink-0">
+            <img class="h-12 w-12 human-radius" src="/img/avatars/sonic.jpg" alt="Sonic"/>
+          </div>
+          <div>
+            <div class="text-xl font-book text-black">Thomas Schranz</div>
+            <p class="text-gray-500">Product, UX, StarCraft, Clojure, …</p>
+          </div>
+        </div>
+        <div class="p-2 max-w-sm mx-auto flex items-center space-x-4">
+          <div class="flex-shrink-0">
+            <img class="h-12 w-12 human-radius" src="/img/avatars/gregor.jpg" alt="Sonic"/>
+          </div>
+          <div>
+            <div class="text-xl font-book text-black">Gregor Mitscha-Baude</div>
+            <p class="text-gray-500">Product, UX, StarCraft, Clojure, …</p>
+          </div>
+        </div>
       </div>
     </div>
   );
