@@ -43,7 +43,7 @@ export function useIsRoomNew(roomId, doFetch = true) {
   return [isNew, isLoading, refetch];
 }
 
-export async function createRoom(roomId, peerId) {
+export async function createRoom(roomId, name, peerId) {
   let res = await fetch(`${API}/rooms/${roomId}`, {
     method: 'POST',
     headers: {
@@ -51,6 +51,7 @@ export async function createRoom(roomId, peerId) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
+      name: name,
       moderators: [peerId],
       speakers: [peerId],
     }),
