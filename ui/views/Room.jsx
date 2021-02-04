@@ -27,7 +27,7 @@ export default function Room() {
                 ? 'human-radius p-1 ring-4 ring-gray-300'
                 : 'human-radius p-1 ring-4 ring-white'
               }>
-              <img className="human-radius border-gray-300" src="img/avatars/sonic.jpg" />
+              <img className="human-radius border border-gray-300" src="img/avatars/sonic.jpg" />
             </div>
           </li>
         )}
@@ -44,7 +44,7 @@ export default function Room() {
                   ? 'human-radius p-1 ring-4 ring-gray-300'
                   : 'human-radius p-1 ring-4 ring-white'
                 }>
-                <img className="human-radius border-gray-300" src="img/avatars/sonic.jpg" />
+                <img className="human-radius border border-gray-300" src="img/avatars/sonic.jpg" />
               </div>
             </li>
           )
