@@ -22,14 +22,13 @@ export default function Room() {
         <ol className="flex space-x-4 pt-6">
         {myStream && (
           <li className="flex-shrink w-28 h-28 text-center">
-            <img className="human-radius" src="img/avatars/sonic.jpg" />
-            <span
-              className={
+            <div className={
                 speaking.has('me')
-                  ? 'visible'
-                  : 'invisible'
-              }
-            >speaking</span>
+                  ? 'human-radius p-1 ring-4 ring-gray-300'
+                  : 'human-radius p-1 ring-4 ring-white'
+              }>
+              <img className="human-radius border-gray-300" src="img/avatars/sonic.jpg" />
+            </div>
           </li>
         )}
         {streams.map(({stream, peerId}) =>
@@ -40,7 +39,7 @@ export default function Room() {
               title={peerId}
               alt={peerId}
             >
-              <img className="human-radius" src="img/avatars/sonic.jpg" />
+              <img className="human-radius border-gray-300" src="img/avatars/sonic.jpg" />
               <span className={speaking.has(peerId) ? 'visible' : 'invisible'}>
                 speaking
               </span>
