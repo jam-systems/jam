@@ -23,9 +23,9 @@ export default function Room() {
         {myStream && (
           <li className="flex-shrink w-28 h-28 text-center">
             <div className={
-                speaking.has('me')
-                  ? 'human-radius p-1 ring-4 ring-gray-300'
-                  : 'human-radius p-1 ring-4 ring-white'
+              speaking.has('me')
+                ? 'human-radius p-1 ring-4 ring-gray-300'
+                : 'human-radius p-1 ring-4 ring-white'
               }>
               <img className="human-radius border-gray-300" src="img/avatars/sonic.jpg" />
             </div>
@@ -39,10 +39,13 @@ export default function Room() {
               title={peerId}
               alt={peerId}
             >
-              <img className="human-radius border-gray-300" src="img/avatars/sonic.jpg" />
-              <span className={speaking.has(peerId) ? 'visible' : 'invisible'}>
-                speaking
-              </span>
+              <div className={
+                speaking.has(peerId)
+                  ? 'human-radius p-1 ring-4 ring-gray-300'
+                  : 'human-radius p-1 ring-4 ring-white'
+                }>
+                <img className="human-radius border-gray-300" src="img/avatars/sonic.jpg" />
+              </div>
             </li>
           )
         )}
