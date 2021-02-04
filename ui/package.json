@@ -6,7 +6,6 @@
     "build": "esbuild --bundle ./App.jsx --outfile=./bundle.js --format=esm --define:process.env.NODE_ENV='\"development\"'"
   },
   "devDependencies": {
-    "chokidar-cli": "^2.1.0",
     "esbuild": "^0.8.41",
     "eslint": "^7.19.0",
     "eslint-plugin-react": "^7.22.0",
