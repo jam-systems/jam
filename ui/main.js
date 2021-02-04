@@ -6,15 +6,21 @@ export const state = State({
   soundMuted: true,
   myAudio: null,
   speaking: new Set(),
+  enteredRooms: new Set(),
 });
 window.state = state; // for debugging
 
-export function enterJamRoom() {
-  requestAudio();
+export {requestAudio};
+
+export function enterRoom(roomId) {
+  state.enteredRooms.add(roomId);
+  state.update('enteredRooms');
   state.set('soundMuted', false);
 }
 
-export function leaveJamRoom() {
+export function leaveRoom(roomId) {
+  state.enteredRooms.delete(roomId);
+  state.update('enteredRooms');
   stopAudio();
   state.set('soundMuted', true);
 }

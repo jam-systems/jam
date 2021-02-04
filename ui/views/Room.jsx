@@ -1,21 +1,21 @@
 import React, {useState, useEffect} from 'react';
-import {enterJamRoom, leaveJamRoom, state} from '../main';
+import {requestAudio, leaveRoom, state} from '../main';
 import {fetchRoom} from '../backend';
 import use from '../lib/use-state';
 import swarm from '../lib/swarm';
+import EnterRoom from './EnterRoom';
 
 // TODOs:
-// -) add unentered room UI here
-// -) return to unentered room UI after "Leave quietly"
 // -) Q: should we only connect webrtc after "entering"? (probably not, complicates things & makes slower)
 // -) wire speakers, mod lists to UI
 
-export default function Room() {
+export default function Room({roomId}) {
   let myStream = use(state, 'myAudio');
   let speaking = use(state, 'speaking');
+  let enteredRooms = use(state, 'enteredRooms');
   let streams = use(swarm, 'remoteStreams');
 
-  let [name, setName] = useState("");
+  let [name, setName] = useState('');
 
   useEffect(() => {
     (async function grabRoomName() {
@@ -26,6 +26,9 @@ export default function Room() {
     })();
   }, []);
 
+  if (!enteredRooms.has(roomId))
+    return <EnterRoom roomId={roomId} name={name} />;
+
   return (
     <div className="container">
       <div className="child">
@@ -33,35 +36,45 @@ export default function Room() {
 
         <h3 style={{marginTop: '80px'}}>Stage</h3>
         <ol className="flex space-x-4 pt-6">
-        {myStream && (
-          <li className="flex-shrink w-28 h-28 text-center">
-            <div className={
-              speaking.has('me')
-                ? 'human-radius p-1 ring-4 ring-gray-300'
-                : 'human-radius p-1 ring-4 ring-white'
-              }>
-              <img className="human-radius border border-gray-300" src="img/avatars/sonic.jpg" />
-            </div>
-          </li>
-        )}
-        {streams.map(({stream, peerId}) =>
-          !stream ? undefined : (
-            <li
-              key={peerId}
-              className="flex-shrink w-28 h-28 text-center"
-              title={peerId}
-              alt={peerId}
-            >
-              <div className={
-                speaking.has(peerId)
-                  ? 'human-radius p-1 ring-4 ring-gray-300'
-                  : 'human-radius p-1 ring-4 ring-white'
-                }>
-                <img className="human-radius border border-gray-300" src="img/avatars/sonic.jpg" />
+          {myStream && (
+            <li className="flex-shrink w-28 h-28 text-center">
+              <div
+                className={
+                  speaking.has('me')
+                    ? 'human-radius p-1 ring-4 ring-gray-300'
+                    : 'human-radius p-1 ring-4 ring-white'
+                }
+              >
+                <img
+                  className="human-radius border border-gray-300"
+                  src="img/avatars/sonic.jpg"
+                />
               </div>
             </li>
-          )
-        )}
+          )}
+          {streams.map(({stream, peerId}) =>
+            !stream ? undefined : (
+              <li
+                key={peerId}
+                className="flex-shrink w-28 h-28 text-center"
+                title={peerId}
+                alt={peerId}
+              >
+                <div
+                  className={
+                    speaking.has(peerId)
+                      ? 'human-radius p-1 ring-4 ring-gray-300'
+                      : 'human-radius p-1 ring-4 ring-white'
+                  }
+                >
+                  <img
+                    className="human-radius border border-gray-300"
+                    src="img/avatars/sonic.jpg"
+                  />
+                </div>
+              </li>
+            )
+          )}
         </ol>
 
         <h3 style={{marginTop: '80px'}}>Audience</h3>
@@ -87,7 +100,7 @@ export default function Room() {
         <div className="navigation" style={{marginTop: '80px'}}>
           <button
             className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400"
-            onClick={leaveJamRoom}
+            onClick={() => leaveRoom(roomId)}
           >
             🚪 Leave quietly
           </button>
@@ -117,7 +130,7 @@ export default function Room() {
         {/* TODO: i guess this button is deprecated in favor of the unentered room UI in Start */}
         <div className="flex">
           <button
-            onClick={enterJamRoom}
+            onClick={requestAudio}
             className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400 flex-grow mt-10"
           >
             🔊 Open microphone and join audio

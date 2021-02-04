@@ -18,7 +18,7 @@ function App() {
     return isNew && !doDisplayRoom ? (
       <Start urlRoomId={roomId} displayRoom={displayRoom} />
     ) : (
-      <Room />
+      <Room roomId={roomId} />
     );
   } else {
     return <Start displayRoom={displayRoom} />;

@@ -1,3 +1,5 @@
+const LOGGING = false;
+
 export default function State(initialState) {
   let map = new Map();
 
@@ -11,6 +13,7 @@ export default function State(initialState) {
       api.update(key);
     },
     update(key) {
+      if (LOGGING) console.log('update', key, state[key]);
       if (key !== undefined) {
         api.emit(key, state[key]);
       }
