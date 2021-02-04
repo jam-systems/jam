@@ -2,12 +2,15 @@
   "name": "jam",
   "version": "0.1.0",
   "scripts": {
-    "start": "serve -s . & esbuild --bundle ./App.jsx --outfile=./bundle.js --format=esm --define:process.env.NODE_ENV='\"development\"' --watch"
+    "start": "serve -s . & chokidar \"**/*.(js|jsx)\" \"!(bundle.*)\" \"!(node_modules)\" -c \"yarn build\"",
+    "build": "esbuild --bundle ./App.jsx --outfile=./bundle.js --format=esm --define:process.env.NODE_ENV='\"development\"'"
   },
   "devDependencies": {
+    "chokidar-cli": "^2.1.0",
     "esbuild": "^0.8.39",
     "eslint": "^7.19.0",
     "eslint-plugin-react": "^7.22.0",
+    "eslint-plugin-react-hooks": "^4.2.0",
     "serve": "^11.3.2"
   },
   "license": "MIT",
@@ -16,6 +19,7 @@
     "hark": "^1.2.3",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "simple-peer-light": "^1.0.0",
     "tweetnacl": "^1.0.3"
   }
 }

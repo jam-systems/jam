@@ -3,6 +3,12 @@ import {enterJamRoom, leaveJamRoom, state} from '../main';
 import use from '../lib/use-state';
 import swarm from '../lib/swarm';
 
+// TODOs:
+// -) add unentered room UI here
+// -) return to unentered room UI after "Leave quietly"
+// -) Q: should we only connect webrtc after "entering"? (probably not, complicates things & makes slower)
+// -) wire speakers, mod lists to UI
+
 export default function Room() {
   let myStream = use(state, 'myAudio');
   let speaking = use(state, 'speaking');
@@ -19,7 +25,13 @@ export default function Room() {
               {myStream && (
                 <td className={speaking.has('me') ? 'speaking' : undefined}>
                   <img src="img/avatars/tosh.jpg" />
-                  <span className={speaking.has('me') ? 'visible animate-ping flex h-3 w-10 relative top-0 right-0 -mt-6' : 'invisible animate-ping flex h-3 w-10 relative top-0 right-0 -mt-6'}>
+                  <span
+                    className={
+                      speaking.has('me')
+                        ? 'visible animate-ping flex h-3 w-10 relative top-0 right-0 -mt-6'
+                        : 'invisible animate-ping flex h-3 w-10 relative top-0 right-0 -mt-6'
+                    }
+                  >
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-600 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-3 w-10 bg-green-800"></span>
                   </span>
@@ -33,7 +45,12 @@ export default function Room() {
                     title={peerId}
                     alt={peerId}
                   >
-                    <img className={speaking.has(peerId) ? 'animate-ping' : undefined} src="img/avatars/sonic.jpg" />
+                    <img
+                      className={
+                        speaking.has(peerId) ? 'animate-ping' : undefined
+                      }
+                      src="img/avatars/sonic.jpg"
+                    />
                   </td>
                 )
               )}
@@ -62,7 +79,10 @@ export default function Room() {
         </table>
 
         <div className="navigation" style={{marginTop: '80px'}}>
-          <button className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400" onClick={leaveJamRoom}>
+          <button
+            className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400"
+            onClick={leaveJamRoom}
+          >
             🚪 Leave quietly
           </button>
 
@@ -70,46 +90,82 @@ export default function Room() {
             ✋🏽 Raise hand
           </button>
 
-          <button onClick={function(e) {navigator.share({title: "Room Name", text: "Hi, join me in this room on Jam.", url: window.location.href})}} className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400">
+          {/*
+            TODO: maybe we should hide this button on platforms where navigator.share does nothing, or implement a simple replacement like
+            "Share link was copied to your clipboard!"
+          */}
+          <button
+            onClick={() => {
+              navigator.share({
+                title: 'Room Name',
+                text: 'Hi, join me in this room on Jam.',
+                url: window.location.href,
+              });
+            }}
+            className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400"
+          >
             ✉️ Share room
           </button>
         </div>
 
+        {/* TODO: i guess this button is deprecated in favor of the unentered room UI in Start */}
         <div className="flex">
-          <button onClick={enterJamRoom}  className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400 flex-grow mt-10">
+          <button
+            onClick={enterJamRoom}
+            className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400 flex-grow mt-10"
+          >
             🔊 Open microphone and join audio
           </button>
         </div>
 
-        <br/><br/><br/><br/>
+        <br />
+        <br />
+        <br />
+        <br />
 
         <h3 className="pb-6">Raised their hand</h3>
 
-        <div class="p-2 max-w-sm mx-auto flex items-center space-x-4">
-          <div class="flex-shrink-0">
-            <img class="h-12 w-12 human-radius" src="/img/avatars/christoph.jpg" alt="Sonic"/>
+        <div className="p-2 max-w-sm mx-auto flex items-center space-x-4">
+          <div className="flex-shrink-0">
+            <img
+              className="h-12 w-12 human-radius"
+              src="/img/avatars/christoph.jpg"
+              alt="Sonic"
+            />
           </div>
           <div>
-            <div class="text-xl font-book text-black">Christoph Witzany</div>
-            <p class="text-gray-500">Product, UX, StarCraft, Clojure, …</p>
+            <div className="text-xl font-book text-black">
+              Christoph Witzany
+            </div>
+            <p className="text-gray-500">Product, UX, StarCraft, Clojure, …</p>
           </div>
         </div>
-        <div class="p-2 max-w-sm mx-auto flex items-center space-x-4">
-          <div class="flex-shrink-0">
-            <img class="h-12 w-12 human-radius" src="/img/avatars/sonic.jpg" alt="Sonic"/>
+        <div className="p-2 max-w-sm mx-auto flex items-center space-x-4">
+          <div className="flex-shrink-0">
+            <img
+              className="h-12 w-12 human-radius"
+              src="/img/avatars/sonic.jpg"
+              alt="Sonic"
+            />
           </div>
           <div>
-            <div class="text-xl font-book text-black">Thomas Schranz</div>
-            <p class="text-gray-500">Product, UX, StarCraft, Clojure, …</p>
+            <div className="text-xl font-book text-black">Thomas Schranz</div>
+            <p className="text-gray-500">Product, UX, StarCraft, Clojure, …</p>
           </div>
         </div>
-        <div class="p-2 max-w-sm mx-auto flex items-center space-x-4">
-          <div class="flex-shrink-0">
-            <img class="h-12 w-12 human-radius" src="/img/avatars/gregor.jpg" alt="Sonic"/>
+        <div className="p-2 max-w-sm mx-auto flex items-center space-x-4">
+          <div className="flex-shrink-0">
+            <img
+              className="h-12 w-12 human-radius"
+              src="/img/avatars/gregor.jpg"
+              alt="Sonic"
+            />
           </div>
           <div>
-            <div class="text-xl font-book text-black">Gregor Mitscha-Baude</div>
-            <p class="text-gray-500">Product, UX, StarCraft, Clojure, …</p>
+            <div className="text-xl font-book text-black">
+              Gregor Mitscha-Baude
+            </div>
+            <p className="text-gray-500">Product, UX, StarCraft, Clojure, …</p>
           </div>
         </div>
       </div>

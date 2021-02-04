@@ -1,9 +1,9 @@
-import SimplePeer from 'https://esm.run/simple-peer-light';
+import SimplePeer from 'simple-peer-light';
 import State from './minimal-state.js';
 import signalhub from './signalhub.js';
-import {getId} from "./identity";
+import {getId} from './identity';
 
-console.log(getId())
+console.log(getId());
 
 const LOGGING = false;
 
