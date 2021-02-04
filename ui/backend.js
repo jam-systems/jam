@@ -58,3 +58,8 @@ export async function createRoom(roomId, name, peerId) {
   });
   return res.ok;
 }
+
+export async function fetchRoom(roomId) {
+  let res = await fetch(`${API}/rooms/${roomId}`);
+  return res.json();
+}
