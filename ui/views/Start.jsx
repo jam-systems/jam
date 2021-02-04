@@ -32,8 +32,8 @@ export default function Start({urlRoomId, displayRoom}) {
           </div>
           <div className="flex-1">
             <img
-              className=""
-              style={{width: 200, height: 200}}
+              className="p-4"
+              style={{width: 170, height: 170}}
               alt="Jam mascot"
               title="Jam mascot"
               src="/img/jam-illustration.png" />
