@@ -46,6 +46,10 @@ export function useIsRoomNew(roomId, doFetch = true) {
 export async function createRoom(roomId, peerId) {
   let res = await fetch(`${API}/rooms/${roomId}`, {
     method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
     body: JSON.stringify({
       moderators: [peerId],
       speakers: [peerId],
