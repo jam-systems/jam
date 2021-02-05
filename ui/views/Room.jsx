@@ -98,7 +98,7 @@ export default function Room({roomId}) {
               onClick={requestAudio}
               className="h-12 px-6 m-2 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline hover:bg-yellow-300 flex-grow mt-10"
             >
-              🔊 listen and speak
+              🔊 Listen and speak
             </button>
           </div>
 
@@ -119,11 +119,11 @@ export default function Room({roomId}) {
               }}
               className="h-12 px-6 m-2 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
             >
-              ✉️ Share
+              ✉️&nbsp;Share
             </button>
 
             <button className="h-12 px-6 m-2 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300 flex-grow">
-              ✋🏽 Raise hand
+              ✋🏽&nbsp;Raise&nbsp;hand
             </button>
           </div>
 
