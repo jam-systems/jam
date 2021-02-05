@@ -1,6 +1,5 @@
-import React, {useState, useEffect} from 'react';
+import React from 'react';
 import {requestAudio, leaveRoom, state} from '../main';
-import {fetchRoom} from '../backend';
 import use from '../lib/use-state';
 import swarm from '../lib/swarm';
 import EnterRoom from './EnterRoom';
@@ -9,22 +8,12 @@ import EnterRoom from './EnterRoom';
 // -) Q: should we only connect webrtc after "entering"? (probably not, complicates things & makes slower)
 // -) wire speakers, mod lists to UI
 
-export default function Room({roomId}) {
+export default function Room({room, roomId}) {
   let myStream = use(state, 'myAudio');
   let speaking = use(state, 'speaking');
   let enteredRooms = use(state, 'enteredRooms');
   let streams = use(swarm, 'remoteStreams');
-
-  let [name, setName] = useState('');
-
-  useEffect(() => {
-    (async function grabRoomName() {
-      // TODO: there is probably a more robust way to get the room id
-      let roomId = window.location.pathname.substring(1);
-      let room = await fetchRoom(roomId);
-      setName(room.name);
-    })();
-  }, []);
+  let name = room?.name;
 
   if (!enteredRooms.has(roomId))
     return <EnterRoom roomId={roomId} name={name} />;

@@ -14,6 +14,12 @@ export function useLocation() {
   return location;
 }
 
+export function usePath() {
+  return useLocation()
+    .pathname.split('/')
+    .filter(p => p);
+}
+
 export function navigate(route) {
   history.pushState(null, '', route);
   state.update();

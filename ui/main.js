@@ -7,6 +7,7 @@ export const state = State({
   myAudio: null,
   speaking: new Set(),
   enteredRooms: new Set(),
+  queries: {},
 });
 window.state = state; // for debugging
 

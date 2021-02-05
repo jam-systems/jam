@@ -1,5 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import {sign} from './lib/identity';
+import use from './lib/use-state';
+import {state} from './main';
 
 // POST https://pantry.jam.systems/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
 // Creates room, returns 409 conflict if room exists
@@ -23,32 +25,39 @@ function signedToken() {
   return sign(signData);
 }
 
-// TODO: this begs for being a generic useQuery hook
-export function useIsRoomNew(roomId, doFetch = true) {
-  let [[isNew, isLoading], setState] = useState([false, true]);
-  let refetch = useCallback(
-    () =>
-      fetch(`${API}/rooms/${roomId}`).then(res => {
-        if (res.status >= 400) {
-          setState([true, false]);
-        } else {
-          setState([false, false]);
-        }
-      }),
-    [roomId]
-  );
+export function useApiQuery(path, doFetch = true) {
+  let cached = use(state, 'queries')[path];
+  let shouldFetch = path && doFetch && !cached;
+  let [isLoading, setLoading] = useState(shouldFetch);
+
+  let refetch = useCallback(async () => {
+    let res = await fetch(API + path);
+    let data;
+    if (res.status < 400) data = await res.json().catch(console.warn);
+    updateApiQuery(path, data, res.status);
+    setLoading(false);
+  }, [path]);
+
   useEffect(() => {
-    if (roomId && doFetch) refetch();
-  }, [roomId, doFetch, refetch]);
-  return [isNew, isLoading, refetch];
+    if (shouldFetch) refetch();
+    else setLoading(false);
+  }, [shouldFetch, refetch]);
+
+  let {data, status} = cached || {};
+  return [data, isLoading, status, refetch];
+}
+
+function updateApiQuery(path, data, status) {
+  state.queries[path] = data && {data, status};
+  state.update('queries');
 }
 
 export async function createRoom(roomId, name, peerId) {
   let res = await fetch(`${API}/rooms/${roomId}`, {
     method: 'POST',
     headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({
       name: name,
@@ -57,9 +66,4 @@ export async function createRoom(roomId, name, peerId) {
     }),
   });
   return res.ok;
-}
-
-export async function fetchRoom(roomId) {
-  let res = await fetch(`${API}/rooms/${roomId}`);
-  return res.json();
 }

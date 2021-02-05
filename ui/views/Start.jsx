@@ -4,7 +4,7 @@ import swarm from '../lib/swarm.js';
 import {navigate} from '../lib/use-location';
 import {enterRoom} from '../main';
 
-export default function Start({urlRoomId, displayRoom}) {
+export default function Start({urlRoomId}) {
   let randomId = useMemo(() => Math.random().toString(36).substr(2, 6), []);
   let [customId, setRoomId] = useState(urlRoomId || '');
   let [name, setName] = useState('');
@@ -15,7 +15,6 @@ export default function Start({urlRoomId, displayRoom}) {
     await createRoom(roomId, name, swarm.myPeerId);
     if (urlRoomId !== roomId) navigate('/' + roomId);
     enterRoom(roomId);
-    displayRoom();
   };
   return (
     <div className="container">
