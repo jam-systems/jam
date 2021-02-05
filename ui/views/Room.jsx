@@ -115,7 +115,7 @@ export default function Room({roomId}) {
           <button
             onClick={() => {
               navigator.share({
-                title: 'Room Name',
+                title: (name || "A Jam room"),
                 text: 'Hi, join me in this room on Jam.',
                 url: window.location.href,
               });
