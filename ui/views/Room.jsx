@@ -38,7 +38,7 @@ export default function Room({room, roomId}) {
                   src="img/avatars/sonic.jpg"
                 />
               </div>
-              <div className="pt-2">Me</div>
+              <div className="pt-2 font-medium">Me</div>
             </li>
           )}
           {streams.map(({stream, peerId}) =>
@@ -61,7 +61,7 @@ export default function Room({room, roomId}) {
                     src="img/avatars/sonic.jpg"
                   />
                 </div>
-                <div className="pt-2">{peerId.substring(0,2).toUpperCase()}</div>
+                <div className="pt-2 font-medium">{peerId.substring(0,2).toUpperCase()}</div>
               </li>
             )
           )}
