@@ -34,7 +34,6 @@ export default function Room({roomId}) {
       <div className="child">
         <h1>{name}</h1>
 
-        <h3 style={{marginTop: '80px'}}>Stage</h3>
         <ol className="flex space-x-4 pt-6">
           {myStream && (
             <li className="flex-shrink w-28 h-28 text-center">
@@ -99,13 +98,13 @@ export default function Room({roomId}) {
 
         <div className="navigation" style={{marginTop: '80px'}}>
           <button
-            className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400"
+            className="h-12 px-6 m-2 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
             onClick={() => leaveRoom(roomId)}
           >
             🚪 Leave quietly
           </button>
 
-          <button className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400">
+          <button className="h-12 px-6 m-2 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300">
             ✋🏽 Raise hand
           </button>
 
@@ -121,7 +120,7 @@ export default function Room({roomId}) {
                 url: window.location.href,
               });
             }}
-            className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400"
+            className="h-12 px-6 m-2 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
           >
             ✉️ Share room
           </button>
@@ -131,7 +130,7 @@ export default function Room({roomId}) {
         <div className="flex">
           <button
             onClick={requestAudio}
-            className="h-12 px-6 m-2 text-lg text-black transition-colors duration-150 bg-gray-300 rounded-lg focus:shadow-outline hover:bg-gray-400 flex-grow mt-10"
+            className="h-12 px-6 m-2 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300 flex-grow mt-10"
           >
             🔊 Open microphone and join audio
           </button>
