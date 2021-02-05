@@ -77,70 +77,70 @@ export default function Room({roomId}) {
         </ol>
 
         <h3 style={{marginTop: '80px'}}>Audience</h3>
-        <table className="audience">
-          <tbody>
-            <tr>
-              <td>
-                <img src="img/avatars/sonic.jpg" />
-              </td>
-              <td>
-                <img src="img/avatars/gregor.jpg" />
-              </td>
-              <td>
-                <img src="img/avatars/christoph.jpg" />
-              </td>
-              <td>
-                <img src="img/avatars/tosh.jpg" />
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <ol className="flex space-x-4 pt-6">
+          <li className="flex-shrink w-24 h-24 ring-yellow-500">
+            <img className="human-radius border border-gray-300" src="img/avatars/sonic.jpg" />
+          </li>
+          <li className="flex-shrink w-24 h-24">
+            <img className="human-radius border border-gray-300" src="img/avatars/gregor.jpg" />
+          </li>
+          <li className="flex-shrink w-24 h-24">
+            <img className="human-radius border border-gray-300" src="img/avatars/christoph.jpg" />
+          </li>
+          <li className="flex-shrink w-24 h-24">
+            <img className="human-radius border border-gray-300" src="img/avatars/tosh.jpg" />
+          </li>
+        </ol>
 
-        <div className="navigation" style={{marginTop: '80px'}}>
+        <div className="mt-10 navigation">
+          <div className="flex">
+            <button
+              onClick={requestAudio}
+              className="h-12 px-6 m-2 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline hover:bg-yellow-300 flex-grow mt-10"
+            >
+              🔊 listen and speak
+            </button>
+          </div>
+
+          <br />
+
+          {/*
+            TODO: maybe we should hide this button on platforms where navigator.share does nothing, or implement a simple replacement like
+            "Share link was copied to your clipboard!"
+          */}
+          <div className="flex">
+            <button
+              onClick={() => {
+                navigator.share({
+                  title: (name || "A Jam room"),
+                  text: 'Hi, join me in this room on Jam.',
+                  url: window.location.href,
+                });
+              }}
+              className="h-12 px-6 m-2 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
+            >
+              ✉️ Share
+            </button>
+
+            <button className="h-12 px-6 m-2 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300 flex-grow">
+              ✋🏽 Raise hand
+            </button>
+          </div>
+
+          <br />
+          <br />
+          <br />
+
           <button
             className="h-12 px-6 m-2 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
             onClick={() => leaveRoom(roomId)}
           >
             🚪 Leave quietly
           </button>
-
-          <button className="h-12 px-6 m-2 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300">
-            ✋🏽 Raise hand
-          </button>
-
-          {/*
-            TODO: maybe we should hide this button on platforms where navigator.share does nothing, or implement a simple replacement like
-            "Share link was copied to your clipboard!"
-          */}
-          <button
-            onClick={() => {
-              navigator.share({
-                title: (name || "A Jam room"),
-                text: 'Hi, join me in this room on Jam.',
-                url: window.location.href,
-              });
-            }}
-            className="h-12 px-6 m-2 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
-          >
-            ✉️ Share room
-          </button>
-        </div>
-
-        {/* TODO: i guess this button is deprecated in favor of the unentered room UI in Start */}
-        <div className="flex">
-          <button
-            onClick={requestAudio}
-            className="h-12 px-6 m-2 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300 flex-grow mt-10"
-          >
-            🔊 Open microphone and join audio
-          </button>
         </div>
 
         <br />
         <br />
-        <br />
-        <br />
-
         <h3 className="pb-6">Raised their hand</h3>
 
         <div className="p-2 max-w-sm mx-auto flex items-center space-x-4">
