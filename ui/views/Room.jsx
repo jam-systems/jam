@@ -34,10 +34,11 @@ export default function Room({room, roomId}) {
                 }
               >
                 <img
-                  className="human-radius border border-gray-300"
+                  className="human-radius border border-gray-300 bg-gray-300"
                   src="img/avatars/sonic.jpg"
                 />
               </div>
+              <div className="pt-2">Me</div>
             </li>
           )}
           {streams.map(({stream, peerId}) =>
@@ -56,10 +57,11 @@ export default function Room({room, roomId}) {
                   }
                 >
                   <img
-                    className="human-radius border border-gray-300"
+                    className="human-radius border border-gray-300 bg-gray-300"
                     src="img/avatars/sonic.jpg"
                   />
                 </div>
+                <div className="pt-2">{peerId.substring(0,2).toUpperCase()}</div>
               </li>
             )
           )}
