@@ -7,11 +7,8 @@ import {navigate} from '../lib/use-location';
 import {createAudioContext, enterRoom} from '../main';
 
 export default function Start({urlRoomId}) {
-  // let randomId = useMemo(() => Math.random().toString(36).substr(2, 6), []);
-  // let [customId, setRoomId] = useState(urlRoomId || '');
   let [name, setName] = useState('');
   let [description, setDescription] = useState('');
-  // let roomId = customId || randomId;
 
   let submit = e => {
     e.preventDefault();
@@ -76,7 +73,8 @@ export default function Start({urlRoomId}) {
             }}
           ></input>
           <div className="p-2 text-gray-500 italic">
-            Pick a topic to talk about. <span className="text-gray-300">(optional)</span>
+            Pick a topic to talk about.{' '}
+            <span className="text-gray-300">(optional)</span>
           </div>
           <br />
           <input
@@ -91,7 +89,8 @@ export default function Start({urlRoomId}) {
             }}
           ></input>
           <div className="p-2 text-gray-500 italic">
-            Describe what this room is about. <span className="text-gray-300">(optional)</span>
+            Describe what this room is about.{' '}
+            <span className="text-gray-300">(optional)</span>
           </div>
 
           {/* <input

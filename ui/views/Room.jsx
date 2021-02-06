@@ -1,12 +1,11 @@
 import React, {useState} from 'react';
-import {createAudioContext, enterRoom, leaveRoom, state} from '../main';
+import {leaveRoom, state} from '../main';
 import use from '../lib/use-state.js';
 import swarm from '../lib/swarm.js';
 import EnterRoom from './EnterRoom.jsx';
-import {gravatarUrl} from "../lib/gravatar";
-import slugify from "slugify";
-import {createRoom} from "../backend";
-import {navigate} from "../lib/use-location";
+import {gravatarUrl} from '../lib/gravatar';
+import {navigate} from '../lib/use-location';
+import copyToClipboard from '../lib/copy-to-clipboard';
 
 // TODOs:
 // -) wire speakers, mod lists to UI
@@ -19,84 +18,84 @@ export default function Room({room, roomId}) {
   let soundMuted = use(state, 'soundMuted');
   let speaking = use(state, 'speaking');
   let enteredRooms = use(state, 'enteredRooms');
-  let editIdentity = use(state, 'editIdentity');
   let streams = use(swarm, 'remoteStreams');
   let name = room?.name;
   let description = room?.description;
 
+  let [editIdentity, setEditIdentity] = useState(false);
+
   let [displayName, setDisplayName] = useState(myInfo.displayName);
   let [email, setEmail] = useState(myInfo.email);
 
+  let [showShareInfo, setShowShareInfo] = useState(false);
 
   let updateInfo = e => {
     e.preventDefault();
-    state.set('myInfo', {displayName, email})
-    state.set('editIdentity', false);
+    state.set('myInfo', {displayName, email});
+    setEditIdentity(false);
   };
-
 
   if (!enteredRooms.has(roomId))
     return <EnterRoom roomId={roomId} name={name} description={description} />;
 
   return (
-
     <div className="container">
       {editIdentity && (
-          <div className="child">
-            <h3 className="font-medium">Profile</h3>
+        <div className="child">
+          <h3 className="font-medium">Profile</h3>
+          <br />
+          <form onSubmit={updateInfo}>
+            <input
+              className="rounded placeholder-gray-300 bg-gray-50 w-64"
+              type="text"
+              placeholder="Display name"
+              value={displayName}
+              name="display-name"
+              onChange={e => {
+                setDisplayName(e.target.value);
+              }}
+            />
+            <div className="p-2 text-gray-500 italic">
+              {`What's your name?`}
+              <span className="text-gray-300">(optional)</span>
+            </div>
             <br />
-            <form onSubmit={updateInfo}>
-              <input
-                  className="rounded placeholder-gray-300 bg-gray-50 w-64"
-                  type="text"
-                  placeholder="Display name"
-                  value={displayName}
-                  name="display-name"
-                  onChange={e => {
-                    setDisplayName(e.target.value);
-                  }}
-              />
-              <div className="p-2 text-gray-500 italic">
-                What's your name? <span className="text-gray-300">(optional)</span>
-              </div>
-              <br />
-              <input
-                  className="rounded placeholder-gray-300 bg-gray-50 w-72"
-                  type="email"
-                  placeholder="email@example.com"
-                  value={email}
-                  name="email"
-                  onChange={e => {
-                    setEmail(e.target.value);
-                  }}
-              />
-              <div className="p-2 text-gray-500 italic">
-                What's your email? <span className="text-gray-300">(used for Gravatar)</span>
-              </div>
-              <button
-                  onClick={updateInfo}
-                  className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
-              >
-                Update Profile
-              </button>
-            </form>
-            <br />
-            <hr />
-          </div>
-
+            <input
+              className="rounded placeholder-gray-300 bg-gray-50 w-72"
+              type="email"
+              placeholder="email@example.com"
+              value={email}
+              name="email"
+              onChange={e => {
+                setEmail(e.target.value);
+              }}
+            />
+            <div className="p-2 text-gray-500 italic">
+              {`What's your email?`}
+              <span className="text-gray-300">(used for Gravatar)</span>
+            </div>
+            <button
+              onClick={updateInfo}
+              className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
+            >
+              Update Profile
+            </button>
+          </form>
+          <br />
+          <hr />
+        </div>
       )}
       <div className="child">
         <h1>{name}</h1>
-        <div className="text-gray-500">
-          {description}
-        </div>
+        <div className="text-gray-500">{description}</div>
 
         {/* Stage */}
         <div className="h-36 min-h-full">
           <ol className="flex space-x-4 pt-6">
-            {micOn && (
-              <li className="flex-shrink w-28 h-28 text-center"
-                  onClick={() => state.set('editIdentity', !editIdentity)}
+            {myAudio && (
+              <li
+                className="flex-shrink w-28 h-28 text-center"
+                onClick={() => setEditIdentity(!editIdentity)}
               >
                 <div
                   className={
@@ -114,31 +113,32 @@ export default function Room({room, roomId}) {
                 <div className="pt-2 font-medium">{myInfo.displayName}</div>
               </li>
             )}
-            {streams.map(({stream, peerId}) =>
-              !stream ? undefined : (
-                <li
-                  key={peerId}
-                  className="flex-shrink w-28 h-28 w-28 h-28 text-center"
-                  title={peerId}
-                >
-                  <div
-                    className={
-                      speaking.has(peerId)
-                        ? 'human-radius p-1 ring-4 ring-gray-300'
-                        : 'human-radius p-1 ring-4 ring-white'
-                    }
+            {streams.map(
+              ({stream, peerId}) =>
+                stream && (
+                  <li
+                    key={peerId}
+                    className="flex-shrink w-28 h-28 w-28 h-28 text-center"
+                    title={peerId}
                   >
-                    <img
-                      className="human-radius border border-gray-300 bg-gray-300"
-                      alt={peerId}
-                      src={gravatarUrl({id: peerId})}
-                    />
-                  </div>
-                  <div className="pt-2 font-medium">
-                    {peerId.substring(0, 2).toUpperCase()}
-                  </div>
-                </li>
-              )
+                    <div
+                      className={
+                        speaking.has(peerId)
+                          ? 'human-radius p-1 ring-4 ring-gray-300'
+                          : 'human-radius p-1 ring-4 ring-white'
+                      }
+                    >
+                      <img
+                        className="human-radius border border-gray-300 bg-gray-300"
+                        alt={peerId}
+                        src={gravatarUrl({id: peerId})}
+                      />
+                    </div>
+                    <div className="pt-2 font-medium">
+                      {peerId.substring(0, 2).toUpperCase()}
+                    </div>
+                  </li>
+                )
             )}
           </ol>
         </div>
@@ -174,14 +174,6 @@ export default function Room({room, roomId}) {
         </ol>
 
         <div className="mt-10 navigation">
-          {/* <div className="flex">
-            <button
-              onClick={requestAudio}
-              className="h-12 px-6 m-2 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline hover:bg-yellow-300 flex-grow mt-10"
-            >
-              🔊 Listen and speak
-            </button>
-          </div> */}
           <div className="flex">
             <button
               onClick={() => state.set('micMuted', !micMuted)}
@@ -206,21 +198,39 @@ export default function Room({room, roomId}) {
             TODO: maybe we should hide this button on platforms where navigator.share does nothing, or implement a simple replacement like
             "Share link was copied to your clipboard!"
           */}
-          <div className="flex">
+          <div className="flex relative">
+            {showShareInfo && (
+              <span
+                style={{
+                  position: 'absolute',
+                  top: '-14px',
+                  left: '10px',
+                  fontSize: '12px',
+                }}
+              >
+                Link copied to clipboard!
+              </span>
+            )}
             <button
               onClick={() => {
-                navigator.share({
-                  title: name || 'A Jam room',
-                  text: 'Hi, join me in this room on Jam.',
-                  url: window.location.href,
-                });
+                if (navigate.share) {
+                  navigator.share({
+                    title: name || 'A Jam room',
+                    text: 'Hi, join me in this room on Jam.',
+                    url: location.href,
+                  });
+                } else {
+                  copyToClipboard(location.href);
+                  setShowShareInfo(true);
+                  setTimeout(() => setShowShareInfo(false), 2000);
+                }
               }}
               className="h-12 px-6 m-2 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
             >
               ✉️&nbsp;Share
             </button>
 
-            <button className="hidden h-12 px-6 m-2 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300 flex-grow">
+            <button className="h-12 px-6 m-2 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300 flex-grow">
               ✋🏽&nbsp;Raise&nbsp;hand
             </button>
           </div>
@@ -258,7 +268,9 @@ export default function Room({room, roomId}) {
               <div className="text-xl font-book text-black">
                 Christoph Witzany
               </div>
-              <p className="text-gray-500">Product, UX, StarCraft, Clojure, …</p>
+              <p className="text-gray-500">
+                Product, UX, StarCraft, Clojure, …
+              </p>
             </div>
           </div>
           <div className="p-2 max-w-sm mx-auto flex items-center space-x-4">
@@ -271,7 +283,9 @@ export default function Room({room, roomId}) {
             </div>
             <div>
               <div className="text-xl font-book text-black">Thomas Schranz</div>
-              <p className="text-gray-500">Product, UX, StarCraft, Clojure, …</p>
+              <p className="text-gray-500">
+                Product, UX, StarCraft, Clojure, …
+              </p>
             </div>
           </div>
           <div className="p-2 max-w-sm mx-auto flex items-center space-x-4">
@@ -286,7 +300,9 @@ export default function Room({room, roomId}) {
               <div className="text-xl font-book text-black">
                 Gregor Mitscha-Baude
               </div>
-              <p className="text-gray-500">Product, UX, StarCraft, Clojure, …</p>
+              <p className="text-gray-500">
+                Product, UX, StarCraft, Clojure, …
+              </p>
             </div>
           </div>
         </div>
