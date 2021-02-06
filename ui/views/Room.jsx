@@ -84,54 +84,57 @@ export default function Room({room, roomId}) {
           {description}
         </div>
 
-        <ol className="flex space-x-4 pt-6">
-          {micOn && (
-            <li className="flex-shrink w-28 h-28 text-center"
-                onClick={() => state.set('editIdentity', !editIdentity)}
-            >
-              <div
-                className={
-                  speaking.has('me')
-                    ? 'human-radius p-1 ring-4 ring-gray-300'
-                    : 'human-radius p-1 ring-4 ring-white'
-                }
-              >
-                <img
-                  className="human-radius border border-gray-300 bg-gray-300"
-                  alt="me"
-                  src={gravatarUrl(myInfo)}
-                />
-              </div>
-              <div className="pt-2 font-medium">{myInfo.displayName}</div>
-            </li>
-          )}
-          {streams.map(({stream, peerId}) =>
-            !stream ? undefined : (
-              <li
-                key={peerId}
-                className="flex-shrink w-28 h-28 text-center"
-                title={peerId}
+        {/* Stage */}
+        <div className="h-36 min-h-full">
+          <ol className="flex space-x-4 pt-6">
+            {micOn && (
+              <li className="flex-shrink w-28 h-28 text-center"
+                  onClick={() => state.set('editIdentity', !editIdentity)}
               >
                 <div
                   className={
-                    speaking.has(peerId)
+                    speaking.has('me')
                       ? 'human-radius p-1 ring-4 ring-gray-300'
                       : 'human-radius p-1 ring-4 ring-white'
                   }
                 >
                   <img
                     className="human-radius border border-gray-300 bg-gray-300"
-                    alt={peerId}
-                    src={gravatarUrl({id: peerId})}
+                    alt="me"
+                    src={gravatarUrl(myInfo)}
                   />
                 </div>
-                <div className="pt-2 font-medium">
-                  {peerId.substring(0, 2).toUpperCase()}
-                </div>
+                <div className="pt-2 font-medium">{myInfo.displayName}</div>
               </li>
-            )
-          )}
-        </ol>
+            )}
+            {streams.map(({stream, peerId}) =>
+              !stream ? undefined : (
+                <li
+                  key={peerId}
+                  className="flex-shrink w-28 h-28 w-28 h-28 text-center"
+                  title={peerId}
+                >
+                  <div
+                    className={
+                      speaking.has(peerId)
+                        ? 'human-radius p-1 ring-4 ring-gray-300'
+                        : 'human-radius p-1 ring-4 ring-white'
+                    }
+                  >
+                    <img
+                      className="human-radius border border-gray-300 bg-gray-300"
+                      alt={peerId}
+                      src={gravatarUrl({id: peerId})}
+                    />
+                  </div>
+                  <div className="pt-2 font-medium">
+                    {peerId.substring(0, 2).toUpperCase()}
+                  </div>
+                </li>
+              )
+            )}
+          </ol>
+        </div>
 
         <h3 className="hidden" style={{marginTop: '80px'}}>
           Audience
