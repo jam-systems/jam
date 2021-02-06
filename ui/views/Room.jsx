@@ -57,7 +57,7 @@ export default function Room({room, roomId}) {
             />
             <div className="p-2 text-gray-500 italic">
               {`What's your name?`}
-              <span className="text-gray-300">(optional)</span>
+              <span className="text-gray-300"> (optional)</span>
             </div>
             <br />
             <input
@@ -72,7 +72,7 @@ export default function Room({room, roomId}) {
             />
             <div className="p-2 text-gray-500 italic">
               {`What's your email?`}
-              <span className="text-gray-300">(used for Gravatar)</span>
+              <span className="text-gray-300"> (used for Gravatar)</span>
             </div>
             <button
               onClick={updateInfo}
@@ -101,6 +101,7 @@ export default function Room({room, roomId}) {
             {myAudio && (
               <li
                 className="flex-shrink w-28 h-28 text-center"
+                style={{cursor: 'pointer'}}
                 onClick={() => setEditIdentity(!editIdentity)}
               >
                 <div
@@ -200,10 +201,6 @@ export default function Room({room, roomId}) {
 
           <br />
 
-          {/*
-            TODO: maybe we should hide this button on platforms where navigator.share does nothing, or implement a simple replacement like
-            "Share link was copied to your clipboard!"
-          */}
           <div className="flex relative">
             {showShareInfo && (
               <span
