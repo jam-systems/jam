@@ -10,7 +10,7 @@ export default function EnterRoom({roomId, name, description}) {
             a snapshot of current or nticipated speakers
             (for scheduled (future) rooms)
         */}
-        <ol className="flex space-x-4 pt-6">
+        <ol className="hidden flex space-x-4 pt-6">
           <li className="flex-shrink w-28 h-28 ring-yellow-500">
             <img className="human-radius border border-gray-300" src="img/avatars/sonic.jpg" />
           </li>
