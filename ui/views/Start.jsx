@@ -14,9 +14,14 @@ export default function Start({urlRoomId}) {
 
   let submit = e => {
     e.preventDefault();
-    if (!name) return;
-    let slug = slugify(name, {lower: true, strict: true});
-    let roomId = slug + '-' + Math.random().toString(36).substr(2, 4);
+    let roomId;
+    if (name) {
+      let slug = slugify(name, {lower: true, strict: true});
+      roomId = slug + '-' + Math.random().toString(36).substr(2, 4);
+    } else {
+      roomId = Math.random().toString(36).substr(2, 6);
+    }
+
     createAudioContext();
     (async () => {
       await createRoom(roomId, name, swarm.myPeerId);
