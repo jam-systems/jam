@@ -165,7 +165,7 @@ export default function Room({room, roomId}) {
                       </div>
                     </div>
                     <div className="font-medium text-center w-28 m-2 break-words">
-                      {myInfo.displayName}
+                      {peerInfo.displayName}
                     </div>
                   </li>
                 )
