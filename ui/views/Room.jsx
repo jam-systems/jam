@@ -5,7 +5,6 @@ import swarm from '../lib/swarm';
 import EnterRoom from './EnterRoom';
 
 // TODOs:
-// -) Q: should we only connect webrtc after "entering"? (probably not, complicates things & makes slower)
 // -) wire speakers, mod lists to UI
 
 export default function Room({room, roomId}) {
@@ -68,16 +67,28 @@ export default function Room({room, roomId}) {
         <h3 style={{marginTop: '80px'}}>Audience</h3>
         <ol className="flex space-x-4 pt-6">
           <li className="flex-shrink w-24 h-24 ring-yellow-500">
-            <img className="human-radius border border-gray-300" src="img/avatars/sonic.jpg" />
+            <img
+              className="human-radius border border-gray-300"
+              src="img/avatars/sonic.jpg"
+            />
           </li>
           <li className="flex-shrink w-24 h-24">
-            <img className="human-radius border border-gray-300" src="img/avatars/gregor.jpg" />
+            <img
+              className="human-radius border border-gray-300"
+              src="img/avatars/gregor.jpg"
+            />
           </li>
           <li className="flex-shrink w-24 h-24">
-            <img className="human-radius border border-gray-300" src="img/avatars/christoph.jpg" />
+            <img
+              className="human-radius border border-gray-300"
+              src="img/avatars/christoph.jpg"
+            />
           </li>
           <li className="flex-shrink w-24 h-24">
-            <img className="human-radius border border-gray-300" src="img/avatars/tosh.jpg" />
+            <img
+              className="human-radius border border-gray-300"
+              src="img/avatars/tosh.jpg"
+            />
           </li>
         </ol>
 
@@ -101,7 +112,7 @@ export default function Room({room, roomId}) {
             <button
               onClick={() => {
                 navigator.share({
-                  title: (name || "A Jam room"),
+                  title: name || 'A Jam room',
                   text: 'Hi, join me in this room on Jam.',
                   url: window.location.href,
                 });

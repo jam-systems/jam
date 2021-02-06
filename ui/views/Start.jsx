@@ -24,10 +24,14 @@ export default function Start({urlRoomId}) {
         <div className="flex flex-row pt-4 pb-4">
           <div className="flex-1 text-gray-600 pt-6">
             Jam is an <span className="italic">audio space</span>
-            <br />for chatting, brainstorming, debating, jamming, micro-conferences and more.
-            <br /><br />
+            <br />
+            for chatting, brainstorming, debating, jamming, micro-conferences
+            and more.
+            <br />
+            <br />
             <a href="/" className="underline text-blue-800 hover:text-blue-600">
-              Learn more about Jam.</a>
+              Learn more about Jam.
+            </a>
           </div>
           <div className="flex-1">
             <img
@@ -35,7 +39,8 @@ export default function Start({urlRoomId}) {
               style={{width: 170, height: 170}}
               alt="Jam mascot"
               title="Jam mascot"
-              src="/img/jam-illustration.png" />
+              src="/img/jam-illustration.png"
+            />
           </div>
         </div>
 
@@ -45,30 +50,31 @@ export default function Start({urlRoomId}) {
         <br />
 
         <form onSubmit={submit}>
-          <p>
-            <input
-              autoFocus
-              className="rounded placeholder-gray-300 bg-gray-50 w-2/3"
-              type="text"
-              placeholder="Room topic"
-              value={name}
-              name="jam-room-topic"
-              autocomplete="off"
-              onChange={e => {
-                setName(e.target.value);
-              }}
-            ></input>
-            <p className="p-2 text-gray-500 italic">Pick a topic to talk about.</p>
-            <input
-              className="hidden"
-              type="text"
-              placeholder={randomId}
-              value={customId}
-              onChange={e => {
-                setRoomId(e.target.value);
-              }}
-            ></input>
+          <input
+            autoFocus
+            className="rounded placeholder-gray-300 bg-gray-50 w-2/3"
+            type="text"
+            placeholder="Room topic"
+            value={name}
+            name="jam-room-topic"
+            autoComplete="off"
+            onChange={e => {
+              setName(e.target.value);
+            }}
+          ></input>
+          <p className="p-2 text-gray-500 italic">
+            Pick a topic to talk about.
           </p>
+          <input
+            className="hidden"
+            type="text"
+            placeholder={randomId}
+            value={customId}
+            onChange={e => {
+              setRoomId(e.target.value);
+            }}
+          ></input>
+
           <button
             onClick={submit}
             className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
