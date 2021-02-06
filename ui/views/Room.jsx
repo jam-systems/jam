@@ -233,7 +233,7 @@ export default function Room({room, roomId}) {
               ✉️&nbsp;Share
             </button>
 
-            <button className="h-12 px-6 m-2 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300 flex-grow">
+            <button className="hidden h-12 px-6 m-2 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300 flex-grow">
               ✋🏽&nbsp;Raise&nbsp;hand
             </button>
           </div>
