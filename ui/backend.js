@@ -52,7 +52,7 @@ function updateApiQuery(path, data, status) {
   state.update('queries');
 }
 
-export async function createRoom(roomId, name, peerId) {
+export async function createRoom(roomId, name, description, peerId) {
   let res = await fetch(`${API}/rooms/${roomId}`, {
     method: 'POST',
     headers: {
@@ -61,6 +61,7 @@ export async function createRoom(roomId, name, peerId) {
     },
     body: JSON.stringify({
       name: name,
+      description: description,
       moderators: [peerId],
       speakers: [peerId],
     }),

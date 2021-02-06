@@ -1,7 +1,7 @@
 import React from 'react';
 import {enterRoom} from '../main';
 
-export default function EnterRoom({roomId, name}) {
+export default function EnterRoom({roomId, name, description}) {
   return (
     <div className="container">
       <div className="child">
@@ -25,8 +25,7 @@ export default function EnterRoom({roomId, name}) {
           </li>
         </ol>
         <p className="text-gray-500">
-          This is a description of the Room you are about to Enter so you have
-          more context. This description is optional.
+          {description || 'This is a Room on Jam'}
         </p>
         {/*
             optional (for future events:)

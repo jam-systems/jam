@@ -16,14 +16,18 @@ export default function Room({room, roomId}) {
   let enteredRooms = use(state, 'enteredRooms');
   let streams = use(swarm, 'remoteStreams');
   let name = room?.name;
+  let description = room?.description;
 
   if (!enteredRooms.has(roomId))
-    return <EnterRoom roomId={roomId} name={name} />;
+    return <EnterRoom roomId={roomId} name={name} description={description} />;
 
   return (
     <div className="container">
       <div className="child">
         <h1>{name}</h1>
+        <div className="text-gray-500">
+          {description}
+        </div>
 
         <ol className="flex space-x-4 pt-6">
           {micOn && (

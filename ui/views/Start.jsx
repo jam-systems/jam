@@ -10,6 +10,7 @@ export default function Start({urlRoomId}) {
   // let randomId = useMemo(() => Math.random().toString(36).substr(2, 6), []);
   // let [customId, setRoomId] = useState(urlRoomId || '');
   let [name, setName] = useState('');
+  let [description, setDescription] = useState('');
   // let roomId = customId || randomId;
 
   let submit = e => {
@@ -24,7 +25,7 @@ export default function Start({urlRoomId}) {
 
     createAudioContext();
     (async () => {
-      await createRoom(roomId, name, swarm.myPeerId);
+      await createRoom(roomId, name, description, swarm.myPeerId);
       if (urlRoomId !== roomId) navigate('/' + roomId);
       enterRoom(roomId);
     })();
@@ -64,8 +65,7 @@ export default function Start({urlRoomId}) {
 
         <form onSubmit={submit}>
           <input
-            autoFocus
-            className="rounded placeholder-gray-300 bg-gray-50 w-2/3"
+            className="rounded placeholder-gray-300 bg-gray-50 w-64"
             type="text"
             placeholder="Room topic"
             value={name}
@@ -75,9 +75,25 @@ export default function Start({urlRoomId}) {
               setName(e.target.value);
             }}
           ></input>
-          <p className="p-2 text-gray-500 italic">
-            Pick a topic to talk about.
-          </p>
+          <div className="p-2 text-gray-500 italic">
+            Pick a topic to talk about. <span className="text-gray-300">(optional)</span>
+          </div>
+          <br />
+          <input
+            className="rounded placeholder-gray-300 bg-gray-50 w-96"
+            type="text"
+            placeholder="Room description"
+            value={description}
+            name="jam-room-description"
+            autoComplete="off"
+            onChange={e => {
+              setDescription(e.target.value);
+            }}
+          ></input>
+          <div className="p-2 text-gray-500 italic">
+            Describe what this room is about. <span className="text-gray-300">(optional)</span>
+          </div>
+
           {/* <input
             className="hidden"
             type="text"
