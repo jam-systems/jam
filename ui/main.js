@@ -23,7 +23,8 @@ export function enterRoom(roomId) {
   createAudioContext();
 }
 export function createAudioContext() {
-  if (!state.audioContext) {
+  const AudioContext = AudioContext || window.webkitAudioContext;
+  if (AudioContext && !state.audioContext) {
     state.set('audioContext', new AudioContext());
   }
 }
