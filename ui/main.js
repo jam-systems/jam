@@ -23,7 +23,7 @@ export function enterRoom(roomId) {
   createAudioContext();
 }
 export function createAudioContext() {
-  const AudioContext = AudioContext || window.webkitAudioContext;
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
   if (AudioContext && !state.audioContext) {
     state.set('audioContext', new AudioContext());
   }
@@ -63,9 +63,10 @@ swarm.on('stream', (stream, name, peer) => {
   let audio = new Audio();
   speaker[id] = audio;
   audio.srcObject = stream;
+  console.log('muted', state.soundMuted);
   audio.muted = state.soundMuted;
   audio.addEventListener('canplay', () => {
-    audio.play();
+    audio.play(); // TODO throws in chrome
   });
   listenIfSpeaking(id, stream);
 });
