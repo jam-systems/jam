@@ -1,8 +1,10 @@
 import React from 'react';
+import SparkMD5 from 'spark-md5';
 import {leaveRoom, state} from '../main';
 import use from '../lib/use-state.js';
 import swarm from '../lib/swarm.js';
 import EnterRoom from './EnterRoom.jsx';
+import {getId} from "../lib/identity";
 
 // TODOs:
 // -) wire speakers, mod lists to UI
@@ -41,10 +43,11 @@ export default function Room({room, roomId}) {
               >
                 <img
                   className="human-radius border border-gray-300 bg-gray-300"
-                  src="img/avatars/sonic.jpg"
+                  alt="me"
+                  src={`https://www.gravatar.com/avatar/${SparkMD5.hash(getId())}?d=robohash`}
                 />
               </div>
-              <div className="pt-2 font-medium">Me</div>
+              <div className="pt-2 font-medium">{getId().substring(0, 2).toUpperCase()}</div>
             </li>
           )}
           {streams.map(({stream, peerId}) =>
@@ -53,7 +56,6 @@ export default function Room({room, roomId}) {
                 key={peerId}
                 className="flex-shrink w-28 h-28 text-center"
                 title={peerId}
-                alt={peerId}
               >
                 <div
                   className={
@@ -64,7 +66,8 @@ export default function Room({room, roomId}) {
                 >
                   <img
                     className="human-radius border border-gray-300 bg-gray-300"
-                    src="img/avatars/sonic.jpg"
+                    alt={peerId}
+                    src={`https://www.gravatar.com/avatar/${SparkMD5.hash(peerId)}?d=robohash`}
                   />
                 </div>
                 <div className="pt-2 font-medium">
