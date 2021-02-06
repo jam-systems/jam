@@ -19,7 +19,7 @@ export default function Room({room, roomId}) {
   let speaking = use(state, 'speaking');
   let enteredRooms = use(state, 'enteredRooms');
   let streams = use(swarm, 'remoteStreams');
-  let identities = use(state, "identities");
+  let identities = use(state, 'identities');
   let name = room?.name;
   let description = room?.description;
 
@@ -121,13 +121,13 @@ export default function Room({room, roomId}) {
                 <div className="pt-2 font-medium">{myInfo.displayName}</div>
               </li>
             )}
-            {streams.map(
-              ({stream, peerId}) => {
-                const peerInfo = identities[peerId] || {id: peerId}
-                console.log("Peer Info for " + peerId);
-                console.log(peerInfo)
-                console.log(identities)
-                return stream && (
+            {streams.map(({stream, peerId}) => {
+              const peerInfo = identities[peerId] || {id: peerId};
+              // console.log('Peer Info for ' + peerId);
+              // console.log(peerInfo);
+              // console.log(identities);
+              return (
+                stream && (
                   <li
                     key={peerId}
                     className="flex-shrink w-28 h-28 w-28 h-28 text-center"
@@ -150,8 +150,9 @@ export default function Room({room, roomId}) {
                       {peerInfo.displayName}
                     </div>
                   </li>
-                )}
-            )}
+                )
+              );
+            })}
           </ol>
         </div>
 
@@ -211,9 +212,9 @@ export default function Room({room, roomId}) {
               <span
                 style={{
                   position: 'absolute',
-                  top: '-14px',
-                  left: '10px',
-                  fontSize: '12px',
+                  top: '-20px',
+                  left: '2px',
+                  fontSize: '13px',
                 }}
               >
                 Link copied to clipboard!
