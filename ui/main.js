@@ -2,8 +2,11 @@ import swarm from './lib/swarm.js';
 import State from './lib/minimal-state.js';
 import hark from 'hark';
 import {onFirstInteraction} from './lib/user-interaction.js';
+import {getInfo, updateInfo} from "./lib/identity";
+
 
 export const state = State({
+  myInfo: getInfo(),
   soundMuted: true,
   micMuted: true,
   myAudio: null,
@@ -14,6 +17,8 @@ export const state = State({
   userInteracted: false,
 });
 window.state = state; // for debugging
+
+state.on('myInfo', updateInfo);
 
 onFirstInteraction(() => state.set('userInteracted', true));
 

@@ -1,30 +1,83 @@
-import React from 'react';
-import SparkMD5 from 'spark-md5';
-import {leaveRoom, state} from '../main';
+import React, {useState} from 'react';
+import {createAudioContext, enterRoom, leaveRoom, state} from '../main';
 import use from '../lib/use-state.js';
 import swarm from '../lib/swarm.js';
 import EnterRoom from './EnterRoom.jsx';
-import {getId} from "../lib/identity";
+import {gravatarUrl} from "../lib/gravatar";
+import slugify from "slugify";
+import {createRoom} from "../backend";
+import {navigate} from "../lib/use-location";
 
 // TODOs:
 // -) wire speakers, mod lists to UI
 
 export default function Room({room, roomId}) {
+  let myInfo = use(state, 'myInfo');
   let myAudio = use(state, 'myAudio');
   let micOn = myAudio?.active;
   let micMuted = use(state, 'micMuted');
   let soundMuted = use(state, 'soundMuted');
   let speaking = use(state, 'speaking');
   let enteredRooms = use(state, 'enteredRooms');
+  let editIdentity = use(state, 'editIdentity');
   let streams = use(swarm, 'remoteStreams');
   let name = room?.name;
   let description = room?.description;
+
+  let [displayName, setDisplayName] = useState(myInfo.displayName);
+  let [email, setEmail] = useState(myInfo.email);
+
+
+  let updateInfo = e => {
+    e.preventDefault();
+    state.set('myInfo', {displayName, email})
+    state.set('editIdentity', false);
+  };
+
 
   if (!enteredRooms.has(roomId))
     return <EnterRoom roomId={roomId} name={name} description={description} />;
 
   return (
+
     <div className="container">
+      {editIdentity && (
+          <div className="child">
+            <form onSubmit={updateInfo}>
+              <input
+                  className="rounded placeholder-gray-300 bg-gray-50 w-64"
+                  type="text"
+                  placeholder="DisplayName"
+                  value={displayName}
+                  name="display-name"
+                  onChange={e => {
+                    setDisplayName(e.target.value);
+                  }}
+              />
+              <br />
+              <input
+                  className="rounded placeholder-gray-300 bg-gray-50 w-64"
+                  type="email"
+                  placeholder="email@example.com"
+                  value={email}
+                  name="email"
+                  onChange={e => {
+                    setEmail(e.target.value);
+                  }}
+              />
+              <br />
+              <button
+                  onClick={updateInfo}
+                  className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
+              >
+                Update Info
+              </button>
+            </form>
+            <br />
+            <hr />
+          </div>
+
+      )}
       <div className="child">
         <h1>{name}</h1>
         <div className="text-gray-500">
@@ -33,7 +86,9 @@ export default function Room({room, roomId}) {
 
         <ol className="flex space-x-4 pt-6">
           {micOn && (
-            <li className="flex-shrink w-28 h-28 text-center">
+            <li className="flex-shrink w-28 h-28 text-center"
+                onClick={() => state.set('editIdentity', !editIdentity)}
+            >
               <div
                 className={
                   speaking.has('me')
@@ -44,10 +99,10 @@ export default function Room({room, roomId}) {
                 <img
                   className="human-radius border border-gray-300 bg-gray-300"
                   alt="me"
-                  src={`https://www.gravatar.com/avatar/${SparkMD5.hash(getId())}?d=robohash`}
+                  src={gravatarUrl(myInfo)}
                 />
               </div>
-              <div className="pt-2 font-medium">{getId().substring(0, 2).toUpperCase()}</div>
+              <div className="pt-2 font-medium">{myInfo.displayName}</div>
             </li>
           )}
           {streams.map(({stream, peerId}) =>
@@ -67,7 +122,7 @@ export default function Room({room, roomId}) {
                   <img
                     className="human-radius border border-gray-300 bg-gray-300"
                     alt={peerId}
-                    src={`https://www.gravatar.com/avatar/${SparkMD5.hash(peerId)}?d=robohash`}
+                    src={gravatarUrl({id: peerId})}
                   />
                 </div>
                 <div className="pt-2 font-medium">
