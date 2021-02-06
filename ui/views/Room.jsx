@@ -76,9 +76,15 @@ export default function Room({room, roomId}) {
             </div>
             <button
               onClick={updateInfo}
-              className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
+              className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300 mr-2"
             >
               Update Profile
+            </button>
+            <button
+              onClick={() => setEditIdentity(false)}
+              className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
+            >
+              Cancel
             </button>
           </form>
           <br />
