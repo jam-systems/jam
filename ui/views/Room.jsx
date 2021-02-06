@@ -1,14 +1,16 @@
 import React from 'react';
-import {requestAudio, leaveRoom, state} from '../main';
-import use from '../lib/use-state';
-import swarm from '../lib/swarm';
-import EnterRoom from './EnterRoom';
+import {leaveRoom, state} from '../main';
+import use from '../lib/use-state.js';
+import swarm from '../lib/swarm.js';
+import EnterRoom from './EnterRoom.jsx';
 
 // TODOs:
 // -) wire speakers, mod lists to UI
 
 export default function Room({room, roomId}) {
   let myStream = use(state, 'myAudio');
+  let micMuted = use(state, 'micMuted');
+  let soundMuted = use(state, 'soundMuted');
   let speaking = use(state, 'speaking');
   let enteredRooms = use(state, 'enteredRooms');
   let streams = use(swarm, 'remoteStreams');
@@ -60,13 +62,17 @@ export default function Room({room, roomId}) {
                     src="img/avatars/sonic.jpg"
                   />
                 </div>
-                <div className="pt-2 font-medium">{peerId.substring(0,2).toUpperCase()}</div>
+                <div className="pt-2 font-medium">
+                  {peerId.substring(0, 2).toUpperCase()}
+                </div>
               </li>
             )
           )}
         </ol>
 
-        <h3 className="hidden" style={{marginTop: '80px'}}>Audience</h3>
+        <h3 className="hidden" style={{marginTop: '80px'}}>
+          Audience
+        </h3>
         <ol className="hidden flex space-x-4 pt-6">
           <li className="flex-shrink w-24 h-24 ring-yellow-500">
             <img
@@ -95,12 +101,29 @@ export default function Room({room, roomId}) {
         </ol>
 
         <div className="mt-10 navigation">
-          <div className="flex">
+          {/* <div className="flex">
             <button
               onClick={requestAudio}
               className="h-12 px-6 m-2 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline hover:bg-yellow-300 flex-grow mt-10"
             >
               🔊 Listen and speak
+            </button>
+          </div> */}
+          <div className="flex">
+            <button
+              onClick={() => state.set('micMuted', !micMuted)}
+              className="h-12 px-6 m-2 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline hover:bg-yellow-300 flex-grow mt-10"
+              style={{flex: '1 0 0'}}
+            >
+              🎙️ Mic is {micMuted ? 'off' : 'on'}
+            </button>
+
+            <button
+              onClick={() => state.set('soundMuted', !soundMuted)}
+              className="h-12 px-6 m-2 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline hover:bg-yellow-300 flex-grow mt-10"
+              style={{flex: '1 0 0'}}
+            >
+              {soundMuted ? '🔇' : '🔊'} Sound is {soundMuted ? 'off' : 'on'}
             </button>
           </div>
 

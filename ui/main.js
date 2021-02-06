@@ -4,6 +4,7 @@ import hark from 'hark';
 
 export const state = State({
   soundMuted: true,
+  micMuted: false,
   myAudio: null,
   speaking: new Set(),
   enteredRooms: new Set(),
@@ -16,6 +17,7 @@ export {requestAudio};
 export function enterRoom(roomId) {
   state.enteredRooms.add(roomId);
   state.update('enteredRooms');
+  requestAudio(); // TBD
   state.set('soundMuted', false);
 }
 
@@ -32,13 +34,12 @@ export function connectRoom(roomId) {
   swarm.connect();
 }
 
-state.on('myAudio', () => {
-  swarm.addLocalStream(state.myAudio, 'audio');
+state.on('myAudio', stream => {
+  swarm.addLocalStream(stream, 'audio');
 });
 
 let speaker = {};
-state.on('soundMuted', () => {
-  let muted = state.soundMuted;
+state.on('soundMuted', muted => {
   for (let id in speaker) {
     speaker[id].muted = muted;
   }
@@ -76,6 +77,10 @@ async function requestAudio() {
     });
   if (!stream) return;
   state.set('myAudio', stream);
+  let muted = state.micMuted;
+  for (let track of stream.getTracks()) {
+    track.enabled = !muted;
+  }
   listenIfSpeaking('me', stream);
   return stream;
 }
@@ -86,6 +91,13 @@ async function stopAudio() {
   }
   state.set('myAudio', undefined);
 }
+
+state.on('micMuted', muted => {
+  if (!state.myAudio) return;
+  for (let track of state.myAudio.getTracks()) {
+    track.enabled = !muted;
+  }
+});
 
 function listenIfSpeaking(peerId, stream) {
   let options = {};
