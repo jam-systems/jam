@@ -110,10 +110,10 @@ export default function Room({room, roomId}) {
 
         {/* Stage */}
         <div className="">
-          <ol className="flex flex-wrap space-x-4 pt-6">
+          <ol className="flex flex-wrap space-x-2 pt-6">
             {myAudio && (
               <li
-                className="items-center space-y-1"
+                className="items-center space-y-1 mt-4"
                 style={{cursor: 'pointer'}}
                 onClick={() => setEditIdentity(!editIdentity)}
               >
@@ -146,7 +146,7 @@ export default function Room({room, roomId}) {
                 stream && (
                   <li
                     key={peerId}
-                    className="flex-col items-center space-y-1"
+                    className="items-center space-y-1 mt-4"
                     title={peerId}
                   >
                     <div
@@ -164,9 +164,9 @@ export default function Room({room, roomId}) {
                         />
                       </div>
                     </div>
-                    <span className="font-medium text-center w-28 m-2 break-words">
-                      {peerInfo.displayName}
-                    </span>
+                    <div className="font-medium text-center w-28 m-2 break-words">
+                      {myInfo.displayName}
+                    </div>
                   </li>
                 )
               );
