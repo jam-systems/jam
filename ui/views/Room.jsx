@@ -77,7 +77,7 @@ export default function Room({room, roomId}) {
                   onClick={updateInfo}
                   className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
               >
-                Update Info
+                Update Profile
               </button>
             </form>
             <br />
