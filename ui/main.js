@@ -2,8 +2,7 @@ import swarm from './lib/swarm.js';
 import State from './lib/minimal-state.js';
 import hark from 'hark';
 import {onFirstInteraction} from './lib/user-interaction.js';
-import {getInfo, updateInfo} from "./lib/identity";
-
+import {getInfo, updateInfo} from './lib/identity';
 
 export const state = State({
   myInfo: getInfo(),

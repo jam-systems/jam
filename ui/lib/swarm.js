@@ -3,8 +3,6 @@ import State from './minimal-state.js';
 import signalhub from './signalhub.js';
 import {getId} from './identity';
 
-console.log(getId());
-
 const LOGGING = false;
 
 // public API starts here
@@ -63,7 +61,7 @@ function createPeer(peerId, connId, initiator) {
   let streams = Object.values(localStreams).filter(x => x);
   peer = new SimplePeer({
     initiator,
-    trickle: false,
+    trickle: true,
     streams,
   });
   peer.peerId = peerId;
