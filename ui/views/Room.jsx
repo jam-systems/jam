@@ -6,6 +6,8 @@ import EnterRoom from './EnterRoom.jsx';
 import {gravatarUrl} from '../lib/gravatar';
 import {navigate} from '../lib/use-location';
 import copyToClipboard from '../lib/copy-to-clipboard';
+import signalhub from "../lib/signalhub";
+
 
 // TODOs:
 // -) wire speakers, mod lists to UI
@@ -23,6 +25,7 @@ export default function Room({room, roomId}) {
   let name = room?.name;
   let description = room?.description;
 
+
   let [editIdentity, setEditIdentity] = useState(false);
 
   let [displayName, setDisplayName] = useState(myInfo.displayName);
@@ -32,8 +35,10 @@ export default function Room({room, roomId}) {
 
   let updateInfo = e => {
     e.preventDefault();
-    state.set('myInfo', {displayName, email});
+    const userInfo = {displayName, email};
+    state.set('myInfo', userInfo);
     setEditIdentity(false);
+    swarm.hub.broadcast("identity-updates", swarm.myPeerId);
   };
 
   if (!enteredRooms.has(roomId))

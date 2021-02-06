@@ -3,7 +3,7 @@ import State from './lib/minimal-state.js';
 import hark from 'hark';
 import {onFirstInteraction} from './lib/user-interaction.js';
 import {get} from "./backend";
-import {getInfo, updateInfo} from "./lib/identity";
+import {updateInfo} from "./lib/identity";
 
 export const state = State({
   myInfo: {},
@@ -51,6 +51,12 @@ export function connectRoom(roomId) {
   swarm.config('https://signalhub.jam.systems/', roomId);
   if (swarm.connected) swarm.disconnect();
   swarm.connect();
+  swarm.hub.subscribe("identity-updates", async (id) => {
+    state.set("identities", {
+      ...state.get("identities"),
+      [id]: await get(`/identities/${id}`)
+    })
+  })
 }
 
 state.on('myAudio', stream => {
