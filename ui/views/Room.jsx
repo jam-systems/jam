@@ -97,7 +97,7 @@ export default function Room({room, roomId}) {
         <div className="text-gray-500">{description}</div>
 
         {/* Stage */}
-        <div className="h-36 min-h-full">
+        <div className="h-40 min-h-full">
           <ol className="flex space-x-4 pt-6">
             {myAudio && (
               <li
@@ -120,9 +120,9 @@ export default function Room({room, roomId}) {
                     />
                   </div>
                 </div>
-                <span className="font-medium break-all">
+                <div className="font-medium text-center w-28 m-2 break-words">
                   {myInfo.displayName}
-                </span>
+                </div>
               </li>
             )}
             {streams.map(({stream, peerId}) => {
@@ -152,7 +152,7 @@ export default function Room({room, roomId}) {
                         />
                       </div>
                     </div>
-                    <span className="font-medium break-all">
+                    <span className="font-medium text-center w-28 m-2 break-words">
                       {peerInfo.displayName}
                     </span>
                   </li>
