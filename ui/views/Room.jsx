@@ -109,11 +109,11 @@ export default function Room({room, roomId}) {
         <div className="text-gray-500">{description}</div>
 
         {/* Stage */}
-        <div className="h-40 min-h-full">
-          <ol className="flex space-x-4 pt-6">
+        <div className="">
+          <ol className="flex flex-wrap space-x-4 pt-6">
             {myAudio && (
               <li
-                className="flex-col items-center space-y-1"
+                className="items-center space-y-1"
                 style={{cursor: 'pointer'}}
                 onClick={() => setEditIdentity(!editIdentity)}
               >
