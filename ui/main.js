@@ -1,6 +1,7 @@
 import swarm from './lib/swarm.js';
 import State from './lib/minimal-state.js';
 import hark from 'hark';
+import {onFirstInteraction} from './lib/user-interaction.js';
 
 export const state = State({
   soundMuted: true,
@@ -10,8 +11,11 @@ export const state = State({
   enteredRooms: new Set(),
   queries: {},
   audioContext: null,
+  userInteracted: false,
 });
 window.state = state; // for debugging
+
+onFirstInteraction(() => state.set('userInteracted', true));
 
 export {requestAudio};
 
@@ -22,7 +26,8 @@ export function enterRoom(roomId) {
   state.set('soundMuted', false);
   createAudioContext();
 }
-export function createAudioContext() {
+
+function createAudioContext() {
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   if (AudioContext && !state.audioContext) {
     state.set('audioContext', new AudioContext());
@@ -66,7 +71,13 @@ swarm.on('stream', (stream, name, peer) => {
   console.log('muted', state.soundMuted);
   audio.muted = state.soundMuted;
   audio.addEventListener('canplay', () => {
-    audio.play(); // TODO throws in chrome
+    try {
+      audio.play(); // throws in chrome before user interaction
+    } catch (e) {
+      state.on('userInteracted', interacted => {
+        if (interacted) audio.play();
+      });
+    }
   });
   listenIfSpeaking(id, stream);
 });
