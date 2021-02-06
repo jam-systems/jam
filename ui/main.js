@@ -9,6 +9,7 @@ export const state = State({
   speaking: new Set(),
   enteredRooms: new Set(),
   queries: {},
+  audioContext: null,
 });
 window.state = state; // for debugging
 
@@ -19,6 +20,12 @@ export function enterRoom(roomId) {
   state.update('enteredRooms');
   requestAudio(); // TBD
   state.set('soundMuted', false);
+  createAudioContext();
+}
+export function createAudioContext() {
+  if (!state.audioContext) {
+    state.set('audioContext', new AudioContext());
+  }
 }
 
 export function leaveRoom(roomId) {
@@ -101,7 +108,18 @@ state.on('micMuted', muted => {
 });
 
 function listenIfSpeaking(peerId, stream) {
-  let options = {};
+  if (!state.audioContext) {
+    // if no audio context exists yet, retry as soon as it is available
+    let onAudioContext = () => {
+      console.log('reacting to audio context later');
+      listenIfSpeaking(peerId, stream);
+      state.off('audioContext', onAudioContext);
+    };
+    state.on('audioContext', onAudioContext);
+    return;
+  }
+  console.log('have an audio context');
+  let options = {audioContext: state.audioContext};
   let speechEvents = hark(stream, options);
 
   speechEvents.on('speaking', () => {

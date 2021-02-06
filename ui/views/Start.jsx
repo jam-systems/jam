@@ -4,7 +4,7 @@ import slugify from 'slugify';
 import {createRoom} from '../backend';
 import swarm from '../lib/swarm.js';
 import {navigate} from '../lib/use-location';
-import {enterRoom} from '../main';
+import {createAudioContext, enterRoom} from '../main';
 
 export default function Start({urlRoomId}) {
   // let randomId = useMemo(() => Math.random().toString(36).substr(2, 6), []);
@@ -12,14 +12,17 @@ export default function Start({urlRoomId}) {
   let [name, setName] = useState('');
   // let roomId = customId || randomId;
 
-  let submit = async e => {
+  let submit = e => {
     e.preventDefault();
     if (!name) return;
     let slug = slugify(name, {lower: true, strict: true});
     let roomId = slug + '-' + Math.random().toString(36).substr(2, 4);
-    await createRoom(roomId, name, swarm.myPeerId);
-    if (urlRoomId !== roomId) navigate('/' + roomId);
-    enterRoom(roomId);
+    createAudioContext();
+    (async () => {
+      await createRoom(roomId, name, swarm.myPeerId);
+      if (urlRoomId !== roomId) navigate('/' + roomId);
+      enterRoom(roomId);
+    })();
   };
   return (
     <div className="container">
