@@ -71,13 +71,12 @@ swarm.on('stream', (stream, name, peer) => {
   console.log('muted', state.soundMuted);
   audio.muted = state.soundMuted;
   audio.addEventListener('canplay', () => {
-    try {
-      audio.play(); // throws in chrome before user interaction
-    } catch (e) {
+    audio.play().catch(() => {
+      console.log('deferring audio.play');
       state.on('userInteracted', interacted => {
-        if (interacted) audio.play();
+        if (interacted) audio.play().then(() => console.log('playing audio!!'));
       });
-    }
+    });
   });
   listenIfSpeaking(id, stream);
 });
