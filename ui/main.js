@@ -4,7 +4,7 @@ import hark from 'hark';
 
 export const state = State({
   soundMuted: true,
-  micMuted: false,
+  micMuted: true,
   myAudio: null,
   speaking: new Set(),
   enteredRooms: new Set(),
@@ -74,13 +74,11 @@ async function requestAudio() {
     .catch(err => {
       console.error('error getting mic');
       console.error(err);
+      state.set('micMuted', true);
     });
   if (!stream) return;
   state.set('myAudio', stream);
-  let muted = state.micMuted;
-  for (let track of stream.getTracks()) {
-    track.enabled = !muted;
-  }
+  state.set('micMuted', false);
   listenIfSpeaking('me', stream);
   return stream;
 }
@@ -93,7 +91,10 @@ async function stopAudio() {
 }
 
 state.on('micMuted', muted => {
-  if (!state.myAudio) return;
+  if (!state.myAudio?.active && !muted) {
+    requestAudio();
+    return;
+  }
   for (let track of state.myAudio.getTracks()) {
     track.enabled = !muted;
   }
