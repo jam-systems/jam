@@ -1,17 +1,22 @@
-import React, {useMemo, useState} from 'react';
+import React, {useState} from 'react';
+import slugify from 'slugify';
+
 import {createRoom} from '../backend';
 import swarm from '../lib/swarm.js';
 import {navigate} from '../lib/use-location';
 import {enterRoom} from '../main';
 
 export default function Start({urlRoomId}) {
-  let randomId = useMemo(() => Math.random().toString(36).substr(2, 6), []);
-  let [customId, setRoomId] = useState(urlRoomId || '');
+  // let randomId = useMemo(() => Math.random().toString(36).substr(2, 6), []);
+  // let [customId, setRoomId] = useState(urlRoomId || '');
   let [name, setName] = useState('');
-  let roomId = customId || randomId;
+  // let roomId = customId || randomId;
 
   let submit = async e => {
     e.preventDefault();
+    if (!name) return;
+    let slug = slugify(name, {lower: true, strict: true});
+    let roomId = slug + '-' + Math.random().toString(36).substr(2, 4);
     await createRoom(roomId, name, swarm.myPeerId);
     if (urlRoomId !== roomId) navigate('/' + roomId);
     enterRoom(roomId);
@@ -65,7 +70,7 @@ export default function Start({urlRoomId}) {
           <p className="p-2 text-gray-500 italic">
             Pick a topic to talk about.
           </p>
-          <input
+          {/* <input
             className="hidden"
             type="text"
             placeholder={randomId}
@@ -73,7 +78,7 @@ export default function Start({urlRoomId}) {
             onChange={e => {
               setRoomId(e.target.value);
             }}
-          ></input>
+          ></input> */}
 
           <button
             onClick={submit}
