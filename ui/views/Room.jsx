@@ -101,24 +101,28 @@ export default function Room({room, roomId}) {
           <ol className="flex space-x-4 pt-6">
             {myAudio && (
               <li
-                className="flex-shrink w-28 h-28 text-center"
+                className="flex-col items-center space-y-1"
                 style={{cursor: 'pointer'}}
                 onClick={() => setEditIdentity(!editIdentity)}
               >
                 <div
                   className={
                     speaking.has('me')
-                      ? 'human-radius p-1 ring-4 ring-gray-300'
-                      : 'human-radius p-1 ring-4 ring-white'
+                      ? 'human-radius p-1 bg-gray-300'
+                      : 'human-radius p-1 bg-white'
                   }
                 >
-                  <img
-                    className="human-radius border border-gray-300 bg-gray-300"
-                    alt="me"
-                    src={gravatarUrl(myInfo)}
-                  />
+                  <div className="human-radius p-1 bg-white">
+                    <img
+                      className="human-radius border border-gray-300 bg-gray-300 w-28 h-28"
+                      alt="me"
+                      src={gravatarUrl(myInfo)}
+                    />
+                  </div>
                 </div>
-                <div className="pt-2 font-medium">{myInfo.displayName}</div>
+                <span className="font-medium break-all">
+                  {myInfo.displayName}
+                </span>
               </li>
             )}
             {streams.map(({stream, peerId}) => {
@@ -130,25 +134,27 @@ export default function Room({room, roomId}) {
                 stream && (
                   <li
                     key={peerId}
-                    className="flex-shrink w-28 h-28 w-28 h-28 text-center"
+                    className="flex-col items-center space-y-1"
                     title={peerId}
                   >
                     <div
                       className={
                         speaking.has(peerId)
-                          ? 'human-radius p-1 ring-4 ring-gray-300'
-                          : 'human-radius p-1 ring-4 ring-white'
+                          ? 'human-radius p-1 bg-gray-300'
+                          : 'human-radius p-1 bg-white'
                       }
                     >
-                      <img
-                        className="human-radius border border-gray-300 bg-gray-300"
-                        alt={peerId}
-                        src={gravatarUrl(peerInfo)}
-                      />
+                      <div className="human-radius p-1 bg-white">
+                        <img
+                          className="human-radius border border-gray-300 bg-gray-300 w-28 h-28"
+                          alt={peerId}
+                          src={gravatarUrl(peerInfo)}
+                        />
+                      </div>
                     </div>
-                    <div className="pt-2 font-medium">
+                    <span className="font-medium break-all">
                       {peerInfo.displayName}
-                    </div>
+                    </span>
                   </li>
                 )
               );
