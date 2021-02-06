@@ -47,7 +47,7 @@ export default function Start({urlRoomId}) {
           <div className="flex-1">
             <img
               className="p-4"
-              style={{width: 170, height: 170}}
+              style={{width: 130, height: 130}}
               alt="Jam mascot"
               title="Jam mascot"
               src="/img/jam-illustration.png"
@@ -78,7 +78,7 @@ export default function Start({urlRoomId}) {
           </div>
           <br />
           <input
-            className="rounded placeholder-gray-300 bg-gray-50 w-96"
+            className="rounded placeholder-gray-300 bg-gray-50 w-64 lg:w-96"
             type="text"
             placeholder="Room description"
             value={description}
