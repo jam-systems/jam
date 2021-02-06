@@ -8,7 +8,8 @@ import EnterRoom from './EnterRoom.jsx';
 // -) wire speakers, mod lists to UI
 
 export default function Room({room, roomId}) {
-  let myStream = use(state, 'myAudio');
+  let myAudio = use(state, 'myAudio');
+  let micOn = myAudio?.active;
   let micMuted = use(state, 'micMuted');
   let soundMuted = use(state, 'soundMuted');
   let speaking = use(state, 'speaking');
@@ -25,7 +26,7 @@ export default function Room({room, roomId}) {
         <h1>{name}</h1>
 
         <ol className="flex space-x-4 pt-6">
-          {myStream && (
+          {micOn && (
             <li className="flex-shrink w-28 h-28 text-center">
               <div
                 className={
@@ -115,7 +116,7 @@ export default function Room({room, roomId}) {
               className="h-12 px-6 m-2 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline hover:bg-yellow-300 flex-grow mt-10"
               style={{flex: '1 0 0'}}
             >
-              🎙️ Mic is {micMuted ? 'off' : 'on'}
+              🎙️ {micOn ? (micMuted ? 'Muted' : 'On') : 'Off'}
             </button>
 
             <button
@@ -123,7 +124,7 @@ export default function Room({room, roomId}) {
               className="h-12 px-6 m-2 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline hover:bg-yellow-300 flex-grow mt-10"
               style={{flex: '1 0 0'}}
             >
-              {soundMuted ? '🔇' : '🔊'} Sound is {soundMuted ? 'off' : 'on'}
+              {soundMuted ? '🔇' : '🔊'} {soundMuted ? 'Off' : 'On'}
             </button>
           </div>
 
