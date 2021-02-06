@@ -43,20 +43,25 @@ export default function Room({room, roomId}) {
     <div className="container">
       {editIdentity && (
           <div className="child">
+            <h3 className="font-medium">Profile</h3>
+            <br />
             <form onSubmit={updateInfo}>
               <input
                   className="rounded placeholder-gray-300 bg-gray-50 w-64"
                   type="text"
-                  placeholder="DisplayName"
+                  placeholder="Display name"
                   value={displayName}
                   name="display-name"
                   onChange={e => {
                     setDisplayName(e.target.value);
                   }}
               />
+              <div className="p-2 text-gray-500 italic">
+                What's your name? <span className="text-gray-300">(optional)</span>
+              </div>
               <br />
               <input
-                  className="rounded placeholder-gray-300 bg-gray-50 w-64"
+                  className="rounded placeholder-gray-300 bg-gray-50 w-72"
                   type="email"
                   placeholder="email@example.com"
                   value={email}
@@ -65,7 +70,9 @@ export default function Room({room, roomId}) {
                     setEmail(e.target.value);
                   }}
               />
-              <br />
+              <div className="p-2 text-gray-500 italic">
+                What's your email? <span className="text-gray-300">(used for Gravatar)</span>
+              </div>
               <button
                   onClick={updateInfo}
                   className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
