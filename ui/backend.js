@@ -3,6 +3,7 @@ import {sign} from './lib/identity';
 import use from './lib/use-state';
 import {state} from './main';
 
+
 // POST https://pantry.jam.systems/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
 // Creates room, returns 409 conflict if room exists
 
@@ -52,19 +53,34 @@ function updateApiQuery(path, data, status) {
   state.update('queries');
 }
 
-export async function createRoom(roomId, name, description, peerId) {
-  let res = await fetch(`${API}/rooms/${roomId}`, {
-    method: 'POST',
+
+async function authenticatedApiRequest(method, path, payload) {
+  let res = await fetch(API + path, {
+    method: method.toUpperCase(),
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
+      Authentication: `Token ${signedToken()}`
     },
-    body: JSON.stringify({
-      name: name,
-      description: description,
-      moderators: [peerId],
-      speakers: [peerId],
-    }),
+    body: JSON.stringify(payload),
   });
   return res.ok;
+}
+
+export async function post(path, payload) {
+  return authenticatedApiRequest('POST', path, payload);
+}
+
+export async function put(path, payload) {
+  return authenticatedApiRequest('PUT', path, payload);
+}
+
+
+export async function createRoom(roomId, name, description, peerId) {
+  return post(`/rooms/${roomId}`, {
+      name,
+      description,
+      moderators: [peerId],
+      speakers: [peerId],
+    });
 }
