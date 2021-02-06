@@ -2,8 +2,9 @@ import swarm from './lib/swarm.js';
 import State from './lib/minimal-state.js';
 import hark from 'hark';
 import {onFirstInteraction} from './lib/user-interaction.js';
-import {get} from "./backend";
-import {updateInfo} from "./lib/identity";
+import {get} from './backend';
+import {updateInfo} from './lib/identity';
+import {updateStorage} from './lib/local-storage.js';
 
 export const state = State({
   myInfo: {},
@@ -15,13 +16,14 @@ export const state = State({
   queries: {},
   audioContext: null,
   userInteracted: false,
-  identities: {}
+  identities: {},
 });
 window.state = state; // for debugging
 
 state.on('myInfo', updateInfo);
 
 onFirstInteraction(() => state.set('userInteracted', true));
+state.on('userInteracted', i => i && createAudioContext());
 
 export {requestAudio};
 
@@ -31,12 +33,18 @@ export function enterRoom(roomId) {
   requestAudio(); // TBD
   state.set('soundMuted', false);
   createAudioContext();
+  updateStorage(sessionStorage, 'enteredRooms', (rooms = []) => {
+    if (rooms.indexOf(roomId) === -1) rooms.push(roomId);
+    return rooms;
+  });
 }
 
 export function createAudioContext() {
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   if (AudioContext && !state.audioContext) {
     state.set('audioContext', new AudioContext());
+  } else {
+    state.audioContext.resume();
   }
 }
 
@@ -45,18 +53,23 @@ export function leaveRoom(roomId) {
   state.update('enteredRooms');
   stopAudio();
   state.set('soundMuted', true);
+  updateStorage(sessionStorage, 'enteredRooms', (rooms = []) => {
+    let i = rooms.indexOf(roomId);
+    if (i !== -1) rooms.splice(i, 1);
+    return rooms;
+  });
 }
 
 export function connectRoom(roomId) {
   swarm.config('https://signalhub.jam.systems/', roomId);
   if (swarm.connected) swarm.disconnect();
   swarm.connect();
-  swarm.hub.subscribe("identity-updates", async (id) => {
-    state.set("identities", {
-      ...state.get("identities"),
-      [id]: await get(`/identities/${id}`)
-    })
-  })
+  swarm.hub.subscribe('identity-updates', async id => {
+    state.set('identities', {
+      ...state.get('identities'),
+      [id]: await get(`/identities/${id}`),
+    });
+  });
 }
 
 state.on('myAudio', stream => {
@@ -73,10 +86,10 @@ state.on('soundMuted', muted => {
 swarm.on('stream', async (stream, name, peer) => {
   console.log('remote stream', name, stream);
   let id = peer.peerId;
-  state.set("identities", {
-    ...state.get("identities"),
-    [id]: await get(`/identities/${id}`)
-  })
+  state.set('identities', {
+    ...state.get('identities'),
+    [id]: await get(`/identities/${id}`),
+  });
   if (!stream) {
     delete speaker[id];
     return;
@@ -84,13 +97,17 @@ swarm.on('stream', async (stream, name, peer) => {
   let audio = new Audio();
   speaker[id] = audio;
   audio.srcObject = stream;
-  console.log('muted', state.soundMuted);
   audio.muted = state.soundMuted;
   audio.addEventListener('canplay', () => {
     audio.play().catch(() => {
       console.log('deferring audio.play');
+      state.set('soundMuted', true);
       state.on('userInteracted', interacted => {
-        if (interacted) audio.play().then(() => console.log('playing audio!!'));
+        if (interacted)
+          audio.play().then(() => {
+            state.set('soundMuted', false);
+            console.log('playing audio!!');
+          });
       });
     });
   });

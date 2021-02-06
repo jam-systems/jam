@@ -1,13 +1,12 @@
-import React, {useState} from 'react';
-import {leaveRoom, state} from '../main';
+import React, {useEffect, useState} from 'react';
+import {enterRoom, leaveRoom, state} from '../main';
 import use from '../lib/use-state.js';
 import swarm from '../lib/swarm.js';
 import EnterRoom from './EnterRoom.jsx';
 import {gravatarUrl} from '../lib/gravatar';
 import {navigate} from '../lib/use-location';
 import copyToClipboard from '../lib/copy-to-clipboard';
-import signalhub from "../lib/signalhub";
-
+import {getStorage} from '../lib/local-storage';
 
 // TODOs:
 // -) wire speakers, mod lists to UI
@@ -25,7 +24,6 @@ export default function Room({room, roomId}) {
   let name = room?.name;
   let description = room?.description;
 
-
   let [editIdentity, setEditIdentity] = useState(false);
 
   let [displayName, setDisplayName] = useState(myInfo.displayName);
@@ -38,10 +36,19 @@ export default function Room({room, roomId}) {
     const userInfo = {displayName, email};
     state.set('myInfo', userInfo);
     setEditIdentity(false);
-    swarm.hub.broadcast("identity-updates", swarm.myPeerId);
+    swarm.hub.broadcast('identity-updates', swarm.myPeerId);
   };
 
-  if (!enteredRooms.has(roomId))
+  let hasEnteredRoom = enteredRooms.has(roomId);
+
+  useEffect(() => {
+    if (hasEnteredRoom) return;
+    if (getStorage(sessionStorage, 'enteredRooms')?.includes(roomId)) {
+      enterRoom(roomId);
+    }
+  }, [roomId, hasEnteredRoom]);
+
+  if (!hasEnteredRoom)
     return <EnterRoom roomId={roomId} name={name} description={description} />;
 
   return (
