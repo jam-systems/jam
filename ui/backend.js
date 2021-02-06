@@ -1,5 +1,4 @@
 import {useCallback, useEffect, useState} from 'react';
-import {sign} from './lib/identity';
 import use from './lib/use-state';
 import {state} from './main';
 
@@ -15,16 +14,6 @@ import {state} from './main';
 
 const API = 'https://pantry.jam.systems/api/v1';
 
-// TODO
-function signedToken() {
-  const dateToken = Math.round(Date.now() / 30000);
-  const signData = Uint8Array.of(
-    dateToken % 256,
-    (dateToken >> 16) % 256,
-    (dateToken >> 24) % 256
-  );
-  return sign(signData);
-}
 
 export function useApiQuery(path, doFetch = true) {
   let cached = use(state, 'queries')[path];
@@ -54,30 +43,41 @@ function updateApiQuery(path, data, status) {
 }
 
 
-async function authenticatedApiRequest(method, path, payload) {
+async function authenticatedApiRequest(method, token, path, payload) {
   let res = await fetch(API + path, {
     method: method.toUpperCase(),
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      Authentication: `Token ${signedToken()}`
+      Authentication: `Token ${token}`
     },
     body: JSON.stringify(payload),
   });
   return res.ok;
 }
 
-export async function post(path, payload) {
-  return authenticatedApiRequest('POST', path, payload);
+export async function get(path) {
+  let res = await fetch(API + path, {
+    method: "GET",
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+  return res.json();
 }
 
-export async function put(path, payload) {
-  return authenticatedApiRequest('PUT', path, payload);
+
+export async function post(token, path, payload) {
+  return authenticatedApiRequest('POST', token, path, payload);
+}
+
+export async function put(token, path, payload) {
+  return authenticatedApiRequest('PUT', token, path, payload);
 }
 
 
 export async function createRoom(roomId, name, description, peerId) {
-  return post(`/rooms/${roomId}`, {
+  return post("",`/rooms/${roomId}`, {
       name,
       description,
       moderators: [peerId],

@@ -2,10 +2,11 @@ import swarm from './lib/swarm.js';
 import State from './lib/minimal-state.js';
 import hark from 'hark';
 import {onFirstInteraction} from './lib/user-interaction.js';
-import {getInfo, updateInfo} from './lib/identity';
+import {get} from "./backend";
+import {getInfo, updateInfo} from "./lib/identity";
 
 export const state = State({
-  myInfo: getInfo(),
+  myInfo: {},
   soundMuted: true,
   micMuted: true,
   myAudio: null,
@@ -14,6 +15,7 @@ export const state = State({
   queries: {},
   audioContext: null,
   userInteracted: false,
+  identities: {}
 });
 window.state = state; // for debugging
 
@@ -62,9 +64,13 @@ state.on('soundMuted', muted => {
   }
 });
 
-swarm.on('stream', (stream, name, peer) => {
+swarm.on('stream', async (stream, name, peer) => {
   console.log('remote stream', name, stream);
   let id = peer.peerId;
+  state.set("identities", {
+    ...state.get("identities"),
+    [id]: await get(`/identities/${id}`)
+  })
   if (!stream) {
     delete speaker[id];
     return;

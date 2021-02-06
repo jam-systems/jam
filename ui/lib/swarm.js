@@ -10,7 +10,7 @@ const LOGGING = false;
 const swarm = State({
   // state
   peers: {},
-  myPeerId: getId(),
+  myPeerId: null,
   connected: false,
   remoteStreams: [], // {stream, name, peerId}, only one per (name, peerId) if name is set
   // internal

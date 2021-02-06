@@ -19,6 +19,7 @@ export default function Room({room, roomId}) {
   let speaking = use(state, 'speaking');
   let enteredRooms = use(state, 'enteredRooms');
   let streams = use(swarm, 'remoteStreams');
+  let identities = use(state, "identities");
   let name = room?.name;
   let description = room?.description;
 
@@ -121,8 +122,12 @@ export default function Room({room, roomId}) {
               </li>
             )}
             {streams.map(
-              ({stream, peerId}) =>
-                stream && (
+              ({stream, peerId}) => {
+                const peerInfo = identities[peerId] || {id: peerId}
+                console.log("Peer Info for " + peerId);
+                console.log(peerInfo)
+                console.log(identities)
+                return stream && (
                   <li
                     key={peerId}
                     className="flex-shrink w-28 h-28 w-28 h-28 text-center"
@@ -138,14 +143,14 @@ export default function Room({room, roomId}) {
                       <img
                         className="human-radius border border-gray-300 bg-gray-300"
                         alt={peerId}
-                        src={gravatarUrl({id: peerId})}
+                        src={gravatarUrl(peerInfo)}
                       />
                     </div>
                     <div className="pt-2 font-medium">
-                      {peerId.substring(0, 2).toUpperCase()}
+                      {peerInfo.displayName}
                     </div>
                   </li>
-                )
+                )}
             )}
           </ol>
         </div>
