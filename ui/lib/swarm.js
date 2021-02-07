@@ -62,7 +62,7 @@ function createPeer(peerId, connId, initiator) {
   let streams = Object.values(localStreams).filter(x => x);
   peer = new SimplePeer({
     initiator,
-    trickle: true,
+    trickle: false,
     streams,
   });
   peer.peerId = peerId;
