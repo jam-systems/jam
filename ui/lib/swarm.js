@@ -1,9 +1,9 @@
 import SimplePeer from 'simple-peer-light';
 import State from './minimal-state.js';
 import signalhub from './signalhub.js';
-import {getId, verifyToken} from './identity';
+import {verifyToken} from './identity';
 
-const LOGGING = false;
+const LOGGING = true;
 
 // public API starts here
 
@@ -281,13 +281,11 @@ function connect() {
   });
 
   hub.subscribe('mute-status', ({id, micMuted, authToken}) => {
-        if (verifyToken(authToken, id)) {
-          swarm.mutedPeers[id] = micMuted;
-          swarm.update('mutedPeers');
-        }
-      }
-  )
-
+    if (verifyToken(authToken, id)) {
+      swarm.mutedPeers[id] = micMuted;
+      swarm.update('mutedPeers');
+    }
+  });
 }
 
 function disconnect() {

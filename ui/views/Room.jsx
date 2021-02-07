@@ -1,12 +1,12 @@
-import React, {useEffect, useState} from 'react';
-import {enterRoom, leaveRoom, state} from '../main';
+import React, {useState} from 'react';
+import {leaveRoom, state} from '../main';
 import use from '../lib/use-state.js';
 import swarm from '../lib/swarm.js';
 import EnterRoom from './EnterRoom.jsx';
 import {gravatarUrl} from '../lib/gravatar';
 import {navigate} from '../lib/use-location';
 import copyToClipboard from '../lib/copy-to-clipboard';
-import {getStorage} from '../lib/local-storage';
+// import {getStorage} from '../lib/local-storage';
 
 // TODOs:
 // -) wire speakers, mod lists to UI
@@ -42,12 +42,12 @@ export default function Room({room, roomId}) {
 
   let hasEnteredRoom = enteredRooms.has(roomId);
 
-  useEffect(() => {
-    if (hasEnteredRoom) return;
-    if (getStorage(sessionStorage, 'enteredRooms')?.includes(roomId)) {
-      enterRoom(roomId);
-    }
-  }, [roomId, hasEnteredRoom]);
+  // useEffect(() => {
+  //   if (hasEnteredRoom) return;
+  //   if (getStorage(sessionStorage, 'enteredRooms')?.includes(roomId)) {
+  //     enterRoom(roomId);
+  //   }
+  // }, [roomId, hasEnteredRoom]);
 
   if (!hasEnteredRoom)
     return <EnterRoom roomId={roomId} name={name} description={description} />;
@@ -173,7 +173,7 @@ export default function Room({room, roomId}) {
                         />
                       </div>
                     </div>
-                    { /* div for showing mute/unmute status */ }
+                    {/* div for showing mute/unmute status */}
                     <div className={mutedPeers[peerId] ? '' : 'hidden'}>
                       <div className="absolute w-8 h-8 right-0 bottom-14 rounded-full bg-white border border-gray-400 flex items-center justify-center">
                         🎤
