@@ -7,11 +7,13 @@
   },
   "dependencies": {
     "body-parser": "^1.19.0",
+    "compact-base64": "^2.1.2",
     "cors": "^2.8.5",
     "debug": "^4.3.1",
     "express": "^4.17.1",
     "morgan": "^1.10.0",
     "redis": "^3.0.2",
-    "signalhub": "^4.9.0"
+    "signalhub": "^4.9.0",
+    "tweetnacl": "^1.0.3"
   }
 }

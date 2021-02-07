@@ -49,7 +49,7 @@ async function authenticatedApiRequest(method, token, path, payload) {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      Authentication: `Token ${token}`
+      Authorization: `Token ${token}`
     },
     body: JSON.stringify(payload),
   });

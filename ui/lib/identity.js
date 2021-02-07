@@ -55,6 +55,7 @@ function signedToken() {
   const dateToken = Math.round(Date.now() / 30000);
   const signData = Uint8Array.of(
       dateToken % 256,
+      (dateToken >> 8) % 256,
       (dateToken >> 16) % 256,
       (dateToken >> 24) % 256
   );
