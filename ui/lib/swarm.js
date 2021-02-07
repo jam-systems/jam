@@ -147,7 +147,6 @@ function removePeer(peerId, peer) {
 function addPeerMetaData(peer, data) {
   if (!data) return;
   try {
-    log('adding metadata', data);
     for (let key in data) {
       peer[key] = data[key];
     }
@@ -157,9 +156,7 @@ function addPeerMetaData(peer, data) {
 }
 
 function addStreamToPeers(stream, name) {
-  log('addStreamToPeers', stream, name);
   let {peers} = swarm;
-  log('peers', peers);
   for (let peerId in peers) {
     let peer = peers[peerId];
     // TODO maybe some condition for what peers we will add stream? (e.g. only connected peers)
@@ -193,7 +190,7 @@ function connect() {
     );
   }
   let myConnId = randomHex4();
-  log('connecting. peers', swarm.peers, 'conn id', myConnId);
+  log('connecting. conn id', myConnId);
   let hub = signalhub(swarm.room, swarm.url);
   let {myPeerId} = swarm;
   hub

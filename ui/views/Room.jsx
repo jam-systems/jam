@@ -4,7 +4,6 @@ import use from '../lib/use-state.js';
 import swarm from '../lib/swarm.js';
 import EnterRoom from './EnterRoom.jsx';
 import {gravatarUrl} from '../lib/gravatar';
-import {navigate} from '../lib/use-location';
 import copyToClipboard from '../lib/copy-to-clipboard';
 // import {getStorage} from '../lib/local-storage';
 
@@ -258,7 +257,7 @@ export default function Room({room, roomId}) {
             )}
             <button
               onClick={() => {
-                if (navigate.share) {
+                if (navigator.share) {
                   navigator.share({
                     title: name || 'A Jam room',
                     text: 'Hi, join me in this room on Jam.',
