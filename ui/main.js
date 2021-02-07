@@ -3,7 +3,7 @@ import State from './lib/minimal-state.js';
 import hark from 'hark';
 import {onFirstInteraction} from './lib/user-interaction.js';
 import {get} from './backend';
-import {updateInfo} from './lib/identity';
+import {getId, updateInfo, signedToken} from './lib/identity';
 import {updateStorage} from './lib/local-storage.js';
 
 export const state = State({
@@ -142,14 +142,15 @@ async function stopAudio() {
   state.set('myAudio', undefined);
 }
 
-state.on('micMuted', muted => {
-  if (!state.myAudio?.active && !muted) {
+state.on('micMuted', micMuted => {
+  if (!state.myAudio?.active && !micMuted) {
     requestAudio();
     return;
   }
   for (let track of state.myAudio.getTracks()) {
-    track.enabled = !muted;
+    track.enabled = !micMuted;
   }
+  swarm.hub.broadcast('mute-status', {id: getId(), micMuted, authToken: signedToken()});
 });
 
 function listenIfSpeaking(peerId, stream) {

@@ -20,6 +20,7 @@ export default function Room({room, roomId}) {
   let speaking = use(state, 'speaking');
   let enteredRooms = use(state, 'enteredRooms');
   let streams = use(swarm, 'remoteStreams');
+  let mutedPeers = use(swarm, 'mutedPeers');
   let identities = use(state, 'identities');
   let name = room?.name;
   let description = room?.description;
@@ -113,7 +114,7 @@ export default function Room({room, roomId}) {
           <ol className="flex flex-wrap space-x-2 pt-6">
             {myAudio && (
               <li
-                className="items-center space-y-1 mt-4"
+                className="relative items-center space-y-1 mt-4"
                 style={{cursor: 'pointer'}}
                 onClick={() => setEditIdentity(!editIdentity)}
               >
@@ -130,6 +131,14 @@ export default function Room({room, roomId}) {
                       alt="me"
                       src={gravatarUrl(myInfo)}
                     />
+                  </div>
+                </div>
+                <div className={micMuted ? '' : 'hidden'}>
+                  <div className="absolute w-8 h-8 right-0 bottom-14 rounded-full bg-white border border-gray-400 flex items-center justify-center">
+                    🎤
+                  </div>
+                  <div className="absolute w-8 h-8 text-red-600 font-bold right-0 bottom-14 rounded-full bg-transparent border border-gray-400 flex items-center justify-center">
+                    ＼
                   </div>
                 </div>
                 <div className="font-medium text-center w-20 md:w-28 m-2 break-words">
@@ -165,7 +174,7 @@ export default function Room({room, roomId}) {
                       </div>
                     </div>
                     { /* div for showing mute/unmute status */ }
-                    <div className="">
+                    <div className={mutedPeers[peerId] ? '' : 'hidden'}>
                       <div className="absolute w-8 h-8 right-0 bottom-14 rounded-full bg-white border border-gray-400 flex items-center justify-center">
                         🎤
                       </div>
