@@ -146,7 +146,7 @@ export default function Room({room, roomId}) {
                 stream && (
                   <li
                     key={peerId}
-                    className="items-center space-y-1 mt-4"
+                    className="relative items-center space-y-1 mt-4"
                     title={peerId}
                   >
                     <div
@@ -162,6 +162,15 @@ export default function Room({room, roomId}) {
                           alt={peerId}
                           src={gravatarUrl(peerInfo)}
                         />
+                      </div>
+                    </div>
+                    { /* div for showing mute/unmute status */ }
+                    <div className="">
+                      <div className="absolute w-8 h-8 right-0 bottom-14 rounded-full bg-white border border-gray-400 flex items-center justify-center">
+                        🎤
+                      </div>
+                      <div className="absolute w-8 h-8 text-red-600 font-bold right-0 bottom-14 rounded-full bg-transparent border border-gray-400 flex items-center justify-center">
+                        ＼
                       </div>
                     </div>
                     <div className="font-medium text-center w-20 lg:w-28 m-2 break-words">
