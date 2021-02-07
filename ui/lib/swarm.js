@@ -64,6 +64,7 @@ function createPeer(peerId, connId, initiator) {
     initiator,
     trickle: false,
     streams,
+    debug: true,
   });
   peer.peerId = peerId;
   peer.connId = connId;
