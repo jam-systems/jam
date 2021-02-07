@@ -29,7 +29,7 @@ export default function Start({urlRoomId}) {
   };
   return (
     <div className="container">
-      <div className="child">
+      <div className="child md:p-10">
         <h1>Welcome to Jam</h1>
 
         <div className="flex flex-row pt-4 pb-4">
@@ -78,7 +78,7 @@ export default function Start({urlRoomId}) {
           </div>
           <br />
           <input
-            className="rounded placeholder-gray-300 bg-gray-50 w-64 lg:w-96"
+            className="rounded placeholder-gray-300 bg-gray-50 w-64 md:w-96"
             type="text"
             placeholder="Room description"
             value={description}

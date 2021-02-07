@@ -4,7 +4,7 @@ import {enterRoom} from '../main';
 export default function EnterRoom({roomId, name, description}) {
   return (
     <div className="container">
-      <div className="child">
+      <div className="child md:p-10">
         <h1 className="font-book text-black text-xl3">{name || ''}</h1>
         {/*
             a snapshot of current or nticipated speakers

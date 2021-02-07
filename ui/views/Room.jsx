@@ -54,7 +54,7 @@ export default function Room({room, roomId}) {
   return (
     <div className="container">
       {editIdentity && (
-        <div className="child">
+        <div className="child md:p-10">
           <h3 className="font-medium">Profile</h3>
           <br />
           <form onSubmit={updateInfo}>
@@ -104,7 +104,7 @@ export default function Room({room, roomId}) {
           <hr />
         </div>
       )}
-      <div className="child">
+      <div className="child md:p-10">
         <h1>{name}</h1>
         <div className="text-gray-500">{description}</div>
 
@@ -126,13 +126,13 @@ export default function Room({room, roomId}) {
                 >
                   <div className="human-radius p-1 bg-white">
                     <img
-                      className="human-radius border border-gray-300 bg-gray-300 w-20 h-20 lg:w-28 lg:h-28"
+                      className="human-radius border border-gray-300 bg-gray-300 w-20 h-20 md:w-28 md:h-28"
                       alt="me"
                       src={gravatarUrl(myInfo)}
                     />
                   </div>
                 </div>
-                <div className="font-medium text-center w-20 lg:w-28 m-2 break-words">
+                <div className="font-medium text-center w-20 md:w-28 m-2 break-words">
                   {myInfo.displayName}
                 </div>
               </li>
@@ -158,7 +158,7 @@ export default function Room({room, roomId}) {
                     >
                       <div className="human-radius p-1 bg-white">
                         <img
-                          className="human-radius border border-gray-300 bg-gray-300 w-20 h-20 lg:w-28 lg:h-28"
+                          className="human-radius border border-gray-300 bg-gray-300 w-20 h-20 md:w-28 md:h-28"
                           alt={peerId}
                           src={gravatarUrl(peerInfo)}
                         />
@@ -173,7 +173,7 @@ export default function Room({room, roomId}) {
                         ＼
                       </div>
                     </div>
-                    <div className="font-medium text-center w-20 lg:w-28 m-2 break-words">
+                    <div className="font-medium text-center w-20 md:w-28 m-2 break-words">
                       {peerInfo.displayName}
                     </div>
                   </li>
