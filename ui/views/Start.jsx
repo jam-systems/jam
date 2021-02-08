@@ -20,7 +20,7 @@ export default function Start({urlRoomId}) {
       roomId = Math.random().toString(36).substr(2, 6);
     }
 
-    createAudioContext();
+    // createAudioContext();
     (async () => {
       await createRoom(roomId, name, description, swarm.myPeerId);
       if (urlRoomId !== roomId) navigate('/' + roomId);

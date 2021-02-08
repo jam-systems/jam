@@ -4,12 +4,15 @@ import signalhub from './signalhub.js';
 import {verifyToken} from './identity';
 
 const LOGGING = true;
+const MAX_CONNECT_TIME = 4000;
+const MAX_FAIL_TIME = 24000;
 
 // public API starts here
 
 const swarm = State({
   // state
   peers: {},
+  stickyPeerInfo: {}, // peerId: {failTime: number, hadStream: boolean, inRoom: boolean}
   myPeerId: null,
   connected: false,
   remoteStreams: [], // {stream, name, peerId}, only one per (name, peerId) if name is set
@@ -21,6 +24,7 @@ const swarm = State({
   // events
   stream: null,
   data: null,
+  newPeer: null,
   mutedPeers: {},
 });
 
@@ -44,9 +48,7 @@ swarm.addLocalStream = (stream, name) => {
 
 // public API ends here
 
-function log(...args) {
-  if (LOGGING) console.log(...args);
-}
+let log = LOGGING ? console.log : () => {};
 
 function createPeer(peerId, connId, initiator) {
   let {hub, localStreams, peers, myPeerId} = swarm;
@@ -63,7 +65,7 @@ function createPeer(peerId, connId, initiator) {
   peer = new SimplePeer({
     initiator,
     config: {
-      iceTransportPolicy:"relay",
+      iceTransportPolicy: 'relay',
       iceServers: [
         {urls: 'stun:stun.turn.systems:3478'},
         {
@@ -73,15 +75,22 @@ function createPeer(peerId, connId, initiator) {
         },
       ],
     },
-    trickle: false,
+    trickle: true,
     streams,
-    debug: true,
+    // debug: true,
   });
   peer.peerId = peerId;
   peer.connId = connId;
   peer.streams = {...localStreams};
   peers[peerId] = peer;
   swarm.update('peers');
+
+  peer.createdAt = Date.now();
+  peer.timeout = setTimeout(() => {
+    log('peer timed out');
+    peer.timeout = null;
+    handlePeerFail(peer, MAX_CONNECT_TIME);
+  }, MAX_CONNECT_TIME);
 
   peer.on('signal', data => {
     log('signaling to', peerId, connId, data.type);
@@ -103,7 +112,10 @@ function createPeer(peerId, connId, initiator) {
     });
   });
   peer.on('connect', () => {
-    log('connected peer', peerId);
+    log('connected peer', peerId, 'after', Date.now() - peer.createdAt);
+    clearTimeout(peer.timeout);
+    peer.timeout = null;
+    swarm.stickyPeerInfo[peerId].failTime = 0;
     swarm.update('peers');
   });
 
@@ -119,32 +131,69 @@ function createPeer(peerId, connId, initiator) {
     let name = remoteStreamInfo && remoteStreamInfo[0];
     let remoteStreams = [...swarm.remoteStreams];
     let i = remoteStreams.findIndex(
-      streamObj =>
-        streamObj.peerId === peerId && (!name || streamObj.name === name)
+      streamObj => streamObj.peerId === peerId && streamObj.name === name
     );
     if (i === -1) i = remoteStreams.length;
     remoteStreams[i] = {stream, name, peerId};
     swarm.set('remoteStreams', remoteStreams);
     swarm.emit('stream', stream, name, peer);
-  });
-  // WARNING: this uses undocumented internals of simple-peer
-  peer._pc.addEventListener('track', ({track, transceiver}) => {
-    if (track.kind === 'video') log('got remote video mid', transceiver.mid);
+    swarm.stickyPeerInfo[peerId].hadStream = true;
   });
 
   peer.on('error', err => {
     log('error', err);
   });
+  peer.on('iceStateChange', iceConnectionState => {
+    log('ice state', iceConnectionState);
+    if (iceConnectionState === 'disconnected') {
+      // we treat this like a reconnect for now
+      clearTimeout(peer.timeout);
+      peer.timeout = setTimeout(() => {
+        log('peer timed out after ice disconnect');
+        peer.timeout = null;
+        handlePeerFail(peer, MAX_CONNECT_TIME);
+      }, MAX_CONNECT_TIME);
+    }
+  });
   peer.on('close', () => {
-    removePeer(peerId, peer);
+    let thisFailTime = 0;
+    if (peer.timeout) {
+      thisFailTime = Date.now() - peer.createdAt;
+      clearTimeout(peer.timeout);
+      peer.timeout = null;
+    }
+    handlePeerFail(peer, thisFailTime);
   });
   return peer;
+}
+
+function handlePeerFail(peer, thisFailTime) {
+  // peer either took too long to fire 'connect', or fired an error-like event
+  // depending how long we already tried, either reconnect or remove peer
+  let {peerId, connId} = peer;
+  let {peers, stickyPeerInfo, hub} = swarm;
+
+  let info = stickyPeerInfo[peer.peerId];
+  info.failTime += thisFailTime;
+
+  // don't break anything if we already replaced this peer instance
+  if (peers[peerId] !== peer) return;
+
+  log('handle peer fail!', thisFailTime, info.failTime);
+
+  if (info.failTime > MAX_FAIL_TIME) {
+    delete stickyPeerInfo[peer.peerId];
+    swarm.update('stickyPeerInfo');
+    removePeer(peerId, peer);
+  } else {
+    connectPeer(hub, peerId, connId);
+  }
 }
 
 function removePeer(peerId, peer) {
   let {peers} = swarm;
   if (!peers[peerId] || (peer && peer !== peers[peerId])) return;
-  log('removing peer', peerId);
+  console.log('removing peer', peerId);
   delete peers[peerId];
   let {remoteStreams} = swarm;
   if (remoteStreams.find(streamObj => streamObj.peerId === peerId)) {
@@ -171,7 +220,6 @@ function addStreamToPeers(stream, name) {
   let {peers} = swarm;
   for (let peerId in peers) {
     let peer = peers[peerId];
-    // TODO maybe some condition for what peers we will add stream? (e.g. only connected peers)
     let oldStream = peer.streams[name];
     let addStream = () => {
       log('adding stream to', peerId, name);
@@ -193,6 +241,41 @@ function addStreamToPeers(stream, name) {
   }
 }
 
+function initializePeer(peerId) {
+  let {stickyPeerInfo} = swarm;
+  if (!stickyPeerInfo[peerId]) {
+    stickyPeerInfo[peerId] = {
+      hadStream: false,
+      failTime: 0,
+    };
+    swarm.update('stickyPeerInfo');
+    swarm.emit('newPeer', peerId);
+  }
+}
+
+function connectPeer(hub, peerId, connId) {
+  // connect to a peer whose peerId & connId we already know
+  // either after being pinged by connect-me or as a retry
+  // SPEC:
+  // -) this has to be callable by both peers without race conflict
+  // -) this has to work in every state of swarm.peers (e.g. with or without existing Peer instance)
+  log('connecting peer', peerId, connId);
+  let {myPeerId} = swarm;
+  if (myPeerId > peerId) {
+    log('i initiate, and override any previous peer!');
+    createPeer(peerId, connId, true);
+  } else {
+    log('i dont initiate, but will prepare a new peer');
+    hub.broadcast(`no-you-connect-${peerId}`, {
+      peerId: myPeerId,
+      connId: hub.connId,
+      yourConnId: connId,
+    });
+    log('sent no-you-connect', peerId);
+    createPeer(peerId, connId, false);
+  }
+}
+
 function connect() {
   // don't auto-reconnect (fixes hot reloading!)
   if (swarm.hub) return;
@@ -202,7 +285,7 @@ function connect() {
     );
   }
   let myConnId = randomHex4();
-  log('connecting. peers', swarm.peers, 'conn id', myConnId);
+  log('connecting. conn id', myConnId);
   let hub = signalhub(swarm.room, swarm.url);
   let {myPeerId} = swarm;
   hub
@@ -224,20 +307,9 @@ function connect() {
 
   hub.subscribe('connect-me', ({peerId, connId}) => {
     if (peerId === myPeerId) return;
-    log('got connect-me', peerId, {peerId, connId});
-    if (myPeerId > peerId) {
-      log('i initiate, and override any previous peer!');
-      createPeer(peerId, connId, true);
-    } else {
-      log('i dont initiate, but will prepare a new peer');
-      hub.broadcast(`no-you-connect-${peerId}`, {
-        peerId: myPeerId,
-        connId: myConnId,
-        yourConnId: connId,
-      });
-      log('sent no-you-connect', peerId);
-      createPeer(peerId, connId, false);
-    }
+    log('got connect-me');
+    initializePeer(peerId);
+    connectPeer(hub, peerId, connId);
   });
 
   hub.subscribe(
@@ -245,6 +317,7 @@ function connect() {
     ({peerId, connId, yourConnId}) => {
       if (peerId === myPeerId) return;
       log('got no-you-connect', peerId, {peerId, connId, yourConnId});
+      initializePeer(peerId);
       if (yourConnId !== myConnId) {
         console.warn('no-you-connect to old connection, should be ignored');
         log('ignoring msg to old connection', yourConnId);
@@ -269,6 +342,7 @@ function connect() {
 
   hub.subscribe(`signal-${myPeerId}`, ({peerId, data, connId, yourConnId}) => {
     log('signal received from', peerId, connId, data.type);
+    initializePeer(peerId);
     if (yourConnId !== myConnId) {
       console.warn('signal to old connection, should be ignored');
       log('ignoring msg to old connection', yourConnId);
@@ -286,9 +360,18 @@ function connect() {
         addPeerMetaData(peer, data.meta);
         peer.signal(data);
       }
+      if (data && data.type !== 'offer') {
+        log(
+          'UH-OH! received signal other than offer & no peer yet:',
+          data.type
+        );
+      }
     }
   });
 
+  // TODO:
+  // 1) need more general version of this channel
+  // 2) need to communicate also to NEW clients
   hub.subscribe('mute-status', ({id, micMuted, authToken}) => {
     if (verifyToken(authToken, id)) {
       swarm.mutedPeers[id] = micMuted;

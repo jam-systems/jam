@@ -76,7 +76,6 @@ export const verifyToken = (authToken, key) => {
 }
 
 
-// TODO
 export function signedToken() {
   const dateToken = currentTimeCode();
   const signData = Uint8Array.of(

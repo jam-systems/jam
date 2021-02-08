@@ -4,7 +4,7 @@ import hark from 'hark';
 import {onFirstInteraction} from './lib/user-interaction.js';
 import {get} from './backend';
 import {getId, updateInfo, signedToken} from './lib/identity';
-import {updateStorage} from './lib/local-storage.js';
+// import {updateStorage} from './lib/local-storage.js';
 
 export const state = State({
   myInfo: {},
@@ -19,6 +19,7 @@ export const state = State({
   identities: {},
 });
 window.state = state; // for debugging
+window.swarm = swarm;
 
 state.on('myInfo', updateInfo);
 
@@ -30,13 +31,13 @@ export {requestAudio};
 export function enterRoom(roomId) {
   state.enteredRooms.add(roomId);
   state.update('enteredRooms');
-  requestAudio(); // TBD
+  requestAudio();
   state.set('soundMuted', false);
-  createAudioContext();
-  updateStorage(sessionStorage, 'enteredRooms', (rooms = []) => {
-    if (rooms.indexOf(roomId) === -1) rooms.push(roomId);
-    return rooms;
-  });
+  // createAudioContext();
+  // updateStorage(sessionStorage, 'enteredRooms', (rooms = []) => {
+  //   if (rooms.indexOf(roomId) === -1) rooms.push(roomId);
+  //   return rooms;
+  // });
 }
 
 export function createAudioContext() {
@@ -53,11 +54,11 @@ export function leaveRoom(roomId) {
   state.update('enteredRooms');
   stopAudio();
   state.set('soundMuted', true);
-  updateStorage(sessionStorage, 'enteredRooms', (rooms = []) => {
-    let i = rooms.indexOf(roomId);
-    if (i !== -1) rooms.splice(i, 1);
-    return rooms;
-  });
+  // updateStorage(sessionStorage, 'enteredRooms', (rooms = []) => {
+  //   let i = rooms.indexOf(roomId);
+  //   if (i !== -1) rooms.splice(i, 1);
+  //   return rooms;
+  // });
 }
 
 export function connectRoom(roomId) {
@@ -83,13 +84,14 @@ state.on('soundMuted', muted => {
   }
 });
 
-swarm.on('stream', async (stream, name, peer) => {
+swarm.on('newPeer', async id => {
+  state.identities[id] = await get(`/identities/${id}`);
+  state.update('identities');
+});
+
+swarm.on('stream', (stream, name, peer) => {
   console.log('remote stream', name, stream);
   let id = peer.peerId;
-  state.set('identities', {
-    ...state.get('identities'),
-    [id]: await get(`/identities/${id}`),
-  });
   if (!stream) {
     delete speaker[id];
     return;
@@ -150,7 +152,11 @@ state.on('micMuted', micMuted => {
   for (let track of state.myAudio.getTracks()) {
     track.enabled = !micMuted;
   }
-  swarm.hub.broadcast('mute-status', {id: getId(), micMuted, authToken: signedToken()});
+  swarm.hub.broadcast('mute-status', {
+    id: getId(),
+    micMuted,
+    authToken: signedToken(),
+  });
 });
 
 function listenIfSpeaking(peerId, stream) {

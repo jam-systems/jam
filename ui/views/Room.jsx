@@ -18,7 +18,7 @@ export default function Room({room, roomId}) {
   let soundMuted = use(state, 'soundMuted');
   let speaking = use(state, 'speaking');
   let enteredRooms = use(state, 'enteredRooms');
-  let streams = use(swarm, 'remoteStreams');
+  let peers = use(swarm, 'stickyPeerInfo');
   let mutedPeers = use(swarm, 'mutedPeers');
   let identities = use(state, 'identities');
   let name = room?.name;
@@ -145,13 +145,13 @@ export default function Room({room, roomId}) {
                 </div>
               </li>
             )}
-            {streams.map(({stream, peerId}) => {
+            {Object.keys(peers || {}).map(peerId => {
+              let {hadStream} = peers[peerId];
               const peerInfo = identities[peerId] || {id: peerId};
-              // console.log('Peer Info for ' + peerId);
-              // console.log(peerInfo);
-              // console.log(identities);
+              // TODO: hadStream is NOT the appropriate condition for showing avatar
+              // need inRoom status from peers
               return (
-                stream && (
+                hadStream && (
                   <li
                     key={peerId}
                     className="relative items-center space-y-1 mt-4"
