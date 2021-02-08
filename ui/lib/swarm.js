@@ -62,6 +62,17 @@ function createPeer(peerId, connId, initiator) {
   let streams = Object.values(localStreams).filter(x => x);
   peer = new SimplePeer({
     initiator,
+    config: {
+      iceTransportPolicy:"relay",
+      iceServers: [
+        {urls: 'stun:stun.turn.systems:3478'},
+        {
+          urls: 'turn:turn.jam.systems:3478',
+          username: 'test',
+          credential: 'yieChoi0PeoKo8ni',
+        },
+      ],
+    },
     trickle: false,
     streams,
     debug: true,
@@ -191,7 +202,7 @@ function connect() {
     );
   }
   let myConnId = randomHex4();
-  log('connecting. conn id', myConnId);
+  log('connecting. peers', swarm.peers, 'conn id', myConnId);
   let hub = signalhub(swarm.room, swarm.url);
   let {myPeerId} = swarm;
   hub

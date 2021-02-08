@@ -1,5 +1,10 @@
 version: '3'
 services:
+  coturn:
+    image: woahbase/alpine-coturn
+    volumes:
+      - "./turnserver.conf:/var/lib/coturn/turnserver.conf"
+    network_mode: host
   postgres:
     image: postgres:12
     restart: always
