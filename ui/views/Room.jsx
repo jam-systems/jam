@@ -225,7 +225,7 @@ export default function Room({room, roomId}) {
           <div className="flex">
             <button
               onClick={() => state.set('micMuted', !micMuted)}
-              className="h-12 mr-2 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline hover:bg-yellow-300 flex-grow mt-10"
+              className="select-none h-12 mr-2 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline hover:bg-yellow-300 flex-grow mt-10"
               style={{flex: '1 0 0'}}
             >
               🎙️ {micOn ? (micMuted ? 'Muted' : 'On') : 'Off'}
@@ -233,7 +233,7 @@ export default function Room({room, roomId}) {
 
             <button
               onClick={() => state.set('soundMuted', !soundMuted)}
-              className="h-12 ml-2 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline hover:bg-yellow-300 flex-grow mt-10"
+              className="select-none h-12 ml-2 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline hover:bg-yellow-300 flex-grow mt-10"
               style={{flex: '1 0 0'}}
             >
               {soundMuted ? '🔇' : '🔊'} {soundMuted ? 'Off' : 'On'}
@@ -269,12 +269,12 @@ export default function Room({room, roomId}) {
                   setTimeout(() => setShowShareInfo(false), 2000);
                 }
               }}
-              className="h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
+              className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
             >
               ✉️&nbsp;Share
             </button>
 
-            <button className="hidden h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300 flex-grow">
+            <button className="select-none hidden h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300 flex-grow">
               ✋🏽&nbsp;Raise&nbsp;hand
             </button>
           </div>
@@ -284,7 +284,7 @@ export default function Room({room, roomId}) {
           <br />
 
           <button
-            className="h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
+            className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
             onClick={() => leaveRoom(roomId)}
           >
             🚪 Leave quietly

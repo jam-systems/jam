@@ -49,7 +49,7 @@ export default function EnterRoom({roomId, name, description}) {
         */}
         <button
           onClick={() => enterRoom(roomId)}
-          className="mt-10 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
+          className="select-none mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
         >
           🚪 Join this room
         </button>
