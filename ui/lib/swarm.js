@@ -6,7 +6,7 @@ import {verifyToken} from './identity';
 const LOGGING = true;
 const MAX_CONNECT_TIME = 3000;
 const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;
-const MIN_MAX_CONNECT_TIME_AFTER_SIGNAL = 1000;
+const MIN_MAX_CONNECT_TIME_AFTER_SIGNAL = 2000;
 const MAX_FAIL_TIME = 20000;
 
 // public API starts here
