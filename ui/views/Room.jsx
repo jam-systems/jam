@@ -133,7 +133,7 @@ export default function Room({room, roomId}) {
                   </div>
                 </div>
                 <div className={micMuted ? '' : 'hidden'}>
-                  <div className="absolute w-10 h-10 right-0 top-20 rounded-full bg-white border-2 text-2xl border-gray-400 flex items-center justify-center">
+                  <div className="absolute w-10 h-10 right-0 top-12 md:top-20 rounded-full bg-white border-2 text-2xl border-gray-400 flex items-center justify-center">
                     🙊
                   </div>
                 </div>
@@ -171,7 +171,7 @@ export default function Room({room, roomId}) {
                     </div>
                     {/* div for showing mute/unmute status */}
                     <div className={mutedPeers[peerId] ? '' : 'hidden'}>
-                      <div className="absolute w-10 h-10 right-0 top-20 rounded-full bg-white border-2 text-2xl border-gray-400 flex items-center justify-center">
+                      <div className="absolute w-10 h-10 right-0 top-12 md:top-20 rounded-full bg-white border-2 text-2xl border-gray-400 flex items-center justify-center">
                         🙊
                       </div>
                     </div>
