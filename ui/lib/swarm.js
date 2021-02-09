@@ -4,17 +4,15 @@ import signalhub from './signalhub.js';
 import {verifyToken} from './identity';
 
 const LOGGING = true;
-const MAX_CONNECT_TIME = 3000;
-const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;
-const MIN_MAX_CONNECT_TIME_AFTER_SIGNAL = 2000;
-const MAX_FAIL_TIME = 20000;
+const MAX_CONNECT_TIME = 4000;
+const MAX_FAIL_TIME = 24000;
 
 // public API starts here
 
 const swarm = State({
   // state
   peers: {},
-  stickyPeerInfo: {}, // peerId: {lastFailure: number, hadStream: boolean}
+  stickyPeerInfo: {}, // peerId: {failTime: number, hadStream: boolean, inRoom: boolean}
   myPeerId: null,
   connected: false,
   remoteStreams: [], // {stream, name, peerId}, only one per (name, peerId) if name is set
@@ -57,7 +55,6 @@ function createPeer(peerId, connId, initiator) {
   let peer = peers[peerId];
   if (peer) {
     log('destroying old peer', s(peerId));
-    peer.garbage = true;
     peer.destroy();
   }
   log('creating peer', s(peerId), connId);
@@ -86,8 +83,12 @@ function createPeer(peerId, connId, initiator) {
   peers[peerId] = peer;
   swarm.update('peers');
 
-  peer.connectStart = Date.now();
-  timeoutPeer(peer, MAX_CONNECT_TIME);
+  peer.createdAt = Date.now();
+  peer.timeout = setTimeout(() => {
+    log('peer timed out');
+    peer.timeout = null;
+    handlePeerFail(peer, MAX_CONNECT_TIME);
+  }, MAX_CONNECT_TIME);
 
   peer.on('signal', data => {
     log('signaling to', s(peerId), connId, data.type);
@@ -109,8 +110,10 @@ function createPeer(peerId, connId, initiator) {
     });
   });
   peer.on('connect', () => {
-    log('connected peer', s(peerId), 'after', Date.now() - peer.connectStart);
-    handlePeerSuccess(peer);
+    log('connected peer', s(peerId), 'after', Date.now() - peer.createdAt);
+    clearTimeout(peer.timeout);
+    peer.timeout = null;
+    swarm.stickyPeerInfo[peerId].failTime = 0;
     swarm.update('peers');
   });
 
@@ -136,78 +139,47 @@ function createPeer(peerId, connId, initiator) {
   });
 
   peer.on('error', err => {
-    if (!peer.garbage) log('error', err);
+    log('error', err);
   });
-  peer.on('iceStateChange', state => {
-    log('ice state', state);
-    if (state === 'disconnected') {
-      timeoutPeer(
-        peer,
-        MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT,
-        'peer timed out after ice disconnect'
-      );
-    }
-    if (state === 'connected' || state === 'completed') {
-      handlePeerSuccess(peer);
+  peer.on('iceStateChange', iceConnectionState => {
+    log('ice state', iceConnectionState);
+    if (iceConnectionState === 'disconnected') {
+      // we treat this like a reconnect for now
+      clearTimeout(peer.timeout);
+      peer.timeout = setTimeout(() => {
+        log('peer timed out after ice disconnect');
+        peer.timeout = null;
+        handlePeerFail(peer, MAX_CONNECT_TIME);
+      }, MAX_CONNECT_TIME);
     }
   });
   peer.on('close', () => {
-    handlePeerFail(peer);
+    let thisFailTime = 0;
+    if (peer.timeout) {
+      thisFailTime = Date.now() - peer.createdAt;
+      clearTimeout(peer.timeout);
+      peer.timeout = null;
+    }
+    handlePeerFail(peer, thisFailTime);
   });
   return peer;
 }
 
-function timeoutPeer(peer, delay, message) {
-  let info = swarm.stickyPeerInfo[peer.peerId];
-  let now = Date.now();
-  info.lastFailure = info.lastFailure || now;
-  clearTimeout(peer.timeout);
-  delay = Math.max(0, (peer.timeoutEnd || 0) - now, delay);
-  peer.timeoutEnd = now + delay;
-  if (message) peer.timeoutMessage = message;
-  peer.timeout = setTimeout(() => {
-    log(peer.timeoutMessage || 'peer timed out');
-    handlePeerFail(peer);
-  }, delay);
-
-  log('timeout peer in', delay);
-}
-
-function addToTimeout(peer, delay) {
-  if (peer.timeout) timeoutPeer(peer, delay);
-}
-
-function stopTimeout(peer) {
-  clearTimeout(peer.timeout);
-  peer.timeout = null;
-  peer.timeoutMessage = '';
-  peer.timeoutEnd = 0;
-}
-
-function handlePeerSuccess(peer) {
-  let info = swarm.stickyPeerInfo[peer.peerId];
-  info.lastFailure = null;
-  stopTimeout(peer);
-}
-
-function handlePeerFail(peer) {
+function handlePeerFail(peer, thisFailTime) {
   // peer either took too long to fire 'connect', or fired an error-like event
   // depending how long we already tried, either reconnect or remove peer
   let {peerId, connId} = peer;
   let {peers, stickyPeerInfo, hub} = swarm;
-  stopTimeout(peer);
-
-  // don't do anything if we already replaced this Peer instance
-  if (peers[peerId] !== peer || peer.garbage) return;
 
   let info = stickyPeerInfo[peer.peerId];
-  let now = Date.now();
-  info.lastFailure = info.lastFailure || now;
-  let failTime = now - info.lastFailure;
+  info.failTime += thisFailTime;
 
-  log('handle peer fail! time failing:', failTime);
+  // don't break anything if we already replaced this peer instance
+  if (peers[peerId] !== peer) return;
 
-  if (failTime > MAX_FAIL_TIME) {
+  log('handle peer fail!', thisFailTime, info.failTime);
+
+  if (info.failTime > MAX_FAIL_TIME) {
     delete stickyPeerInfo[peer.peerId];
     swarm.update('stickyPeerInfo');
     removePeer(peerId, peer);
@@ -272,7 +244,7 @@ function initializePeer(peerId) {
   if (!stickyPeerInfo[peerId]) {
     stickyPeerInfo[peerId] = {
       hadStream: false,
-      lastFailure: null,
+      failTime: 0,
     };
     swarm.update('stickyPeerInfo');
     swarm.emit('newPeer', peerId);
@@ -378,7 +350,6 @@ function connect() {
     if (peer && !peer.destroyed) {
       addPeerMetaData(peer, data.meta);
       peer.signal(data);
-      addToTimeout(peer, MIN_MAX_CONNECT_TIME_AFTER_SIGNAL);
     } else {
       log('no peer to receive signal');
       if (data && data.type === 'offer') {
