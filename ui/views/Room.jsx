@@ -55,7 +55,7 @@ export default function Room({room, roomId}) {
     <div className="container">
       {editIdentity && (
         <div className="child md:p-10">
-          <h3 className="font-medium">Profile</h3>
+          <h3 className="p-6 font-medium">Profile</h3>
           <br />
           <form onSubmit={updateInfo}>
             <input
@@ -105,8 +105,8 @@ export default function Room({room, roomId}) {
         </div>
       )}
       <div className="child md:p-10">
-        <h1>{name}</h1>
-        <div className="text-gray-500">{description}</div>
+        <h1 className="pt-6 md:pt-0 pl-6">{name}</h1>
+        <div className="pl-6 text-gray-500">{description}</div>
 
         {/* Stage */}
         <div className="h-44">

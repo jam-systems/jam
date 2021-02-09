@@ -29,24 +29,25 @@ export default function Start({urlRoomId}) {
   };
   return (
     <div className="container">
-      <div className="child md:p-10">
+      <div className="child p-6 md:p-10">
         <h1>Welcome to Jam</h1>
 
         <div className="flex flex-row pt-4 pb-4">
           <div className="flex-1 text-gray-600 pt-6">
-            Jam is an <span className="italic">audio space</span>
+            Jam is an <span className="italic">audio&nbsp;space</span>
             <br />
-            for chatting, brainstorming, debating, jamming, micro-conferences
+            for chatting, brainstorming, debating, jamming,<br />
+            micro-conferences
             and more.
             <br />
             <br />
             <a href="/" className="underline text-blue-800 active:text-blue-600">
-              Learn more about Jam.
+              Learn&nbsp;more&nbsp;about&nbsp;Jam.
             </a>
           </div>
-          <div className="flex-1">
+          <div className="flex-initial">
             <img
-              className="p-4"
+              className="mt-8 md:mt-4 md:mr-8"
               style={{width: 130, height: 130}}
               alt="Jam mascot"
               title="Jam mascot"
@@ -78,7 +79,7 @@ export default function Start({urlRoomId}) {
           </div>
           <br />
           <input
-            className="rounded placeholder-gray-300 bg-gray-50 w-64 md:w-96"
+            className="rounded placeholder-gray-300 bg-gray-50 w-72 md:w-96"
             type="text"
             placeholder="Room description"
             value={description}
