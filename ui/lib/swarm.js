@@ -48,18 +48,16 @@ swarm.addLocalStream = (stream, name) => {
 
 // public API ends here
 
-let log = LOGGING ? console.log : () => {};
-
 function createPeer(peerId, connId, initiator) {
   let {hub, localStreams, peers, myPeerId} = swarm;
   if (!myPeerId || peerId === myPeerId) return;
   // destroy any existing peer
   let peer = peers[peerId];
   if (peer) {
-    log('destroying old peer', peerId);
+    log('destroying old peer', s(peerId));
     peer.destroy();
   }
-  log('creating peer', peerId, connId);
+  log('creating peer', s(peerId), connId);
 
   let streams = Object.values(localStreams).filter(x => x);
   peer = new SimplePeer({
@@ -93,7 +91,7 @@ function createPeer(peerId, connId, initiator) {
   }, MAX_CONNECT_TIME);
 
   peer.on('signal', data => {
-    log('signaling to', peerId, connId, data.type);
+    log('signaling to', s(peerId), connId, data.type);
     // tell peer how to identify streams
     // TODO: it may at one point become necessary to use transceiver.mid instead of stream.id
     let remoteStreamIds = [];
@@ -112,7 +110,7 @@ function createPeer(peerId, connId, initiator) {
     });
   });
   peer.on('connect', () => {
-    log('connected peer', peerId, 'after', Date.now() - peer.createdAt);
+    log('connected peer', s(peerId), 'after', Date.now() - peer.createdAt);
     clearTimeout(peer.timeout);
     peer.timeout = null;
     swarm.stickyPeerInfo[peerId].failTime = 0;
@@ -120,7 +118,7 @@ function createPeer(peerId, connId, initiator) {
   });
 
   peer.on('data', rawData => {
-    log('data (channel) from', peerId);
+    log('data (channel) from', s(peerId));
     swarm.emit('data', rawData);
   });
 
@@ -193,7 +191,7 @@ function handlePeerFail(peer, thisFailTime) {
 function removePeer(peerId, peer) {
   let {peers} = swarm;
   if (!peers[peerId] || (peer && peer !== peers[peerId])) return;
-  console.log('removing peer', peerId);
+  console.log('removing peer', s(peerId));
   delete peers[peerId];
   let {remoteStreams} = swarm;
   if (remoteStreams.find(streamObj => streamObj.peerId === peerId)) {
@@ -222,7 +220,7 @@ function addStreamToPeers(stream, name) {
     let peer = peers[peerId];
     let oldStream = peer.streams[name];
     let addStream = () => {
-      log('adding stream to', peerId, name);
+      log('adding stream to', s(peerId), name);
       peer.streams[name] = stream;
       if (stream) peer.addStream(stream);
     };
@@ -259,7 +257,7 @@ function connectPeer(hub, peerId, connId) {
   // SPEC:
   // -) this has to be callable by both peers without race conflict
   // -) this has to work in every state of swarm.peers (e.g. with or without existing Peer instance)
-  log('connecting peer', peerId, connId);
+  log('connecting peer', s(peerId), connId);
   let {myPeerId} = swarm;
   if (myPeerId > peerId) {
     log('i initiate, and override any previous peer!');
@@ -271,7 +269,7 @@ function connectPeer(hub, peerId, connId) {
       connId: hub.connId,
       yourConnId: connId,
     });
-    log('sent no-you-connect', peerId);
+    log('sent no-you-connect', s(peerId));
     createPeer(peerId, connId, false);
   }
 }
@@ -316,7 +314,7 @@ function connect() {
     `no-you-connect-${myPeerId}`,
     ({peerId, connId, yourConnId}) => {
       if (peerId === myPeerId) return;
-      log('got no-you-connect', peerId, {peerId, connId, yourConnId});
+      log('got no-you-connect', s(peerId), {connId, yourConnId});
       initializePeer(peerId);
       if (yourConnId !== myConnId) {
         console.warn('no-you-connect to old connection, should be ignored');
@@ -341,7 +339,7 @@ function connect() {
   );
 
   hub.subscribe(`signal-${myPeerId}`, ({peerId, data, connId, yourConnId}) => {
-    log('signal received from', peerId, connId, data.type);
+    log('signal received from', s(peerId), connId, data.type);
     initializePeer(peerId);
     if (yourConnId !== myConnId) {
       console.warn('signal to old connection, should be ignored');
@@ -361,10 +359,7 @@ function connect() {
         peer.signal(data);
       }
       if (data && data.type !== 'offer') {
-        log(
-          'UH-OH! received signal other than offer & no peer yet:',
-          data.type
-        );
+        console.warn('received signal != offer & no peer yet: ' + data.type);
       }
     }
   });
@@ -401,3 +396,15 @@ function reconnect() {
 function randomHex4() {
   return ((Math.random() * 16 ** 4) | 0).toString(16).padStart(4, '0');
 }
+
+let s = id => id.slice(0, 2);
+
+let log = LOGGING
+  ? (...a) => {
+      let d = new Date();
+      let time = `[${d.toLocaleTimeString('de-DE')},${String(
+        d.getMilliseconds()
+      ).padStart(3, '0')}]`;
+      console.log(time, ...a);
+    }
+  : () => {};
