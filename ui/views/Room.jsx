@@ -133,11 +133,8 @@ export default function Room({room, roomId}) {
                   </div>
                 </div>
                 <div className={micMuted ? '' : 'hidden'}>
-                  <div className="absolute w-8 h-8 right-0 bottom-14 rounded-full bg-white border border-gray-400 flex items-center justify-center">
-                    🎤
-                  </div>
-                  <div className="absolute w-8 h-8 text-red-600 font-bold right-0 bottom-14 rounded-full bg-transparent border border-gray-400 flex items-center justify-center">
-                    ＼
+                  <div className="absolute w-10 h-10 right-0 top-20 rounded-full bg-white border-2 text-2xl border-gray-400 flex items-center justify-center">
+                    🙊
                   </div>
                 </div>
                 <div className="font-medium text-center w-20 md:w-28 m-2 break-words">
@@ -174,11 +171,8 @@ export default function Room({room, roomId}) {
                     </div>
                     {/* div for showing mute/unmute status */}
                     <div className={mutedPeers[peerId] ? '' : 'hidden'}>
-                      <div className="absolute w-8 h-8 right-0 bottom-14 rounded-full bg-white border border-gray-400 flex items-center justify-center">
-                        🎤
-                      </div>
-                      <div className="absolute w-8 h-8 text-red-600 font-bold right-0 bottom-14 rounded-full bg-transparent border border-gray-400 flex items-center justify-center">
-                        ＼
+                      <div className="absolute w-10 h-10 right-0 top-20 rounded-full bg-white border-2 text-2xl border-gray-400 flex items-center justify-center">
+                        🙊
                       </div>
                     </div>
                     <div className="font-medium text-center w-20 md:w-28 m-2 break-words">
@@ -226,20 +220,21 @@ export default function Room({room, roomId}) {
             <button
               onClick={() => state.set('micMuted', !micMuted)}
               className="select-none h-12 mr-2 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline hover:bg-yellow-300 flex-grow mt-10"
-              style={{flex: '1 0 0'}}
             >
-              🎙️ {micOn ? (micMuted ? 'Muted' : 'On') : 'Off'}
-            </button>
-
-            <button
-              onClick={() => state.set('soundMuted', !soundMuted)}
-              className="select-none h-12 ml-2 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline hover:bg-yellow-300 flex-grow mt-10"
-              style={{flex: '1 0 0'}}
-            >
-              {soundMuted ? '🔇' : '🔊'} {soundMuted ? 'Off' : 'On'}
+              {micOn ? (micMuted ? '🙊 You\'re silent' : '🐵 You\'re on') : 'Off'}
             </button>
           </div>
 
+          <br />
+
+          <button
+              onClick={() => state.set('soundMuted', !soundMuted)}
+              className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300 flex-grow"
+            >
+            {soundMuted ? '🔇' : '🔊'} {soundMuted ? 'Off' : 'On'}
+          </button>
+
+          <br />
           <br />
 
           <div className="flex relative">
