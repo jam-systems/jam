@@ -89,13 +89,13 @@ export default function Room({room, roomId}) {
             </div>
             <button
               onClick={updateInfo}
-              className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300 mr-2"
+              className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
             >
               Update Profile
             </button>
             <button
               onClick={() => setEditIdentity(false)}
-              className="mt-5 h-12 px-6 text-lg text-black bg-gray-100 rounded-lg focus:shadow-outline hover:bg-gray-300"
+              className="mt-5 h-12 px-6 text-lg text-black bg-gray-100 rounded-lg focus:shadow-outline active:bg-gray-300"
             >
               Cancel
             </button>
@@ -219,7 +219,7 @@ export default function Room({room, roomId}) {
           <div className="flex">
             <button
               onClick={() => state.set('micMuted', !micMuted)}
-              className="select-none h-12 mr-2 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline hover:bg-yellow-300 flex-grow mt-10"
+              className="select-none h-12 mr-2 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline active:bg-yellow-300 flex-grow mt-10"
             >
               {micOn ? (micMuted ? '🙊 You\'re silent' : '🐵 You\'re on') : 'Off'}
             </button>
@@ -229,7 +229,7 @@ export default function Room({room, roomId}) {
 
           <button
               onClick={() => state.set('soundMuted', !soundMuted)}
-              className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300 flex-grow"
+              className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow"
             >
             {soundMuted ? '🔇' : '🔊'} {soundMuted ? 'Off' : 'On'}
           </button>
@@ -264,12 +264,12 @@ export default function Room({room, roomId}) {
                   setTimeout(() => setShowShareInfo(false), 2000);
                 }
               }}
-              className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
+              className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
             >
               ✉️&nbsp;Share
             </button>
 
-            <button className="select-none hidden h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300 flex-grow">
+            <button className="select-none hidden h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow">
               ✋🏽&nbsp;Raise&nbsp;hand
             </button>
           </div>
@@ -279,7 +279,7 @@ export default function Room({room, roomId}) {
           <br />
 
           <button
-            className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
+            className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
             onClick={() => leaveRoom(roomId)}
           >
             🚪 Leave quietly

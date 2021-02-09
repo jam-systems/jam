@@ -40,7 +40,7 @@ export default function Start({urlRoomId}) {
             and more.
             <br />
             <br />
-            <a href="/" className="underline text-blue-800 hover:text-blue-600">
+            <a href="/" className="underline text-blue-800 active:text-blue-600">
               Learn more about Jam.
             </a>
           </div>
@@ -105,7 +105,7 @@ export default function Start({urlRoomId}) {
 
           <button
             onClick={submit}
-            className="select-none mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
+            className="select-none mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
           >
             🌱 Start room
           </button>

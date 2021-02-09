@@ -49,18 +49,18 @@ export default function EnterRoom({roomId, name, description}) {
         */}
         <button
           onClick={() => enterRoom(roomId)}
-          className="select-none mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300"
+          className="select-none mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
         >
           🚪 Join this room
         </button>
         {/*
             if it is a future/scheduled room this button could be replaced with
         */}
-        <button className="hidden h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300">
+        <button className="hidden h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300">
           ⏰ Alert me 5 min before
         </button>
 
-        <button className="hidden h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline hover:bg-gray-300">
+        <button className="hidden h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300">
           🗓 Add this to my calendar
         </button>
       </div>
