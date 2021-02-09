@@ -109,7 +109,7 @@ export default function Room({room, roomId}) {
         <div className="text-gray-500">{description}</div>
 
         {/* Stage */}
-        <div className="">
+        <div className="h-44">
           <ol className="flex flex-wrap space-x-2 pt-6">
             {myAudio && (
               <li
