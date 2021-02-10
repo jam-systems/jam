@@ -89,6 +89,8 @@ function createPeer(peerId, connId, initiator) {
   peer.connectStart = Date.now();
   timeoutPeer(peer, MAX_CONNECT_TIME);
 
+  peer.didSignal = false;
+
   peer.on('signal', data => {
     log('signaling to', s(peerId), connId, data.type);
     // tell peer how to identify streams
@@ -101,6 +103,11 @@ function createPeer(peerId, connId, initiator) {
       }
     }
     data.meta = {remoteStreamIds};
+    data.from = peer._id;
+    if (!peer.didSignal) {
+      data.first = true;
+      peer.didSignal = true;
+    }
     hub.broadcast(`signal-${peerId}`, {
       peerId: myPeerId,
       connId: hub.connId,
@@ -286,19 +293,24 @@ function connectPeer(hub, peerId, connId) {
   // -) this has to be callable by both peers without race conflict
   // -) this has to work in every state of swarm.peers (e.g. with or without existing Peer instance)
   log('connecting peer', s(peerId), connId);
-  let {myPeerId} = swarm;
+  let {myPeerId, peers} = swarm;
   if (myPeerId > peerId) {
     log('i initiate, and override any previous peer!');
     createPeer(peerId, connId, true);
   } else {
-    log('i dont initiate, but will prepare a new peer');
+    log('i dont initiate, wait for first signal');
     hub.broadcast(`no-you-connect-${peerId}`, {
       peerId: myPeerId,
       connId: hub.connId,
       yourConnId: connId,
     });
+    let peer = peers[peerId];
+    if (peer) {
+      log('destroying old peer', s(peerId));
+      peer.garbage = true;
+      peer.destroy();
+    }
     log('sent no-you-connect', s(peerId));
-    createPeer(peerId, connId, false);
   }
 }
 
@@ -375,22 +387,41 @@ function connect() {
       return;
     }
     let peer = swarm.peers[peerId];
-    if (peer && !peer.destroyed) {
-      addPeerMetaData(peer, data.meta);
-      peer.signal(data);
-      addToTimeout(peer, MIN_MAX_CONNECT_TIME_AFTER_SIGNAL);
-    } else {
-      log('no peer to receive signal');
-      if (data && data.type === 'offer') {
-        log('i got an offer and will create a new peer to receive it');
-        peer = createPeer(peerId, connId, false);
-        addPeerMetaData(peer, data.meta);
-        peer.signal(data);
-      }
-      if (data && data.type !== 'offer') {
-        console.warn('received signal != offer & no peer yet: ' + data.type);
-      }
+    let {first, from} = data;
+    let iAmActive = myPeerId > peerId;
+
+    if (first && !iAmActive) {
+      // this is the ONLY place a peer should ever be created by non-initiator
+      log('I got the first signal and create a new peer to receive it');
+      peer = createPeer(peerId, connId, false);
+      peer.from = from;
     }
+
+    if (!peer || peer.destroyed) {
+      console.warn(
+        'I received a signal without being in a valid state for any further action. Reconnecting!'
+      );
+      log('Signal data:', data);
+      connectPeer(hub, peerId, connId);
+      return;
+    }
+
+    if (!peer.from) {
+      peer.from = from;
+      if (!iAmActive) console.error('Something impossible happened');
+    }
+
+    // at this point we have peer && peer.from
+    if (peer.from !== from) {
+      console.warn('Ignoring signal from wrong peer instance.');
+      return;
+    }
+
+    // from here on we are in the happy path
+    addPeerMetaData(peer, data.meta);
+    peer.signal(data);
+    if (!(first && !iAmActive))
+      addToTimeout(peer, MIN_MAX_CONNECT_TIME_AFTER_SIGNAL);
   });
 
   // TODO:
