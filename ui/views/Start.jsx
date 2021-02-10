@@ -115,7 +115,7 @@ export default function Start({urlRoomId}) {
             🌱 Start room
           </button>
         </form>
-        <div className="pt-32 text-xs text-gray-200 text-center">
+        <div className="pt-32 text-xs text-gray-300 text-center">
           <a href="https://gitlab.com/jam-systems/jam" target="_blank">built</a> w/ ♥ by {humins.map((humin, idx) => (<span key={idx}> <a href={"https://twitter.com/" + humin} target="_blank">@{humin}</a></span>))} in Berlin &amp; Vienna, <a href="https://www.digitalocean.com" target="_blank">hosted in Frankfurt</a>
         </div>
       </div>
