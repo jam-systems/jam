@@ -64,8 +64,9 @@ export default function Start({urlRoomId}) {
 
         <br />
         <br />
+        <h1>Start a Room</h1>
 
-        <form onSubmit={submit}>
+        <form className="pt-12" onSubmit={submit}>
           <input
             className="rounded placeholder-gray-300 bg-gray-50 w-64"
             type="text"
