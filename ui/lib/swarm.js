@@ -1,7 +1,7 @@
 import SimplePeer from 'simple-peer-light';
 import State from './minimal-state.js';
 import signalhub from './signalhub.js';
-import {verifyToken} from './identity';
+import {verifyToken, signedToken} from '../identity';
 
 const LOGGING = true;
 const MAX_CONNECT_TIME = 3000;
@@ -18,6 +18,8 @@ const swarm = State({
   myPeerId: null,
   connected: false,
   remoteStreams: [], // {stream, name, peerId}, only one per (name, peerId) if name is set
+  sharedPeerState: {}, // peerId: any
+  mySharedPeerState: null,
   // internal
   url: '',
   room: '',
@@ -32,21 +34,41 @@ const swarm = State({
 
 export default swarm;
 
-swarm.config = (signalhubUrl, room) => {
-  swarm.url = signalhubUrl;
-  swarm.room = room;
-};
+function config({url, room, myPeerId, sign, verify}) {
+  if (url) swarm.url = url;
+  if (room) swarm.room = room;
+  if (myPeerId) swarm.myPeerId = myPeerId;
+  if (sign) swarm.sign = sign; // sign(state): string
+  if (verify) swarm.verify = verify; // verify(state, authToken, peerId): boolean
+}
 
-swarm.connect = connect;
-swarm.disconnect = disconnect;
-swarm.reconnect = reconnect;
-
-swarm.addLocalStream = (stream, name) => {
+function addLocalStream(stream, name) {
   log('addlocalstream', stream, name);
   if (!name) name = randomHex4();
   swarm.localStreams[name] = stream;
   addStreamToPeers(stream, name);
-};
+}
+
+function shareState(state) {
+  let {hub, myPeerId, sign, mySharedPeerState} = swarm;
+  if (typeof state === 'function') {
+    state = state(mySharedPeerState || null);
+  }
+  swarm.set('mySharedPeerState', state);
+  if (!hub || !myPeerId) return;
+  let data = {peerId: myPeerId, state};
+  if (sign) data.authToken = sign(state);
+  hub.broadcast('shared-state', data);
+}
+
+export {config, connect, disconnect, reconnect, addLocalStream, shareState};
+
+swarm.config = config;
+swarm.connect = connect;
+swarm.disconnect = disconnect;
+swarm.reconnect = reconnect;
+swarm.addLocalStream = addLocalStream;
+swarm.shareState = shareState;
 
 // public API ends here
 
@@ -66,7 +88,7 @@ function createPeer(peerId, connId, initiator) {
   peer = new SimplePeer({
     initiator,
     config: {
-      iceTransportPolicy: 'relay',
+      iceTransportPolicy: 'relay', // TODO: shouldn't this be 'all'?
       iceServers: [
         {urls: 'stun:stun.turn.systems:3478'},
         {
@@ -314,9 +336,9 @@ function connectPeer(hub, peerId, connId) {
   }
 }
 
-function connect() {
-  // don't auto-reconnect (fixes hot reloading!)
+function connect(url, room) {
   if (swarm.hub) return;
+  swarm.config({url, room});
   if (!swarm.room || !swarm.url) {
     return console.error(
       'Must call swarm.config(url, room) before connecting!'
@@ -422,6 +444,13 @@ function connect() {
     peer.signal(data);
     if (!(first && !iAmActive))
       addToTimeout(peer, MIN_MAX_CONNECT_TIME_AFTER_SIGNAL);
+  });
+
+  hub.subscribe('shared-state', ({peerId, state, authToken}) => {
+    if (!swarm.verify || swarm.verify(state, authToken, peerId)) {
+      swarm.sharedPeerState[peerId] = state;
+      swarm.update('sharedPeerState');
+    }
   });
 
   // TODO:

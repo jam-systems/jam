@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useState} from 'react';
 import use from './lib/use-state';
-import {state} from './main';
+import state from './state.js';
 
 // POST https://pantry.jam.systems/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
 // Creates room, returns 409 conflict if room exists

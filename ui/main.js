@@ -1,25 +1,14 @@
 import swarm from './lib/swarm.js';
-import State from './lib/minimal-state.js';
 import hark from 'hark';
 import {onFirstInteraction} from './lib/user-interaction.js';
 import {get} from './backend';
-import {getId, updateInfo, signedToken} from './lib/identity';
-// import {updateStorage} from './lib/local-storage.js';
+import {getId, updateInfo, signedToken} from './identity';
+import state from './state.js';
 
-export const state = State({
-  myInfo: {},
-  soundMuted: true,
-  micMuted: true,
-  myAudio: null,
-  speaking: new Set(),
-  enteredRooms: new Set(),
-  queries: {},
-  audioContext: null,
-  userInteracted: false,
-  identities: {},
-});
 window.state = state; // for debugging
 window.swarm = swarm;
+
+export {state};
 
 state.on('myInfo', updateInfo);
 
@@ -31,13 +20,30 @@ export {requestAudio};
 export function enterRoom(roomId) {
   state.enteredRooms.add(roomId);
   state.update('enteredRooms');
+  swarm.shareState(shared => ({...shared, inRoom: true}));
   requestAudio();
   state.set('soundMuted', false);
-  // createAudioContext();
-  // updateStorage(sessionStorage, 'enteredRooms', (rooms = []) => {
-  //   if (rooms.indexOf(roomId) === -1) rooms.push(roomId);
-  //   return rooms;
-  // });
+}
+
+export function leaveRoom(roomId) {
+  state.enteredRooms.delete(roomId);
+  state.update('enteredRooms');
+  swarm.shareState(shared => ({...shared, inRoom: false}));
+  stopAudio();
+  state.set('soundMuted', true);
+}
+
+swarm.on('sharedPeerState', state => console.log('shared peer state', state));
+
+export function connectRoom(roomId) {
+  if (swarm.connected) swarm.disconnect();
+  swarm.connect('https://signalhub.jam.systems/', roomId);
+  swarm.hub.subscribe('identity-updates', async id => {
+    state.set('identities', {
+      ...state.get('identities'),
+      [id]: await get(`/identities/${id}`),
+    });
+  });
 }
 
 export function createAudioContext() {
@@ -47,30 +53,6 @@ export function createAudioContext() {
   } else {
     state.audioContext.resume();
   }
-}
-
-export function leaveRoom(roomId) {
-  state.enteredRooms.delete(roomId);
-  state.update('enteredRooms');
-  stopAudio();
-  state.set('soundMuted', true);
-  // updateStorage(sessionStorage, 'enteredRooms', (rooms = []) => {
-  //   let i = rooms.indexOf(roomId);
-  //   if (i !== -1) rooms.splice(i, 1);
-  //   return rooms;
-  // });
-}
-
-export function connectRoom(roomId) {
-  swarm.config('https://signalhub.jam.systems/', roomId);
-  if (swarm.connected) swarm.disconnect();
-  swarm.connect();
-  swarm.hub.subscribe('identity-updates', async id => {
-    state.set('identities', {
-      ...state.get('identities'),
-      [id]: await get(`/identities/${id}`),
-    });
-  });
 }
 
 state.on('myAudio', stream => {
