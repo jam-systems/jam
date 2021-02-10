@@ -27,6 +27,10 @@ export default function Start({urlRoomId}) {
       enterRoom(roomId);
     })();
   };
+
+  let humins = ["DoubleMalt", "mitschabaude", "__tosh"];
+  humins = humins.sort(() => Math.random() - 0.5);
+
   return (
     <div className="container">
       <div className="child p-6 md:p-10">
@@ -49,8 +53,8 @@ export default function Start({urlRoomId}) {
             <img
               className="mt-8 md:mt-4 md:mb-4 md:mr-8"
               style={{width: 130, height: 130}}
-              alt="Jam mascot"
-              title="Jam mascot"
+              alt="Jam mascot by @eejitlikeme"
+              title="Jam mascot by @eejitlikeme"
               src="/img/jam-illustration.png"
             />
           </div>
@@ -111,6 +115,9 @@ export default function Start({urlRoomId}) {
             🌱 Start room
           </button>
         </form>
+        <div className="pt-32 text-xs text-gray-200 text-center">
+          <a href="https://gitlab.com/jam-systems/jam" target="_blank">built</a> w/ ♥ by {humins.map((humin, idx) => (<span key={idx}> <a href={"https://twitter.com/" + humin} target="_blank">@{humin}</a></span>))} in Berlin &amp; Vienna, <a href="https://www.digitalocean.com" target="_blank">hosted in Frankfurt</a>
+        </div>
       </div>
     </div>
   );
