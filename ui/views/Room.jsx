@@ -109,7 +109,7 @@ export default function Room({room, roomId}) {
         <div className="pl-6 text-gray-500">{description}</div>
 
         {/* Stage */}
-        <div className="h-44">
+        <div className="h-44 h-full">
           <ol className="flex flex-wrap space-x-2 pt-6">
             {myAudio && (
               <li
@@ -185,6 +185,8 @@ export default function Room({room, roomId}) {
           </ol>
         </div>
 
+        <br />
+
         <h3 className="hidden" style={{marginTop: '80px'}}>
           Audience
         </h3>
@@ -215,7 +217,7 @@ export default function Room({room, roomId}) {
           </li>
         </ol>
 
-        <div className="mt-10 navigation">
+        <div className="navigation">
           <div className="flex">
             <button
               onClick={() => state.set('micMuted', !micMuted)}
