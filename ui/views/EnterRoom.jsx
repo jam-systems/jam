@@ -51,7 +51,7 @@ export default function EnterRoom({roomId, name, description}) {
           onClick={() => enterRoom(roomId)}
           className="select-none mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
         >
-          🚪 Join this room
+          🐾 &nbsp;Join this Jam
         </button>
         {/*
             if it is a future/scheduled room this button could be replaced with
