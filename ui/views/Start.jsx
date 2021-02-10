@@ -47,7 +47,7 @@ export default function Start({urlRoomId}) {
           </div>
           <div className="flex-initial">
             <img
-              className="mt-8 md:mt-4 md:mr-8"
+              className="mt-8 md:mt-4 md:mb-4 md:mr-8"
               style={{width: 130, height: 130}}
               alt="Jam mascot"
               title="Jam mascot"
