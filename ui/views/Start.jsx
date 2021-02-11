@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useMemo} from 'react';
 import slugify from 'slugify';
 
 import {createRoom} from '../backend';
@@ -27,8 +27,10 @@ export default function Start({urlRoomId}) {
     })();
   };
 
-  let humins = ['DoubleMalt', 'mitschabaude', '__tosh'];
-  humins = humins.sort(() => Math.random() - 0.5);
+  let humins = useMemo(() => {
+    let humins = ['DoubleMalt', 'mitschabaude', '__tosh']
+    return humins.sort(() => Math.random() - 0.5)},
+    []);
 
   return (
     <div className="container">
