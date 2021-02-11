@@ -12,6 +12,9 @@ export {state};
 
 state.on('myInfo', updateInfo);
 
+// TODO remove when convinced it works
+swarm.on('peerState', state => console.log('shared peer state', state));
+
 onFirstInteraction(() => state.set('userInteracted', true));
 state.on('userInteracted', i => i && createAudioContext());
 
@@ -32,8 +35,6 @@ export function leaveRoom(roomId) {
   stopAudio();
   state.set('soundMuted', true);
 }
-
-swarm.on('peerState', state => console.log('shared peer state', state));
 
 export function connectRoom(roomId) {
   if (swarm.connected) swarm.disconnect();

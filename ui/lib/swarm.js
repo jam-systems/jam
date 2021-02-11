@@ -67,7 +67,7 @@ swarm.addLocalStream = addLocalStream;
 // public API ends here
 
 function createPeer(peerId, connId, initiator) {
-  let {hub, localStreams, peers, myPeerId} = swarm;
+  let {hub, localStreams, peers, myPeerId, sign} = swarm;
   if (!myPeerId || peerId === myPeerId) return;
   // destroy any existing peer
   let peer = peers[peerId];
@@ -120,15 +120,20 @@ function createPeer(peerId, connId, initiator) {
     }
     data.meta = {remoteStreamIds};
     data.from = peer._id;
+    let sharedState, authToken;
     if (!peer.didSignal) {
       data.first = true;
       peer.didSignal = true;
+      sharedState = swarm.sharedState;
+      authToken = sign ? sign(sharedState) : undefined;
     }
     hub.broadcast(`signal-${peerId}`, {
       peerId: myPeerId,
       connId: hub.connId,
       yourConnId: connId,
       data,
+      sharedState,
+      authToken,
     });
   });
   peer.on('connect', () => {
@@ -291,7 +296,14 @@ function addStreamToPeers(stream, name) {
   }
 }
 
-function initializePeer(peerId) {
+function updatePeerState(peerId, state, authToken) {
+  if (!swarm.verify || swarm.verify(state, authToken, peerId)) {
+    swarm.peerState[peerId] = state;
+    swarm.update('peerState');
+  }
+}
+
+function initializePeer(peerId, sharedState, authToken) {
   let {stickyPeers} = swarm;
   if (!stickyPeers[peerId]) {
     stickyPeers[peerId] = {
@@ -301,6 +313,7 @@ function initializePeer(peerId) {
     swarm.update('stickyPeers');
     swarm.emit('newPeer', peerId);
   }
+  if (sharedState) updatePeerState(peerId, sharedState, authToken);
 }
 
 function connectPeer(hub, peerId, connId) {
@@ -310,7 +323,7 @@ function connectPeer(hub, peerId, connId) {
   // -) this has to be callable by both peers without race conflict
   // -) this has to work in every state of swarm.peers (e.g. with or without existing Peer instance)
   log('connecting peer', s(peerId), connId);
-  let {myPeerId, peers} = swarm;
+  let {myPeerId, peers, sharedState, sign} = swarm;
   if (myPeerId > peerId) {
     log('i initiate, and override any previous peer!');
     createPeer(peerId, connId, true);
@@ -320,6 +333,8 @@ function connectPeer(hub, peerId, connId) {
       peerId: myPeerId,
       connId: hub.connId,
       yourConnId: connId,
+      sharedState,
+      authToken: sign ? sign(sharedState) : undefined,
     });
     let peer = peers[peerId];
     if (peer) {
@@ -342,11 +357,13 @@ function connect(url, room) {
   let myConnId = randomHex4();
   log('connecting. conn id', myConnId);
   let hub = signalhub(swarm.room, swarm.url);
-  let {myPeerId} = swarm;
+  let {myPeerId, sharedState, sign} = swarm;
   hub
     .broadcast('connect-me', {
       peerId: myPeerId,
       connId: myConnId,
+      sharedState,
+      authToken: sign ? sign(sharedState) : undefined,
     })
     .then(() => {
       swarm.set('connected', true);
@@ -360,19 +377,19 @@ function connect(url, room) {
   hub.connId = myConnId;
   swarm.hub = hub;
 
-  hub.subscribe('connect-me', ({peerId, connId}) => {
+  hub.subscribe('connect-me', ({peerId, connId, sharedState, authToken}) => {
     if (peerId === myPeerId) return;
     log('got connect-me');
-    initializePeer(peerId);
+    initializePeer(peerId, sharedState, authToken);
     connectPeer(hub, peerId, connId);
   });
 
   hub.subscribe(
     `no-you-connect-${myPeerId}`,
-    ({peerId, connId, yourConnId}) => {
+    ({peerId, connId, yourConnId, sharedState, authToken}) => {
       if (peerId === myPeerId) return;
       log('got no-you-connect', s(peerId), {connId, yourConnId});
-      initializePeer(peerId);
+      initializePeer(peerId, sharedState, authToken);
       if (yourConnId !== myConnId) {
         console.warn('no-you-connect to old connection, should be ignored');
         log('ignoring msg to old connection', yourConnId);
@@ -395,57 +412,57 @@ function connect(url, room) {
     }
   );
 
-  hub.subscribe(`signal-${myPeerId}`, ({peerId, data, connId, yourConnId}) => {
-    log('signal received from', s(peerId), connId, data.type);
-    initializePeer(peerId);
-    if (yourConnId !== myConnId) {
-      console.warn('signal to old connection, should be ignored');
-      log('ignoring msg to old connection', yourConnId);
-      return;
-    }
-    let peer = swarm.peers[peerId];
-    let {first, from} = data;
-    let iAmActive = myPeerId > peerId;
+  hub.subscribe(
+    `signal-${myPeerId}`,
+    ({peerId, data, connId, yourConnId, sharedState, authToken}) => {
+      log('signal received from', s(peerId), connId, data.type);
+      initializePeer(peerId, sharedState, authToken);
+      if (yourConnId !== myConnId) {
+        console.warn('signal to old connection, should be ignored');
+        log('ignoring msg to old connection', yourConnId);
+        return;
+      }
+      let peer = swarm.peers[peerId];
+      let {first, from} = data;
+      let iAmActive = myPeerId > peerId;
 
-    if (first && !iAmActive) {
-      // this is the ONLY place a peer should ever be created by non-initiator
-      log('I got the first signal and create a new peer to receive it');
-      peer = createPeer(peerId, connId, false);
-      peer.from = from;
-    }
+      if (first && !iAmActive) {
+        // this is the ONLY place a peer should ever be created by non-initiator
+        log('I got the first signal and create a new peer to receive it');
+        peer = createPeer(peerId, connId, false);
+        peer.from = from;
+      }
 
-    if (!peer || peer.destroyed) {
-      console.warn(
-        'I received a signal without being in a valid state for any further action. Reconnecting!'
-      );
-      log('Signal data:', data);
-      connectPeer(hub, peerId, connId);
-      return;
-    }
+      if (!peer || peer.destroyed) {
+        console.warn(
+          'I received a signal without being in a valid state for any further action. Reconnecting!'
+        );
+        log('Signal data:', data);
+        connectPeer(hub, peerId, connId);
+        return;
+      }
 
-    if (!peer.from) {
-      peer.from = from;
-      if (!iAmActive) console.error('Something impossible happened');
-    }
+      if (!peer.from) {
+        peer.from = from;
+        if (!iAmActive) console.error('Something impossible happened');
+      }
 
-    // at this point we have peer && peer.from
-    if (peer.from !== from) {
-      console.warn('Ignoring signal from wrong peer instance.');
-      return;
-    }
+      // at this point we have peer && peer.from
+      if (peer.from !== from) {
+        console.warn('Ignoring signal from wrong peer instance.');
+        return;
+      }
 
-    // from here on we are in the happy path
-    addPeerMetaData(peer, data.meta);
-    peer.signal(data);
-    if (!(first && !iAmActive))
-      addToTimeout(peer, MIN_MAX_CONNECT_TIME_AFTER_SIGNAL);
-  });
+      // from here on we are in the happy path
+      addPeerMetaData(peer, data.meta);
+      peer.signal(data);
+      if (!(first && !iAmActive))
+        addToTimeout(peer, MIN_MAX_CONNECT_TIME_AFTER_SIGNAL);
+    }
+  );
 
   hub.subscribe('shared-state', ({peerId, state, authToken}) => {
-    if (!swarm.verify || swarm.verify(state, authToken, peerId)) {
-      swarm.peerState[peerId] = state;
-      swarm.update('peerState');
-    }
+    updatePeerState(peerId, state, authToken);
   });
 }
 
