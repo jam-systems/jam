@@ -65,7 +65,12 @@ export async function get(path) {
       Accept: 'application/json',
     },
   });
-  return res.json();
+  if (res.status < 400) return res.json();
+  else {
+    let err = new Error();
+    err.status = res.status;
+    throw err;
+  }
 }
 
 export async function post(token, path, payload) {

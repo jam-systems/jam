@@ -51,9 +51,9 @@ export function createAudioContext() {
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   if (AudioContext && !state.audioContext) {
     state.set('audioContext', new AudioContext());
-  } else {
-    state.audioContext.resume();
-  }
+  } //  else {
+  //   state.audioContext.resume();
+  // }
 }
 
 state.on('myAudio', stream => {
@@ -68,8 +68,16 @@ state.on('soundMuted', muted => {
 });
 
 swarm.on('newPeer', async id => {
-  state.identities[id] = await get(`/identities/${id}`);
-  state.update('identities');
+  for (let i = 0; i < 5; i++) {
+    // try multiple times to lose race with the first POST /identities
+    try {
+      state.identities[id] = await get(`/identities/${id}`);
+      state.update('identities');
+      return;
+    } catch (e) {
+      console.warn(e);
+    }
+  }
 });
 
 swarm.on('stream', (stream, name, peer) => {

@@ -38,13 +38,6 @@ export default function Room({room, roomId}) {
 
   let hasEnteredRoom = enteredRooms.has(roomId);
 
-  // useEffect(() => {
-  //   if (hasEnteredRoom) return;
-  //   if (getStorage(sessionStorage, 'enteredRooms')?.includes(roomId)) {
-  //     enterRoom(roomId);
-  //   }
-  // }, [roomId, hasEnteredRoom]);
-
   if (!hasEnteredRoom)
     return <EnterRoom roomId={roomId} name={name} description={description} />;
 
