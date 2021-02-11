@@ -25,8 +25,7 @@ export function enterRoom(roomId) {
   state.enteredRooms.add(roomId);
   state.update('enteredRooms');
   swarm.set('sharedState', state => ({...state, inRoom: true}));
-  requestAudio();
-  state.set('soundMuted', false);
+  requestAudio().then(() => state.set('soundMuted', false));
 }
 
 export function leaveRoom(roomId) {
