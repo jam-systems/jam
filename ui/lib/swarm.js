@@ -1,7 +1,6 @@
 import SimplePeer from 'simple-peer-light';
 import State from './minimal-state.js';
 import signalhub from './signalhub.js';
-import {verifyToken, signedToken} from '../identity';
 
 const LOGGING = true;
 const MAX_CONNECT_TIME = 3000;
@@ -13,14 +12,15 @@ const MAX_FAIL_TIME = 20000;
 
 const swarm = State({
   // state
-  peers: {},
-  stickyPeerInfo: {}, // peerId: {lastFailure: number, hadStream: boolean}
+  stickyPeers: {}, // {peerId: {lastFailure: number, hadStream: boolean}}
   myPeerId: null,
   connected: false,
-  remoteStreams: [], // {stream, name, peerId}, only one per (name, peerId) if name is set
-  sharedPeerState: {}, // peerId: any
-  mySharedPeerState: null,
+  remoteStreams: [], // [{stream, name, peerId}], only one per (name, peerId) if name is set
+  peerState: {}, // {peerId: sharedState}
+  sharedState: null, // my portion of peerState, gets shared on update and on peer join
+  // shared peer state can be authenticated by passing sign / verify functions to config()
   // internal
+  peers: {},
   url: '',
   room: '',
   hub: null,
@@ -29,7 +29,6 @@ const swarm = State({
   stream: null,
   data: null,
   newPeer: null,
-  mutedPeers: {},
 });
 
 export default swarm;
@@ -49,26 +48,21 @@ function addLocalStream(stream, name) {
   addStreamToPeers(stream, name);
 }
 
-function shareState(state) {
-  let {hub, myPeerId, sign, mySharedPeerState} = swarm;
-  if (typeof state === 'function') {
-    state = state(mySharedPeerState || null);
-  }
-  swarm.set('mySharedPeerState', state);
+swarm.on('sharedState', state => {
+  let {hub, myPeerId, sign} = swarm;
   if (!hub || !myPeerId) return;
   let data = {peerId: myPeerId, state};
   if (sign) data.authToken = sign(state);
   hub.broadcast('shared-state', data);
-}
+});
 
-export {config, connect, disconnect, reconnect, addLocalStream, shareState};
+export {config, connect, disconnect, reconnect, addLocalStream};
 
 swarm.config = config;
 swarm.connect = connect;
 swarm.disconnect = disconnect;
 swarm.reconnect = reconnect;
 swarm.addLocalStream = addLocalStream;
-swarm.shareState = shareState;
 
 // public API ends here
 
@@ -106,7 +100,7 @@ function createPeer(peerId, connId, initiator) {
   peer.connId = connId;
   peer.streams = {...localStreams};
   peers[peerId] = peer;
-  swarm.update('peers');
+  // swarm.update('peers');
 
   peer.connectStart = Date.now();
   timeoutPeer(peer, MAX_CONNECT_TIME);
@@ -140,7 +134,7 @@ function createPeer(peerId, connId, initiator) {
   peer.on('connect', () => {
     log('connected peer', s(peerId), 'after', Date.now() - peer.connectStart);
     handlePeerSuccess(peer);
-    swarm.update('peers');
+    // swarm.update('peers');
   });
 
   peer.on('data', rawData => {
@@ -161,7 +155,8 @@ function createPeer(peerId, connId, initiator) {
     remoteStreams[i] = {stream, name, peerId};
     swarm.set('remoteStreams', remoteStreams);
     swarm.emit('stream', stream, name, peer);
-    swarm.stickyPeerInfo[peerId].hadStream = true;
+    swarm.stickyPeers[peerId].hadStream = true;
+    swarm.update('stickyPeers');
   });
 
   peer.on('error', err => {
@@ -187,9 +182,9 @@ function createPeer(peerId, connId, initiator) {
 }
 
 function timeoutPeer(peer, delay, message) {
-  let info = swarm.stickyPeerInfo[peer.peerId];
+  let info = swarm.stickyPeers[peer.peerId];
   let now = Date.now();
-  info.lastFailure = info.lastFailure || now;
+  info.lastFailure = info.lastFailure || now; // TODO update problem indicators?
   clearTimeout(peer.timeout);
   delay = Math.max(0, (peer.timeoutEnd || 0) - now, delay);
   peer.timeoutEnd = now + delay;
@@ -214,8 +209,8 @@ function stopTimeout(peer) {
 }
 
 function handlePeerSuccess(peer) {
-  let info = swarm.stickyPeerInfo[peer.peerId];
-  info.lastFailure = null;
+  let info = swarm.stickyPeers[peer.peerId];
+  info.lastFailure = null; // TODO update problem indicators?
   stopTimeout(peer);
 }
 
@@ -223,13 +218,13 @@ function handlePeerFail(peer) {
   // peer either took too long to fire 'connect', or fired an error-like event
   // depending how long we already tried, either reconnect or remove peer
   let {peerId, connId} = peer;
-  let {peers, stickyPeerInfo, hub} = swarm;
+  let {peers, stickyPeers, hub} = swarm;
   stopTimeout(peer);
 
   // don't do anything if we already replaced this Peer instance
   if (peers[peerId] !== peer || peer.garbage) return;
 
-  let info = stickyPeerInfo[peer.peerId];
+  let info = stickyPeers[peer.peerId];
   let now = Date.now();
   info.lastFailure = info.lastFailure || now;
   let failTime = now - info.lastFailure;
@@ -237,8 +232,8 @@ function handlePeerFail(peer) {
   log('handle peer fail! time failing:', failTime);
 
   if (failTime > MAX_FAIL_TIME) {
-    delete stickyPeerInfo[peer.peerId];
-    swarm.update('stickyPeerInfo');
+    delete stickyPeers[peer.peerId];
+    swarm.update('stickyPeers');
     removePeer(peerId, peer);
   } else {
     connectPeer(hub, peerId, connId);
@@ -257,7 +252,7 @@ function removePeer(peerId, peer) {
       remoteStreams.filter(streamObj => streamObj.peerId !== peerId)
     );
   }
-  swarm.update('peers');
+  // swarm.update('peers');
 }
 
 function addPeerMetaData(peer, data) {
@@ -297,13 +292,13 @@ function addStreamToPeers(stream, name) {
 }
 
 function initializePeer(peerId) {
-  let {stickyPeerInfo} = swarm;
-  if (!stickyPeerInfo[peerId]) {
-    stickyPeerInfo[peerId] = {
+  let {stickyPeers} = swarm;
+  if (!stickyPeers[peerId]) {
+    stickyPeers[peerId] = {
       hadStream: false,
       lastFailure: null,
     };
-    swarm.update('stickyPeerInfo');
+    swarm.update('stickyPeers');
     swarm.emit('newPeer', peerId);
   }
 }
@@ -448,18 +443,8 @@ function connect(url, room) {
 
   hub.subscribe('shared-state', ({peerId, state, authToken}) => {
     if (!swarm.verify || swarm.verify(state, authToken, peerId)) {
-      swarm.sharedPeerState[peerId] = state;
-      swarm.update('sharedPeerState');
-    }
-  });
-
-  // TODO:
-  // 1) need more general version of this channel
-  // 2) need to communicate also to NEW clients
-  hub.subscribe('mute-status', ({id, micMuted, authToken}) => {
-    if (verifyToken(authToken, id)) {
-      swarm.mutedPeers[id] = micMuted;
-      swarm.update('mutedPeers');
+      swarm.peerState[peerId] = state;
+      swarm.update('peerState');
     }
   });
 }

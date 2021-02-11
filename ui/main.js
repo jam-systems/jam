@@ -2,7 +2,7 @@ import swarm from './lib/swarm.js';
 import hark from 'hark';
 import {onFirstInteraction} from './lib/user-interaction.js';
 import {get} from './backend';
-import {getId, updateInfo, signedToken} from './identity';
+import {updateInfo} from './identity';
 import state from './state.js';
 
 window.state = state; // for debugging
@@ -20,7 +20,7 @@ export {requestAudio};
 export function enterRoom(roomId) {
   state.enteredRooms.add(roomId);
   state.update('enteredRooms');
-  swarm.shareState(shared => ({...shared, inRoom: true}));
+  swarm.set('sharedState', state => ({...state, inRoom: true}));
   requestAudio();
   state.set('soundMuted', false);
 }
@@ -28,12 +28,12 @@ export function enterRoom(roomId) {
 export function leaveRoom(roomId) {
   state.enteredRooms.delete(roomId);
   state.update('enteredRooms');
-  swarm.shareState(shared => ({...shared, inRoom: false}));
+  swarm.set('sharedState', state => ({...state, inRoom: false}));
   stopAudio();
   state.set('soundMuted', true);
 }
 
-swarm.on('sharedPeerState', state => console.log('shared peer state', state));
+swarm.on('peerState', state => console.log('shared peer state', state));
 
 export function connectRoom(roomId) {
   if (swarm.connected) swarm.disconnect();
@@ -134,11 +134,7 @@ state.on('micMuted', micMuted => {
   for (let track of state.myAudio.getTracks()) {
     track.enabled = !micMuted;
   }
-  swarm.hub.broadcast('mute-status', {
-    id: getId(),
-    micMuted,
-    authToken: signedToken(),
-  });
+  swarm.set('sharedState', state => ({...state, micMuted}));
 });
 
 function listenIfSpeaking(peerId, stream) {

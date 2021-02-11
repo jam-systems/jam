@@ -7,9 +7,6 @@ import {gravatarUrl} from '../lib/gravatar';
 import copyToClipboard from '../lib/copy-to-clipboard';
 // import {getStorage} from '../lib/local-storage';
 
-// TODOs:
-// -) wire speakers, mod lists to UI
-
 export default function Room({room, roomId}) {
   let myInfo = use(state, 'myInfo');
   let myAudio = use(state, 'myAudio');
@@ -18,8 +15,8 @@ export default function Room({room, roomId}) {
   let soundMuted = use(state, 'soundMuted');
   let speaking = use(state, 'speaking');
   let enteredRooms = use(state, 'enteredRooms');
-  let peers = use(swarm, 'stickyPeerInfo');
-  let mutedPeers = use(swarm, 'mutedPeers');
+  let peers = use(swarm, 'stickyPeers');
+  let peerState = use(swarm, 'peerState');
   let identities = use(state, 'identities');
   let name = room?.name;
   let description = room?.description;
@@ -143,12 +140,12 @@ export default function Room({room, roomId}) {
               </li>
             )}
             {Object.keys(peers || {}).map(peerId => {
-              let {hadStream} = peers[peerId];
+              let {micMuted, inRoom} = peerState[peerId] || {};
               const peerInfo = identities[peerId] || {id: peerId};
               // TODO: hadStream is NOT the appropriate condition for showing avatar
               // need inRoom status from peers
               return (
-                hadStream && (
+                inRoom && (
                   <li
                     key={peerId}
                     className="relative items-center space-y-1 mt-4"
@@ -170,7 +167,7 @@ export default function Room({room, roomId}) {
                       </div>
                     </div>
                     {/* div for showing mute/unmute status */}
-                    <div className={mutedPeers[peerId] ? '' : 'hidden'}>
+                    <div className={micMuted ? '' : 'hidden'}>
                       <div className="absolute w-10 h-10 right-0 top-12 md:top-20 rounded-full bg-white border-2 text-2xl border-gray-400 flex items-center justify-center">
                         🙊
                       </div>
@@ -223,16 +220,16 @@ export default function Room({room, roomId}) {
               onClick={() => state.set('micMuted', !micMuted)}
               className="select-none h-12 mr-2 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline active:bg-yellow-300 flex-grow mt-10"
             >
-              {micOn ? (micMuted ? '🙊 You\'re silent' : '🐵 You\'re on') : 'Off'}
+              {micOn ? (micMuted ? "🙊 You're silent" : "🐵 You're on") : 'Off'}
             </button>
           </div>
 
           <br />
 
           <button
-              onClick={() => state.set('soundMuted', !soundMuted)}
-              className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow"
-            >
+            onClick={() => state.set('soundMuted', !soundMuted)}
+            className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow"
+          >
             {soundMuted ? '🔇' : '🔊'} {soundMuted ? 'Off' : 'On'}
           </button>
 

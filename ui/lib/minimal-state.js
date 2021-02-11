@@ -8,7 +8,11 @@ export default function State(initialState) {
     get: key => {
       return key == undefined ? state : state[key];
     },
-    set(key, value) {
+    set(key, valueOrFunction) {
+      let value =
+        typeof valueOrFunction === 'function'
+          ? valueOrFunction(state[key])
+          : valueOrFunction;
       state[key] = value;
       api.update(key);
     },
