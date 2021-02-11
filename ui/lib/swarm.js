@@ -284,7 +284,13 @@ function addStreamToPeers(stream, name) {
     // log(kind, 'old', oldStream, 'new', stream);
     if (oldStream) {
       if (oldStream === stream) return; // avoid error if listener is called twice
-      peer.removeStream(oldStream);
+      try {
+        // avoid TypeError: this._senderMap is null
+        peer.removeStream(oldStream);
+      } catch (err) {
+        console.warn(err);
+      }
+
       // this code path throws an error if the stream already existed at the peer earlier
       // -- but that shouldn't happen!
       // if it should ever do, maybe we could use replaceTrack() instead of removeStream()
@@ -337,6 +343,7 @@ function connectPeer(hub, peerId, connId) {
       authToken: sign ? sign(sharedState) : undefined,
     });
     let peer = peers[peerId];
+    // TODO: destroying the old peer here destroys the retry timeouts!
     if (peer) {
       log('destroying old peer', s(peerId));
       peer.garbage = true;
