@@ -14,7 +14,7 @@ export const adjectives = [
 export const nouns = [
     "Lingonberry",
     "Peach",
-    "Blackbery",
+    "Blackberry",
     "Strawberry",
     "Blueberry",
     "Cranberry",
