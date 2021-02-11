@@ -15,12 +15,13 @@ state.on('myInfo', updateInfo);
 // TODO remove when convinced it works
 swarm.on('peerState', state => console.log('shared peer state', state));
 
-onFirstInteraction(() => state.set('userInteracted', true));
+onFirstInteraction(() => console.log('first user interaction'));
 state.on('userInteracted', i => i && createAudioContext());
 
 export {requestAudio};
 
 export function enterRoom(roomId) {
+  state.set('userInteracted', true);
   state.enteredRooms.add(roomId);
   state.update('enteredRooms');
   swarm.set('sharedState', state => ({...state, inRoom: true}));
@@ -96,6 +97,14 @@ swarm.on('stream', (stream, name, peer) => {
       });
     });
   });
+  // these don't seem to be useful
+  // audio.addEventListener('suspend', () => console.log('EVENT: suspend', id));
+  // audio.addEventListener('stalled', () => console.log('EVENT: stalled', id));
+  // audio.addEventListener('waiting', () => console.log('EVENT: waiting', id));
+  // audio.addEventListener('volumechange', () =>
+  //   console.log('EVENT: volumechange', id)
+  // );
+
   listenIfSpeaking(id, stream);
 });
 

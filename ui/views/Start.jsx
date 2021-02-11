@@ -4,7 +4,7 @@ import slugify from 'slugify';
 import {createRoom} from '../backend';
 import swarm from '../lib/swarm.js';
 import {navigate} from '../lib/use-location';
-import {enterRoom} from '../main';
+import {enterRoom, state} from '../main';
 
 export default function Start({urlRoomId}) {
   let [name, setName] = useState('');
@@ -12,6 +12,7 @@ export default function Start({urlRoomId}) {
 
   let submit = e => {
     e.preventDefault();
+    state.set('userInteracted', true);
     let roomId;
     if (name) {
       let slug = slugify(name, {lower: true, strict: true});
