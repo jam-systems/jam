@@ -26,6 +26,7 @@ function App() {
       sign: () => signedToken(),
       verify: (_, token, id) => verifyToken(token, id),
     });
+    swarm.set('sharedState', {inRoom: false});
   }, []);
 
   // detect roomId & connect to signalhub
