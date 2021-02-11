@@ -84,12 +84,12 @@ swarm.on('stream', (stream, name, peer) => {
   audio.srcObject = stream;
   audio.muted = state.soundMuted;
   audio.addEventListener('canplay', () => {
-    audio.play().catch(() => {
+    play(audio).catch(() => {
       console.log('deferring audio.play');
       state.set('soundMuted', true);
       state.on('userInteracted', interacted => {
         if (interacted)
-          audio.play().then(() => {
+          play(audio).then(() => {
             state.set('soundMuted', false);
             console.log('playing audio!!');
           });
@@ -98,6 +98,14 @@ swarm.on('stream', (stream, name, peer) => {
   });
   listenIfSpeaking(id, stream);
 });
+
+// TODO: does this fix iOS speaker consistency?
+// TODO: worth it to detect OS?
+async function play(audio) {
+  await audio.play();
+  audio.pause();
+  await audio.play();
+}
 
 async function requestAudio() {
   if (state.myAudio && state.myAudio.active) {

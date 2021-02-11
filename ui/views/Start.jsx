@@ -4,7 +4,7 @@ import slugify from 'slugify';
 import {createRoom} from '../backend';
 import swarm from '../lib/swarm.js';
 import {navigate} from '../lib/use-location';
-import {createAudioContext, enterRoom} from '../main';
+import {enterRoom} from '../main';
 
 export default function Start({urlRoomId}) {
   let [name, setName] = useState('');
@@ -20,7 +20,6 @@ export default function Start({urlRoomId}) {
       roomId = Math.random().toString(36).substr(2, 6);
     }
 
-    // createAudioContext();
     (async () => {
       await createRoom(roomId, name, description, swarm.myPeerId);
       if (urlRoomId !== roomId) navigate('/' + roomId);
@@ -28,7 +27,7 @@ export default function Start({urlRoomId}) {
     })();
   };
 
-  let humins = ["DoubleMalt", "mitschabaude", "__tosh"];
+  let humins = ['DoubleMalt', 'mitschabaude', '__tosh'];
   humins = humins.sort(() => Math.random() - 0.5);
 
   return (
@@ -40,12 +39,15 @@ export default function Start({urlRoomId}) {
           <div className="flex-1 text-gray-600 pt-6">
             Jam is an <span className="italic">audio&nbsp;space</span>
             <br />
-            for chatting, brainstorming, debating, jamming,<br />
-            micro-conferences
-            and more.
+            for chatting, brainstorming, debating, jamming,
+            <br />
+            micro-conferences and more.
             <br />
             <br />
-            <a href="/" className="underline text-blue-800 active:text-blue-600">
+            <a
+              href="/"
+              className="underline text-blue-800 active:text-blue-600"
+            >
               Learn&nbsp;more&nbsp;about&nbsp;Jam.
             </a>
           </div>
@@ -99,16 +101,6 @@ export default function Start({urlRoomId}) {
             <span className="text-gray-300">(optional)</span>
           </div>
 
-          {/* <input
-            className="hidden"
-            type="text"
-            placeholder={randomId}
-            value={customId}
-            onChange={e => {
-              setRoomId(e.target.value);
-            }}
-          ></input> */}
-
           <button
             onClick={submit}
             className="select-none mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
@@ -117,7 +109,22 @@ export default function Start({urlRoomId}) {
           </button>
         </form>
         <div className="pt-32 text-xs text-gray-300 text-center">
-          <a href="https://gitlab.com/jam-systems/jam" target="_blank">built</a> w/ ♥ by {humins.map((humin, idx) => (<span key={idx}> <a href={"https://twitter.com/" + humin} target="_blank">@{humin}</a></span>))} in Berlin &amp; Vienna, <a href="https://www.digitalocean.com" target="_blank">hosted in Frankfurt</a>
+          <a href="https://gitlab.com/jam-systems/jam" target="_blank">
+            built
+          </a>{' '}
+          w/ ♥ by{' '}
+          {humins.map((humin, idx) => (
+            <span key={idx}>
+              {' '}
+              <a href={'https://twitter.com/' + humin} target="_blank">
+                @{humin}
+              </a>
+            </span>
+          ))}{' '}
+          in Berlin &amp; Vienna,{' '}
+          <a href="https://www.digitalocean.com" target="_blank">
+            hosted in Frankfurt
+          </a>
         </div>
       </div>
     </div>
