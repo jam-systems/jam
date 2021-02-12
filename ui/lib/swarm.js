@@ -1,6 +1,7 @@
 import SimplePeer from 'simple-peer-light';
 import State from './minimal-state.js';
 import signalhub from './signalhub.js';
+import {jamHost} from "../config";
 
 const LOGGING = true;
 const MAX_CONNECT_TIME = 3000;
@@ -85,9 +86,9 @@ function createPeer(peerId, connId, initiator) {
     config: {
       iceTransportPolicy: 'all',
       iceServers: [
-        {urls: 'stun:stun.turn.systems:3478'},
+        {urls: `stun:stun.${jamHost()}:3478`},
         {
-          urls: 'turn:turn.jam.systems:3478',
+          urls: `turn:turn.${jamHost()}:3478`,
           username: 'test',
           credential: 'yieChoi0PeoKo8ni',
         },

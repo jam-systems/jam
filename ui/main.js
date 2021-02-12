@@ -4,6 +4,7 @@ import {onFirstInteraction} from './lib/user-interaction.js';
 import {get} from './backend';
 import {updateInfo} from './identity';
 import state from './state.js';
+import {jamHost} from "./config";
 
 window.state = state; // for debugging
 window.swarm = swarm;
@@ -38,7 +39,7 @@ export function leaveRoom(roomId) {
 
 export function connectRoom(roomId) {
   if (swarm.connected) swarm.disconnect();
-  swarm.connect('https://signalhub.jam.systems/', roomId);
+  swarm.connect(`https://signalhub.${jamHost()}/`, roomId);
   swarm.hub.subscribe('identity-updates', async id => {
     state.set('identities', {
       ...state.get('identities'),

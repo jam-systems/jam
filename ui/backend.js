@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import use from './lib/use-state';
 import state from './state.js';
-
+import {jamHost} from "./config";
 // POST https://pantry.jam.systems/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
 // Creates room, returns 409 conflict if room exists
 
@@ -11,7 +11,7 @@ import state from './state.js';
 // PUT https://pantry.jam.systems/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
 // updates room and broadcasts to roomId / channel room-info on signal hub
 
-const API = 'https://pantry.jam.systems/api/v1';
+const API = `https://pantry.${jamHost()}/api/v1`;
 
 export function useApiQuery(path, doFetch = true) {
   let cached = use(state, 'queries')[path];

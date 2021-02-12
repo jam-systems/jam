@@ -3,3 +3,4 @@
 node_modules
 ui/bundle*
 *.DS_Store
+.env

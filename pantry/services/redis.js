@@ -1,6 +1,6 @@
 const redis = require('redis');
 const { promisify } = require("util");
-const LOCAL = false;
+const {local} = require("../config");
 
 const localStore = {};
 
@@ -9,7 +9,7 @@ let _exports = {
     set: (key, value) => localStore[key] = value
 }
 
-if(!LOCAL) {
+if(!local) {
     const client = redis.createClient({host: 'pantryredis'});
 
 

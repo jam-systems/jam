@@ -4,7 +4,6 @@ services:
 
 variables:
   DOCKER_NAMESPACE: registry.gitlab.com/jam-systems/jam
-  DEPLOYMENT_HOST: jam.systems
   DEPLOYMENT_PATH: /root/jam/deployment
 
 stages:
@@ -20,6 +19,7 @@ build-pantry:
   only:
     refs:
       - master
+      - stable
     changes:
       - pantry/**/*
 
@@ -33,6 +33,7 @@ build-signalhub:
   only:
     refs:
       - master
+      - stable
     changes:
       - signalhub/**/*
 
@@ -45,18 +46,36 @@ build-ui:
   only:
     refs:
       - master
+      - stable
     changes:
       - ui/**/*
 
 
-update-server:
+update-beta-server:
   stage: deploy
   only:
     refs:
       - master
   variables:
     GIT_STRATEGY: none
+    DEPLOYMENT_HOST: beta.jam.systems
+  script:
+    - eval $(ssh-agent -s)
+    - echo "$DEPLOY_KEY" | tr -d '\r' | ssh-add - > /dev/null
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan $DEPLOYMENT_HOST >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - ssh root@$DEPLOYMENT_HOST "cd $DEPLOYMENT_PATH && git pull && docker-compose pull && docker-compose up -d && exit"
 
+update-prod-server:
+  stage: deploy
+  only:
+    refs:
+      - stable
+  variables:
+    GIT_STRATEGY: none
+    DEPLOYMENT_HOST: jam.systems
   script:
     - eval $(ssh-agent -s)
     - echo "$DEPLOY_KEY" | tr -d '\r' | ssh-add - > /dev/null
