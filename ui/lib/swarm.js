@@ -38,7 +38,7 @@ function config({url, room, myPeerId, sign, verify}) {
   if (room) swarm.room = room;
   if (myPeerId) swarm.myPeerId = myPeerId;
   if (sign) swarm.sign = sign; // sign(state): string
-  if (verify) swarm.verify = verify; // verify(state, authToken, peerId): boolean
+  if (verify) swarm.verify = verify; // verify(signedState, peerId): state | undefined
 }
 
 function addLocalStream(stream, name) {
@@ -51,9 +51,10 @@ function addLocalStream(stream, name) {
 swarm.on('sharedState', state => {
   let {hub, myPeerId, sign} = swarm;
   if (!hub || !myPeerId) return;
-  let data = {peerId: myPeerId, state};
-  if (sign) data.authToken = sign(state);
-  hub.broadcast('shared-state', data);
+  hub.broadcast('shared-state', {
+    peerId: myPeerId,
+    state: sign ? sign(state) : state,
+  });
 });
 
 export {config, connect, disconnect, reconnect, addLocalStream};
@@ -120,12 +121,11 @@ function createPeer(peerId, connId, initiator) {
     }
     data.meta = {remoteStreamIds};
     data.from = peer._id;
-    let sharedState, authToken;
+    let sharedState;
     if (!peer.didSignal) {
       data.first = true;
       peer.didSignal = true;
-      sharedState = swarm.sharedState;
-      authToken = sign ? sign(sharedState) : undefined;
+      sharedState = sign ? sign(swarm.sharedState) : swarm.sharedState;
     }
     hub.broadcast(`signal-${peerId}`, {
       peerId: myPeerId,
@@ -133,7 +133,6 @@ function createPeer(peerId, connId, initiator) {
       yourConnId: connId,
       data,
       sharedState,
-      authToken,
     });
   });
   peer.on('connect', () => {
@@ -302,14 +301,16 @@ function addStreamToPeers(stream, name) {
   }
 }
 
-function updatePeerState(peerId, state, authToken) {
-  if (!swarm.verify || swarm.verify(state, authToken, peerId)) {
-    swarm.peerState[peerId] = state;
-    swarm.update('peerState');
+function updatePeerState(peerId, state) {
+  if (swarm.verify) {
+    state = swarm.verify(state, peerId);
+    if (state === undefined) return;
   }
+  swarm.peerState[peerId] = state;
+  swarm.update('peerState');
 }
 
-function initializePeer(peerId, sharedState, authToken) {
+function initializePeer(peerId, sharedState) {
   let {stickyPeers} = swarm;
   if (!stickyPeers[peerId]) {
     stickyPeers[peerId] = {
@@ -319,7 +320,7 @@ function initializePeer(peerId, sharedState, authToken) {
     swarm.update('stickyPeers');
     swarm.emit('newPeer', peerId);
   }
-  if (sharedState) updatePeerState(peerId, sharedState, authToken);
+  if (sharedState) updatePeerState(peerId, sharedState);
 }
 
 function connectPeer(hub, peerId, connId) {
@@ -339,8 +340,7 @@ function connectPeer(hub, peerId, connId) {
       peerId: myPeerId,
       connId: hub.connId,
       yourConnId: connId,
-      sharedState,
-      authToken: sign ? sign(sharedState) : undefined,
+      sharedState: sign ? sign(sharedState) : sharedState,
     });
     let peer = peers[peerId];
     // TODO: destroying the old peer here destroys the retry timeouts!
@@ -369,8 +369,7 @@ function connect(url, room) {
     .broadcast('connect-me', {
       peerId: myPeerId,
       connId: myConnId,
-      sharedState,
-      authToken: sign ? sign(sharedState) : undefined,
+      sharedState: sign ? sign(sharedState) : sharedState,
     })
     .then(() => {
       swarm.set('connected', true);
@@ -384,19 +383,19 @@ function connect(url, room) {
   hub.connId = myConnId;
   swarm.hub = hub;
 
-  hub.subscribe('connect-me', ({peerId, connId, sharedState, authToken}) => {
+  hub.subscribe('connect-me', ({peerId, connId, sharedState}) => {
     if (peerId === myPeerId) return;
     log('got connect-me');
-    initializePeer(peerId, sharedState, authToken);
+    initializePeer(peerId, sharedState);
     connectPeer(hub, peerId, connId);
   });
 
   hub.subscribe(
     `no-you-connect-${myPeerId}`,
-    ({peerId, connId, yourConnId, sharedState, authToken}) => {
+    ({peerId, connId, yourConnId, sharedState}) => {
       if (peerId === myPeerId) return;
       log('got no-you-connect', s(peerId), {connId, yourConnId});
-      initializePeer(peerId, sharedState, authToken);
+      initializePeer(peerId, sharedState);
       if (yourConnId !== myConnId) {
         console.warn('no-you-connect to old connection, should be ignored');
         log('ignoring msg to old connection', yourConnId);
@@ -421,9 +420,9 @@ function connect(url, room) {
 
   hub.subscribe(
     `signal-${myPeerId}`,
-    ({peerId, data, connId, yourConnId, sharedState, authToken}) => {
+    ({peerId, data, connId, yourConnId, sharedState}) => {
       log('signal received from', s(peerId), connId, data.type);
-      initializePeer(peerId, sharedState, authToken);
+      initializePeer(peerId, sharedState);
       if (yourConnId !== myConnId) {
         console.warn('signal to old connection, should be ignored');
         log('ignoring msg to old connection', yourConnId);
@@ -468,8 +467,8 @@ function connect(url, room) {
     }
   );
 
-  hub.subscribe('shared-state', ({peerId, state, authToken}) => {
-    updatePeerState(peerId, state, authToken);
+  hub.subscribe('shared-state', ({peerId, state}) => {
+    updatePeerState(peerId, state);
   });
 }
 

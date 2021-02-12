@@ -6,8 +6,8 @@ import {
   initializeIdentity,
   getInfo,
   getId,
-  signedToken,
-  verifyToken,
+  signData,
+  verifyData,
 } from './identity';
 import {useApiQuery} from './backend.js';
 import {usePath} from './lib/use-location.js';
@@ -23,8 +23,8 @@ function App() {
     state.set('myInfo', getInfo());
     swarm.config({
       myPeerId: getId(),
-      sign: () => signedToken(),
-      verify: (_, token, id) => verifyToken(token, id),
+      sign: state => signData(state),
+      verify: (signedState, peerId) => verifyData(signedState, peerId),
     });
     swarm.set('sharedState', {inRoom: false});
   }, []);

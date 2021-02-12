@@ -97,3 +97,17 @@ export function signedToken() {
   );
   return sign(signData);
 }
+
+export function signData(data) {
+  let bytes = new TextEncoder().encode(JSON.stringify(data));
+  return sign(bytes);
+}
+
+export function verifyData(signed, key) {
+  try {
+    let bytes = nacl.sign.open(decode(signed), decode(key));
+    return JSON.parse(new TextDecoder().decode(bytes));
+  } catch (err) {
+    console.warn(err);
+  }
+}
