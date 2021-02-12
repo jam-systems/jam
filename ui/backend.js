@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import use from './lib/use-state';
 import state from './state.js';
-import {jamHost} from "./config";
+import {jamHost} from './config';
 // POST https://pantry.jam.systems/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
 // Creates room, returns 409 conflict if room exists
 
@@ -40,7 +40,7 @@ export function useApiQuery(path, doFetch = true) {
   return [data, isLoading, status, refetch];
 }
 
-function updateApiQuery(path, data, status) {
+export function updateApiQuery(path, data, status) {
   state.queries[path] = data && {data, status};
   state.update('queries');
 }

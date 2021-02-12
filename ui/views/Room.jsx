@@ -36,15 +36,17 @@ export default function Room({room, roomId}) {
   let {name, description, speakers, moderators} = room || {};
   let {myPeerId} = swarm;
 
-  // let modPeers = (moderators || []).filter(id => id in peers);
+  // TODO: visually distinguish moderators
+  let modPeers = (moderators || []).filter(id => id in peers);
   let stagePeers = (speakers || []).filter(id => id in peers);
   let audiencePeers = Object.keys(peers || {}).filter(
     id => !stagePeers.includes(id)
   );
 
-  let iSpeak = (room?.speakers || []).includes(myPeerId);
+  let iSpeak = (speakers || []).includes(myPeerId);
+  let iModerate = (moderators || []).includes(myPeerId);
 
-  let addRole = (id, role) => {
+  let addRole = async (id, role) => {
     if (!room) return;
     if (!moderators.includes(swarm.myPeerId)) return;
     if (role !== 'speakers' && role !== 'moderators') return;
@@ -52,7 +54,20 @@ export default function Room({room, roomId}) {
     if (existing.includes(id)) return;
     console.log('adding to', role, id);
     let newRoom = {...room, [role]: [...existing, id]};
-    put(signedToken(), `/rooms/${roomId}`, newRoom);
+    await put(signedToken(), `/rooms/${roomId}`, newRoom);
+    setEditRole(null);
+  };
+
+  let removeRole = async (id, role) => {
+    if (!room) return;
+    if (!moderators.includes(swarm.myPeerId)) return;
+    if (role !== 'speakers' && role !== 'moderators') return;
+    let existing = role === 'speakers' ? speakers : moderators;
+    if (!existing.includes(id)) return;
+    console.log('removing from', role, id);
+    let newRoom = {...room, [role]: existing.filter(id_ => id_ !== id)};
+    await put(signedToken(), `/rooms/${roomId}`, newRoom);
+    setEditRole(null);
   };
 
   let hasEnteredRoom = enteredRooms.has(roomId);
@@ -73,6 +88,7 @@ export default function Room({room, roomId}) {
         <EditRole
           peerId={editRole}
           addRole={addRole}
+          removeRole={removeRole}
           onCancel={() => setEditRole(null)}
         />
       )}
@@ -125,8 +141,8 @@ export default function Room({room, roomId}) {
                     key={peerId}
                     className="relative items-center space-y-1 mt-4"
                     title={peerId}
-                    style={{cursor: 'pointer'}}
-                    onClick={() => setEditRole(peerId)}
+                    style={iModerate ? {cursor: 'pointer'} : undefined}
+                    onClick={iModerate ? () => setEditRole(peerId) : undefined}
                   >
                     <div
                       className={
@@ -183,8 +199,8 @@ export default function Room({room, roomId}) {
                 <li
                   key={peerId}
                   className="flex-shrink w-24 h-24"
-                  style={{cursor: 'pointer'}}
-                  onClick={() => setEditRole(peerId)}
+                  style={iModerate ? {cursor: 'pointer'} : undefined}
+                  onClick={iModerate ? () => setEditRole(peerId) : undefined}
                 >
                   <img
                     className="human-radius border border-gray-300"
@@ -355,7 +371,7 @@ export default function Room({room, roomId}) {
   );
 }
 
-function EditRole({peerId, addRole, onCancel}) {
+function EditRole({peerId, addRole, removeRole, onCancel}) {
   return (
     <div className="child md:p-10">
       <h3 className="p-6 font-medium">Promote</h3>
@@ -367,10 +383,22 @@ function EditRole({peerId, addRole, onCancel}) {
         Promote to stage
       </button>
       <button
+        onClick={() => removeRole(peerId, 'speakers')}
+        className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
+      >
+        Remove from stage
+      </button>
+      <button
         onClick={() => addRole(peerId, 'moderators')}
         className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
       >
         Promote to moderator
+      </button>
+      <button
+        onClick={() => removeRole(peerId, 'moderators')}
+        className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
+      >
+        Remove moderator
       </button>
       <button
         onClick={onCancel}

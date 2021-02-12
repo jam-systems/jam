@@ -1,10 +1,10 @@
 import swarm from './lib/swarm.js';
 import hark from 'hark';
 import {onFirstInteraction} from './lib/user-interaction.js';
-import {get} from './backend';
+import {get, updateApiQuery} from './backend';
 import {updateInfo} from './identity';
 import state from './state.js';
-import {jamHost} from "./config";
+import {jamHost} from './config';
 
 window.state = state; // for debugging
 window.swarm = swarm;
@@ -47,8 +47,8 @@ export function connectRoom(roomId) {
     });
   });
   swarm.hub.subscribe('room-info', data => {
-    console.log('ROOM INFO', data);
-    // TODO updateApiQuery when PUT /room is actually used
+    console.log('new room info', data);
+    updateApiQuery(`/rooms/${swarm.room}`, data, 200);
   });
 }
 const emptyRoom = {name: '', description: '', speakers: [], moderators: []};
@@ -57,10 +57,14 @@ function currentRoom() {
 }
 state.on('queries', () => {
   let {speakers} = currentRoom();
-  if (!state.soundMuted)
+  if (!state.soundMuted) {
     speakers.forEach(id => {
       if (speaker[id]?.muted) speaker[id].muted = false;
     });
+    for (let id in speaker) {
+      if (!speakers.includes(id)) speaker[id].muted = true;
+    }
+  }
 });
 
 export function createAudioContext() {
