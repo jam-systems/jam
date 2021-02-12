@@ -2,7 +2,7 @@ import swarm from './lib/swarm.js';
 import hark from 'hark';
 import {onFirstInteraction} from './lib/user-interaction.js';
 import {get, updateApiQuery} from './backend';
-import {updateInfo} from './identity';
+import {signData, updateInfo, verifyData} from './identity';
 import state from './state.js';
 import {jamHost} from './config';
 
@@ -13,6 +13,21 @@ export {state};
 
 state.on('myInfo', updateInfo);
 
+swarm.config({
+  sign: signData,
+  verify: verifyData,
+  pcConfig: {
+    iceTransportPolicy: 'all',
+    iceServers: [
+      {urls: `stun:stun.${jamHost()}:3478`},
+      {
+        urls: `turn:turn.${jamHost()}:3478`,
+        username: 'test',
+        credential: 'yieChoi0PeoKo8ni',
+      },
+    ],
+  },
+});
 // TODO remove when convinced it works
 swarm.on('peerState', state => console.log('shared peer state', state));
 
@@ -138,7 +153,7 @@ swarm.on('stream', (stream, name, peer) => {
   listenIfSpeaking(id, stream);
 });
 
-// TODO: does this fix iOS speaker consistency?
+// TODO: this does not fix iOS speaker consistency
 // TODO: worth it to detect OS?
 async function play(audio) {
   await audio.play();

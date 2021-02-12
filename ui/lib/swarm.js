@@ -1,7 +1,6 @@
 import SimplePeer from 'simple-peer-light';
 import State from './minimal-state.js';
 import signalhub from './signalhub.js';
-import {jamHost} from '../config';
 
 const LOGGING = true;
 const MAX_CONNECT_TIME = 3000;
@@ -34,12 +33,13 @@ const swarm = State({
 
 export default swarm;
 
-function config({url, room, myPeerId, sign, verify}) {
+function config({url, room, myPeerId, sign, verify, pcConfig}) {
   if (url) swarm.url = url;
   if (room) swarm.room = room;
   if (myPeerId) swarm.myPeerId = myPeerId;
   if (sign) swarm.sign = sign; // sign(state): string
   if (verify) swarm.verify = verify; // verify(signedState, peerId): state | undefined
+  if (pcConfig) swarm.pcConfig = pcConfig;
 }
 
 function addLocalStream(stream, name) {
@@ -69,7 +69,7 @@ swarm.addLocalStream = addLocalStream;
 // public API ends here
 
 function createPeer(peerId, connId, initiator) {
-  let {hub, localStreams, peers, myPeerId} = swarm;
+  let {hub, localStreams, peers, myPeerId, pcConfig} = swarm;
   if (!myPeerId || peerId === myPeerId) return;
   // destroy any existing peer
   let peer = peers[peerId];
@@ -83,17 +83,7 @@ function createPeer(peerId, connId, initiator) {
   let streams = Object.values(localStreams).filter(x => x);
   peer = new SimplePeer({
     initiator,
-    config: {
-      iceTransportPolicy: 'all',
-      iceServers: [
-        {urls: `stun:stun.${jamHost()}:3478`},
-        {
-          urls: `turn:turn.${jamHost()}:3478`,
-          username: 'test',
-          credential: 'yieChoi0PeoKo8ni',
-        },
-      ],
-    },
+    config: pcConfig || undefined,
     trickle: true,
     streams,
     // debug: true,
