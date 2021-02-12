@@ -36,16 +36,19 @@ const roomAuthenticator = {
         const authHeader = req.header("Authorization");
         if(authHeader) {
             const token = authHeader.substring(6);
-            console.log("Redis key: " + req.params.id)
             const roomInfo = await get('rooms/' + req.params.id);
-            console.log('room info', roomInfo)
+            let authenticated = false;
             for (const moderatorKey of roomInfo['moderators']) {
                 if(verify(token, moderatorKey)) {
-                    next();
+                    authenticated = true;
                     break;
                 }
             }
-            res.sendStatus(403);
+            if(authenticated) {
+                next();
+            } else {
+                res.sendStatus(403);
+            }
         } else {
             res.sendStatus(401);
         }
