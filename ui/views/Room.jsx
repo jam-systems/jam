@@ -5,6 +5,8 @@ import swarm from '../lib/swarm.js';
 import EnterRoom from './EnterRoom.jsx';
 import {gravatarUrl} from '../lib/gravatar';
 import copyToClipboard from '../lib/copy-to-clipboard';
+import {put} from '../backend';
+import {signedToken} from '../identity';
 // import {getStorage} from '../lib/local-storage';
 
 export default function Room({room, roomId}) {
@@ -19,42 +21,39 @@ export default function Room({room, roomId}) {
   let peers = use(swarm, 'stickyPeers');
   let peerState = use(swarm, 'peerState');
   let identities = use(state, 'identities');
-  let name = room?.name;
-  let description = room?.description;
 
   let [editIdentity, setEditIdentity] = useState(false);
-
-  let [displayName, setDisplayName] = useState(myInfo.displayName);
-  let [email, setEmail] = useState(myInfo.email);
+  let [editRole, setEditRole] = useState(null);
 
   let [showShareInfo, setShowShareInfo] = useState(false);
 
-  let updateInfo = e => {
-    e.preventDefault();
-    const userInfo = {displayName, email};
-    state.set('myInfo', userInfo);
+  let updateInfo = ({displayName, email}) => {
+    state.set('myInfo', {displayName, email});
     setEditIdentity(false);
     swarm.hub.broadcast('identity-updates', swarm.myPeerId);
   };
 
+  let {name, description, speakers, moderators} = room || {};
   let {myPeerId} = swarm;
 
-  let modPeers = (room?.moderators || []).filter(id => id in peers);
-  let stagePeers = (room?.speakers || []).filter(id => id in peers);
+  // let modPeers = (moderators || []).filter(id => id in peers);
+  let stagePeers = (speakers || []).filter(id => id in peers);
   let audiencePeers = Object.keys(peers || {}).filter(
     id => !stagePeers.includes(id)
   );
 
   let iSpeak = (room?.speakers || []).includes(myPeerId);
 
-  // let addToSpeakers = id => {
-  //   if (!modPeers.includes(swarm.myPeerId)) return;
-  //   console.log('adding to speakers', id);
-  // };
-  // let addToModerators = id => {
-  //   if (!modPeers.includes(swarm.myPeerId)) return;
-  //   console.log('adding to mods', id);
-  // };
+  let addRole = (id, role) => {
+    if (!room) return;
+    if (!moderators.includes(swarm.myPeerId)) return;
+    if (role !== 'speakers' && role !== 'moderators') return;
+    let existing = role === 'speakers' ? speakers : moderators;
+    if (existing.includes(id)) return;
+    console.log('adding to', role, id);
+    let newRoom = {...room, [role]: [...existing, id]};
+    put(signedToken(), `/rooms/${roomId}`, newRoom);
+  };
 
   let hasEnteredRoom = enteredRooms.has(roomId);
 
@@ -86,58 +85,18 @@ export default function Room({room, roomId}) {
         </div>
       )}
       {editIdentity && (
-        <div className="child md:p-10">
-          <h3 className="p-6 font-medium">Profile</h3>
-          <br />
-          <form onSubmit={updateInfo}>
-            <input
-              className="rounded placeholder-gray-300 bg-gray-50 w-64"
-              type="text"
-              placeholder="Display name"
-              value={displayName || ''}
-              name="display-name"
-              onChange={e => {
-                setDisplayName(e.target.value);
-              }}
-            />
-            <div className="p-2 text-gray-500 italic">
-              {`What's your name?`}
-              <span className="text-gray-300"> (optional)</span>
-            </div>
-            <br />
-            <input
-              className="rounded placeholder-gray-300 bg-gray-50 w-72"
-              type="email"
-              placeholder="email@example.com"
-              value={email || ''}
-              name="email"
-              onChange={e => {
-                setEmail(e.target.value);
-              }}
-            />
-            <div className="p-2 text-gray-500 italic">
-              {`What's your email?`}
-              <span className="text-gray-300"> (used for Gravatar)</span>
-            </div>
-            <button
-              onClick={updateInfo}
-              className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
-            >
-              Update Profile
-            </button>
-            <button
-              onClick={e => {
-                e.preventDefault();
-                setEditIdentity(false);
-              }}
-              className="mt-5 h-12 px-6 text-lg text-black bg-gray-100 rounded-lg focus:shadow-outline active:bg-gray-300"
-            >
-              Cancel
-            </button>
-          </form>
-          <br />
-          <hr />
-        </div>
+        <EditIdentity
+          info={myInfo}
+          onSubmit={updateInfo}
+          onCancel={() => setEditIdentity(false)}
+        />
+      )}
+      {editRole && (
+        <EditRole
+          peerId={editRole}
+          addRole={addRole}
+          onCancel={() => setEditRole(null)}
+        />
       )}
       <div className="child md:p-10">
         <h1 className="pt-6 md:pt-0 pl-6">{name}</h1>
@@ -188,6 +147,8 @@ export default function Room({room, roomId}) {
                     key={peerId}
                     className="relative items-center space-y-1 mt-4"
                     title={peerId}
+                    style={{cursor: 'pointer'}}
+                    onClick={() => setEditRole(peerId)}
                   >
                     <div
                       className={
@@ -241,7 +202,12 @@ export default function Room({room, roomId}) {
             const peerInfo = identities[peerId] || {id: peerId};
             return (
               inRoom && (
-                <li key={peerId} className="flex-shrink w-24 h-24">
+                <li
+                  key={peerId}
+                  className="flex-shrink w-24 h-24"
+                  style={{cursor: 'pointer'}}
+                  onClick={() => setEditRole(peerId)}
+                >
                   <img
                     className="human-radius border border-gray-300"
                     alt={peerId}
@@ -278,7 +244,11 @@ export default function Room({room, roomId}) {
               onClick={() => state.set('micMuted', !micMuted)}
               className="select-none h-12 mr-2 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline active:bg-yellow-300 flex-grow mt-10"
             >
-              {micOn ? (micMuted ? "🙊 You're silent" : "🐵 You're on") : 'Off'}
+              {micOn
+                ? micMuted
+                  ? "🙊 You're silent"
+                  : "🐵 You're on"
+                : "🙊 You're off"}
             </button>
           </div>
 
@@ -403,6 +373,99 @@ export default function Room({room, roomId}) {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function EditRole({peerId, addRole, onCancel}) {
+  return (
+    <div className="child md:p-10">
+      <h3 className="p-6 font-medium">Promote</h3>
+      <br />
+      <button
+        onClick={() => addRole(peerId, 'speakers')}
+        className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
+      >
+        Promote to stage
+      </button>
+      <button
+        onClick={() => addRole(peerId, 'moderators')}
+        className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
+      >
+        Promote to moderator
+      </button>
+      <button
+        onClick={onCancel}
+        className="mt-5 h-12 px-6 text-lg text-black bg-gray-100 rounded-lg focus:shadow-outline active:bg-gray-300"
+      >
+        Cancel
+      </button>
+      <br />
+      <hr />
+    </div>
+  );
+}
+
+function EditIdentity({info, onSubmit, onCancel}) {
+  let [displayName, setDisplayName] = useState(info?.displayName);
+  let [email, setEmail] = useState(info?.email);
+  let submit = e => {
+    e.preventDefault();
+    onSubmit({displayName, email});
+  };
+  let cancel = e => {
+    e.preventDefault();
+    onCancel();
+  };
+  return (
+    <div className="child md:p-10">
+      <h3 className="p-6 font-medium">Profile</h3>
+      <br />
+      <form onSubmit={submit}>
+        <input
+          className="rounded placeholder-gray-300 bg-gray-50 w-64"
+          type="text"
+          placeholder="Display name"
+          value={displayName || ''}
+          name="display-name"
+          onChange={e => {
+            setDisplayName(e.target.value);
+          }}
+        />
+        <div className="p-2 text-gray-500 italic">
+          {`What's your name?`}
+          <span className="text-gray-300"> (optional)</span>
+        </div>
+        <br />
+        <input
+          className="rounded placeholder-gray-300 bg-gray-50 w-72"
+          type="email"
+          placeholder="email@example.com"
+          value={email || ''}
+          name="email"
+          onChange={e => {
+            setEmail(e.target.value);
+          }}
+        />
+        <div className="p-2 text-gray-500 italic">
+          {`What's your email?`}
+          <span className="text-gray-300"> (used for Gravatar)</span>
+        </div>
+        <button
+          onClick={submit}
+          className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
+        >
+          Update Profile
+        </button>
+        <button
+          onClick={cancel}
+          className="mt-5 h-12 px-6 text-lg text-black bg-gray-100 rounded-lg focus:shadow-outline active:bg-gray-300"
+        >
+          Cancel
+        </button>
+      </form>
+      <br />
+      <hr />
     </div>
   );
 }
