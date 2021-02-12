@@ -1,7 +1,7 @@
 import SimplePeer from 'simple-peer-light';
 import State from './minimal-state.js';
 import signalhub from './signalhub.js';
-import {jamHost} from "../config";
+import {jamHost} from '../config';
 
 const LOGGING = true;
 const MAX_CONNECT_TIME = 3000;
@@ -69,7 +69,7 @@ swarm.addLocalStream = addLocalStream;
 // public API ends here
 
 function createPeer(peerId, connId, initiator) {
-  let {hub, localStreams, peers, myPeerId, sign} = swarm;
+  let {hub, localStreams, peers, myPeerId} = swarm;
   if (!myPeerId || peerId === myPeerId) return;
   // destroy any existing peer
   let peer = peers[peerId];
@@ -126,7 +126,7 @@ function createPeer(peerId, connId, initiator) {
     if (!peer.didSignal) {
       data.first = true;
       peer.didSignal = true;
-      sharedState = sign ? sign(swarm.sharedState) : swarm.sharedState;
+      sharedState = signedState();
     }
     hub.broadcast(`signal-${peerId}`, {
       peerId: myPeerId,
@@ -331,7 +331,7 @@ function connectPeer(hub, peerId, connId) {
   // -) this has to be callable by both peers without race conflict
   // -) this has to work in every state of swarm.peers (e.g. with or without existing Peer instance)
   log('connecting peer', s(peerId), connId);
-  let {myPeerId, peers, sharedState, sign} = swarm;
+  let {myPeerId, peers} = swarm;
   if (myPeerId > peerId) {
     log('i initiate, and override any previous peer!');
     createPeer(peerId, connId, true);
@@ -341,7 +341,7 @@ function connectPeer(hub, peerId, connId) {
       peerId: myPeerId,
       connId: hub.connId,
       yourConnId: connId,
-      sharedState: sign ? sign(sharedState) : sharedState,
+      sharedState: signedState(),
     });
     let peer = peers[peerId];
     // TODO: destroying the old peer here destroys the retry timeouts!
@@ -365,12 +365,12 @@ function connect(url, room) {
   let myConnId = randomHex4();
   log('connecting. conn id', myConnId);
   let hub = signalhub(swarm.room, swarm.url);
-  let {myPeerId, sharedState, sign} = swarm;
+  let {myPeerId} = swarm;
   hub
     .broadcast('connect-me', {
       peerId: myPeerId,
       connId: myConnId,
-      sharedState: sign ? sign(sharedState) : sharedState,
+      sharedState: signedState(),
     })
     .then(() => {
       swarm.set('connected', true);
@@ -471,6 +471,11 @@ function connect(url, room) {
   hub.subscribe('shared-state', ({peerId, state}) => {
     updatePeerState(peerId, state);
   });
+}
+
+function signedState() {
+  let {sign, sharedState} = swarm;
+  return sign ? sign(sharedState) : sharedState;
 }
 
 function disconnect() {
