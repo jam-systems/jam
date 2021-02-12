@@ -32,12 +32,12 @@ const verify = (authToken, key) => {
 
 const roomAuthenticator = {
     ...permitAllAuthenticator,
-    canPut: (req, res, next) => {
+    canPut: async (req, res, next) => {
         const authHeader = req.header("Authorization");
         if(authHeader) {
             const token = authHeader.substring(6);
             console.log("Redis key: " + req.params.id)
-            const roomInfo = get('rooms/' + req.params.id);
+            const roomInfo = await get('rooms/' + req.params.id);
             console.log('room info', roomInfo)
             for (const moderatorKey of roomInfo['moderators']) {
                 if(verify(token, moderatorKey)) {
