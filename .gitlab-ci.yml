@@ -22,6 +22,7 @@ build-pantry:
       - stable
     changes:
       - pantry/**/*
+      - .gitlab-ci.yml
 
 
 build-signalhub:
@@ -36,6 +37,7 @@ build-signalhub:
       - stable
     changes:
       - signalhub/**/*
+      - .gitlab-ci.yml
 
 build-ui:
   stage: build
@@ -49,6 +51,7 @@ build-ui:
       - stable
     changes:
       - ui/**/*
+      - .gitlab-ci.yml
 
 
 update-beta-server:
