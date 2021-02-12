@@ -62,28 +62,6 @@ export default function Room({room, roomId}) {
 
   return (
     <div className="container">
-      {true &&  (
-        <div className="child md:p-10">
-          <h3 className="p-6 font-medium">Promote to Stage</h3>
-          <br />
-          <form onSubmit={updateInfo}>
-            <button
-                onClick={updateInfo}
-                className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
-              >
-              Promote to Stage
-            </button>
-            <button
-              onClick={e => {
-                e.preventDefault();
-              }}
-              className="mt-5 h-12 px-6 text-lg text-black bg-gray-100 rounded-lg focus:shadow-outline active:bg-gray-300"
-              >
-              Cancel
-            </button>
-          </form>
-        </div>
-      )}
       {editIdentity && (
         <EditIdentity
           info={myInfo}
@@ -400,6 +378,7 @@ function EditRole({peerId, addRole, onCancel}) {
       >
         Cancel
       </button>
+      <br />
       <br />
       <hr />
     </div>
