@@ -83,7 +83,7 @@ function createPeer(peerId, connId, initiator) {
   peer = new SimplePeer({
     initiator,
     config: {
-      iceTransportPolicy: 'relay', // TODO: shouldn't this be 'all'?
+      iceTransportPolicy: 'all',
       iceServers: [
         {urls: 'stun:stun.turn.systems:3478'},
         {

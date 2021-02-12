@@ -16,6 +16,14 @@ const timeCodeFromBytes = timeCodeBytes =>
   (timeCodeBytes[1] << 8) +
   (timeCodeBytes[2] << 16) +
   (timeCodeBytes[3] << 24);
+const timeCodeToBytes = timeCode =>
+  Uint8Array.of(
+    timeCode % 256,
+    (timeCode >> 8) % 256,
+    (timeCode >> 16) % 256,
+    (timeCode >> 24) % 256
+  );
+// TODO maybe better 10 sec instead of 30?
 const currentTimeCode = () => Math.round(Date.now() / 30000);
 
 export function initializeIdentity() {
@@ -88,26 +96,33 @@ export const verifyToken = (authToken, key) => {
 };
 
 export function signedToken() {
-  const dateToken = currentTimeCode();
-  const signData = Uint8Array.of(
-    dateToken % 256,
-    (dateToken >> 8) % 256,
-    (dateToken >> 16) % 256,
-    (dateToken >> 24) % 256
-  );
+  const signData = timeCodeToBytes(currentTimeCode());
   return sign(signData);
 }
 
+// sign data + current time to prevent replay of outdated message
 export function signData(data) {
-  let bytes = new TextEncoder().encode(JSON.stringify(data));
-  return sign(bytes);
+  let dataBytes = new TextEncoder().encode(JSON.stringify(data));
+  let timeBytes = timeCodeToBytes(currentTimeCode());
+  return sign(concat(timeBytes, dataBytes));
 }
-
 export function verifyData(signed, key) {
   try {
     let bytes = nacl.sign.open(decode(signed), decode(key));
-    return JSON.parse(new TextDecoder().decode(bytes));
+    let timeCode = timeCodeFromBytes(bytes.subarray(0, 4));
+    console.log('timecode', timeCode, currentTimeCode());
+    if (timeCode !== currentTimeCode()) return;
+    let dataBytes = bytes.subarray(4);
+    return JSON.parse(new TextDecoder().decode(dataBytes));
   } catch (err) {
     console.warn(err);
   }
+}
+
+// util for uint8array
+function concat(arr1, arr2) {
+  let arr = new Uint8Array(arr1.length + arr2.length);
+  arr.set(arr1);
+  arr.set(arr2, arr1.length);
+  return arr;
 }
