@@ -110,7 +110,6 @@ export function verifyData(signed, key) {
   try {
     let bytes = nacl.sign.open(decode(signed), decode(key));
     let timeCode = timeCodeFromBytes(bytes.subarray(0, 4));
-    console.log('timecode', timeCode, currentTimeCode());
     if (timeCode !== currentTimeCode()) return;
     let dataBytes = bytes.subarray(4);
     return JSON.parse(new TextDecoder().decode(dataBytes));

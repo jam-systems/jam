@@ -46,7 +46,22 @@ export function connectRoom(roomId) {
       [id]: await get(`/identities/${id}`),
     });
   });
+  swarm.hub.subscribe('room-info', data => {
+    console.log('ROOM INFO', data);
+    // TODO updateApiQuery when PUT /room is actually used
+  });
 }
+const emptyRoom = {name: '', description: '', speakers: [], moderators: []};
+function currentRoom() {
+  return state.queries[`/rooms/${swarm.room}`]?.data || emptyRoom;
+}
+state.on('queries', () => {
+  let {speakers} = currentRoom();
+  if (!state.soundMuted)
+    speakers.forEach(id => {
+      if (speaker[id]?.muted) speaker[id].muted = false;
+    });
+});
 
 export function createAudioContext() {
   const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -63,10 +78,12 @@ state.on('myAudio', stream => {
 
 let speaker = {};
 state.on('soundMuted', muted => {
+  let {speakers} = currentRoom();
   for (let id in speaker) {
-    speaker[id].muted = muted;
+    speaker[id].muted = muted || !speakers.includes(id);
   }
 });
+// TODO make muted also react to changing speakers !!
 
 swarm.on('newPeer', async id => {
   for (let i = 0; i < 5; i++) {
@@ -88,10 +105,11 @@ swarm.on('stream', (stream, name, peer) => {
     delete speaker[id];
     return;
   }
+  let {speakers} = currentRoom();
   let audio = new Audio();
   speaker[id] = audio;
   audio.srcObject = stream;
-  audio.muted = state.soundMuted;
+  audio.muted = state.soundMuted || !speakers.includes(id);
   audio.addEventListener('canplay', () => {
     play(audio).catch(() => {
       console.log('deferring audio.play');
@@ -99,7 +117,7 @@ swarm.on('stream', (stream, name, peer) => {
       state.on('userInteracted', interacted => {
         if (interacted)
           play(audio).then(() => {
-            state.set('soundMuted', false);
+            if (state.soundMuted) state.set('soundMuted', false);
             console.log('playing audio!!');
           });
       });

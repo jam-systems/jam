@@ -8,6 +8,7 @@ import copyToClipboard from '../lib/copy-to-clipboard';
 // import {getStorage} from '../lib/local-storage';
 
 export default function Room({room, roomId}) {
+  // room = {name, description, moderators: [peerId], speakers: [peerId]}
   let myInfo = use(state, 'myInfo');
   let myAudio = use(state, 'myAudio');
   let micOn = myAudio?.active;
@@ -36,6 +37,25 @@ export default function Room({room, roomId}) {
     swarm.hub.broadcast('identity-updates', swarm.myPeerId);
   };
 
+  let {myPeerId} = swarm;
+
+  let modPeers = (room?.moderators || []).filter(id => id in peers);
+  let stagePeers = (room?.speakers || []).filter(id => id in peers);
+  let audiencePeers = Object.keys(peers || {}).filter(
+    id => !stagePeers.includes(id)
+  );
+
+  let iSpeak = (room?.speakers || []).includes(myPeerId);
+
+  // let addToSpeakers = id => {
+  //   if (!modPeers.includes(swarm.myPeerId)) return;
+  //   console.log('adding to speakers', id);
+  // };
+  // let addToModerators = id => {
+  //   if (!modPeers.includes(swarm.myPeerId)) return;
+  //   console.log('adding to mods', id);
+  // };
+
   let hasEnteredRoom = enteredRooms.has(roomId);
 
   if (!hasEnteredRoom)
@@ -52,7 +72,7 @@ export default function Room({room, roomId}) {
               className="rounded placeholder-gray-300 bg-gray-50 w-64"
               type="text"
               placeholder="Display name"
-              value={displayName}
+              value={displayName || ''}
               name="display-name"
               onChange={e => {
                 setDisplayName(e.target.value);
@@ -67,7 +87,7 @@ export default function Room({room, roomId}) {
               className="rounded placeholder-gray-300 bg-gray-50 w-72"
               type="email"
               placeholder="email@example.com"
-              value={email}
+              value={email || ''}
               name="email"
               onChange={e => {
                 setEmail(e.target.value);
@@ -84,7 +104,10 @@ export default function Room({room, roomId}) {
               Update Profile
             </button>
             <button
-              onClick={() => setEditIdentity(false)}
+              onClick={e => {
+                e.preventDefault();
+                setEditIdentity(false);
+              }}
               className="mt-5 h-12 px-6 text-lg text-black bg-gray-100 rounded-lg focus:shadow-outline active:bg-gray-300"
             >
               Cancel
@@ -101,7 +124,7 @@ export default function Room({room, roomId}) {
         {/* Stage */}
         <div className="h-44 h-full">
           <ol className="flex flex-wrap space-x-2 pt-6">
-            {myAudio && (
+            {iSpeak && (
               <li
                 className="relative items-center space-y-1 mt-4"
                 style={{cursor: 'pointer'}}
@@ -132,7 +155,7 @@ export default function Room({room, roomId}) {
                 </div>
               </li>
             )}
-            {Object.keys(peers || {}).map(peerId => {
+            {stagePeers.map(peerId => {
               let {micMuted, inRoom} = peerState[peerId] || {};
               const peerInfo = identities[peerId] || {id: peerId};
               // TODO: hadStream is NOT the appropriate condition for showing avatar
@@ -177,23 +200,43 @@ export default function Room({room, roomId}) {
 
         <br />
 
-        <h3 className="hidden" style={{marginTop: '80px'}}>
-          Audience
-        </h3>
-        <ol className="hidden flex space-x-4 pt-6">
-          <li className="flex-shrink w-24 h-24 ring-yellow-500">
+        <h3 style={{marginTop: '80px'}}>Audience</h3>
+        <ol className="flex space-x-4 pt-6">
+          {!iSpeak && (
+            <li
+              className="flex-shrink w-24 h-24"
+              style={{cursor: 'pointer'}}
+              onClick={() => setEditIdentity(!editIdentity)}
+            >
+              <img
+                className="human-radius border border-gray-300"
+                src={gravatarUrl(myInfo)}
+              />
+            </li>
+          )}
+          {audiencePeers.map(peerId => {
+            let {inRoom} = peerState[peerId] || {};
+            const peerInfo = identities[peerId] || {id: peerId};
+            return (
+              inRoom && (
+                <li key={peerId} className="flex-shrink w-24 h-24">
+                  <img
+                    className="human-radius border border-gray-300"
+                    alt={peerId}
+                    src={gravatarUrl(peerInfo)}
+                  />
+                </li>
+              )
+            );
+          })}
+          {/* <li className="flex-shrink w-24 h-24 ring-yellow-500">
             <img
               className="human-radius border border-gray-300"
               src="img/avatars/sonic.jpg"
             />
-          </li>
-          <li className="flex-shrink w-24 h-24">
-            <img
-              className="human-radius border border-gray-300"
-              src="img/avatars/gregor.jpg"
-            />
-          </li>
-          <li className="flex-shrink w-24 h-24">
+          </li> */}
+
+          {/* <li className="flex-shrink w-24 h-24">
             <img
               className="human-radius border border-gray-300"
               src="img/avatars/christoph.jpg"
@@ -204,7 +247,7 @@ export default function Room({room, roomId}) {
               className="human-radius border border-gray-300"
               src="img/avatars/tosh.jpg"
             />
-          </li>
+          </li> */}
         </ol>
 
         <div className="navigation">
