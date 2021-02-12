@@ -14,10 +14,12 @@ services:
     volumes:
       - ../data/postgres:/var/lib/postgresql/data
   ui:
-    image: registry.gitlab.com/jam-systems/jam/ui:master
+    image: registry.gitlab.com/jam-systems/jam/ui:${CHANNEL}
     restart: always
+    env_file:
+      - ".env"
     labels:
-      - traefik.http.routers.ui.rule=Host(`jam.systems`)
+      - traefik.http.routers.ui.rule=Host(`${JAM_HOST}`)
       - traefik.http.routers.ui.tls=true
       - traefik.http.routers.ui.tls.certresolver=letsencrypt
       - traefik.enable=true
@@ -27,18 +29,20 @@ services:
       - "../pantryredis:/data"
     command: "redis-server --appendonly yes"
   pantry:
-    image: registry.gitlab.com/jam-systems/jam/pantry:master
+    image: registry.gitlab.com/jam-systems/jam/pantry:${CHANNEL}
     restart: always
+    env_file:
+      - ".env"
     labels:
-      - traefik.http.routers.pantry.rule=Host(`pantry.jam.systems`)
+      - traefik.http.routers.pantry.rule=Host(`pantry.${JAM_HOST}`)
       - traefik.http.routers.pantry.tls=true
       - traefik.http.routers.pantry.tls.certresolver=letsencrypt
       - traefik.enable=true
   signalhub:
-    image: registry.gitlab.com/jam-systems/jam/signalhub:master
+    image: registry.gitlab.com/jam-systems/jam/signalhub:${CHANNEL}
     restart: always
     labels:
-      - traefik.http.routers.signalhub.rule=Host(`signalhub.jam.systems`)
+      - traefik.http.routers.signalhub.rule=Host(`signalhub.${JAM_HOST}`)
       - traefik.http.routers.signalhub.tls=true
       - traefik.http.routers.signalhub.tls.certresolver=letsencrypt
       - traefik.enable=true
@@ -49,7 +53,7 @@ services:
     command:
       - "--entryPoints.web.address=:80"
       - "--entryPoints.websecure.address=:443"
-      - "--certificatesResolvers.letsencrypt.acme.email=christoph@doublemalt.net"
+      - "--certificatesResolvers.letsencrypt.acme.email=admin@${JAM_HOST}"
       - "--certificatesResolvers.letsencrypt.acme.storage=/acme/acme.json"
       - "--certificatesResolvers.letsencrypt.acme.httpChallenge.entryPoint=web"
       - "--providers.docker=true"

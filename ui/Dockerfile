@@ -8,5 +8,7 @@ RUN npx esbuild --bundle ./App.jsx --outfile=./bundle.js --format=esm --define:p
 
 FROM nginx:alpine
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker/set-jam-host /usr/local/bin/
 COPY img /usr/share/nginx/html/img
 COPY --from=builder /index.html /bundle.js /usr/share/nginx/html/
+CMD set-jam-host && nginx -g 'daemon off;'
