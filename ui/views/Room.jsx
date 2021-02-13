@@ -77,9 +77,7 @@ export default function Room({room, roomId}) {
 
   return (
     <div className="container md:min-h-full">
-      {/* Navigation
-      
-      */}
+      {/* Navigation */}
       <div className="z-10 navigation absolute bottom-0 bg-white p-4 pb-8">
         {editIdentity && (
           <EditIdentity
@@ -206,8 +204,19 @@ export default function Room({room, roomId}) {
                   </div>
                   <div className="font-medium w-20 md:w-28 m-2 break-words">
                     <div className="flex">
-                      <div style={{lineHeight: "30px", marginTop: "4px"}} className={moderators.includes(swarm.myPeerId) ? "flex-none block bg-yellow-400 text-white font-light text-4xl w-4 h-4 text-center rounded-full" : "hidden"}>*</div>
-                      <div className="flex-none pl-1 overflow-ellipsis w-20 md:w-28">{myInfo.displayName}</div>
+                      <div
+                        style={{lineHeight: '30px', marginTop: '4px'}}
+                        className={
+                          moderators.includes(swarm.myPeerId)
+                            ? 'flex-none block bg-yellow-400 text-white font-light text-4xl w-4 h-4 text-center rounded-full'
+                            : 'hidden'
+                        }
+                      >
+                        *
+                      </div>
+                      <div className="flex-none pl-1 overflow-ellipsis w-20 md:w-28">
+                        {myInfo.displayName}
+                      </div>
                     </div>
                   </div>
                 </li>
@@ -224,7 +233,9 @@ export default function Room({room, roomId}) {
                       className="relative items-center space-y-1 mt-4"
                       alt={peerInfo.displayName}
                       style={iModerate ? {cursor: 'pointer'} : undefined}
-                      onClick={iModerate ? () => setEditRole(peerId) : undefined}
+                      onClick={
+                        iModerate ? () => setEditRole(peerId) : undefined
+                      }
                     >
                       <div
                         className={
@@ -249,8 +260,19 @@ export default function Room({room, roomId}) {
                       </div>
                       <div className="font-medium w-20 md:w-28 m-2 break-words">
                         <div className="flex">
-                          <div style={{lineHeight: "30px", marginTop: "4px"}} className={moderators.includes(peerId) ? "flex-none block bg-yellow-400 text-white font-light text-4xl w-4 h-4 text-center rounded-full" : "hidden"}>*</div>
-                          <div className="flex-none pl-1 truncate w-20 md:w-28">{peerInfo.displayName}</div>
+                          <div
+                            style={{lineHeight: '30px', marginTop: '4px'}}
+                            className={
+                              moderators.includes(peerId)
+                                ? 'flex-none block bg-yellow-400 text-white font-light text-4xl w-4 h-4 text-center rounded-full'
+                                : 'hidden'
+                            }
+                          >
+                            *
+                          </div>
+                          <div className="flex-none pl-1 truncate w-20 md:w-28">
+                            {peerInfo.displayName}
+                          </div>
                         </div>
                       </div>
                     </li>
@@ -293,7 +315,9 @@ export default function Room({room, roomId}) {
                       alt={peerInfo.displayName}
                       src={gravatarUrl(peerInfo)}
                     />
-                    <div className="text-center mt-2">{peerInfo.displayName}</div>
+                    <div className="text-center mt-2">
+                      {peerInfo.displayName}
+                    </div>
                   </li>
                 )
               );
@@ -384,40 +408,55 @@ export default function Room({room, roomId}) {
   );
 }
 
-function EditRole({peerId, addRole, removeRole, speakers, moderators, onCancel}) {
+function EditRole({
+  peerId,
+  addRole,
+  removeRole,
+  speakers,
+  moderators,
+  onCancel,
+}) {
   return (
     <div className="child md:p-10">
       <h3 className="font-medium">Moderator Actions</h3>
       <br />
       <button
         onClick={() => addRole(peerId, 'speakers')}
-        className={speakers.includes(peerId)
-          ? "hidden"
-          : "mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"}
+        className={
+          speakers.includes(peerId)
+            ? 'hidden'
+            : 'mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2'
+        }
       >
         ↑ Invite to Stage
       </button>
       <button
         onClick={() => removeRole(peerId, 'speakers')}
-        className={speakers.includes(peerId)
-        ? "mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
-        : "hidden"}
+        className={
+          speakers.includes(peerId)
+            ? 'mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2'
+            : 'hidden'
+        }
       >
         ↓ Move to Audience
       </button>
       <button
         onClick={() => addRole(peerId, 'moderators')}
-        className={!speakers.includes(peerId) || moderators.includes(peerId)
-        ? "hidden"
-        : "mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"}
+        className={
+          !speakers.includes(peerId) || moderators.includes(peerId)
+            ? 'hidden'
+            : 'mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2'
+        }
       >
         ✳️ Make Moderator
       </button>
       <button
         onClick={() => removeRole(peerId, 'moderators')}
-        className={moderators.includes(peerId)
-          ? "mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
-          : "hidden"}
+        className={
+          moderators.includes(peerId)
+            ? 'mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2'
+            : 'hidden'
+        }
       >
         ❎ Demote Moderator
       </button>

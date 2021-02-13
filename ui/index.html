@@ -6,12 +6,22 @@
     <meta property="og:description" content="Join this Jam audio space" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://jam.systems/" />
-    <meta property="og:image" content="https://jam.systems/img/jam-illustration.png" />
+    <meta
+      property="og:image"
+      content="https://jam.systems/img/jam-illustration.png"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="shortcut icon" type="image/png" href="/img/jam-illustration.png" />
-    <link rel="apple-touch-icon" href="/img/jam-illustration.png">
+    <link
+      rel="shortcut icon"
+      type="image/png"
+      href="/img/jam-illustration.png"
+    />
+    <link rel="apple-touch-icon" href="/img/jam-illustration.png" />
     <!-- TODO: move tailwind to build pipeline if we keep it -->
-    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <link
+      href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
     <title>Jam</title>
     <style>
       body {
@@ -21,9 +31,13 @@
           'Helvetica Neue', sans-serif;
         background-color: rgb(243, 242, 239);
       }
+      .outer-container {
+        height: 100vh;
+        padding-top: 50px;
+      }
       .container {
         width: 700px;
-        margin: 50px auto 0 auto;
+        margin: 0 auto;
         padding: 13px;
         height: 100%;
         border-radius: 30px 30px 0 0;
@@ -91,7 +105,7 @@
     </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root" class="outer-container"></div>
     <script type="module" src="./bundle.js"></script>
   </body>
 </html>
