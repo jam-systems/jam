@@ -238,7 +238,7 @@ export default function Room({room, roomId}) {
           <div className="flex">
             <button
               onClick={() => state.set('micMuted', !micMuted)}
-              className="select-none h-12 mr-2 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline active:bg-yellow-300 flex-grow mt-10"
+              className="select-none h-12 mr-2 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline active:bg-yellow-300 flex-grow mt-20"
             >
               {micOn
                 ? micMuted
