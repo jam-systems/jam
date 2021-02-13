@@ -444,11 +444,11 @@ function EditIdentity({info, onSubmit, onCancel}) {
   };
   return (
     <div className="child md:p-10">
-      <h3 className="p-6 font-medium">Profile</h3>
+      <h3 className="font-medium">Edit Profile</h3>
       <br />
       <form onSubmit={submit}>
         <input
-          className="rounded placeholder-gray-300 bg-gray-50 w-64"
+          className="rounded placeholder-gray-300 bg-gray-50 w-48"
           type="text"
           placeholder="Display name"
           value={displayName || ''}
