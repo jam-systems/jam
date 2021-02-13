@@ -121,7 +121,7 @@ export default function Room({room, roomId}) {
                       🙊
                     </div>
                   </div>
-                  <div className="font-medium w-20 md:w-28 m-2 break-words">
+                  <div className="font-medium w-20 md:w-28 m-2">
                     <div className="flex">
                       <div
                         style={{lineHeight: '30px', marginTop: '4px'}}
@@ -177,7 +177,7 @@ export default function Room({room, roomId}) {
                           🙊
                         </div>
                       </div>
-                      <div className="font-medium w-20 md:w-28 m-2 break-words">
+                      <div className="font-medium w-20 md:w-28 m-2">
                         <div className="flex">
                           <div
                             style={{lineHeight: '30px', marginTop: '4px'}}
