@@ -384,7 +384,7 @@ export default function Room({room, roomId}) {
 function EditRole({peerId, addRole, removeRole, speakers, moderators, onCancel}) {
   return (
     <div className="child md:p-10">
-      <h3 className="p-6 font-medium">Promote</h3>
+      <h3 className="font-medium">Moderator Actions</h3>
       <br />
       <button
         onClick={() => addRole(peerId, 'speakers')}
