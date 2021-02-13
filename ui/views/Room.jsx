@@ -89,6 +89,8 @@ export default function Room({room, roomId}) {
           peerId={editRole}
           addRole={addRole}
           removeRole={removeRole}
+          speakers={speakers}
+          moderators={moderators}
           onCancel={() => setEditRole(null)}
         />
       )}
@@ -379,32 +381,40 @@ export default function Room({room, roomId}) {
   );
 }
 
-function EditRole({peerId, addRole, removeRole, onCancel}) {
+function EditRole({peerId, addRole, removeRole, speakers, moderators, onCancel}) {
   return (
     <div className="child md:p-10">
       <h3 className="p-6 font-medium">Promote</h3>
       <br />
       <button
         onClick={() => addRole(peerId, 'speakers')}
-        className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
+        className={speakers.includes(peerId)
+          ? "hidden"
+          : "mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"}
       >
         Invite to Stage
       </button>
       <button
         onClick={() => removeRole(peerId, 'speakers')}
-        className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
+        className={speakers.includes(peerId)
+        ? "mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
+        : "hidden"}
       >
         Move to Audience
       </button>
       <button
         onClick={() => addRole(peerId, 'moderators')}
-        className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
+        className={!speakers.includes(peerId) || moderators.includes(peerId)
+        ? "hidden"
+        : "mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"}
       >
         Make Moderator
       </button>
       <button
         onClick={() => removeRole(peerId, 'moderators')}
-        className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
+        className={moderators.includes(peerId)
+          ? "mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
+          : "hidden"}
       >
         Demote Moderator
       </button>
