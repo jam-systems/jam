@@ -99,7 +99,7 @@ export default function Room({room, roomId}) {
         <div className="flex">
           <button
             onClick={() => state.set('soundMuted', !soundMuted)}
-            className="mr-2 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow"
+            className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow"
           >
             {soundMuted ? '🔇' : '🔊'} {soundMuted ? 'Off' : 'On'}
           </button>
@@ -131,19 +131,19 @@ export default function Room({room, roomId}) {
                 setTimeout(() => setShowShareInfo(false), 2000);
               }
             }}
-            className="ml-2 mr-2 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
+            className="ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
           >
             ✉️&nbsp;Share
           </button>
-
-          {/* Leave */}
-          <button
-            className="ml-2 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
-            onClick={() => leaveRoom(roomId)}
-          >
-            🚪 Leave quietly
-          </button>
         </div>
+
+        {/* Leave */}
+        <button
+          className="mt-6 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
+          onClick={() => leaveRoom(roomId)}
+        >
+          🚪 Leave quietly
+        </button>
 
         <div className="flex relative">
           <button className="select-none hidden h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow">
