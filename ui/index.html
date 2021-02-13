@@ -15,7 +15,6 @@
     <title>Jam</title>
     <style>
       body {
-        margin: 0;
         width: 100%;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
           'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
@@ -24,12 +23,22 @@
       }
       .container {
         width: 700px;
-        margin: 50px auto 40px auto;
+        margin: 50px auto 0 auto;
         padding: 13px;
-        border-radius: 30px;
+        height: 100%;
+        border-radius: 30px 30px 0 0;
         border: 2px solid lightgrey;
+        border-bottom: 0;
         background: white;
       }
+
+      .navigation {
+        margin-left: -15px; /* compensate for padding from outer div (?) */
+        width: 700px;
+        border: 2px solid lightgrey;
+        border-bottom: 0;
+      }
+
       h1,
       h2,
       h3 {
@@ -78,8 +87,18 @@
       @media (max-width: 640px) {
         .container {
           width: 100%;
-          box-sizing: border-box;
           border: 0px;
+          box-sizing: border-box;
+        }
+
+        .navigation {
+          width: 100%;
+          border-top: 2px;
+          border-right: 0;
+          border-bottom: 0;
+          border-left: 0;
+
+          box-sizing: border-box;
         }
       }
     </style>
