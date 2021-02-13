@@ -3,7 +3,7 @@ import {enterRoom} from '../main';
 
 export default function EnterRoom({roomId, name, description}) {
   return (
-    <div className="container min-h-screen">
+    <div className="container md:min-h-full">
       <div className="child md:p-10">
         <h1 className="pl-2  pt-6 font-book text-black text-xl3">{name || ''}</h1>
         {/*

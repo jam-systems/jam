@@ -76,7 +76,7 @@ export default function Room({room, roomId}) {
     return <EnterRoom roomId={roomId} name={name} description={description} />;
 
   return (
-    <div className="container min-h-screen">
+    <div className="container md:min-h-full">
       {/* Navigation
       
       */}
