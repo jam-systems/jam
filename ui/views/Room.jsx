@@ -114,7 +114,7 @@ export default function Room({room, roomId}) {
                 >
                   <div className="human-radius p-1 bg-white">
                     <img
-                      className="human-radius border border-gray-300 bg-gray-300 w-20 h-20 md:w-28 md:h-28"
+                      className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28 "
                       alt="me"
                       src={gravatarUrl(myInfo)}
                     />
@@ -153,7 +153,7 @@ export default function Room({room, roomId}) {
                     >
                       <div className="human-radius p-1 bg-white">
                         <img
-                          className="human-radius border border-gray-300 bg-gray-300 w-20 h-20 md:w-28 md:h-28"
+                          className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28"
                           alt={peerId}
                           src={gravatarUrl(peerInfo)}
                         />
@@ -186,7 +186,7 @@ export default function Room({room, roomId}) {
               onClick={() => setEditIdentity(!editIdentity)}
             >
               <img
-                className="human-radius border border-gray-300"
+                className="human-radius border border-gray-300 bg-yellow-50"
                 src={gravatarUrl(myInfo)}
               />
             </li>
@@ -203,7 +203,7 @@ export default function Room({room, roomId}) {
                   onClick={iModerate ? () => setEditRole(peerId) : undefined}
                 >
                   <img
-                    className="human-radius border border-gray-300"
+                    className="human-radius border border-gray-300 bg-yellow-50"
                     alt={peerId}
                     src={gravatarUrl(peerInfo)}
                   />
