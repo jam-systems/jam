@@ -392,7 +392,7 @@ function EditRole({peerId, addRole, removeRole, speakers, moderators, onCancel})
           ? "hidden"
           : "mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"}
       >
-        Invite to Stage
+        ↑ Invite to Stage
       </button>
       <button
         onClick={() => removeRole(peerId, 'speakers')}
@@ -400,7 +400,7 @@ function EditRole({peerId, addRole, removeRole, speakers, moderators, onCancel})
         ? "mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
         : "hidden"}
       >
-        Move to Audience
+        ↓ Move to Audience
       </button>
       <button
         onClick={() => addRole(peerId, 'moderators')}
@@ -408,7 +408,7 @@ function EditRole({peerId, addRole, removeRole, speakers, moderators, onCancel})
         ? "hidden"
         : "mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"}
       >
-        Make Moderator
+        ✳️ Make Moderator
       </button>
       <button
         onClick={() => removeRole(peerId, 'moderators')}
@@ -416,7 +416,7 @@ function EditRole({peerId, addRole, removeRole, speakers, moderators, onCancel})
           ? "mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
           : "hidden"}
       >
-        Demote Moderator
+        ❎ Demote Moderator
       </button>
       <button
         onClick={onCancel}
