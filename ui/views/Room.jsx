@@ -150,7 +150,7 @@ export default function Room({room, roomId}) {
                     <li
                       key={peerId}
                       className="relative items-center space-y-1 mt-4"
-                      alt={peerInfo.displayName}
+                      title={peerInfo.displayName}
                       style={iModerate ? {cursor: 'pointer'} : undefined}
                       onClick={
                         iModerate ? () => setEditRole(peerId) : undefined
@@ -225,6 +225,7 @@ export default function Room({room, roomId}) {
                 inRoom && (
                   <li
                     key={peerId}
+                    title={peerInfo.displayName}
                     className="flex-shrink w-16 h-16 md:w-24 md:h-24 text-xs"
                     style={iModerate ? {cursor: 'pointer'} : undefined}
                     onClick={iModerate ? () => setEditRole(peerId) : undefined}
