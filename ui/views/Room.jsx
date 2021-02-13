@@ -126,7 +126,7 @@ export default function Room({room, roomId}) {
                   </div>
                 </div>
                 <div className="font-medium text-center w-20 md:w-28 m-2 break-words">
-                  {myInfo.displayName}
+                  <div style={{lineHeight: "31px"}} className={moderators.includes(swarm.myPeerId) ? "inline-block bg-yellow-400 text-white font-light text-4xl w-4 h-4 text-center rounded-full" : "hidden"}>*</div>{myInfo.displayName}
                 </div>
               </li>
             )}
@@ -166,7 +166,7 @@ export default function Room({room, roomId}) {
                       </div>
                     </div>
                     <div className="font-medium text-center w-20 md:w-28 m-2 break-words">
-                      {peerInfo.displayName}
+                      <div style={{lineHeight: "31px"}} className={moderators.includes(peerId) ? "inline-block bg-yellow-400 text-white font-light text-4xl w-4 h-4 text-center rounded-full" : "hidden"}>*</div>{peerInfo.displayName}
                     </div>
                   </li>
                 )
