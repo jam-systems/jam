@@ -4,8 +4,8 @@ import {enterRoom} from '../main';
 export default function EnterRoom({roomId, name, description}) {
   return (
     <div className="container">
-      <div className="child p-6 md:p-10">
-        <h1 className="font-book text-black text-xl3">{name || ''}</h1>
+      <div className="child md:p-10">
+        <h1 className="pl-2  pt-6 font-book text-black text-xl3">{name || ''}</h1>
         {/*
             a snapshot of current or nticipated speakers
             (for scheduled (future) rooms)
@@ -24,7 +24,7 @@ export default function EnterRoom({roomId, name, description}) {
             <img className="human-radius border border-gray-300" src="img/avatars/tosh.jpg" />
           </li>
         </ol>
-        <p className="text-gray-500">
+        <p className="pl-2 text-gray-500">
           {description || 'This is a Room on Jam'}
         </p>
         {/*
@@ -49,7 +49,7 @@ export default function EnterRoom({roomId, name, description}) {
         */}
         <button
           onClick={() => enterRoom(roomId)}
-          className="select-none mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
+          className="mb-10 select-none mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
         >
           🐾 &nbsp;Join this Jam
         </button>

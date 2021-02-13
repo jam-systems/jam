@@ -95,8 +95,8 @@ export default function Room({room, roomId}) {
         />
       )}
       <div className="child md:p-10">
-        <h1 className="pt-6 md:pt-0">{name}</h1>
-        <div className="text-gray-500">{description}</div>
+        <h1 className="pl-2 pt-6 md:pt-0">{name}</h1>
+        <div className="pl-2 text-gray-500">{description}</div>
 
         {/* Stage */}
         <div className="h-44 h-full">
