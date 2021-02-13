@@ -222,7 +222,7 @@ export default function Room({room, roomId}) {
                     <li
                       key={peerId}
                       className="relative items-center space-y-1 mt-4"
-                      title={peerId}
+                      alt={peerInfo.displayName}
                       style={iModerate ? {cursor: 'pointer'} : undefined}
                       onClick={iModerate ? () => setEditRole(peerId) : undefined}
                     >
@@ -236,7 +236,7 @@ export default function Room({room, roomId}) {
                         <div className="human-radius p-1 bg-white">
                           <img
                             className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28"
-                            alt={peerId}
+                            alt={peerInfo.displayName}
                             src={gravatarUrl(peerInfo)}
                           />
                         </div>
@@ -290,7 +290,7 @@ export default function Room({room, roomId}) {
                   >
                     <img
                       className="human-radius border border-gray-300 bg-yellow-50"
-                      alt={peerId}
+                      alt={peerInfo.displayName}
                       src={gravatarUrl(peerInfo)}
                     />
                     <div className="text-center mt-2">{peerInfo.displayName}</div>
