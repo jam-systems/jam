@@ -177,7 +177,7 @@ export default function Room({room, roomId}) {
 
         <br />
 
-        <h3 style={{marginTop: '80px'}}>Audience</h3>
+        <h3 className="text-gray-300">Audience</h3>
         <ol className="flex space-x-4 pt-6">
           {!iSpeak && (
             <li
