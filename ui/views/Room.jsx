@@ -390,14 +390,14 @@ function EditRole({peerId, addRole, removeRole, speakers, moderators, onCancel})
         onClick={() => addRole(peerId, 'speakers')}
         className={speakers.includes(peerId)
           ? "hidden"
-          : "mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"}
+          : "h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"}
       >
         Invite to Stage
       </button>
       <button
         onClick={() => removeRole(peerId, 'speakers')}
         className={speakers.includes(peerId)
-        ? "mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
+        ? "h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
         : "hidden"}
       >
         Move to Audience
@@ -406,21 +406,21 @@ function EditRole({peerId, addRole, removeRole, speakers, moderators, onCancel})
         onClick={() => addRole(peerId, 'moderators')}
         className={!speakers.includes(peerId) || moderators.includes(peerId)
         ? "hidden"
-        : "mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"}
+        : "h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"}
       >
         Make Moderator
       </button>
       <button
         onClick={() => removeRole(peerId, 'moderators')}
         className={moderators.includes(peerId)
-          ? "mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
+          ? "h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
           : "hidden"}
       >
         Demote Moderator
       </button>
       <button
         onClick={onCancel}
-        className="mt-5 h-12 px-6 text-lg text-black bg-gray-100 rounded-lg focus:shadow-outline active:bg-gray-300"
+        className="h-12 px-6 text-lg text-black bg-gray-100 rounded-lg focus:shadow-outline active:bg-gray-300"
       >
         Cancel
       </button>
