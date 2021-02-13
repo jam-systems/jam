@@ -1,10 +1,10 @@
 import swarm from './lib/swarm.js';
 import hark from 'hark';
 import {onFirstInteraction} from './lib/user-interaction.js';
-import {get} from './backend';
-import {updateInfo} from './identity';
+import {get, updateApiQuery} from './backend';
+import {signData, updateInfo, verifyData} from './identity';
 import state from './state.js';
-import {jamHost} from "./config";
+import {jamHost} from './config';
 
 window.state = state; // for debugging
 window.swarm = swarm;
@@ -13,6 +13,21 @@ export {state};
 
 state.on('myInfo', updateInfo);
 
+swarm.config({
+  sign: signData,
+  verify: verifyData,
+  pcConfig: {
+    iceTransportPolicy: 'all',
+    iceServers: [
+      {urls: `stun:stun.${jamHost()}:3478`},
+      {
+        urls: `turn:turn.${jamHost()}:3478`,
+        username: 'test',
+        credential: 'yieChoi0PeoKo8ni',
+      },
+    ],
+  },
+});
 // TODO remove when convinced it works
 swarm.on('peerState', state => console.log('shared peer state', state));
 
@@ -46,7 +61,26 @@ export function connectRoom(roomId) {
       [id]: await get(`/identities/${id}`),
     });
   });
+  swarm.hub.subscribe('room-info', data => {
+    console.log('new room info', data);
+    updateApiQuery(`/rooms/${swarm.room}`, data, 200);
+  });
 }
+const emptyRoom = {name: '', description: '', speakers: [], moderators: []};
+function currentRoom() {
+  return state.queries[`/rooms/${swarm.room}`]?.data || emptyRoom;
+}
+state.on('queries', () => {
+  let {speakers} = currentRoom();
+  if (!state.soundMuted) {
+    speakers.forEach(id => {
+      if (speaker[id]?.muted) speaker[id].muted = false;
+    });
+    for (let id in speaker) {
+      if (!speakers.includes(id)) speaker[id].muted = true;
+    }
+  }
+});
 
 export function createAudioContext() {
   const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -63,10 +97,12 @@ state.on('myAudio', stream => {
 
 let speaker = {};
 state.on('soundMuted', muted => {
+  let {speakers} = currentRoom();
   for (let id in speaker) {
-    speaker[id].muted = muted;
+    speaker[id].muted = muted || !speakers.includes(id);
   }
 });
+// TODO make muted also react to changing speakers !!
 
 swarm.on('newPeer', async id => {
   for (let i = 0; i < 5; i++) {
@@ -88,10 +124,11 @@ swarm.on('stream', (stream, name, peer) => {
     delete speaker[id];
     return;
   }
+  let {speakers} = currentRoom();
   let audio = new Audio();
   speaker[id] = audio;
   audio.srcObject = stream;
-  audio.muted = state.soundMuted;
+  audio.muted = state.soundMuted || !speakers.includes(id);
   audio.addEventListener('canplay', () => {
     play(audio).catch(() => {
       console.log('deferring audio.play');
@@ -99,7 +136,7 @@ swarm.on('stream', (stream, name, peer) => {
       state.on('userInteracted', interacted => {
         if (interacted)
           play(audio).then(() => {
-            state.set('soundMuted', false);
+            if (state.soundMuted) state.set('soundMuted', false);
             console.log('playing audio!!');
           });
       });
@@ -116,7 +153,7 @@ swarm.on('stream', (stream, name, peer) => {
   listenIfSpeaking(id, stream);
 });
 
-// TODO: does this fix iOS speaker consistency?
+// TODO: this does not fix iOS speaker consistency
 // TODO: worth it to detect OS?
 async function play(audio) {
   await audio.play();

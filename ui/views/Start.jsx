@@ -34,7 +34,7 @@ export default function Start({urlRoomId}) {
     []);
 
   return (
-    <div className="container">
+    <div className="container md:min-h-full">
       <div className="child p-6 md:p-10">
         <h1>Welcome to Jam</h1>
 

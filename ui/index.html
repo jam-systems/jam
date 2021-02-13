@@ -6,30 +6,54 @@
     <meta property="og:description" content="Join this Jam audio space" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://jam.systems/" />
-    <meta property="og:image" content="https://jam.systems/img/jam-illustration.png" />
+    <meta
+      property="og:image"
+      content="https://jam.systems/img/jam-illustration.png"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="shortcut icon" type="image/png" href="/img/jam-illustration.png" />
-    <link rel="apple-touch-icon" href="/img/jam-illustration.png">
+    <link
+      rel="shortcut icon"
+      type="image/png"
+      href="/img/jam-illustration.png"
+    />
+    <link rel="apple-touch-icon" href="/img/jam-illustration.png" />
     <!-- TODO: move tailwind to build pipeline if we keep it -->
-    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <link
+      href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
     <title>Jam</title>
     <style>
       body {
-        margin: 0;
         width: 100%;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
           'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
           'Helvetica Neue', sans-serif;
         background-color: rgb(243, 242, 239);
       }
+      .outer-container {
+        height: 100vh;
+        padding-top: 50px;
+      }
       .container {
         width: 700px;
-        margin: 50px auto 40px auto;
+        margin: 0 auto;
         padding: 13px;
-        border-radius: 30px;
+        height: 100%;
+        border-radius: 30px 30px 0 0;
         border: 2px solid lightgrey;
+        border-bottom: 0;
         background: white;
       }
+
+      .navigation {
+        margin-left: -15px; /* compensate for padding from outer div (?) */
+        width: 700px;
+        border: 2px solid lightgrey;
+        border-bottom: 0;
+        flex: none;
+      }
+
       h1,
       h2,
       h3 {
@@ -57,19 +81,6 @@
         border: 5px solid transparent;
         vertical-align: top;
       }
-      .muted:after {
-        content: '';
-        height: 24px;
-        width: 24px;
-        display: inline-block;
-        position: relative;
-        top: -34px;
-        left: 80px;
-        border: 4px solid white;
-        border-radius: 50%;
-        background: white url(img/muted.png) no-repeat;
-        background-size: cover;
-      }
 
       .human-radius {
         border-radius: 42%;
@@ -78,13 +89,24 @@
       @media (max-width: 640px) {
         .container {
           width: 100%;
+          border: 0px;
+          box-sizing: border-box;
+        }
+
+        .navigation {
+          width: 100%;
+          border-top: 2px;
+          border-right: 0;
+          border-bottom: 0;
+          border-left: 0;
+
           box-sizing: border-box;
         }
       }
     </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root" class="outer-container"></div>
     <script type="module" src="./bundle.js"></script>
   </body>
 </html>

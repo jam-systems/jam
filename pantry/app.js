@@ -32,18 +32,23 @@ const verify = (authToken, key) => {
 
 const roomAuthenticator = {
     ...permitAllAuthenticator,
-    canPut: (req, res, next) => {
+    canPut: async (req, res, next) => {
         const authHeader = req.header("Authorization");
         if(authHeader) {
             const token = authHeader.substring(6);
-            const roomInfo = get('rooms/' + req.params.id);
+            const roomInfo = await get('rooms/' + req.params.id);
+            let authenticated = false;
             for (const moderatorKey of roomInfo['moderators']) {
                 if(verify(token, moderatorKey)) {
-                    next();
+                    authenticated = true;
                     break;
                 }
             }
-            res.sendStatus(403);
+            if(authenticated) {
+                next();
+            } else {
+                res.sendStatus(403);
+            }
         } else {
             res.sendStatus(401);
         }

@@ -2,13 +2,7 @@ import React, {useEffect} from 'react';
 import {render} from 'react-dom';
 import Start from './views/Start.jsx';
 import Room from './views/Room.jsx';
-import {
-  initializeIdentity,
-  getInfo,
-  getId,
-  signData,
-  verifyData,
-} from './identity';
+import {initializeIdentity, getInfo, getId} from './identity';
 import {useApiQuery} from './backend.js';
 import {usePath} from './lib/use-location.js';
 import {connectRoom, state} from './main.js';
@@ -21,11 +15,7 @@ function App() {
   useEffect(() => {
     initializeIdentity();
     state.set('myInfo', getInfo());
-    swarm.config({
-      myPeerId: getId(),
-      sign: state => signData(state),
-      verify: (signedState, peerId) => verifyData(signedState, peerId),
-    });
+    swarm.config({myPeerId: getId()});
     swarm.set('sharedState', {inRoom: false});
   }, []);
 
