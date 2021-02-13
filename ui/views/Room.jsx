@@ -189,7 +189,7 @@ export default function Room({room, roomId}) {
                           >
                             *
                           </div>
-                          <div className="flex-none overflow-ellipsis pl-1 w-20 md:w-28">
+                          <div className="flex-none pl-1 overflow-ellipsis w-20 md:w-28">
                             {peerInfo.displayName}
                           </div>
                         </div>
