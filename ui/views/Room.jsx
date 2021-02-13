@@ -247,7 +247,7 @@ export default function Room({room, roomId}) {
                           🙊
                         </div>
                       </div>
-                      <div className="font-medium text-center w-20 md:w-28 m-2 break-words">
+                      <div className="font-medium w-20 md:w-28 m-2 break-words">
                         <div className="flex">
                           <div style={{lineHeight: "30px", marginTop: "4px"}} className={moderators.includes(peerId) ? "flex-none block bg-yellow-400 text-white font-light text-4xl w-4 h-4 text-center rounded-full" : "hidden"}>*</div>
                           <div className="flex-none pl-1 truncate w-20 md:w-28">{peerInfo.displayName}</div>
