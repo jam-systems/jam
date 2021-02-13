@@ -189,6 +189,7 @@ export default function Room({room, roomId}) {
                 className="human-radius border border-gray-300 bg-yellow-50"
                 src={gravatarUrl(myInfo)}
               />
+              {myInfo.displayName}
             </li>
           )}
           {audiencePeers.map(peerId => {
@@ -207,6 +208,7 @@ export default function Room({room, roomId}) {
                     alt={peerId}
                     src={gravatarUrl(peerInfo)}
                   />
+                  {peerInfo.displayName}
                 </li>
               )
             );
