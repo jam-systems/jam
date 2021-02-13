@@ -81,6 +81,23 @@ export default function Room({room, roomId}) {
       
       */}
       <div className="z-10 navigation absolute bottom-0 bg-white p-4 pb-8">
+        {editIdentity && (
+          <EditIdentity
+            info={myInfo}
+            onSubmit={updateInfo}
+            onCancel={() => setEditIdentity(false)}
+          />
+        )}
+        {editRole && (
+          <EditRole
+            peerId={editRole}
+            addRole={addRole}
+            removeRole={removeRole}
+            speakers={speakers}
+            moderators={moderators}
+            onCancel={() => setEditRole(null)}
+          />
+        )}
         <div className="flex">
           <button
             onClick={() => state.set('micMuted', !micMuted)}
@@ -150,26 +167,8 @@ export default function Room({room, roomId}) {
             ✋🏽&nbsp;Raise&nbsp;hand
           </button>
         </div>
-
       </div>
 
-      {editIdentity && (
-        <EditIdentity
-          info={myInfo}
-          onSubmit={updateInfo}
-          onCancel={() => setEditIdentity(false)}
-        />
-      )}
-      {editRole && (
-        <EditRole
-          peerId={editRole}
-          addRole={addRole}
-          removeRole={removeRole}
-          speakers={speakers}
-          moderators={moderators}
-          onCancel={() => setEditRole(null)}
-        />
-      )}
       <div className="child flex flex-col h-5/6 md:p-10">
         <h1 className="pl-2 pt-6 md:pt-0">{name}</h1>
         <div className="pl-2 text-gray-500">{description}</div>
