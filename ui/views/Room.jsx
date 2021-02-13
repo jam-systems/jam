@@ -76,98 +76,17 @@ export default function Room({room, roomId}) {
     return <EnterRoom roomId={roomId} name={name} description={description} />;
 
   return (
-    <div className="container md:min-h-full">
-      {/* Navigation */}
-      <div className="z-10 navigation absolute bottom-0 bg-white p-4 pb-8">
-        {editIdentity && (
-          <EditIdentity
-            info={myInfo}
-            onSubmit={updateInfo}
-            onCancel={() => setEditIdentity(false)}
-          />
-        )}
-        {editRole && (
-          <EditRole
-            peerId={editRole}
-            addRole={addRole}
-            removeRole={removeRole}
-            speakers={speakers}
-            moderators={moderators}
-            onCancel={() => setEditRole(null)}
-          />
-        )}
-        <div className="flex">
-          <button
-            onClick={() => state.set('micMuted', !micMuted)}
-            className="select-none h-12 mt-4 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline active:bg-yellow-300 flex-grow"
-          >
-            {micOn
-              ? micMuted
-                ? "🙊 You're silent"
-                : "🐵 You're on"
-              : "🙊 You're off"}
-          </button>
-        </div>
-
-        <br />
-
-        <div className="flex">
-          <button
-            onClick={() => state.set('soundMuted', !soundMuted)}
-            className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow"
-          >
-            {soundMuted ? '🔇' : '🔊'}&nbsp;{soundMuted ? 'Off' : 'On'}
-          </button>
-
-          {/* Share */}
-          {showShareInfo && (
-            <span
-              style={{
-                position: 'absolute',
-                top: '-20px',
-                left: '2px',
-                fontSize: '13px',
-              }}
-            >
-              Link copied to clipboard!
-            </span>
-          )}
-          <button
-            onClick={() => {
-              if (navigator.share) {
-                navigator.share({
-                  title: name || 'A Jam room',
-                  text: 'Hi, join me in this room on Jam.',
-                  url: location.href,
-                });
-              } else {
-                copyToClipboard(location.href);
-                setShowShareInfo(true);
-                setTimeout(() => setShowShareInfo(false), 2000);
-              }
-            }}
-            className="ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
-          >
-            ✉️&nbsp;Share
-          </button>
-
-          {/* Leave */}
-          <button
-            className="ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
-            onClick={() => leaveRoom(roomId)}
-          >
-            🚪&nbsp;Leave
-          </button>
-        </div>
-
-        <div className="flex relative">
-          <button className="select-none hidden h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow">
-            ✋🏽&nbsp;Raise&nbsp;hand
-          </button>
-        </div>
-      </div>
-
-      <div className="child flex flex-col h-5/6 md:p-10">
+    <div
+      className="container"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <div
+        className="child flex flex-col md:p-10"
+        style={{flex: '1', overflowY: 'auto', minHeight: '0'}}
+      >
         <h1 className="pl-2 pt-6 md:pt-0">{name}</h1>
         <div className="pl-2 text-gray-500">{description}</div>
 
@@ -402,6 +321,96 @@ export default function Room({room, roomId}) {
               </p>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <div className="z-10 navigation bg-white p-4 pb-8">
+        {editIdentity && (
+          <EditIdentity
+            info={myInfo}
+            onSubmit={updateInfo}
+            onCancel={() => setEditIdentity(false)}
+          />
+        )}
+        {editRole && (
+          <EditRole
+            peerId={editRole}
+            addRole={addRole}
+            removeRole={removeRole}
+            speakers={speakers}
+            moderators={moderators}
+            onCancel={() => setEditRole(null)}
+          />
+        )}
+        <div className="flex">
+          <button
+            onClick={() => state.set('micMuted', !micMuted)}
+            className="select-none h-12 mt-4 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline active:bg-yellow-300 flex-grow"
+          >
+            {micOn
+              ? micMuted
+                ? "🙊 You're silent"
+                : "🐵 You're on"
+              : "🙊 You're off"}
+          </button>
+        </div>
+
+        <br />
+
+        <div className="flex">
+          <button
+            onClick={() => state.set('soundMuted', !soundMuted)}
+            className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow"
+          >
+            {soundMuted ? '🔇' : '🔊'}&nbsp;{soundMuted ? 'Off' : 'On'}
+          </button>
+
+          {/* Share */}
+          {showShareInfo && (
+            <span
+              style={{
+                position: 'absolute',
+                top: '-20px',
+                left: '2px',
+                fontSize: '13px',
+              }}
+            >
+              Link copied to clipboard!
+            </span>
+          )}
+          <button
+            onClick={() => {
+              if (navigator.share) {
+                navigator.share({
+                  title: name || 'A Jam room',
+                  text: 'Hi, join me in this room on Jam.',
+                  url: location.href,
+                });
+              } else {
+                copyToClipboard(location.href);
+                setShowShareInfo(true);
+                setTimeout(() => setShowShareInfo(false), 2000);
+              }
+            }}
+            className="ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
+          >
+            ✉️&nbsp;Share
+          </button>
+
+          {/* Leave */}
+          <button
+            className="ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
+            onClick={() => leaveRoom(roomId)}
+          >
+            🚪&nbsp;Leave
+          </button>
+        </div>
+
+        <div className="flex relative">
+          <button className="select-none hidden h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow">
+            ✋🏽&nbsp;Raise&nbsp;hand
+          </button>
         </div>
       </div>
     </div>
