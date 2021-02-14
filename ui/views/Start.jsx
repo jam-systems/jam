@@ -48,7 +48,7 @@ export default function Start({urlRoomId}) {
             <br />
             <br />
             <a
-              href="/"
+              href="https://gitlab.com/jam-systems/jam"
               className="underline text-blue-800 active:text-blue-600"
             >
               Learn&nbsp;more&nbsp;about&nbsp;Jam.
