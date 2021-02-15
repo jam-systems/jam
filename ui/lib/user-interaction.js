@@ -1,3 +1,4 @@
+// TODO this lib does not work reliably on iOS
 const activationEvents = ['change', 'click', 'contextmenu', 'dblclick'];
 
 export function onFirstInteraction(cb) {

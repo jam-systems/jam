@@ -1,6 +1,5 @@
 import swarm from './lib/swarm.js';
 import hark from 'hark';
-import {onFirstInteraction} from './lib/user-interaction.js';
 import {get, updateApiQuery} from './backend';
 import {signData, updateInfo, verifyData} from './identity';
 import state from './state.js';
@@ -28,25 +27,17 @@ swarm.config({
     ],
   },
 });
-// TODO remove when convinced it works
-swarm.on('peerState', state => console.log('shared peer state', state));
-
-onFirstInteraction(() => console.log('first user interaction'));
 state.on('userInteracted', i => i && createAudioContext());
 
 export {requestAudio};
 
 export function enterRoom(roomId) {
   state.set('userInteracted', true);
-  state.enteredRooms.add(roomId);
-  state.update('enteredRooms');
   swarm.set('sharedState', state => ({...state, inRoom: true}));
   requestAudio().then(() => state.set('soundMuted', false));
 }
 
 export function leaveRoom(roomId) {
-  state.enteredRooms.delete(roomId);
-  state.update('enteredRooms');
   swarm.set('sharedState', state => ({...state, inRoom: false}));
   stopAudio();
   state.set('soundMuted', true);
@@ -131,13 +122,13 @@ swarm.on('stream', (stream, name, peer) => {
   audio.muted = state.soundMuted || !speakers.includes(id);
   audio.addEventListener('canplay', () => {
     play(audio).catch(() => {
-      console.log('deferring audio.play');
+      // console.log('deferring audio.play');
       state.set('soundMuted', true);
       state.on('userInteracted', interacted => {
         if (interacted)
           play(audio).then(() => {
             if (state.soundMuted) state.set('soundMuted', false);
-            console.log('playing audio!!');
+            // console.log('playing audio!!');
           });
       });
     });
@@ -204,14 +195,12 @@ function listenIfSpeaking(peerId, stream) {
   if (!state.audioContext) {
     // if no audio context exists yet, retry as soon as it is available
     let onAudioContext = () => {
-      console.log('reacting to audio context later');
       listenIfSpeaking(peerId, stream);
       state.off('audioContext', onAudioContext);
     };
     state.on('audioContext', onAudioContext);
     return;
   }
-  console.log('have an audio context');
   let options = {audioContext: state.audioContext};
   let speechEvents = hark(stream, options);
 

@@ -5,7 +5,6 @@ const state = State({
   micMuted: true,
   myAudio: null,
   speaking: new Set(),
-  enteredRooms: new Set(),
   queries: {},
   audioContext: null,
   userInteracted: false,

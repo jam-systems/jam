@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {leaveRoom, state} from '../main';
-import use from '../lib/use-state.js';
+import {useMany} from '../lib/use-state.js';
 import swarm from '../lib/swarm.js';
 import EnterRoom from './EnterRoom.jsx';
 import {gravatarUrl} from '../lib/gravatar';
@@ -11,16 +11,29 @@ import {signedToken} from '../identity';
 
 export default function Room({room, roomId}) {
   // room = {name, description, moderators: [peerId], speakers: [peerId]}
-  let myInfo = use(state, 'myInfo');
-  let myAudio = use(state, 'myAudio');
+  let [
+    myInfo,
+    myAudio,
+    micMuted,
+    soundMuted,
+    identities,
+    speaking,
+  ] = useMany(state, [
+    'myInfo',
+    'myAudio',
+    'micMuted',
+    'soundMuted',
+    'identities',
+    'speaking',
+  ]);
+  let [peers, peerState, sharedState] = useMany(swarm, [
+    'stickyPeers',
+    'peerState',
+    'sharedState',
+  ]);
+
   let micOn = myAudio?.active;
-  let micMuted = use(state, 'micMuted');
-  let soundMuted = use(state, 'soundMuted');
-  let speaking = use(state, 'speaking');
-  let enteredRooms = use(state, 'enteredRooms');
-  let peers = use(swarm, 'stickyPeers');
-  let peerState = use(swarm, 'peerState');
-  let identities = use(state, 'identities');
+  let hasEnteredRoom = sharedState?.inRoom;
 
   let [editIdentity, setEditIdentity] = useState(false);
   let [editRole, setEditRole] = useState(null);
@@ -36,8 +49,6 @@ export default function Room({room, roomId}) {
   let {name, description, speakers, moderators} = room || {};
   let {myPeerId} = swarm;
 
-  // TODO: visually distinguish moderators
-  let modPeers = (moderators || []).filter(id => id in peers);
   let stagePeers = (speakers || []).filter(id => id in peers);
   let audiencePeers = Object.keys(peers || {}).filter(
     id => !stagePeers.includes(id)
@@ -69,8 +80,6 @@ export default function Room({room, roomId}) {
     await put(signedToken(), `/rooms/${roomId}`, newRoom);
     setEditRole(null);
   };
-
-  let hasEnteredRoom = enteredRooms.has(roomId);
 
   if (!hasEnteredRoom)
     return <EnterRoom roomId={roomId} name={name} description={description} />;
