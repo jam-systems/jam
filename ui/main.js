@@ -181,12 +181,15 @@ async function stopAudio() {
 }
 
 state.on('micMuted', micMuted => {
-  if (!state.myAudio?.active && !micMuted) {
+  let {myAudio} = state;
+  if (!myAudio?.active && !micMuted) {
     requestAudio();
     return;
   }
-  for (let track of state.myAudio.getTracks()) {
-    track.enabled = !micMuted;
+  if (myAudio) {
+    for (let track of myAudio.getTracks()) {
+      track.enabled = !micMuted;
+    }
   }
   swarm.set('sharedState', state => ({...state, micMuted}));
 });
