@@ -1,5 +1,6 @@
 // TODO this lib does not work reliably on iOS
 const activationEvents = ['change', 'click', 'contextmenu', 'dblclick'];
+// try 'touchstart', 'touchend'
 
 export function onFirstInteraction(cb) {
   let listener = () => {

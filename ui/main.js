@@ -204,6 +204,7 @@ function listenIfSpeaking(peerId, stream) {
     state.on('audioContext', onAudioContext);
     return;
   }
+  console.log('audio destination', state.audioContext?.destination);
   let options = {audioContext: state.audioContext};
   let speechEvents = hark(stream, options);
 
