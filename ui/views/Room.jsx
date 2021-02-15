@@ -359,7 +359,7 @@ export default function Room({room, roomId}) {
 
         <br />
 
-        <div className="flex">
+        <div className="flex relative">
           <button
             onClick={() => state.set('soundMuted', !soundMuted)}
             className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow"
@@ -373,7 +373,7 @@ export default function Room({room, roomId}) {
               style={{
                 position: 'absolute',
                 top: '-20px',
-                left: '2px',
+                right: '2px',
                 fontSize: '13px',
               }}
             >
