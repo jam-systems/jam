@@ -3,11 +3,6 @@ import {enterRoom} from '../main';
 import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm';
 
-
-let LinkRenderer = (props) => {
-  return <a href={props.href} target="_blank">{props.children}</a>
-};
-
 export default function EnterRoom({roomId, name, description}) {
   return (
     <div className="container md:min-h-full">
