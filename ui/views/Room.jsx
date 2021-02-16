@@ -243,7 +243,7 @@ export default function Room({room, roomId}) {
               >
                 <div className="relative flex justify-center">
                   <img
-                    className="human-radius border border-gray-300 bg-yellow-50"
+                    className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50"
                     src={gravatarUrl(myInfo)}
                   />
                   <Reaction reaction={myReaction} size="56px" />
@@ -266,7 +266,7 @@ export default function Room({room, roomId}) {
                   >
                     <div className="relative flex justify-center">
                       <img
-                        className="human-radius border border-gray-300 bg-yellow-50"
+                        className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50"
                         alt={peerInfo.displayName}
                         src={gravatarUrl(peerInfo)}
                       />
@@ -408,7 +408,7 @@ function Reaction({size, reaction}) {
       className="absolute"
       style={{
         alignSelf: 'center',
-        fontSize: size,
+        fontSize: size
       }}
     >
       {reaction}
