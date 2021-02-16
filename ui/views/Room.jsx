@@ -102,10 +102,12 @@ export default function Room({room, roomId}) {
         <h1 className="pl-2 pt-6 md:pt-0">{name}</h1>
         <div className="pl-2 text-gray-500">
           <ReactMarkdown
+            className="markdown"
             plugins={[gfm]}
-            children={description || 'This is a Room on Jam'}
             linkTarget="_blank"
-           />
+          >
+            {description || 'This is a Room on Jam'}
+          </ReactMarkdown>
         </div>
 
         {/* Main Area */}
