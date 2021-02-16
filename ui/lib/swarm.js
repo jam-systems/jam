@@ -29,6 +29,8 @@ const swarm = State({
   stream: null,
   data: null,
   newPeer: null,
+  sharedEvent: null,
+  peerEvent: null,
 });
 
 export default swarm;
@@ -52,9 +54,20 @@ function addLocalStream(stream, name) {
 swarm.on('sharedState', state => {
   let {hub, myPeerId, sign} = swarm;
   if (!hub || !myPeerId) return;
-  hub.broadcast('shared-state', {
+  hub.broadcast('all', {
+    type: 'shared-state',
     peerId: myPeerId,
-    state: sign ? sign(state) : state,
+    data: sign ? sign(state) : state,
+  });
+});
+
+swarm.on('sharedEvent', data => {
+  let {hub, myPeerId, sign} = swarm;
+  if (!hub || !myPeerId) return;
+  hub.broadcast('all', {
+    type: 'shared-event',
+    peerId: myPeerId,
+    data: sign ? sign(data) : data,
   });
 });
 
@@ -461,8 +474,18 @@ function connect(url, room) {
     }
   );
 
-  hub.subscribe('shared-state', ({peerId, state}) => {
-    updatePeerState(peerId, state);
+  hub.subscribe('all', ({type, peerId, data}) => {
+    if (type === 'shared-state') {
+      updatePeerState(peerId, data);
+    }
+    if (type === 'shared-event') {
+      if (peerId === myPeerId) return;
+      if (swarm.verify) {
+        data = swarm.verify(data, peerId);
+        if (data === undefined) return;
+      }
+      swarm.emit('peerEvent', peerId, data);
+    }
   });
 }
 

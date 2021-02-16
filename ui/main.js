@@ -31,6 +31,11 @@ state.on('userInteracted', i => i && createAudioContext());
 
 export {requestAudio};
 
+// experiment
+swarm.on('peerEvent', (peerId, data) =>
+  console.log('peer event', peerId, data)
+);
+
 export function enterRoom() {
   state.set('userInteracted', true);
   swarm.set('sharedState', state => ({...state, inRoom: true}));
