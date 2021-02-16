@@ -3,6 +3,12 @@ import {enterRoom} from '../main';
 import ReactMarkdown from 'react-markdown';
 import gfm from 'remark-gfm';
 
+let customUriTransformer = (uri) => {
+  return (uri.startsWith("bitcoin:")
+         ? uri
+         : ReactMarkdown.uriTransformer(uri));
+};
+
 export default function EnterRoom({roomId, name, description}) {
   return (
     <div className="container md:min-h-full">
@@ -45,6 +51,7 @@ export default function EnterRoom({roomId, name, description}) {
             className="markdown"
             plugins={[gfm]}
             linkTarget="_blank"
+            transformLinkUri={customUriTransformer}
           >
             {description || 'This is a Room on Jam'}
           </ReactMarkdown>

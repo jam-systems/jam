@@ -85,6 +85,12 @@ export default function Room({room, roomId}) {
   if (!hasEnteredRoom)
     return <EnterRoom roomId={roomId} name={name} description={description} />;
 
+  let customUriTransformer = (uri) => {
+    return (uri.startsWith("bitcoin:")
+           ? uri
+           : ReactMarkdown.uriTransformer(uri));
+  };
+
   return (
     <div
       className="container"
@@ -103,6 +109,7 @@ export default function Room({room, roomId}) {
             className="markdown"
             plugins={[gfm]}
             linkTarget="_blank"
+            transformLinkUri={customUriTransformer}
           >
             {description || 'This is a Room on Jam'}
           </ReactMarkdown>
