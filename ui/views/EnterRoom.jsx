@@ -1,5 +1,12 @@
 import React from 'react';
 import {enterRoom} from '../main';
+import ReactMarkdown from 'react-markdown'
+import gfm from 'remark-gfm';
+
+
+let LinkRenderer = (props) => {
+  return <a href={props.href} target="_blank">{props.children}</a>
+};
 
 export default function EnterRoom({roomId, name, description}) {
   return (
@@ -24,9 +31,13 @@ export default function EnterRoom({roomId, name, description}) {
             <img className="human-radius border border-gray-300" src="img/avatars/tosh.jpg" />
           </li>
         </ol>
-        <p className="pl-2 text-gray-500">
-          {description || 'This is a Room on Jam'}
-        </p>
+        <div className="pl-2 text-gray-500">
+          <ReactMarkdown
+              plugins={[gfm]}
+              children={description || 'This is a Room on Jam'}
+              linkTarget="_blank"
+            />
+        </div>
         {/*
             optional (for future events:)
             when is this event?

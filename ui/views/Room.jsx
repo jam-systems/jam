@@ -7,6 +7,9 @@ import {gravatarUrl} from '../lib/gravatar';
 import copyToClipboard from '../lib/copy-to-clipboard';
 import {put} from '../backend';
 import {signedToken} from '../identity';
+import ReactMarkdown from 'react-markdown';
+import gfm from 'remark-gfm';
+
 // import {getStorage} from '../lib/local-storage';
 
 export default function Room({room, roomId}) {
@@ -97,7 +100,13 @@ export default function Room({room, roomId}) {
         style={{flex: '1', overflowY: 'auto', minHeight: '0'}}
       >
         <h1 className="pl-2 pt-6 md:pt-0">{name}</h1>
-        <div className="pl-2 text-gray-500">{description}</div>
+        <div className="pl-2 text-gray-500">
+          <ReactMarkdown
+            plugins={[gfm]}
+            children={description || 'This is a Room on Jam'}
+            linkTarget="_blank"
+           />
+        </div>
 
         {/* Main Area */}
         <div className="">

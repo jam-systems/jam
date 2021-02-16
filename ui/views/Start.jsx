@@ -89,7 +89,7 @@ export default function Start({urlRoomId}) {
           </div>
           <br />
           <input
-            className="rounded placeholder-gray-300 bg-gray-50 w-72 md:w-96"
+            className="rounded placeholder-gray-300 bg-gray-50 w-72 md:w-full"
             type="text"
             placeholder="Room description"
             value={description}
@@ -101,7 +101,7 @@ export default function Start({urlRoomId}) {
           ></input>
           <div className="p-2 text-gray-500 italic">
             Describe what this room is about.{' '}
-            <span className="text-gray-300">(optional)</span>
+            <span className="text-gray-300">(optional) (supports <a className="underline" href="https://guides.github.com/pdfs/markdown-cheatsheet-online.pdf" target="_blank">Markdown</a>)</span>
           </div>
 
           <button
