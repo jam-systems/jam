@@ -85,7 +85,7 @@ export default function Start({urlRoomId}) {
           ></input>
           <div className="p-2 text-gray-500 italic">
             Pick a topic to talk about.{' '}
-            <span className="text-gray-300">(optional)</span>
+            <span className="text-gray-400">(optional)</span>
           </div>
           <br />
           <input
@@ -101,7 +101,7 @@ export default function Start({urlRoomId}) {
           ></input>
           <div className="p-2 text-gray-500 italic">
             Describe what this room is about.{' '}
-            <span className="text-gray-300">(optional) (supports <a className="underline" href="https://guides.github.com/pdfs/markdown-cheatsheet-online.pdf" target="_blank">Markdown</a>)</span>
+            <span className="text-gray-400">(optional) (supports <a className="underline" href="https://guides.github.com/pdfs/markdown-cheatsheet-online.pdf" target="_blank">Markdown</a>)</span>
           </div>
 
           <button
