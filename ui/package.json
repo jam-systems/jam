@@ -2,8 +2,8 @@
   "name": "jam",
   "version": "0.1.0",
   "scripts": {
-    "start": "serve -s . & esbuild --bundle ./App.jsx --outfile=./bundle.js --format=esm --define:process.env.NODE_ENV='\"development\"' --watch",
-    "build": "esbuild --bundle ./App.jsx --outfile=./bundle.js --format=esm --define:process.env.NODE_ENV='\"development\"'"
+    "start": "serve -s . & esbuild --bundle ./App.jsx --outfile=./bundle.js --format=esm --target=es6 --define:process.env.NODE_ENV='\"development\"' --watch",
+    "build": "esbuild --bundle ./App.jsx --outfile=./bundle.js --format=esm --target=es6 --define:process.env.NODE_ENV='\"development\"'"
   },
   "devDependencies": {
     "esbuild": "^0.8.41",
