@@ -10,8 +10,6 @@ import {signedToken} from '../identity';
 import ReactMarkdown from 'react-markdown';
 import gfm from 'remark-gfm';
 
-// import {getStorage} from '../lib/local-storage';
-
 export default function Room({room, roomId}) {
   // room = {name, description, moderators: [peerId], speakers: [peerId]}
   let [
@@ -163,8 +161,6 @@ export default function Room({room, roomId}) {
               {stagePeers.map(peerId => {
                 let {micMuted, inRoom} = peerState[peerId] || {};
                 const peerInfo = identities[peerId] || {id: peerId};
-                // TODO: hadStream is NOT the appropriate condition for showing avatar
-                // need inRoom status from peers
                 return (
                   inRoom && (
                     <li
@@ -262,87 +258,11 @@ export default function Room({room, roomId}) {
                 )
               );
             })}
-            {/* <li className="flex-shrink w-24 h-24 ring-yellow-500">
-              <img
-                className="human-radius border border-gray-300"
-                src="img/avatars/sonic.jpg"
-              />
-            </li> */}
-
-            {/* <li className="flex-shrink w-24 h-24">
-              <img
-                className="human-radius border border-gray-300"
-                src="img/avatars/christoph.jpg"
-              />
-            </li>
-            <li className="flex-shrink w-24 h-24">
-              <img
-                className="human-radius border border-gray-300"
-                src="img/avatars/tosh.jpg"
-              />
-            </li> */}
           </ol>
         </div>
 
         <br />
         <br />
-        {/*
-            TODO: implement concept of stage / audience + raising hands
-            hide this for now
-        */}
-        <div className="hidden">
-          <h3 className="pb-6">Raised their hand</h3>
-
-          <div className="p-2 max-w-sm mx-auto flex items-center space-x-4">
-            <div className="flex-shrink-0">
-              <img
-                className="h-12 w-12 human-radius"
-                src="/img/avatars/christoph.jpg"
-                alt="Sonic"
-              />
-            </div>
-            <div>
-              <div className="text-xl font-book text-black">
-                Christoph Witzany
-              </div>
-              <p className="text-gray-500">
-                Product, UX, StarCraft, Clojure, …
-              </p>
-            </div>
-          </div>
-          <div className="p-2 max-w-sm mx-auto flex items-center space-x-4">
-            <div className="flex-shrink-0">
-              <img
-                className="h-12 w-12 human-radius"
-                src="/img/avatars/sonic.jpg"
-                alt="Sonic"
-              />
-            </div>
-            <div>
-              <div className="text-xl font-book text-black">Thomas Schranz</div>
-              <p className="text-gray-500">
-                Product, UX, StarCraft, Clojure, …
-              </p>
-            </div>
-          </div>
-          <div className="p-2 max-w-sm mx-auto flex items-center space-x-4">
-            <div className="flex-shrink-0">
-              <img
-                className="h-12 w-12 human-radius"
-                src="/img/avatars/gregor.jpg"
-                alt="Sonic"
-              />
-            </div>
-            <div>
-              <div className="text-xl font-book text-black">
-                Gregor Mitscha-Baude
-              </div>
-              <p className="text-gray-500">
-                Product, UX, StarCraft, Clojure, …
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Navigation */}

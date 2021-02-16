@@ -338,7 +338,6 @@ function connectPeer(hub, peerId, connId) {
       sharedState: signedState(),
     });
     let peer = peers[peerId];
-    // TODO: destroying the old peer here destroys the retry timeouts!
     if (peer) {
       log('destroying old peer', s(peerId));
       peer.garbage = true;

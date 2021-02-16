@@ -31,13 +31,13 @@ state.on('userInteracted', i => i && createAudioContext());
 
 export {requestAudio};
 
-export function enterRoom(roomId) {
+export function enterRoom() {
   state.set('userInteracted', true);
   swarm.set('sharedState', state => ({...state, inRoom: true}));
   requestAudio().then(() => state.set('soundMuted', false));
 }
 
-export function leaveRoom(roomId) {
+export function leaveRoom() {
   swarm.set('sharedState', state => ({...state, inRoom: false}));
   stopAudio();
   state.set('soundMuted', true);
@@ -93,7 +93,6 @@ state.on('soundMuted', muted => {
     speaker[id].muted = muted || !speakers.includes(id);
   }
 });
-// TODO make muted also react to changing speakers !!
 
 swarm.on('newPeer', async id => {
   for (let i = 0; i < 5; i++) {
