@@ -479,7 +479,6 @@ function connect(url, room) {
       updatePeerState(peerId, data);
     }
     if (type === 'shared-event') {
-      if (peerId === myPeerId) return;
       if (swarm.verify) {
         data = swarm.verify(data, peerId);
         if (data === undefined) return;

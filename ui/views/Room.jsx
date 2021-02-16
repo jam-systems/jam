@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {leaveRoom, state} from '../main';
+import {leaveRoom, sendReaction, state} from '../main';
 import {useMany} from '../lib/use-state.js';
 import swarm from '../lib/swarm.js';
 import EnterRoom from './EnterRoom.jsx';
@@ -10,20 +10,23 @@ import {signedToken} from '../identity';
 import ReactMarkdown from 'react-markdown';
 import gfm from 'remark-gfm';
 
+const reactionButton = '❤️';
+const reactionEmojis = ['💯', '😂', '👋', '✌️', '👋'];
+
 export default function Room({room, roomId}) {
   // room = {name, description, moderators: [peerId], speakers: [peerId]}
   let [
     myInfo,
     myAudio,
     micMuted,
-    soundMuted,
+    reactions,
     identities,
     speaking,
   ] = useMany(state, [
     'myInfo',
     'myAudio',
     'micMuted',
-    'soundMuted',
+    'reactions',
     'identities',
     'speaking',
   ]);
@@ -38,6 +41,7 @@ export default function Room({room, roomId}) {
 
   let [editIdentity, setEditIdentity] = useState(false);
   let [editRole, setEditRole] = useState(null);
+  let [showReactions, setShowReactions] = useState(false);
 
   let [showShareInfo, setShowShareInfo] = useState(false);
 
@@ -85,11 +89,11 @@ export default function Room({room, roomId}) {
   if (!hasEnteredRoom)
     return <EnterRoom roomId={roomId} name={name} description={description} />;
 
-  let customUriTransformer = (uri) => {
-    return (uri.startsWith("bitcoin:")
-           ? uri
-           : ReactMarkdown.uriTransformer(uri));
+  let customUriTransformer = uri => {
+    return uri.startsWith('bitcoin:') ? uri : ReactMarkdown.uriTransformer(uri);
   };
+
+  let myReaction = reactions[myPeerId];
 
   return (
     <div
@@ -133,12 +137,13 @@ export default function Room({room, roomId}) {
                         : 'human-radius p-1 bg-white'
                     }
                   >
-                    <div className="human-radius p-1 bg-white">
+                    <div className="human-radius p-1 bg-white relative flex justify-center">
                       <img
                         className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28"
                         alt="me"
                         src={gravatarUrl(myInfo)}
                       />
+                      <Reaction reaction={myReaction} size="64px" />
                     </div>
                   </div>
                   <div className={micMuted ? '' : 'hidden'}>
@@ -167,6 +172,7 @@ export default function Room({room, roomId}) {
               )}
               {stagePeers.map(peerId => {
                 let {micMuted, inRoom} = peerState[peerId] || {};
+                let reaction = reactions[peerId];
                 const peerInfo = identities[peerId] || {id: peerId};
                 return (
                   inRoom && (
@@ -186,12 +192,13 @@ export default function Room({room, roomId}) {
                             : 'human-radius p-1 bg-white'
                         }
                       >
-                        <div className="human-radius p-1 bg-white">
+                        <div className="human-radius p-1 bg-white relative flex justify-center">
                           <img
                             className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28"
                             alt={peerInfo.displayName}
                             src={gravatarUrl(peerInfo)}
                           />
+                          <Reaction reaction={reaction} size="64px" />
                         </div>
                       </div>
                       {/* div for showing mute/unmute status */}
@@ -234,15 +241,19 @@ export default function Room({room, roomId}) {
                 style={{cursor: 'pointer'}}
                 onClick={() => setEditIdentity(!editIdentity)}
               >
-                <img
-                  className="human-radius border border-gray-300 bg-yellow-50"
-                  src={gravatarUrl(myInfo)}
-                />
+                <div className="relative flex justify-center">
+                  <img
+                    className="human-radius border border-gray-300 bg-yellow-50"
+                    src={gravatarUrl(myInfo)}
+                  />
+                  <Reaction reaction={myReaction} size="56px" />
+                </div>
                 <div className="text-center mt-2">{myInfo.displayName}</div>
               </li>
             )}
             {audiencePeers.map(peerId => {
               let {inRoom} = peerState[peerId] || {};
+              let reaction = reactions[peerId];
               const peerInfo = identities[peerId] || {id: peerId};
               return (
                 inRoom && (
@@ -253,11 +264,14 @@ export default function Room({room, roomId}) {
                     style={iModerate ? {cursor: 'pointer'} : undefined}
                     onClick={iModerate ? () => setEditRole(peerId) : undefined}
                   >
-                    <img
-                      className="human-radius border border-gray-300 bg-yellow-50"
-                      alt={peerInfo.displayName}
-                      src={gravatarUrl(peerInfo)}
-                    />
+                    <div className="relative flex justify-center">
+                      <img
+                        className="human-radius border border-gray-300 bg-yellow-50"
+                        alt={peerInfo.displayName}
+                        src={gravatarUrl(peerInfo)}
+                      />
+                      <Reaction reaction={reaction} size="56px" />
+                    </div>
                     <div className="text-center mt-2">
                       {peerInfo.displayName}
                     </div>
@@ -307,12 +321,34 @@ export default function Room({room, roomId}) {
         <br />
 
         <div className="flex relative">
-          <button
+          {/* <button
             onClick={() => state.set('soundMuted', !soundMuted)}
             className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow"
           >
             {soundMuted ? '🔇' : '🔊'}&nbsp;{soundMuted ? 'Off' : 'On'}
+          </button> */}
+          <button
+            onClick={() => setShowReactions(s => !s)}
+            className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow"
+          >
+            {reactionButton} React
           </button>
+          {showReactions && (
+            <div className="h-12 text-4xl text-black bg-gray-200 rounded-lg absolute left-0 -top-14">
+              {reactionEmojis.map(r => (
+                <button
+                  className="select-none h-12 px-3 active:bg-gray-300"
+                  key={r}
+                  onClick={() => {
+                    setShowReactions(false);
+                    sendReaction(r);
+                  }}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Share */}
           {showShareInfo && (
@@ -361,6 +397,21 @@ export default function Room({room, roomId}) {
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function Reaction({size, reaction}) {
+  if (!reaction) return null;
+  return (
+    <div
+      className="absolute"
+      style={{
+        alignSelf: 'center',
+        fontSize: size,
+      }}
+    >
+      {reaction}
     </div>
   );
 }

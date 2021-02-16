@@ -9,5 +9,6 @@ const state = State({
   audioContext: null,
   userInteracted: false,
   identities: {},
+  reactions: {},
 });
 export default state;

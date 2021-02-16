@@ -31,11 +31,6 @@ state.on('userInteracted', i => i && createAudioContext());
 
 export {requestAudio};
 
-// experiment
-swarm.on('peerEvent', (peerId, data) =>
-  console.log('peer event', peerId, data)
-);
-
 export function enterRoom() {
   state.set('userInteracted', true);
   swarm.set('sharedState', state => ({...state, inRoom: true}));
@@ -75,6 +70,21 @@ state.on('queries', () => {
     for (let id in speaker) {
       if (!speakers.includes(id)) speaker[id].muted = true;
     }
+  }
+});
+
+export function sendReaction(reaction) {
+  swarm.emit('sharedEvent', {reaction});
+}
+swarm.on('peerEvent', (peerId, data) => {
+  let {reaction} = data;
+  if (reaction) {
+    state.reactions[peerId] = reaction;
+    state.update('reactions');
+    setTimeout(() => {
+      delete state.reactions[peerId];
+      state.update('reactions');
+    }, 5000);
   }
 });
 
