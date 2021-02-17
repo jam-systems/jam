@@ -144,7 +144,10 @@ export default function Room({room, roomId}) {
                         src={gravatarUrl(myInfo)}
                       />
 
-                      <Reactions reactions={myReactions} size="64" />
+                      <Reactions
+                        reactions={myReactions}
+                        className="absolute bg-white text-5xl md:text-7xl pt-4 md:pt-5 human-radius w-20 h-20 md:w-28 md:h-28 border text-center"
+                        />
                     </div>
                   </div>
                   <div className={micMuted ? '' : 'hidden'}>
@@ -199,7 +202,10 @@ export default function Room({room, roomId}) {
                             alt={peerInfo.displayName}
                             src={gravatarUrl(peerInfo)}
                           />
-                          <Reactions reactions={reactions_} size="64" />
+                          <Reactions
+                            reactions={reactions_}
+                            className="absolute bg-white text-5xl md:text-7xl pt-4 md:pt-5 human-radius w-20 h-20 md:w-28 md:h-28 border text-center"
+                            />
                         </div>
                       </div>
                       {/* div for showing mute/unmute status */}
@@ -247,7 +253,10 @@ export default function Room({room, roomId}) {
                     className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50"
                     src={gravatarUrl(myInfo)}
                   />
-                  <Reactions reactions={myReactions} size="56" />
+                  <Reactions
+                    reactions={myReactions}
+                    className="absolute bg-white text-4xl md:text-6xl pt-3 md:pt-4 human-radius w-16 h-16 md:w-24 md:h-24 border text-center"
+                    />
                 </div>
                 <div className="text-center mt-2">{myInfo.displayName}</div>
               </li>
@@ -271,7 +280,10 @@ export default function Room({room, roomId}) {
                         alt={peerInfo.displayName}
                         src={gravatarUrl(peerInfo)}
                       />
-                      <Reactions reactions={reactions_} size="56" />
+                      <Reactions
+                        reactions={reactions_}
+                        className="absolute bg-white text-4xl md:text-6xl pt-3 md:pt-4 human-radius w-16 h-16 md:w-24 md:h-24 border text-center"
+                        />
                     </div>
                     <div className="text-center mt-2">
                       {peerInfo.displayName}
@@ -288,7 +300,7 @@ export default function Room({room, roomId}) {
       </div>
 
       {/* Navigation */}
-      <div className="z-10 navigation bg-white p-4 pb-8">
+      <div className="z-10 navigation bg-white p-4">
         {editIdentity && (
           <EditIdentity
             info={myInfo}
@@ -309,7 +321,7 @@ export default function Room({room, roomId}) {
         <div className="flex">
           <button
             onClick={() => state.set('micMuted', !micMuted)}
-            className="select-none h-12 mt-4 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline active:bg-yellow-300 flex-grow"
+            className="select-none h-12 mt-4 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline active:bg-yellow-300 w-screen"
           >
             {micOn
               ? micMuted
@@ -330,9 +342,12 @@ export default function Room({room, roomId}) {
           </button> */}
           <button
             onClick={() => setShowReactions(s => !s)}
-            className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow"
+            className="select-none text-center h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
           >
-            <span className="text-3xl text-gray-600">{reactionButton}</span>
+            {/* heroicons/emoji-happy */}
+            <svg className="text-gray-600 w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
           </button>
           {showReactions && (
             <div className="text-4xl w-64 flex-shrink text-black text-center bg-gray-200 rounded-lg absolute left-0 bottom-14">
@@ -380,12 +395,15 @@ export default function Room({room, roomId}) {
             }}
             className="ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
           >
-            ✉️&nbsp;Share
+            {/* heroicons/share-small */}
+            <svg className="text-gray-600 w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
+            </svg>
           </button>
 
           {/* Leave */}
           <button
-            className="ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
+            className="ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow"
             onClick={() => leaveRoom(roomId)}
           >
             🚪&nbsp;Leave
@@ -402,18 +420,16 @@ export default function Room({room, roomId}) {
   );
 }
 
-function Reactions({size, reactions}) {
+function Reactions({reactions, className}) {
   if (!reactions) return null;
   return (
     <>
       {reactions.map(([r, id]) => (
         <div
           key={id}
-          className="absolute bg-white human-radius min-w-full min-h-full border text-center"
+          className={className}
           style={{
             alignSelf: 'center',
-            fontSize: (size + "px"),
-            lineHeight: ((size * 1.6).toFixed() + "px"),
           }}
         >
           {r}

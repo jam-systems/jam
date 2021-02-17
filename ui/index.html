@@ -8,15 +8,15 @@
     <meta property="og:url" content="https://jam.systems/" />
     <meta
       property="og:image"
-      content="https://jam.systems/img/jam.jpg"
+      content="https://jam.systems/img/jam-app-icon.jpg"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link
       rel="shortcut icon"
       type="image/png"
-      href="/img/jam.jpg"
+      href="/img/jam-app-icon.jpg"
     />
-    <link rel="apple-touch-icon" href="/img/jam.jpg" />
+    <link rel="apple-touch-icon" href="/img/jam-app-icon.jpg" />
     <!-- TODO: move tailwind to build pipeline if we keep it -->
     <link
       href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
@@ -130,6 +130,8 @@
           border-right: 0;
           border-bottom: 0;
           border-left: 0;
+          padding: 0;
+          margin-left: 0; /* remove negative margin left from desktop view? */
 
           box-sizing: border-box;
         }
