@@ -300,7 +300,7 @@ export default function Room({room, roomId}) {
       </div>
 
       {/* Navigation */}
-      <div className="z-10 navigation bg-white p-4 pb-8">
+      <div className="z-10 navigation bg-white p-4">
         {editIdentity && (
           <EditIdentity
             info={myInfo}
@@ -321,7 +321,7 @@ export default function Room({room, roomId}) {
         <div className="flex">
           <button
             onClick={() => state.set('micMuted', !micMuted)}
-            className="select-none h-12 mt-4 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline active:bg-yellow-300 flex-grow"
+            className="select-none h-12 mt-4 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline active:bg-yellow-300 w-screen"
           >
             {micOn
               ? micMuted
