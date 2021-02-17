@@ -342,9 +342,12 @@ export default function Room({room, roomId}) {
           </button> */}
           <button
             onClick={() => setShowReactions(s => !s)}
-            className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow"
+            className="select-none text-center h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
           >
-            <span className="text-3xl text-gray-600">{reactionButton}</span>
+            {/* heroicons/share-small */}
+            <svg className="text-gray-600 w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
           </button>
           {showReactions && (
             <div className="text-4xl w-64 flex-shrink text-black text-center bg-gray-200 rounded-lg absolute left-0 bottom-14">
@@ -400,7 +403,7 @@ export default function Room({room, roomId}) {
 
           {/* Leave */}
           <button
-            className="ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
+            className="ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow"
             onClick={() => leaveRoom(roomId)}
           >
             🚪&nbsp;Leave
