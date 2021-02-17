@@ -335,10 +335,10 @@ export default function Room({room, roomId}) {
             <span className="text-3xl text-gray-600">{reactionButton}</span>
           </button>
           {showReactions && (
-            <div className="h-12 text-4xl text-black bg-gray-200 rounded-lg absolute left-0 -top-14">
+            <div className="text-4xl p-2 text-black bg-gray-200 rounded-lg absolute left-0 bottom-14">
               {reactionEmojis.map(r => (
                 <button
-                  className="select-none h-12 px-3 active:bg-gray-300"
+                  className="m-2 select-none px-3 active:bg-gray-300"
                   key={r}
                   onClick={() => {
                     setShowReactions(false);
