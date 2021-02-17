@@ -36,39 +36,7 @@ export default function Start({urlRoomId}) {
   return (
     <div className="container md:min-h-full">
       <div className="child p-6 md:p-10">
-        <h1>Welcome to Jam</h1>
 
-        <div className="flex flex-row pt-4 pb-4">
-          <div className="flex-1 text-gray-600 pt-6">
-            Jam is an <span className="italic">audio&nbsp;space</span>
-            <br />
-            for chatting, brainstorming, debating, jamming,
-            <br />
-            micro-conferences and more.
-            <br />
-            <br />
-            <a
-              href="https://gitlab.com/jam-systems/jam"
-              className="underline text-blue-800 active:text-blue-600"
-            >
-              Learn&nbsp;more&nbsp;about&nbsp;Jam.
-            </a>
-          </div>
-          <div className="flex-initial">
-            <img
-              className="mt-8 md:mt-4 md:mb-4 md:mr-8"
-              style={{width: 130, height: 130}}
-              alt="Jam mascot by @eejitlikeme"
-              title="Jam mascot by @eejitlikeme"
-              src="/img/jam.jpg"
-            />
-          </div>
-        </div>
-
-        <hr />
-
-        <br />
-        <br />
         <h1>Start a Room</h1>
 
         <form className="pt-12" onSubmit={submit}>
@@ -111,6 +79,39 @@ export default function Start({urlRoomId}) {
             🌱 Start room
           </button>
         </form>
+
+        <hr className="mt-14 mb-14" />
+
+        <h1>Welcome to Jam</h1>
+
+        <div className="flex flex-row pt-4 pb-4">
+          <div className="flex-1 text-gray-600 pt-6">
+            Jam is an <span className="italic">audio&nbsp;space</span>
+            <br />
+            for chatting, brainstorming, debating, jamming,
+            <br />
+            micro-conferences and more.
+            <br />
+            <br />
+            <a
+              href="https://gitlab.com/jam-systems/jam"
+              className="underline text-blue-800 active:text-blue-600"
+            >
+              Learn&nbsp;more&nbsp;about&nbsp;Jam.
+            </a>
+          </div>
+          <div className="flex-initial">
+            <img
+              className="mt-8 md:mt-4 md:mb-4 md:mr-8"
+              style={{width: 130, height: 130}}
+              alt="Jam mascot by @eejitlikeme"
+              title="Jam mascot by @eejitlikeme"
+              src="/img/jam.jpg"
+            />
+          </div>
+        </div>
+
+
         <div className="pt-32 text-xs text-gray-300 text-center">
           <a href="https://gitlab.com/jam-systems/jam" target="_blank">
             built
