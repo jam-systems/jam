@@ -144,7 +144,7 @@ export default function Room({room, roomId}) {
                         src={gravatarUrl(myInfo)}
                       />
 
-                      <Reactions reactions={myReactions} size="64px" />
+                      <Reactions reactions={myReactions} size="64" />
                     </div>
                   </div>
                   <div className={micMuted ? '' : 'hidden'}>
@@ -199,7 +199,7 @@ export default function Room({room, roomId}) {
                             alt={peerInfo.displayName}
                             src={gravatarUrl(peerInfo)}
                           />
-                          <Reactions reactions={reactions_} size="64px" />
+                          <Reactions reactions={reactions_} size="64" />
                         </div>
                       </div>
                       {/* div for showing mute/unmute status */}
@@ -247,7 +247,7 @@ export default function Room({room, roomId}) {
                     className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50"
                     src={gravatarUrl(myInfo)}
                   />
-                  <Reactions reactions={myReactions} size="56px" />
+                  <Reactions reactions={myReactions} size="56" />
                 </div>
                 <div className="text-center mt-2">{myInfo.displayName}</div>
               </li>
@@ -271,7 +271,7 @@ export default function Room({room, roomId}) {
                         alt={peerInfo.displayName}
                         src={gravatarUrl(peerInfo)}
                       />
-                      <Reactions reactions={reactions_} size="56px" />
+                      <Reactions reactions={reactions_} size="56" />
                     </div>
                     <div className="text-center mt-2">
                       {peerInfo.displayName}
@@ -412,7 +412,8 @@ function Reactions({size, reactions}) {
           className="absolute bg-white human-radius min-w-full min-h-full border text-center"
           style={{
             alignSelf: 'center',
-            fontSize: size,
+            fontSize: (size + "px"),
+            lineHeight: ((size * 1.6).toFixed() + "px"),
           }}
         >
           {r}
