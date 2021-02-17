@@ -409,7 +409,7 @@ function Reactions({size, reactions}) {
       {reactions.map(([r, id]) => (
         <div
           key={id}
-          className="absolute"
+          className="absolute bg-white human-radius min-w-full min-h-full border text-center"
           style={{
             alignSelf: 'center',
             fontSize: size,
