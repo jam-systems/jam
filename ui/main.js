@@ -1,6 +1,5 @@
 import swarm from './lib/swarm.js';
 import hark from 'hark';
-import {onFirstInteraction} from './lib/user-interaction.js';
 import {get, updateApiQuery} from './backend';
 import {signData, updateInfo, verifyData} from './identity';
 import state from './state.js';
@@ -28,25 +27,17 @@ swarm.config({
     ],
   },
 });
-// TODO remove when convinced it works
-swarm.on('peerState', state => console.log('shared peer state', state));
-
-onFirstInteraction(() => console.log('first user interaction'));
 state.on('userInteracted', i => i && createAudioContext());
 
 export {requestAudio};
 
-export function enterRoom(roomId) {
+export function enterRoom() {
   state.set('userInteracted', true);
-  state.enteredRooms.add(roomId);
-  state.update('enteredRooms');
   swarm.set('sharedState', state => ({...state, inRoom: true}));
   requestAudio().then(() => state.set('soundMuted', false));
 }
 
-export function leaveRoom(roomId) {
-  state.enteredRooms.delete(roomId);
-  state.update('enteredRooms');
+export function leaveRoom() {
   swarm.set('sharedState', state => ({...state, inRoom: false}));
   stopAudio();
   state.set('soundMuted', true);
@@ -82,6 +73,25 @@ state.on('queries', () => {
   }
 });
 
+export function sendReaction(reaction) {
+  swarm.emit('sharedEvent', {reaction});
+}
+swarm.on('peerEvent', (peerId, data) => {
+  let {reaction} = data;
+  let {reactions} = state;
+  if (reaction) {
+    if (!reactions[peerId]) reactions[peerId] = [];
+    let reactionObj = [reaction, Math.random()];
+    reactions[peerId].push(reactionObj);
+    state.update('reactions');
+    setTimeout(() => {
+      let i = reactions[peerId].indexOf(reactionObj);
+      if (i !== -1) reactions[peerId].splice(i, 1);
+      state.update('reactions');
+    }, 5000);
+  }
+});
+
 export function createAudioContext() {
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   if (AudioContext && !state.audioContext) {
@@ -102,7 +112,6 @@ state.on('soundMuted', muted => {
     speaker[id].muted = muted || !speakers.includes(id);
   }
 });
-// TODO make muted also react to changing speakers !!
 
 swarm.on('newPeer', async id => {
   for (let i = 0; i < 5; i++) {
@@ -131,13 +140,13 @@ swarm.on('stream', (stream, name, peer) => {
   audio.muted = state.soundMuted || !speakers.includes(id);
   audio.addEventListener('canplay', () => {
     play(audio).catch(() => {
-      console.log('deferring audio.play');
+      // console.log('deferring audio.play');
       state.set('soundMuted', true);
       state.on('userInteracted', interacted => {
         if (interacted)
           play(audio).then(() => {
             if (state.soundMuted) state.set('soundMuted', false);
-            console.log('playing audio!!');
+            // console.log('playing audio!!');
           });
       });
     });
@@ -190,12 +199,15 @@ async function stopAudio() {
 }
 
 state.on('micMuted', micMuted => {
-  if (!state.myAudio?.active && !micMuted) {
+  let {myAudio} = state;
+  if (!myAudio?.active && !micMuted) {
     requestAudio();
     return;
   }
-  for (let track of state.myAudio.getTracks()) {
-    track.enabled = !micMuted;
+  if (myAudio) {
+    for (let track of myAudio.getTracks()) {
+      track.enabled = !micMuted;
+    }
   }
   swarm.set('sharedState', state => ({...state, micMuted}));
 });
@@ -204,14 +216,13 @@ function listenIfSpeaking(peerId, stream) {
   if (!state.audioContext) {
     // if no audio context exists yet, retry as soon as it is available
     let onAudioContext = () => {
-      console.log('reacting to audio context later');
       listenIfSpeaking(peerId, stream);
       state.off('audioContext', onAudioContext);
     };
     state.on('audioContext', onAudioContext);
     return;
   }
-  console.log('have an audio context');
+  console.log('audio destination', state.audioContext?.destination);
   let options = {audioContext: state.audioContext};
   let speechEvents = hark(stream, options);
 

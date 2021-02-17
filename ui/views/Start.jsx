@@ -36,6 +36,52 @@ export default function Start({urlRoomId}) {
   return (
     <div className="container md:min-h-full">
       <div className="child p-6 md:p-10">
+
+        <h1>Start a Room</h1>
+
+        <form className="pt-12" onSubmit={submit}>
+          <input
+            className="rounded placeholder-gray-300 bg-gray-50 w-64"
+            type="text"
+            placeholder="Room topic"
+            value={name}
+            name="jam-room-topic"
+            autoComplete="off"
+            onChange={e => {
+              setName(e.target.value);
+            }}
+          ></input>
+          <div className="p-2 text-gray-500 italic">
+            Pick a topic to talk about.{' '}
+            <span className="text-gray-400">(optional)</span>
+          </div>
+          <br />
+          <input
+            className="rounded placeholder-gray-300 bg-gray-50 w-72 md:w-full"
+            type="text"
+            placeholder="Room description"
+            value={description}
+            name="jam-room-description"
+            autoComplete="off"
+            onChange={e => {
+              setDescription(e.target.value);
+            }}
+          ></input>
+          <div className="p-2 text-gray-500 italic">
+            Describe what this room is about.{' '}
+            <span className="text-gray-400">(optional) (supports <a className="underline" href="https://guides.github.com/pdfs/markdown-cheatsheet-online.pdf" target="_blank">Markdown</a>)</span>
+          </div>
+
+          <button
+            onClick={submit}
+            className="select-none mt-6 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
+          >
+            🌱 Start room
+          </button>
+        </form>
+
+        <hr className="mt-14 mb-14" />
+
         <h1>Welcome to Jam</h1>
 
         <div className="flex flex-row pt-4 pb-4">
@@ -60,57 +106,12 @@ export default function Start({urlRoomId}) {
               style={{width: 130, height: 130}}
               alt="Jam mascot by @eejitlikeme"
               title="Jam mascot by @eejitlikeme"
-              src="/img/jam-illustration.png"
+              src="/img/jam.jpg"
             />
           </div>
         </div>
 
-        <hr />
 
-        <br />
-        <br />
-        <h1>Start a Room</h1>
-
-        <form className="pt-12" onSubmit={submit}>
-          <input
-            className="rounded placeholder-gray-300 bg-gray-50 w-64"
-            type="text"
-            placeholder="Room topic"
-            value={name}
-            name="jam-room-topic"
-            autoComplete="off"
-            onChange={e => {
-              setName(e.target.value);
-            }}
-          ></input>
-          <div className="p-2 text-gray-500 italic">
-            Pick a topic to talk about.{' '}
-            <span className="text-gray-300">(optional)</span>
-          </div>
-          <br />
-          <input
-            className="rounded placeholder-gray-300 bg-gray-50 w-72 md:w-96"
-            type="text"
-            placeholder="Room description"
-            value={description}
-            name="jam-room-description"
-            autoComplete="off"
-            onChange={e => {
-              setDescription(e.target.value);
-            }}
-          ></input>
-          <div className="p-2 text-gray-500 italic">
-            Describe what this room is about.{' '}
-            <span className="text-gray-300">(optional)</span>
-          </div>
-
-          <button
-            onClick={submit}
-            className="select-none mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
-          >
-            🌱 Start room
-          </button>
-        </form>
         <div className="pt-32 text-xs text-gray-300 text-center">
           <a href="https://gitlab.com/jam-systems/jam" target="_blank">
             built

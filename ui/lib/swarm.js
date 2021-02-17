@@ -2,7 +2,7 @@ import SimplePeer from 'simple-peer-light';
 import State from './minimal-state.js';
 import signalhub from './signalhub.js';
 
-const LOGGING = true;
+const LOGGING = false;
 const MAX_CONNECT_TIME = 6000;
 const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;
 const MIN_MAX_CONNECT_TIME_AFTER_SIGNAL = 2000;
@@ -29,6 +29,8 @@ const swarm = State({
   stream: null,
   data: null,
   newPeer: null,
+  sharedEvent: null,
+  peerEvent: null,
 });
 
 export default swarm;
@@ -52,9 +54,20 @@ function addLocalStream(stream, name) {
 swarm.on('sharedState', state => {
   let {hub, myPeerId, sign} = swarm;
   if (!hub || !myPeerId) return;
-  hub.broadcast('shared-state', {
+  hub.broadcast('all', {
+    type: 'shared-state',
     peerId: myPeerId,
-    state: sign ? sign(state) : state,
+    data: sign ? sign(state) : state,
+  });
+});
+
+swarm.on('sharedEvent', data => {
+  let {hub, myPeerId, sign} = swarm;
+  if (!hub || !myPeerId) return;
+  hub.broadcast('all', {
+    type: 'shared-event',
+    peerId: myPeerId,
+    data: sign ? sign(data) : data,
   });
 });
 
@@ -338,7 +351,6 @@ function connectPeer(hub, peerId, connId) {
       sharedState: signedState(),
     });
     let peer = peers[peerId];
-    // TODO: destroying the old peer here destroys the retry timeouts!
     if (peer) {
       log('destroying old peer', s(peerId));
       peer.garbage = true;
@@ -462,8 +474,17 @@ function connect(url, room) {
     }
   );
 
-  hub.subscribe('shared-state', ({peerId, state}) => {
-    updatePeerState(peerId, state);
+  hub.subscribe('all', ({type, peerId, data}) => {
+    if (type === 'shared-state') {
+      updatePeerState(peerId, data);
+    }
+    if (type === 'shared-event') {
+      if (swarm.verify) {
+        data = swarm.verify(data, peerId);
+        if (data === undefined) return;
+      }
+      swarm.emit('peerEvent', peerId, data);
+    }
   });
 }
 

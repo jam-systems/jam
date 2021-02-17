@@ -1,32 +1,61 @@
 import React from 'react';
 import {enterRoom} from '../main';
+import ReactMarkdown from 'react-markdown';
+import gfm from 'remark-gfm';
+
+let customUriTransformer = (uri) => {
+  return (uri.startsWith("bitcoin:")
+         ? uri
+         : ReactMarkdown.uriTransformer(uri));
+};
 
 export default function EnterRoom({roomId, name, description}) {
   return (
     <div className="container md:min-h-full">
       <div className="child md:p-10">
-        <h1 className="pl-2  pt-6 font-book text-black text-xl3">{name || ''}</h1>
+        <h1 className="pl-2  pt-6 font-book text-black text-xl3">
+          {name || ''}
+        </h1>
         {/*
             a snapshot of current or nticipated speakers
             (for scheduled (future) rooms)
         */}
         <ol className="hidden flex space-x-4 pt-6">
           <li className="flex-shrink w-28 h-28 ring-yellow-500">
-            <img className="human-radius border border-gray-300" src="img/avatars/sonic.jpg" />
+            <img
+              className="human-radius border border-gray-300"
+              src="img/avatars/sonic.jpg"
+            />
           </li>
           <li className="flex-shrink w-28 h-28">
-            <img className="human-radius border border-gray-300" src="img/avatars/gregor.jpg" />
+            <img
+              className="human-radius border border-gray-300"
+              src="img/avatars/gregor.jpg"
+            />
           </li>
           <li className="flex-shrink w-28 h-28">
-            <img className="human-radius border border-gray-300" src="img/avatars/christoph.jpg" />
+            <img
+              className="human-radius border border-gray-300"
+              src="img/avatars/christoph.jpg"
+            />
           </li>
           <li className="flex-shrink w-28 h-28">
-            <img className="human-radius border border-gray-300" src="img/avatars/tosh.jpg" />
+            <img
+              className="human-radius border border-gray-300"
+              src="img/avatars/tosh.jpg"
+            />
           </li>
         </ol>
-        <p className="pl-2 text-gray-500">
-          {description || 'This is a Room on Jam'}
-        </p>
+        <div className="pl-2 text-gray-500">
+          <ReactMarkdown
+            className="markdown"
+            plugins={[gfm]}
+            linkTarget="_blank"
+            transformLinkUri={customUriTransformer}
+          >
+            {description || 'This is a Room on Jam'}
+          </ReactMarkdown>
+        </div>
         {/*
             optional (for future events:)
             when is this event?
