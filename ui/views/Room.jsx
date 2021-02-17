@@ -10,8 +10,8 @@ import {signedToken} from '../identity';
 import ReactMarkdown from 'react-markdown';
 import gfm from 'remark-gfm';
 
-const reactionButton = '❤️';
-const reactionEmojis = ['💯', '😂', '👋', '✌️', '👋'];
+const reactionButton = '☺';
+const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
 export default function Room({room, roomId}) {
   // room = {name, description, moderators: [peerId], speakers: [peerId]}
@@ -332,7 +332,7 @@ export default function Room({room, roomId}) {
             onClick={() => setShowReactions(s => !s)}
             className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow"
           >
-            {reactionButton} React
+            <span className="text-3xl text-gray-600">{reactionButton}</span>
           </button>
           {showReactions && (
             <div className="h-12 text-4xl text-black bg-gray-200 rounded-lg absolute left-0 -top-14">
