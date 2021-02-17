@@ -60,7 +60,7 @@ export default function Start({urlRoomId}) {
               style={{width: 130, height: 130}}
               alt="Jam mascot by @eejitlikeme"
               title="Jam mascot by @eejitlikeme"
-              src="/img/jam-illustration.png"
+              src="/img/jam.jpg"
             />
           </div>
         </div>
