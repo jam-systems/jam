@@ -144,7 +144,10 @@ export default function Room({room, roomId}) {
                         src={gravatarUrl(myInfo)}
                       />
 
-                      <Reactions reactions={myReactions} size="64" />
+                      <Reactions
+                        reactions={myReactions}
+                        className="absolute bg-white text-5xl md:text-7xl pt-4 md:pt-5 human-radius w-20 h-20 md:w-28 md:h-28 border text-center"
+                        />
                     </div>
                   </div>
                   <div className={micMuted ? '' : 'hidden'}>
@@ -199,7 +202,10 @@ export default function Room({room, roomId}) {
                             alt={peerInfo.displayName}
                             src={gravatarUrl(peerInfo)}
                           />
-                          <Reactions reactions={reactions_} size="64" />
+                          <Reactions
+                            reactions={reactions_}
+                            className="absolute bg-white text-5xl md:text-7xl pt-4 md:pt-5 human-radius w-20 h-20 md:w-28 md:h-28 border text-center"
+                            />
                         </div>
                       </div>
                       {/* div for showing mute/unmute status */}
@@ -247,7 +253,10 @@ export default function Room({room, roomId}) {
                     className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50"
                     src={gravatarUrl(myInfo)}
                   />
-                  <Reactions reactions={myReactions} size="56" />
+                  <Reactions
+                    reactions={myReactions}
+                    className="absolute bg-white text-4xl md:text-6xl pt-3 md:pt-4 human-radius w-16 h-16 md:w-24 md:h-24 border text-center"
+                    />
                 </div>
                 <div className="text-center mt-2">{myInfo.displayName}</div>
               </li>
@@ -271,7 +280,10 @@ export default function Room({room, roomId}) {
                         alt={peerInfo.displayName}
                         src={gravatarUrl(peerInfo)}
                       />
-                      <Reactions reactions={reactions_} size="56" />
+                      <Reactions
+                        reactions={reactions_}
+                        className="absolute bg-white text-4xl md:text-6xl pt-3 md:pt-4 human-radius w-16 h-16 md:w-24 md:h-24 border text-center"
+                        />
                     </div>
                     <div className="text-center mt-2">
                       {peerInfo.displayName}
@@ -402,18 +414,16 @@ export default function Room({room, roomId}) {
   );
 }
 
-function Reactions({size, reactions}) {
+function Reactions({reactions, className}) {
   if (!reactions) return null;
   return (
     <>
       {reactions.map(([r, id]) => (
         <div
           key={id}
-          className="absolute bg-white human-radius min-w-full min-h-full border text-center"
+          className={className}
           style={{
             alignSelf: 'center',
-            fontSize: (size + "px"),
-            lineHeight: ((size * 1.6).toFixed() + "px"),
           }}
         >
           {r}
