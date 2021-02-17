@@ -93,7 +93,7 @@ export default function Room({room, roomId}) {
     return uri.startsWith('bitcoin:') ? uri : ReactMarkdown.uriTransformer(uri);
   };
 
-  let myReaction = reactions[myPeerId];
+  let myReactions = reactions[myPeerId];
 
   return (
     <div
@@ -143,7 +143,8 @@ export default function Room({room, roomId}) {
                         alt="me"
                         src={gravatarUrl(myInfo)}
                       />
-                      <Reaction reaction={myReaction} size="64px" />
+
+                      <Reactions reactions={myReactions} size="64px" />
                     </div>
                   </div>
                   <div className={micMuted ? '' : 'hidden'}>
@@ -172,7 +173,7 @@ export default function Room({room, roomId}) {
               )}
               {stagePeers.map(peerId => {
                 let {micMuted, inRoom} = peerState[peerId] || {};
-                let reaction = reactions[peerId];
+                let reactions_ = reactions[peerId];
                 const peerInfo = identities[peerId] || {id: peerId};
                 return (
                   inRoom && (
@@ -198,7 +199,7 @@ export default function Room({room, roomId}) {
                             alt={peerInfo.displayName}
                             src={gravatarUrl(peerInfo)}
                           />
-                          <Reaction reaction={reaction} size="64px" />
+                          <Reactions reactions={reactions_} size="64px" />
                         </div>
                       </div>
                       {/* div for showing mute/unmute status */}
@@ -246,14 +247,14 @@ export default function Room({room, roomId}) {
                     className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50"
                     src={gravatarUrl(myInfo)}
                   />
-                  <Reaction reaction={myReaction} size="56px" />
+                  <Reactions reactions={myReactions} size="56px" />
                 </div>
                 <div className="text-center mt-2">{myInfo.displayName}</div>
               </li>
             )}
             {audiencePeers.map(peerId => {
               let {inRoom} = peerState[peerId] || {};
-              let reaction = reactions[peerId];
+              let reactions_ = reactions[peerId];
               const peerInfo = identities[peerId] || {id: peerId};
               return (
                 inRoom && (
@@ -270,7 +271,7 @@ export default function Room({room, roomId}) {
                         alt={peerInfo.displayName}
                         src={gravatarUrl(peerInfo)}
                       />
-                      <Reaction reaction={reaction} size="56px" />
+                      <Reactions reactions={reactions_} size="56px" />
                     </div>
                     <div className="text-center mt-2">
                       {peerInfo.displayName}
@@ -401,18 +402,23 @@ export default function Room({room, roomId}) {
   );
 }
 
-function Reaction({size, reaction}) {
-  if (!reaction) return null;
+function Reactions({size, reactions}) {
+  if (!reactions) return null;
   return (
-    <div
-      className="absolute"
-      style={{
-        alignSelf: 'center',
-        fontSize: size
-      }}
-    >
-      {reaction}
-    </div>
+    <>
+      {reactions.map(([r, id]) => (
+        <div
+          key={id}
+          className="absolute"
+          style={{
+            alignSelf: 'center',
+            fontSize: size,
+          }}
+        >
+          {r}
+        </div>
+      ))}
+    </>
   );
 }
 

@@ -78,11 +78,15 @@ export function sendReaction(reaction) {
 }
 swarm.on('peerEvent', (peerId, data) => {
   let {reaction} = data;
+  let {reactions} = state;
   if (reaction) {
-    state.reactions[peerId] = reaction;
+    if (!reactions[peerId]) reactions[peerId] = [];
+    let reactionObj = [reaction, Math.random()];
+    reactions[peerId].push(reactionObj);
     state.update('reactions');
     setTimeout(() => {
-      delete state.reactions[peerId];
+      let i = reactions[peerId].indexOf(reactionObj);
+      if (i !== -1) reactions[peerId].splice(i, 1);
       state.update('reactions');
     }, 5000);
   }
