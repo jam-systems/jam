@@ -19,7 +19,6 @@ const defaultMetaInfo = {
 
 const getRoomMetaInfo = async (roomPath) => {
     const roomInfo = (await (await fetch(pantryApiPrefix + roomPath)).json());
-    console.log(roomInfo);
     return {
         ogTitle: "Jam - " + roomInfo['name'],
         ogDescription: "Join this Jam audio space - " + roomInfo['description'],
@@ -29,7 +28,6 @@ const getRoomMetaInfo = async (roomPath) => {
 }
 
 app.use(async (req, res) => {
-    console.log(req.path);
     const metaInfo = req.path === '/' ? defaultMetaInfo : {
         ...defaultMetaInfo,
         ...(await getRoomMetaInfo(req.path))
