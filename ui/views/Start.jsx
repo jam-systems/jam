@@ -56,17 +56,17 @@ export default function Start({urlRoomId}) {
             <span className="text-gray-400">(optional)</span>
           </div>
           <br />
-          <input
+          <textarea
             className="rounded placeholder-gray-300 bg-gray-50 w-72 md:w-full"
-            type="text"
             placeholder="Room description"
             value={description}
             name="jam-room-description"
             autoComplete="off"
+            rows="2"
             onChange={e => {
               setDescription(e.target.value);
             }}
-          ></input>
+          ></textarea>
           <div className="p-2 text-gray-500 italic">
             Describe what this room is about.{' '}
             <span className="text-gray-400">(optional) (supports <a className="underline" href="https://guides.github.com/pdfs/markdown-cheatsheet-online.pdf" target="_blank">Markdown</a>)</span>
