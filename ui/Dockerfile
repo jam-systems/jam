@@ -12,7 +12,9 @@ RUN mkdir /app
 WORKDIR /app
 
 COPY docker/set-jam-host /usr/local/bin/
-COPY css img server ./
+COPY css ./css/
+COPY img ./img/
+COPY server ./server/
 COPY --from=builder /bundle.js ./
 RUN yarn add express node-fetch
 
