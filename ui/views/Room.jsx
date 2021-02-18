@@ -120,10 +120,10 @@ export default function Room({room, roomId}) {
       }}
     >
       <div
-        className="child flex flex-col md:p-10"
+        className="child flex flex-col pt-8 md:p-10"
         style={{flex: '1', overflowY: 'auto', minHeight: '0'}}
       >
-        <div className="flex mt-8 md:m-0">
+        <div className="flex">
           {logoURI && (
             <div className="flex-none">
               <img

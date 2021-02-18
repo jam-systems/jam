@@ -10,8 +10,8 @@ let customUriTransformer = uri => {
 export default function EnterRoom({roomId, name, description, logoURI}) {
   return (
     <div className="container md:min-h-full">
-      <div className="child md:p-10">
-        <div className="flex mt-8 md:m-0">
+      <div className="child pt-8 md:p-10">
+        <div className="flex">
           {logoURI && (
             <div className="flex-none">
               <img
