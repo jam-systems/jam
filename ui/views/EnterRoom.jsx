@@ -13,7 +13,7 @@ export default function EnterRoom({roomId, name, description, logoURI}) {
   return (
     <div className="container md:min-h-full">
       <div className="child md:p-10">
-      <div className="flex">
+      <div className="flex mt-2 md:m-0">
         <div className="flex-shrink">
           { logoURI && (
             <img className="w-16 h-16 border rounded p-1 m-2 mt-0" src={logoURI} />)
@@ -87,7 +87,7 @@ export default function EnterRoom({roomId, name, description, logoURI}) {
         */}
         <button
           onClick={() => enterRoom(roomId)}
-          className="mb-10 select-none mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
+          className="ml-2 mt-8 mb-10 select-none mt-5 w-60 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
         >
           🐾 &nbsp;Join this Jam
         </button>
