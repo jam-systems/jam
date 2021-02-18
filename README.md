@@ -1,3 +1,10 @@
+<p align="center">
+  <img title='Jam mascot by @eejitlikeme'
+       src="https://jam.systems/img/jam.jpg"
+       width="300"
+       height="300"/>
+</p>
+
 # Jam
 
 Jam is an Open Source alternative to Clubhouse, Twitter Spaces and similar audio spaces.
