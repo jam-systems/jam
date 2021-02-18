@@ -3,37 +3,38 @@ import {enterRoom} from '../main';
 import ReactMarkdown from 'react-markdown';
 import gfm from 'remark-gfm';
 
-let customUriTransformer = (uri) => {
-  return (uri.startsWith("bitcoin:")
-         ? uri
-         : ReactMarkdown.uriTransformer(uri));
+let customUriTransformer = uri => {
+  return uri.startsWith('bitcoin:') ? uri : ReactMarkdown.uriTransformer(uri);
 };
 
 export default function EnterRoom({roomId, name, description, logoURI}) {
   return (
     <div className="container md:min-h-full">
       <div className="child md:p-10">
-      <div className="flex mt-2 md:m-0">
-        { logoURI && (
+        <div className="flex mt-8 md:m-0">
+          {logoURI && (
             <div className="flex-none">
-              <img className="w-16 h-16 border rounded p-1 m-2 mt-6 md:mt-0" src={logoURI} style={{objectFit: "cover"}} />
+              <img
+                className="w-16 h-16 border rounded p-1 m-2 mt-0"
+                src={logoURI}
+                style={{objectFit: 'cover'}}
+              />
             </div>
-        )}
-        <div className="flex-grow">
-          <h1 className="pl-2 pt-6 md:pt-0">{name}</h1>
-          <div className="pl-2 text-gray-500">
-            <ReactMarkdown
-              className="markdown"
-              plugins={[gfm]}
-              linkTarget="_blank"
-              transformLinkUri={customUriTransformer}
-            >
-              {description || 'This is a Room on Jam'}
-            </ReactMarkdown>
+          )}
+          <div className="flex-grow">
+            <h1 className="pl-2">{name}</h1>
+            <div className="pl-2 text-gray-500">
+              <ReactMarkdown
+                className="markdown"
+                plugins={[gfm]}
+                linkTarget="_blank"
+                transformLinkUri={customUriTransformer}
+              >
+                {description || 'This is a Room on Jam'}
+              </ReactMarkdown>
+            </div>
           </div>
         </div>
-      </div>
-
 
         {/*
             a snapshot of current or nticipated speakers
