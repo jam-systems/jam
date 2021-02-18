@@ -20,8 +20,8 @@ const defaultMetaInfo = {
 const getRoomMetaInfo = async (roomPath) => {
     const roomInfo = (await (await fetch(pantryApiPrefix + roomPath)).json());
     return {
-        ogTitle: "Jam - " + roomInfo['name'],
-        ogDescription: "Join this Jam audio space - " + roomInfo['description'],
+        ogTitle: roomInfo['name'],
+        ogDescription: roomInfo['description'],
         ogUrl: `https://${jamHost}${roomPath}`,
         ogImage: roomInfo['logoURI'] || `https://${jamHost}/img/jam-app-icon.jpg`,
         favIcon: roomInfo['logoURI'] || '/img/jam-app-icon.jpg',
