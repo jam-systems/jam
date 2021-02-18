@@ -10,5 +10,6 @@ const state = State({
   userInteracted: false,
   identities: {},
   reactions: {},
+  modals: new Set(),
 });
 export default state;

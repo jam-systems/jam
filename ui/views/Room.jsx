@@ -9,6 +9,8 @@ import copyToClipboard from '../lib/copy-to-clipboard';
 import {put} from '../backend';
 import {signedToken} from '../identity';
 import animateEmoji from '../lib/animate-emoji';
+import {openModal} from './Modal';
+import {EditRoomModal} from './EditRoom';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
@@ -118,7 +120,12 @@ export default function Room({room, roomId}) {
         className="child flex flex-col pt-8 md:p-10"
         style={{flex: '1', overflowY: 'auto', minHeight: '0'}}
       >
-        <RoomHeader {...{name, description, logoURI}} />
+        <RoomHeader
+          {...{name, description, logoURI}}
+          editRoom={
+            iModerate && (() => openModal(EditRoomModal, {roomId, room}))
+          }
+        />
 
         {/* Main Area */}
         <div className="">
@@ -161,7 +168,7 @@ export default function Room({room, roomId}) {
                       <div
                         style={{lineHeight: '30px', marginTop: '4px'}}
                         className={
-                          moderators.includes(swarm.myPeerId)
+                          iModerate
                             ? 'flex-none block bg-gray-600 text-white w-5 h-5 rounded-full'
                             : 'hidden'
                         }

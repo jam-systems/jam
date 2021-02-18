@@ -7,6 +7,7 @@ import {useApiQuery} from './backend.js';
 import {usePath} from './lib/use-location.js';
 import {connectRoom, state} from './main.js';
 import swarm from './lib/swarm.js';
+import Modals from './views/Modal.jsx';
 
 render(<App />, document.querySelector('#root'));
 
@@ -30,9 +31,18 @@ function App() {
   // fetch room if we are in one
   let [room, isLoading] = useApiQuery(`/rooms/${roomId}`, !!roomId);
 
+  let Main;
+
   if (roomId) {
-    if (isLoading) return null;
-    if (room) return <Room room={room} roomId={roomId} />;
+    if (isLoading) Main = null;
+    else if (room) Main = <Room room={room} roomId={roomId} />;
   }
-  return <Start urlRoomId={roomId} />;
+  if (Main === undefined) Main = <Start urlRoomId={roomId} />;
+
+  return (
+    <>
+      {Main}
+      <Modals />
+    </>
+  );
 }

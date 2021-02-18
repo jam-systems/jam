@@ -6,7 +6,7 @@ function customUriTransformer(uri) {
   return uri.startsWith('bitcoin:') ? uri : ReactMarkdown.uriTransformer(uri);
 }
 
-export default function RoomHeader({name, description, logoURI}) {
+export default function RoomHeader({name, description, logoURI, editRoom}) {
   return (
     <div className="flex">
       {logoURI && (
@@ -31,6 +31,29 @@ export default function RoomHeader({name, description, logoURI}) {
           </ReactMarkdown>
         </div>
       </div>
+      {editRoom && (
+        <div className="flex-none w-8 h-6 cursor-pointer" onClick={editRoom}>
+          <EditSvg />
+        </div>
+      )}
     </div>
+  );
+}
+
+function EditSvg() {
+  return (
+    <svg
+      className="text-gray-500 w-6 h-6"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+    >
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+    </svg>
   );
 }
