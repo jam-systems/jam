@@ -23,7 +23,7 @@ const getRoomMetaInfo = async (roomPath) => {
         ogTitle: "Jam - " + roomInfo['name'],
         ogDescription: "Join this Jam audio space - " + roomInfo['description'],
         ogUrl: `https://${jamHost}${roomPath}`,
-        ogImage: roomInfo['imageURL'] || `https://${jamHost}/img/jam-app-icon.jpg`,
+        ogImage: roomInfo['imageURI'] || `https://${jamHost}/img/jam-app-icon.jpg`,
     }
 }
 
