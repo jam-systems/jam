@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useMemo, useState} from 'react';
 import {leaveRoom, sendReaction, state} from '../main';
 import {useMany} from '../lib/use-state.js';
 import swarm from '../lib/swarm.js';
@@ -53,23 +53,13 @@ export default function Room({room, roomId}) {
 
   let {name, description, logoURI, color, speakers, moderators} = room || {};
 
-  if (color && (color != "#FDE68A")) {
-    let hexToRGB = (hex, alpha) => {
+  let isColorDark = useMemo(() => isDark(color), [color]);
 
-      const r = parseInt(hex.slice(1, 3), 16);
-      const g = parseInt(hex.slice(3, 5), 16);
-      const b = parseInt(hex.slice(5, 7), 16);
-
-      if (alpha) {
-        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-      } else {
-        return `rgb(${r}, ${g}, ${b})`;
-      }
-    };
-
-    document.body.style.backgroundColor = hexToRGB(color, "0.123");
-  };
-
+  useLayoutEffect(() => {
+    if (color && color != '#FDE68A') {
+      document.body.style.backgroundColor = hexToRGB(color, '0.123');
+    }
+  }, [color]);
 
   let {myPeerId} = swarm;
 
@@ -106,7 +96,14 @@ export default function Room({room, roomId}) {
   };
 
   if (!hasEnteredRoom)
-    return <EnterRoom roomId={roomId} name={name} description={description} logoURI={logoURI} />;
+    return (
+      <EnterRoom
+        roomId={roomId}
+        name={name}
+        description={description}
+        logoURI={logoURI}
+      />
+    );
 
   let customUriTransformer = uri => {
     return uri.startsWith('bitcoin:') ? uri : ReactMarkdown.uriTransformer(uri);
@@ -127,9 +124,13 @@ export default function Room({room, roomId}) {
         style={{flex: '1', overflowY: 'auto', minHeight: '0'}}
       >
         <div className="flex mt-2 md:m-0">
-          { logoURI && (
+          {logoURI && (
             <div className="flex-none">
-              <img className="w-16 h-16 border rounded p-1 m-2 mt-6 md:mt-0" src={logoURI} style={{objectFit: "cover"}} />
+              <img
+                className="w-16 h-16 border rounded p-1 m-2 mt-6 md:mt-0"
+                src={logoURI}
+                style={{objectFit: 'cover'}}
+              />
             </div>
           )}
           <div className="flex-grow">
@@ -350,7 +351,10 @@ export default function Room({room, roomId}) {
           <button
             onClick={() => state.set('micMuted', !micMuted)}
             className="select-none h-12 mt-4 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline active:bg-yellow-300 w-screen"
-            style={{backgroundColor: (color || "#FDE68A")}}
+            style={{
+              backgroundColor: color || '#FDE68A',
+              color: isColorDark ? 'white' : 'black',
+            }}
           >
             {micOn
               ? micMuted
@@ -622,4 +626,24 @@ function EditIdentity({info, onSubmit, onCancel}) {
       <hr />
     </div>
   );
+}
+
+function hexToRGB(hex, alpha) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+
+  if (alpha) {
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  } else {
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+}
+
+function isDark(hex) {
+  if (!hex) return false;
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return r + g + b < 128 * 3;
 }
