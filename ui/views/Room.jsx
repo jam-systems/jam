@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {leaveRoom, sendReaction, state} from '../main';
 import {useMany} from '../lib/use-state.js';
 import swarm from '../lib/swarm.js';
@@ -9,8 +9,8 @@ import {put} from '../backend';
 import {signedToken} from '../identity';
 import ReactMarkdown from 'react-markdown';
 import gfm from 'remark-gfm';
+import animateEmoji from '../lib/animate-emoji';
 
-const reactionButton = '☺';
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
 export default function Room({room, roomId}) {
@@ -147,7 +147,7 @@ export default function Room({room, roomId}) {
                       <Reactions
                         reactions={myReactions}
                         className="absolute bg-white text-5xl md:text-7xl pt-4 md:pt-5 human-radius w-20 h-20 md:w-28 md:h-28 border text-center"
-                        />
+                      />
                     </div>
                   </div>
                   <div className={micMuted ? '' : 'hidden'}>
@@ -205,7 +205,7 @@ export default function Room({room, roomId}) {
                           <Reactions
                             reactions={reactions_}
                             className="absolute bg-white text-5xl md:text-7xl pt-4 md:pt-5 human-radius w-20 h-20 md:w-28 md:h-28 border text-center"
-                            />
+                          />
                         </div>
                       </div>
                       {/* div for showing mute/unmute status */}
@@ -256,7 +256,7 @@ export default function Room({room, roomId}) {
                   <Reactions
                     reactions={myReactions}
                     className="absolute bg-white text-4xl md:text-6xl pt-3 md:pt-4 human-radius w-16 h-16 md:w-24 md:h-24 border text-center"
-                    />
+                  />
                 </div>
                 <div className="text-center mt-2">{myInfo.displayName}</div>
               </li>
@@ -283,7 +283,7 @@ export default function Room({room, roomId}) {
                       <Reactions
                         reactions={reactions_}
                         className="absolute bg-white text-4xl md:text-6xl pt-3 md:pt-4 human-radius w-16 h-16 md:w-24 md:h-24 border text-center"
-                        />
+                      />
                     </div>
                     <div className="text-center mt-2">
                       {peerInfo.displayName}
@@ -345,8 +345,19 @@ export default function Room({room, roomId}) {
             className="select-none text-center h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
           >
             {/* heroicons/emoji-happy */}
-            <svg className="text-gray-600 w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="text-gray-600 w-6 h-6"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
           </button>
           {showReactions && (
@@ -396,7 +407,12 @@ export default function Room({room, roomId}) {
             className="ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
           >
             {/* heroicons/share-small */}
-            <svg className="text-gray-600 w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <svg
+              className="text-gray-600 w-5 h-5"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
               <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
             </svg>
           </button>
@@ -425,17 +441,28 @@ function Reactions({reactions, className}) {
   return (
     <>
       {reactions.map(([r, id]) => (
-        <div
+        <AnimatedEmoji
           key={id}
+          emoji={r}
           className={className}
           style={{
             alignSelf: 'center',
           }}
-        >
-          {r}
-        </div>
+        />
       ))}
     </>
+  );
+}
+
+function AnimatedEmoji({emoji, ...props}) {
+  let [element, setElement] = useState(null);
+  useEffect(() => {
+    if (element) animateEmoji(element);
+  }, [element]);
+  return (
+    <div ref={setElement} {...props}>
+      {emoji}
+    </div>
   );
 }
 
