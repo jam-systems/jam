@@ -190,7 +190,7 @@ export default function Room({room, roomId}) {
                         style={{lineHeight: '30px', marginTop: '4px'}}
                         className={
                           moderators.includes(swarm.myPeerId)
-                            ? 'flex-none block bg-yellow-400 text-white w-5 h-5 rounded-full'
+                            ? 'flex-none block bg-gray-600 text-white w-5 h-5 rounded-full'
                             : 'hidden'
                         }
                       >
@@ -251,7 +251,7 @@ export default function Room({room, roomId}) {
                             style={{lineHeight: '30px', marginTop: '4px'}}
                             className={
                               moderators.includes(peerId)
-                                ? 'flex-none block bg-yellow-400 text-white w-5 h-5 rounded-full'
+                                ? 'flex-none block bg-gray-600 text-white w-5 h-5 rounded-full'
                                 : 'hidden'
                             }
                           >
