@@ -190,11 +190,13 @@ export default function Room({room, roomId}) {
                         style={{lineHeight: '30px', marginTop: '4px'}}
                         className={
                           moderators.includes(swarm.myPeerId)
-                            ? 'flex-none block bg-yellow-400 text-white font-light text-4xl w-4 h-4 text-center rounded-full'
+                            ? 'flex-none block bg-yellow-400 text-white w-5 h-5 rounded-full'
                             : 'hidden'
                         }
                       >
-                        *
+                        <svg className="m-1 w-3 h-3" x="0px" y="0px" viewBox="0 0 1000 1000" enable-background="new 0 0 1000 1000" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M894.5,633.4L663.3,500l231.1-133.4c39.1-22.6,52.4-72.5,29.9-111.6c-22.6-39.1-72.5-52.4-111.6-29.9L581.7,358.5V91.7c0-45.1-36.6-81.7-81.7-81.7c-45.1,0-81.7,36.6-81.7,81.7v266.9L187.2,225.1c-39.1-22.6-89-9.2-111.6,29.9c-22.6,39.1-9.2,89,29.9,111.6L336.7,500L105.5,633.4C66.5,656,53.1,705.9,75.6,745c22.6,39.1,72.5,52.4,111.6,29.9l231.1-133.4v266.9c0,45.1,36.6,81.7,81.7,81.7c45.1,0,81.7-36.6,81.7-81.7V641.5l231.1,133.4c39.1,22.6,89,9.2,111.6-29.9C946.9,705.9,933.5,656,894.5,633.4z"/>
+                        </svg>
                       </div>
                       <div className="flex-none pl-1 overflow-ellipsis w-20 md:w-28">
                         {myInfo.displayName}
@@ -249,11 +251,13 @@ export default function Room({room, roomId}) {
                             style={{lineHeight: '30px', marginTop: '4px'}}
                             className={
                               moderators.includes(peerId)
-                                ? 'flex-none block bg-yellow-400 text-white font-light text-4xl w-4 h-4 text-center rounded-full'
+                                ? 'flex-none block bg-yellow-400 text-white w-5 h-5 rounded-full'
                                 : 'hidden'
                             }
                           >
-                            *
+                            <svg className="m-1 w-3 h-3" x="0px" y="0px" viewBox="0 0 1000 1000" enable-background="new 0 0 1000 1000" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M894.5,633.4L663.3,500l231.1-133.4c39.1-22.6,52.4-72.5,29.9-111.6c-22.6-39.1-72.5-52.4-111.6-29.9L581.7,358.5V91.7c0-45.1-36.6-81.7-81.7-81.7c-45.1,0-81.7,36.6-81.7,81.7v266.9L187.2,225.1c-39.1-22.6-89-9.2-111.6,29.9c-22.6,39.1-9.2,89,29.9,111.6L336.7,500L105.5,633.4C66.5,656,53.1,705.9,75.6,745c22.6,39.1,72.5,52.4,111.6,29.9l231.1-133.4v266.9c0,45.1,36.6,81.7,81.7,81.7c45.1,0,81.7-36.6,81.7-81.7V641.5l231.1,133.4c39.1,22.6,89,9.2,111.6-29.9C946.9,705.9,933.5,656,894.5,633.4z"/>
+                            </svg>
                           </div>
                           <div className="flex-none pl-1 overflow-ellipsis w-20 md:w-28">
                             {peerInfo.displayName}
