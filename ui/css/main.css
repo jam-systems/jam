@@ -22,6 +22,8 @@ body {
 }
 
 .navigation {
+    position: fixed;
+    bottom: 0;
     margin-left: -15px; /* compensate for padding from outer div (?) */
     width: 700px;
     border: 2px solid lightgrey;
@@ -113,8 +115,8 @@ table td {
         border-right: 0;
         border-bottom: 0;
         border-left: 0;
-        padding: 0;
-        margin-left: 0; /* remove negative margin left from desktop view? */
+        padding: 0 22px 22px 22px;
+        margin-left: -12px; /* adapt negative margin left from desktop view? */
 
         box-sizing: border-box;
     }
