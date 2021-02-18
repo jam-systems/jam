@@ -1,40 +1,12 @@
 import React from 'react';
 import {enterRoom} from '../main';
-import ReactMarkdown from 'react-markdown';
-import gfm from 'remark-gfm';
-
-let customUriTransformer = uri => {
-  return uri.startsWith('bitcoin:') ? uri : ReactMarkdown.uriTransformer(uri);
-};
+import RoomHeader from './RoomHeader.jsx';
 
 export default function EnterRoom({roomId, name, description, logoURI}) {
   return (
     <div className="container md:min-h-full">
       <div className="child pt-8 md:p-10">
-        <div className="flex">
-          {logoURI && (
-            <div className="flex-none">
-              <img
-                className="w-16 h-16 border rounded p-1 m-2 mt-0"
-                src={logoURI}
-                style={{objectFit: 'cover'}}
-              />
-            </div>
-          )}
-          <div className="flex-grow">
-            <h1 className="pl-2">{name}</h1>
-            <div className="pl-2 text-gray-500">
-              <ReactMarkdown
-                className="markdown"
-                plugins={[gfm]}
-                linkTarget="_blank"
-                transformLinkUri={customUriTransformer}
-              >
-                {description || 'This is a Room on Jam'}
-              </ReactMarkdown>
-            </div>
-          </div>
-        </div>
+        <RoomHeader {...{name, description, logoURI}} />
 
         {/*
             a snapshot of current or nticipated speakers

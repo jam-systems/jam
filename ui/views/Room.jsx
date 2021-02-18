@@ -3,12 +3,11 @@ import {leaveRoom, sendReaction, state} from '../main';
 import {useMany} from '../lib/use-state.js';
 import swarm from '../lib/swarm.js';
 import EnterRoom from './EnterRoom.jsx';
+import RoomHeader from './RoomHeader.jsx';
 import {gravatarUrl} from '../lib/gravatar';
 import copyToClipboard from '../lib/copy-to-clipboard';
 import {put} from '../backend';
 import {signedToken} from '../identity';
-import ReactMarkdown from 'react-markdown';
-import gfm from 'remark-gfm';
 import animateEmoji from '../lib/animate-emoji';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
@@ -105,10 +104,6 @@ export default function Room({room, roomId}) {
       />
     );
 
-  let customUriTransformer = uri => {
-    return uri.startsWith('bitcoin:') ? uri : ReactMarkdown.uriTransformer(uri);
-  };
-
   let myReactions = reactions[myPeerId];
 
   return (
@@ -123,30 +118,7 @@ export default function Room({room, roomId}) {
         className="child flex flex-col pt-8 md:p-10"
         style={{flex: '1', overflowY: 'auto', minHeight: '0'}}
       >
-        <div className="flex">
-          {logoURI && (
-            <div className="flex-none">
-              <img
-                className="w-16 h-16 border rounded p-1 m-2 mt-0"
-                src={logoURI}
-                style={{objectFit: 'cover'}}
-              />
-            </div>
-          )}
-          <div className="flex-grow">
-            <h1 className="pl-2">{name}</h1>
-            <div className="pl-2 text-gray-500">
-              <ReactMarkdown
-                className="markdown"
-                plugins={[gfm]}
-                linkTarget="_blank"
-                transformLinkUri={customUriTransformer}
-              >
-                {description || 'This is a Room on Jam'}
-              </ReactMarkdown>
-            </div>
-          </div>
-        </div>
+        <RoomHeader {...{name, description, logoURI}} />
 
         {/* Main Area */}
         <div className="">
