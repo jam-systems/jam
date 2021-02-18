@@ -1,16 +1,17 @@
-import React, {useState} from 'react';
+import React, {useEffect, useLayoutEffect, useMemo, useState} from 'react';
 import {leaveRoom, sendReaction, state} from '../main';
 import {useMany} from '../lib/use-state.js';
 import swarm from '../lib/swarm.js';
 import EnterRoom from './EnterRoom.jsx';
+import RoomHeader from './RoomHeader.jsx';
 import {gravatarUrl} from '../lib/gravatar';
 import copyToClipboard from '../lib/copy-to-clipboard';
 import {put} from '../backend';
 import {signedToken} from '../identity';
-import ReactMarkdown from 'react-markdown';
-import gfm from 'remark-gfm';
+import animateEmoji from '../lib/animate-emoji';
+import {openModal} from './Modal';
+import {EditRoomModal} from './EditRoom';
 
-const reactionButton = '☺';
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
 export default function Room({room, roomId}) {
@@ -51,7 +52,16 @@ export default function Room({room, roomId}) {
     swarm.hub.broadcast('identity-updates', swarm.myPeerId);
   };
 
-  let {name, description, speakers, moderators} = room || {};
+  let {name, description, logoURI, color, speakers, moderators} = room || {};
+
+  let isColorDark = useMemo(() => isDark(color), [color]);
+
+  useLayoutEffect(() => {
+    if (color && color != '#FDE68A') {
+      document.body.style.backgroundColor = hexToRGB(color, '0.123');
+    }
+  }, [color]);
+
   let {myPeerId} = swarm;
 
   let stagePeers = (speakers || []).filter(id => id in peers);
@@ -87,11 +97,14 @@ export default function Room({room, roomId}) {
   };
 
   if (!hasEnteredRoom)
-    return <EnterRoom roomId={roomId} name={name} description={description} />;
-
-  let customUriTransformer = uri => {
-    return uri.startsWith('bitcoin:') ? uri : ReactMarkdown.uriTransformer(uri);
-  };
+    return (
+      <EnterRoom
+        roomId={roomId}
+        name={name}
+        description={description}
+        logoURI={logoURI}
+      />
+    );
 
   let myReactions = reactions[myPeerId];
 
@@ -104,20 +117,15 @@ export default function Room({room, roomId}) {
       }}
     >
       <div
-        className="child flex flex-col md:p-10"
+        className="child flex flex-col pt-8 md:p-10"
         style={{flex: '1', overflowY: 'auto', minHeight: '0'}}
       >
-        <h1 className="pl-2 pt-6 md:pt-0">{name}</h1>
-        <div className="pl-2 text-gray-500">
-          <ReactMarkdown
-            className="markdown"
-            plugins={[gfm]}
-            linkTarget="_blank"
-            transformLinkUri={customUriTransformer}
-          >
-            {description || 'This is a Room on Jam'}
-          </ReactMarkdown>
-        </div>
+        <RoomHeader
+          {...{name, description, logoURI}}
+          editRoom={
+            iModerate && (() => openModal(EditRoomModal, {roomId, room}))
+          }
+        />
 
         {/* Main Area */}
         <div className="">
@@ -147,7 +155,7 @@ export default function Room({room, roomId}) {
                       <Reactions
                         reactions={myReactions}
                         className="absolute bg-white text-5xl md:text-7xl pt-4 md:pt-5 human-radius w-20 h-20 md:w-28 md:h-28 border text-center"
-                        />
+                      />
                     </div>
                   </div>
                   <div className={micMuted ? '' : 'hidden'}>
@@ -160,12 +168,22 @@ export default function Room({room, roomId}) {
                       <div
                         style={{lineHeight: '30px', marginTop: '4px'}}
                         className={
-                          moderators.includes(swarm.myPeerId)
-                            ? 'flex-none block bg-yellow-400 text-white font-light text-4xl w-4 h-4 text-center rounded-full'
+                          iModerate
+                            ? 'flex-none block bg-gray-600 text-white w-5 h-5 rounded-full'
                             : 'hidden'
                         }
                       >
-                        *
+                        <svg
+                          className="m-1 w-3 h-3"
+                          x="0px"
+                          y="0px"
+                          viewBox="0 0 1000 1000"
+                          enable-background="new 0 0 1000 1000"
+                          fill="currentColor"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path d="M894.5,633.4L663.3,500l231.1-133.4c39.1-22.6,52.4-72.5,29.9-111.6c-22.6-39.1-72.5-52.4-111.6-29.9L581.7,358.5V91.7c0-45.1-36.6-81.7-81.7-81.7c-45.1,0-81.7,36.6-81.7,81.7v266.9L187.2,225.1c-39.1-22.6-89-9.2-111.6,29.9c-22.6,39.1-9.2,89,29.9,111.6L336.7,500L105.5,633.4C66.5,656,53.1,705.9,75.6,745c22.6,39.1,72.5,52.4,111.6,29.9l231.1-133.4v266.9c0,45.1,36.6,81.7,81.7,81.7c45.1,0,81.7-36.6,81.7-81.7V641.5l231.1,133.4c39.1,22.6,89,9.2,111.6-29.9C946.9,705.9,933.5,656,894.5,633.4z" />
+                        </svg>
                       </div>
                       <div className="flex-none pl-1 overflow-ellipsis w-20 md:w-28">
                         {myInfo.displayName}
@@ -205,7 +223,7 @@ export default function Room({room, roomId}) {
                           <Reactions
                             reactions={reactions_}
                             className="absolute bg-white text-5xl md:text-7xl pt-4 md:pt-5 human-radius w-20 h-20 md:w-28 md:h-28 border text-center"
-                            />
+                          />
                         </div>
                       </div>
                       {/* div for showing mute/unmute status */}
@@ -220,11 +238,21 @@ export default function Room({room, roomId}) {
                             style={{lineHeight: '30px', marginTop: '4px'}}
                             className={
                               moderators.includes(peerId)
-                                ? 'flex-none block bg-yellow-400 text-white font-light text-4xl w-4 h-4 text-center rounded-full'
+                                ? 'flex-none block bg-gray-600 text-white w-5 h-5 rounded-full'
                                 : 'hidden'
                             }
                           >
-                            *
+                            <svg
+                              className="m-1 w-3 h-3"
+                              x="0px"
+                              y="0px"
+                              viewBox="0 0 1000 1000"
+                              enable-background="new 0 0 1000 1000"
+                              fill="currentColor"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path d="M894.5,633.4L663.3,500l231.1-133.4c39.1-22.6,52.4-72.5,29.9-111.6c-22.6-39.1-72.5-52.4-111.6-29.9L581.7,358.5V91.7c0-45.1-36.6-81.7-81.7-81.7c-45.1,0-81.7,36.6-81.7,81.7v266.9L187.2,225.1c-39.1-22.6-89-9.2-111.6,29.9c-22.6,39.1-9.2,89,29.9,111.6L336.7,500L105.5,633.4C66.5,656,53.1,705.9,75.6,745c22.6,39.1,72.5,52.4,111.6,29.9l231.1-133.4v266.9c0,45.1,36.6,81.7,81.7,81.7c45.1,0,81.7-36.6,81.7-81.7V641.5l231.1,133.4c39.1,22.6,89,9.2,111.6-29.9C946.9,705.9,933.5,656,894.5,633.4z" />
+                            </svg>
                           </div>
                           <div className="flex-none pl-1 overflow-ellipsis w-20 md:w-28">
                             {peerInfo.displayName}
@@ -256,7 +284,7 @@ export default function Room({room, roomId}) {
                   <Reactions
                     reactions={myReactions}
                     className="absolute bg-white text-4xl md:text-6xl pt-3 md:pt-4 human-radius w-16 h-16 md:w-24 md:h-24 border text-center"
-                    />
+                  />
                 </div>
                 <div className="text-center mt-2">{myInfo.displayName}</div>
               </li>
@@ -283,7 +311,7 @@ export default function Room({room, roomId}) {
                       <Reactions
                         reactions={reactions_}
                         className="absolute bg-white text-4xl md:text-6xl pt-3 md:pt-4 human-radius w-16 h-16 md:w-24 md:h-24 border text-center"
-                        />
+                      />
                     </div>
                     <div className="text-center mt-2">
                       {peerInfo.displayName}
@@ -322,6 +350,10 @@ export default function Room({room, roomId}) {
           <button
             onClick={() => state.set('micMuted', !micMuted)}
             className="select-none h-12 mt-4 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline active:bg-yellow-300 w-screen"
+            style={{
+              backgroundColor: color || '#FDE68A',
+              color: isColorDark ? 'white' : 'black',
+            }}
           >
             {micOn
               ? micMuted
@@ -345,8 +377,19 @@ export default function Room({room, roomId}) {
             className="select-none text-center h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
           >
             {/* heroicons/emoji-happy */}
-            <svg className="text-gray-600 w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="text-gray-600 w-6 h-6"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
           </button>
           {showReactions && (
@@ -396,7 +439,12 @@ export default function Room({room, roomId}) {
             className="ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
           >
             {/* heroicons/share-small */}
-            <svg className="text-gray-600 w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <svg
+              className="text-gray-600 w-5 h-5"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
               <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
             </svg>
           </button>
@@ -425,17 +473,28 @@ function Reactions({reactions, className}) {
   return (
     <>
       {reactions.map(([r, id]) => (
-        <div
+        <AnimatedEmoji
           key={id}
+          emoji={r}
           className={className}
           style={{
             alignSelf: 'center',
           }}
-        >
-          {r}
-        </div>
+        />
       ))}
     </>
+  );
+}
+
+function AnimatedEmoji({emoji, ...props}) {
+  let [element, setElement] = useState(null);
+  useEffect(() => {
+    if (element) animateEmoji(element);
+  }, [element]);
+  return (
+    <div ref={setElement} {...props}>
+      {emoji}
+    </div>
   );
 }
 
@@ -566,4 +625,24 @@ function EditIdentity({info, onSubmit, onCancel}) {
       <hr />
     </div>
   );
+}
+
+function hexToRGB(hex, alpha) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+
+  if (alpha) {
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  } else {
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+}
+
+function isDark(hex) {
+  if (!hex) return false;
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return r + g + b < 128 * 3;
 }

@@ -81,10 +81,12 @@ export async function put(token, path, payload) {
   return authenticatedApiRequest('PUT', token, path, payload);
 }
 
-export async function createRoom(roomId, name, description, peerId) {
+export async function createRoom(roomId, name, description, logoURI, color, peerId) {
   return post('', `/rooms/${roomId}`, {
     name,
     description,
+    logoURI,
+    color,
     moderators: [peerId],
     speakers: [peerId],
   });

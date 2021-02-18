@@ -1,21 +1,13 @@
 import React from 'react';
 import {enterRoom} from '../main';
-import ReactMarkdown from 'react-markdown';
-import gfm from 'remark-gfm';
+import RoomHeader from './RoomHeader.jsx';
 
-let customUriTransformer = (uri) => {
-  return (uri.startsWith("bitcoin:")
-         ? uri
-         : ReactMarkdown.uriTransformer(uri));
-};
-
-export default function EnterRoom({roomId, name, description}) {
+export default function EnterRoom({roomId, name, description, logoURI}) {
   return (
     <div className="container md:min-h-full">
-      <div className="child md:p-10">
-        <h1 className="pl-2  pt-6 font-book text-black text-xl3">
-          {name || ''}
-        </h1>
+      <div className="child pt-8 md:p-10">
+        <RoomHeader {...{name, description, logoURI}} />
+
         {/*
             a snapshot of current or nticipated speakers
             (for scheduled (future) rooms)
@@ -46,16 +38,6 @@ export default function EnterRoom({roomId, name, description}) {
             />
           </li>
         </ol>
-        <div className="pl-2 text-gray-500">
-          <ReactMarkdown
-            className="markdown"
-            plugins={[gfm]}
-            linkTarget="_blank"
-            transformLinkUri={customUriTransformer}
-          >
-            {description || 'This is a Room on Jam'}
-          </ReactMarkdown>
-        </div>
         {/*
             optional (for future events:)
             when is this event?
@@ -78,7 +60,7 @@ export default function EnterRoom({roomId, name, description}) {
         */}
         <button
           onClick={() => enterRoom(roomId)}
-          className="mb-10 select-none mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
+          className="ml-2 mt-8 mb-10 select-none mt-5 w-60 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
         >
           🐾 &nbsp;Join this Jam
         </button>
