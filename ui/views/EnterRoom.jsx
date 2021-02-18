@@ -9,13 +9,32 @@ let customUriTransformer = (uri) => {
          : ReactMarkdown.uriTransformer(uri));
 };
 
-export default function EnterRoom({roomId, name, description}) {
+export default function EnterRoom({roomId, name, description, logoURI}) {
   return (
     <div className="container md:min-h-full">
       <div className="child md:p-10">
-        <h1 className="pl-2  pt-6 font-book text-black text-xl3">
-          {name || ''}
-        </h1>
+      <div className="flex">
+        <div className="flex-shrink">
+          { logoURI && (
+            <img className="w-16 h-16 border rounded p-1 m-2 mt-0" src={logoURI} />)
+          }
+        </div>
+        <div className="flex-grow">
+          <h1 className="pl-2 pt-6 md:pt-0">{name}</h1>
+          <div className="pl-2 text-gray-500">
+            <ReactMarkdown
+              className="markdown"
+              plugins={[gfm]}
+              linkTarget="_blank"
+              transformLinkUri={customUriTransformer}
+            >
+              {description || 'This is a Room on Jam'}
+            </ReactMarkdown>
+          </div>
+        </div>
+      </div>
+
+
         {/*
             a snapshot of current or nticipated speakers
             (for scheduled (future) rooms)
@@ -46,16 +65,6 @@ export default function EnterRoom({roomId, name, description}) {
             />
           </li>
         </ol>
-        <div className="pl-2 text-gray-500">
-          <ReactMarkdown
-            className="markdown"
-            plugins={[gfm]}
-            linkTarget="_blank"
-            transformLinkUri={customUriTransformer}
-          >
-            {description || 'This is a Room on Jam'}
-          </ReactMarkdown>
-        </div>
         {/*
             optional (for future events:)
             when is this event?

@@ -9,6 +9,11 @@ import {enterRoom, state} from '../main';
 export default function Start({urlRoomId}) {
   let [name, setName] = useState('');
   let [description, setDescription] = useState('');
+  let [color, setColor] = useState('#FDE68A');
+  let [logoURI, setLogoURI] = useState('');
+
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
 
   let submit = e => {
     e.preventDefault();
@@ -22,7 +27,7 @@ export default function Start({urlRoomId}) {
     }
 
     (async () => {
-      await createRoom(roomId, name, description, swarm.myPeerId);
+      await createRoom(roomId, name, description, logoURI, color, swarm.myPeerId);
       if (urlRoomId !== roomId) navigate('/' + roomId);
       enterRoom(roomId);
     })();
@@ -69,7 +74,49 @@ export default function Start({urlRoomId}) {
           ></textarea>
           <div className="p-2 text-gray-500 italic">
             Describe what this room is about.{' '}
-            <span className="text-gray-400">(optional) (supports <a className="underline" href="https://guides.github.com/pdfs/markdown-cheatsheet-online.pdf" target="_blank">Markdown</a>)</span>
+            <span className="text-gray-400">(optional) (supports <a className="underline" href="https://guides.github.com/pdfs/markdown-cheatsheet-online.pdf" target="_blank">Markdown</a>)</span>{' '}
+            <span onClick={() => setShowAdvanced(!showAdvanced)}>
+              {/* heroicons/gift */}
+              <svg style={{cursor: 'pointer'}} className="pb-1 h-5 w-5 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+              </svg>
+            </span>
+          </div>
+
+          {/* advanced Room options */}
+          <div className={showAdvanced ? "" : "hidden"}>
+            <br/>
+            <input
+              className="rounded placeholder-gray-300 bg-gray-50 w-72 md:w-full"
+              type="text"
+              placeholder="Logo URI"
+              value={logoURI}
+              name="jam-room-logo-uri"
+              autoComplete="off"
+              onChange={e => {
+                setLogoURI(e.target.value);
+              }}
+            ></input>
+            <div className="p-2 text-gray-500 italic">
+              Set the URI for your logo.{' '}
+              <span className="text-gray-400">(optional)</span>
+            </div>
+
+            <br/>
+            <input
+              className="rounded w-44 h-12"
+              type="color"
+              value={color}
+              name="jam-room-color"
+              autoComplete="off"
+              onChange={e => {
+                setColor(e.target.value);
+              }}
+            ></input>
+            <div className="p-2 text-gray-500 italic">
+              Set primary color for your Room.{' '}
+              <span className="text-gray-400">(optional)</span>
+            </div>
           </div>
 
           <button

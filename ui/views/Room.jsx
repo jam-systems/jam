@@ -51,7 +51,26 @@ export default function Room({room, roomId}) {
     swarm.hub.broadcast('identity-updates', swarm.myPeerId);
   };
 
-  let {name, description, speakers, moderators} = room || {};
+  let {name, description, logoURI, color, speakers, moderators} = room || {};
+
+  if (color) {
+    let hexToRGB = (hex, alpha) => {
+
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+
+      if (alpha) {
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      } else {
+        return `rgb(${r}, ${g}, ${b})`;
+      }
+    };
+
+    document.body.style.backgroundColor = hexToRGB(color, "0.123");
+  };
+
+
   let {myPeerId} = swarm;
 
   let stagePeers = (speakers || []).filter(id => id in peers);
@@ -87,7 +106,7 @@ export default function Room({room, roomId}) {
   };
 
   if (!hasEnteredRoom)
-    return <EnterRoom roomId={roomId} name={name} description={description} />;
+    return <EnterRoom roomId={roomId} name={name} description={description} logoURI={logoURI} />;
 
   let customUriTransformer = uri => {
     return uri.startsWith('bitcoin:') ? uri : ReactMarkdown.uriTransformer(uri);
@@ -107,16 +126,25 @@ export default function Room({room, roomId}) {
         className="child flex flex-col md:p-10"
         style={{flex: '1', overflowY: 'auto', minHeight: '0'}}
       >
-        <h1 className="pl-2 pt-6 md:pt-0">{name}</h1>
-        <div className="pl-2 text-gray-500">
-          <ReactMarkdown
-            className="markdown"
-            plugins={[gfm]}
-            linkTarget="_blank"
-            transformLinkUri={customUriTransformer}
-          >
-            {description || 'This is a Room on Jam'}
-          </ReactMarkdown>
+        <div className="flex">
+          <div className="flex-shrink">
+            { logoURI && (
+              <img className="w-16 h-16 border rounded p-1 m-2 mt-0" src={logoURI} />)
+            }
+          </div>
+          <div className="flex-grow">
+            <h1 className="pl-2 pt-6 md:pt-0">{name}</h1>
+            <div className="pl-2 text-gray-500">
+              <ReactMarkdown
+                className="markdown"
+                plugins={[gfm]}
+                linkTarget="_blank"
+                transformLinkUri={customUriTransformer}
+              >
+                {description || 'This is a Room on Jam'}
+              </ReactMarkdown>
+            </div>
+          </div>
         </div>
 
         {/* Main Area */}
@@ -322,6 +350,7 @@ export default function Room({room, roomId}) {
           <button
             onClick={() => state.set('micMuted', !micMuted)}
             className="select-none h-12 mt-4 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline active:bg-yellow-300 w-screen"
+            style={{backgroundColor: (color || "#FDE68A")}}
           >
             {micOn
               ? micMuted
