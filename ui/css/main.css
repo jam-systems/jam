@@ -99,7 +99,12 @@ table td {
     .container {
         width: 100%;
         border: 0px;
+        border-radius: 0;
         box-sizing: border-box;
+    }
+
+    .outer-container {
+        padding-top: 0;
     }
 
     .navigation {
