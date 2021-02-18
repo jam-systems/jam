@@ -127,11 +127,11 @@ export default function Room({room, roomId}) {
         style={{flex: '1', overflowY: 'auto', minHeight: '0'}}
       >
         <div className="flex mt-2 md:m-0">
-          <div className="flex-shrink">
-            { logoURI && (
-              <img className="w-16 h-16 border rounded p-1 m-2 mt-6 md:mt-0" src={logoURI} style={{objectFit: "cover"}} />)
-            }
-          </div>
+          { logoURI && (
+            <div className="flex-none">
+              <img className="w-16 h-16 border rounded p-1 m-2 mt-6 md:mt-0" src={logoURI} style={{objectFit: "cover"}} />
+            </div>
+          )}
           <div className="flex-grow">
             <h1 className="pl-2 pt-6 md:pt-0">{name}</h1>
             <div className="pl-2 text-gray-500">
