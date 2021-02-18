@@ -53,7 +53,7 @@ export default function Room({room, roomId}) {
 
   let {name, description, logoURI, color, speakers, moderators} = room || {};
 
-  if (color) {
+  if (color && (color != "#FDE68A")) {
     let hexToRGB = (hex, alpha) => {
 
       const r = parseInt(hex.slice(1, 3), 16);
