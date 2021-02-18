@@ -6,7 +6,7 @@ With Jam you can create `Jams` which are audio rooms that can be used for panel 
 
 [https://jam.systems/](https://jam.systems/)
 
-# Features
+## Features
 
 🙈 no camera video
 
@@ -14,7 +14,19 @@ With Jam you can create `Jams` which are audio rooms that can be used for panel 
 
 🪟 no screen sharing
 
-# Develop
+## Host Your Own Server
+
+Hosting your own Jam server is easy.
+
+1. Install docker and docker-compose (eg. `apt install docker.io docker-compose`)
+2. `git clone https://gitlab.com/jam-systems/jam.git`
+3. `cd jam/deployment`
+4. `cp .env.example .env`
+5. `nano .env` set `JAM_HOST` to your domain
+6. In your DNS settings point `${JAM_HOST}`, and `*.${JAM_HOST}` to your IP address (if you don't want a wildcard you need the subdomains `pantry`, `signalhub`, `stun` and `turn`)
+7. `docker-compose up -d`
+
+## Develop
 
 In in the `ui` directory use `yarn` to install dependencies and `yarn start` to start the local development server.
 
