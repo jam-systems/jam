@@ -23,7 +23,8 @@ const getRoomMetaInfo = async (roomPath) => {
         ogTitle: "Jam - " + roomInfo['name'],
         ogDescription: "Join this Jam audio space - " + roomInfo['description'],
         ogUrl: `https://${jamHost}${roomPath}`,
-        ogImage: roomInfo['imageURI'] || `https://${jamHost}/img/jam-app-icon.jpg`,
+        ogImage: roomInfo['logoURI'] || `https://${jamHost}/img/jam-app-icon.jpg`,
+        favIcon: roomInfo['logoURI'] || '/img/jam-app-icon.jpg',
     }
 }
 
@@ -50,9 +51,9 @@ app.use(async (req, res) => {
     <link
       rel="shortcut icon"
       type="image/png"
-      href="/img/jam-app-icon.jpg"
+      href="${metaInfo.favIcon}"
     />
-    <link rel="apple-touch-icon" href="/img/jam-app-icon.jpg" />
+    <link rel="apple-touch-icon" href="${metaInfo.favIcon}" />
     <!-- TODO: move tailwind to build pipeline if we keep it -->
     <link
       href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
