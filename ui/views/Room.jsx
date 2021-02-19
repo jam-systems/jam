@@ -580,7 +580,7 @@ function EditIdentity({info, onSubmit, onCancel}) {
       <br />
       <form onSubmit={submit}>
         <input
-          className="rounded placeholder-gray-300 bg-gray-50 w-48"
+          className="rounded placeholder-gray-400 bg-gray-50 w-48"
           type="text"
           placeholder="Display name"
           value={displayName || ''}
@@ -595,7 +595,7 @@ function EditIdentity({info, onSubmit, onCancel}) {
         </div>
         <br />
         <input
-          className="rounded placeholder-gray-300 bg-gray-50 w-72"
+          className="rounded placeholder-gray-400 bg-gray-50 w-72"
           type="email"
           placeholder="email@example.com"
           value={email || ''}

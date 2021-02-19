@@ -46,7 +46,7 @@ export default function Start({urlRoomId}) {
 
         <form className="pt-12" onSubmit={submit}>
           <input
-            className="rounded placeholder-gray-300 bg-gray-50 w-64"
+            className="rounded placeholder-gray-400 bg-gray-50 w-64"
             type="text"
             placeholder="Room topic"
             value={name}
@@ -62,7 +62,7 @@ export default function Start({urlRoomId}) {
           </div>
           <br />
           <textarea
-            className="rounded placeholder-gray-300 bg-gray-50 w-72 md:w-full"
+            className="rounded placeholder-gray-400 bg-gray-50 w-72 md:w-full"
             placeholder="Room description"
             value={description}
             name="jam-room-description"
@@ -87,7 +87,7 @@ export default function Start({urlRoomId}) {
           <div className={showAdvanced ? "" : "hidden"}>
             <br/>
             <input
-              className="rounded placeholder-gray-300 bg-gray-50 w-72 md:w-full"
+              className="rounded placeholder-gray-400 bg-gray-50 w-72 md:w-full"
               type="text"
               placeholder="Logo URI"
               value={logoURI}
@@ -159,7 +159,7 @@ export default function Start({urlRoomId}) {
         </div>
 
 
-        <div className="pt-32 text-xs text-gray-300 text-center">
+        <div className="pt-32 text-xs text-gray-400 text-center">
           <a href="https://gitlab.com/jam-systems/jam" target="_blank">
             built
           </a>{' '}

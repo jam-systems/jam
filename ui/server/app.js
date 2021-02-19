@@ -14,6 +14,7 @@ const defaultMetaInfo = {
     ogDescription: "Join this Jam audio space",
     ogUrl: `https://${jamHost}/`,
     ogImage: `https://${jamHost}/img/jam-app-icon.jpg`,
+    favIcon: '/img/jam-app-icon.jpg',
 }
 
 
