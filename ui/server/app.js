@@ -18,6 +18,7 @@ const defaultMetaInfo = {
 
 
 const getRoomMetaInfo = async (roomPath) => {
+  try {
     const roomInfo = (await (await fetch(pantryApiPrefix + roomPath)).json());
     return {
         ogTitle: roomInfo['name'],
@@ -26,6 +27,10 @@ const getRoomMetaInfo = async (roomPath) => {
         ogImage: roomInfo['logoURI'] || `https://${jamHost}/img/jam-app-icon.jpg`,
         favIcon: roomInfo['logoURI'] || '/img/jam-app-icon.jpg',
     }
+  } catch(e) {
+    console.log(`Error getting info for ${roomPath}`);
+    return {};
+  }
 }
 
 app.use(async (req, res) => {
