@@ -454,7 +454,7 @@ export default function Room({room, roomId}) {
             className="ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow"
             onClick={() => leaveRoom(roomId)}
           >
-            🚪&nbsp;Leave
+            🖖🏽&nbsp;Leave
           </button>
         </div>
 
