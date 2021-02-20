@@ -46,6 +46,10 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
         }}
       ></input>
       <br />
+      <div className="p-2 text-gray-500 italic">
+        Pick a topic to talk about.{' '}
+        <span className="text-gray-400">(optional)</span>
+      </div>
       <br />
       <textarea
         className="rounded placeholder-gray-300 bg-gray-50 w-72 md:w-full"
