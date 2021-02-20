@@ -2,6 +2,8 @@ const express = require('express');
 const app = express();
 const fetch = require('node-fetch');
 
+let ejs = require('ejs');
+
 
 app.use(express.static(process.env.STATIC_FILES_DIR || '.'))
 
@@ -40,26 +42,26 @@ app.use(async (req, res) => {
         ...(await getRoomMetaInfo(req.path))
     };
 
-    res.send(`
+    res.send(ejs.render(`
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta property="og:title" content="${metaInfo.ogTitle}" />
-    <meta property="og:description" content="${metaInfo.ogDescription}" />
+    <meta property="og:title" content="<%= metaInfo.ogTitle %>" />
+    <meta property="og:description" content="<%= metaInfo.ogDescription %>" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="${metaInfo.ogUrl}" />
+    <meta property="og:url" content="<%= metaInfo.ogUrl %>" />
     <meta
       property="og:image"
-      content="${metaInfo.ogImage}"
+      content="<%= metaInfo.ogImage %>"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link
       rel="shortcut icon"
       type="image/png"
-      href="${metaInfo.favIcon}"
+      href="<%= metaInfo.favIcon %>"
     />
-    <link rel="apple-touch-icon" href="${metaInfo.favIcon}" />
+    <link rel="apple-touch-icon" href="<%= metaInfo.favIcon %>" />
     <!-- TODO: move tailwind to build pipeline if we keep it -->
     <link
       href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
@@ -69,14 +71,14 @@ app.use(async (req, res) => {
       href="/css/main.css"
       rel="stylesheet"
     />
-    <title>${metaInfo.ogTitle}</title>
+    <title><%= metaInfo.ogTitle %></title>
   </head>
   <body>
     <div id="root" class="outer-container"></div>
     <script type="module" src="./bundle.js"></script>
   </body>
 </html>
-`)
+`, {metaInfo: metaInfo}));
 })
 
 module.exports = app;
