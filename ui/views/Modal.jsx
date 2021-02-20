@@ -26,6 +26,7 @@ export function Modal({close, children}) {
       onClick={close}
     >
       <div
+        className="relative p-5 pt-10 pb-10"
         style={{
           flex: 'none',
           display: 'flex',
@@ -37,18 +38,13 @@ export function Modal({close, children}) {
           overflowY: 'hidden',
           backgroundColor: 'white',
           borderRadius: '13px',
-          padding: '1.25rem',
         }}
         onClick={e => {
           e.stopPropagation();
         }}
       >
         <div
-          style={{
-            flex: 'none',
-            display: 'flex',
-            justifyContent: 'flex-end',
-          }}
+          className="absolute top-2 right-2"
         >
           <div
             onClick={close}
@@ -66,7 +62,6 @@ export function Modal({close, children}) {
           }}
         >
           {children}
-          <div style={{height: '1.5rem'}} />
         </div>
       </div>
     </div>
