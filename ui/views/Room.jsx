@@ -576,6 +576,8 @@ function EditIdentity({info, onSubmit, onCancel}) {
   };
   return (
     <div className="child md:p-10">
+      <hr />
+      <br />
       <h3 className="font-medium">Edit Profile</h3>
       <br />
       <form onSubmit={submit}>

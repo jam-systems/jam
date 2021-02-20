@@ -35,7 +35,7 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
   return (
     <form onSubmit={submit}>
       <input
-        className="rounded placeholder-gray-300 bg-gray-50 w-64 md:w-96"
+        className="rounded placeholder-gray-300 bg-gray-50 w-full md:w-96"
         type="text"
         placeholder="Room topic"
         value={name}
@@ -52,7 +52,7 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
       </div>
       <br />
       <textarea
-        className="rounded placeholder-gray-300 bg-gray-50 w-72 md:w-full"
+        className="rounded placeholder-gray-300 bg-gray-50 w-full md:w-full"
         placeholder="Room description"
         value={description}
         name="jam-room-description"
@@ -90,7 +90,7 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
         <div>
           <br />
           <input
-            className="rounded placeholder-gray-300 bg-gray-50 w-72 md:w-full"
+            className="rounded placeholder-gray-300 bg-gray-50 w-full md:w-full"
             type="text"
             placeholder="Logo URI"
             value={logoURI}

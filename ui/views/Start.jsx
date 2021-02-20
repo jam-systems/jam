@@ -46,7 +46,7 @@ export default function Start({urlRoomId}) {
 
         <form className="pt-12" onSubmit={submit}>
           <input
-            className="rounded placeholder-gray-400 bg-gray-50 w-64 md:w-96"
+            className="rounded placeholder-gray-400 bg-gray-50 w-full md:w-96"
             type="text"
             placeholder="Room topic"
             value={name}
@@ -62,7 +62,7 @@ export default function Start({urlRoomId}) {
           </div>
           <br />
           <textarea
-            className="rounded placeholder-gray-400 bg-gray-50 w-72 md:w-full"
+            className="rounded placeholder-gray-400 bg-gray-50 w-full md:w-full"
             placeholder="Room description"
             value={description}
             name="jam-room-description"
@@ -87,7 +87,7 @@ export default function Start({urlRoomId}) {
           <div className={showAdvanced ? "" : "hidden"}>
             <br/>
             <input
-              className="rounded placeholder-gray-400 bg-gray-50 w-72 md:w-full"
+              className="rounded placeholder-gray-400 bg-gray-50 w-full md:w-full"
               type="text"
               placeholder="Logo URI"
               value={logoURI}
