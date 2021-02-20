@@ -27,6 +27,7 @@ body {
     margin-left: -15px; /* compensate for padding from outer div (?) */
     width: 700px;
     border: 2px solid lightgrey;
+    border-top: 0;
     border-bottom: 0;
     flex: none;
 }
