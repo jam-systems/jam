@@ -69,7 +69,7 @@ app.use(async (req, res) => {
       href="/css/main.css"
       rel="stylesheet"
     />
-    <title>Jam</title>
+    <title>${metaInfo.ogTitle}</title>
   </head>
   <body>
     <div id="root" class="outer-container"></div>
