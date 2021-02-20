@@ -36,7 +36,8 @@ export function Modal({close, children}) {
           maxHeight: '100%',
           overflowY: 'hidden',
           backgroundColor: 'white',
-          borderRadius: '30px',
+          borderRadius: '13px',
+          padding: '1.25rem',
         }}
         onClick={e => {
           e.stopPropagation();
