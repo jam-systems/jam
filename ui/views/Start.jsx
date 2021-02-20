@@ -46,7 +46,7 @@ export default function Start({urlRoomId}) {
 
         <form className="pt-12" onSubmit={submit}>
           <input
-            className="rounded placeholder-gray-400 bg-gray-50 w-64"
+            className="rounded placeholder-gray-400 bg-gray-50 w-64 md:w-96"
             type="text"
             placeholder="Room topic"
             value={name}

@@ -35,7 +35,7 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
   return (
     <form onSubmit={submit}>
       <input
-        className="rounded placeholder-gray-300 bg-gray-50 w-64"
+        className="rounded placeholder-gray-300 bg-gray-50 w-64 md:w-96"
         type="text"
         placeholder="Room topic"
         value={name}
