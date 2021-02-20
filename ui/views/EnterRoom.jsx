@@ -5,7 +5,7 @@ import RoomHeader from './RoomHeader.jsx';
 export default function EnterRoom({roomId, name, description, logoURI}) {
   return (
     <div className="container md:min-h-full">
-      <div className="child pt-8 md:p-10">
+      <div className="child pt-60 md:p-10 md:pt-60">
         <RoomHeader {...{name, description, logoURI}} />
 
         {/*
