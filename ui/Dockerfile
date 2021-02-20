@@ -16,7 +16,7 @@ COPY css ./css/
 COPY img ./img/
 COPY server ./server/
 COPY --from=builder /bundle.js ./
-RUN yarn add express node-fetch
+RUN yarn add express ejs node-fetch
 
 CMD set-jam-host && node server/bin/www
 
