@@ -15,11 +15,9 @@ With Jam you can create `Jams` which are audio rooms that can be used for panel 
 
 ## Features
 
-🙈 no camera video
+💯 Animated Reactions
 
-📬 no direct messages
-
-🪟 no screen sharing
+🧑‍🍳 Branded Rooms: set a picture and a color for your room
 
 ## Host Your Own Server
 
