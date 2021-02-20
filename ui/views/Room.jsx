@@ -399,7 +399,6 @@ export default function Room({room, roomId}) {
                   className="m-2 p-2 human-radius select-none px-3 bg-gray-100 active:bg-gray-300"
                   key={r}
                   onClick={() => {
-                    setShowReactions(false);
                     sendReaction(r);
                   }}
                 >
