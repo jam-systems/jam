@@ -5,7 +5,7 @@ import RoomHeader from './RoomHeader.jsx';
 export default function EnterRoom({roomId, name, description, logoURI}) {
   return (
     <div className="container md:min-h-full">
-      <div className="child pt-60 md:p-10 md:pt-60">
+      <div className="child p-2 md:p-10 md:pt-60">
         <RoomHeader {...{name, description, logoURI}} />
 
         {/*
@@ -60,7 +60,7 @@ export default function EnterRoom({roomId, name, description, logoURI}) {
         */}
         <button
           onClick={() => enterRoom(roomId)}
-          className="m-2 mb-10 select-none mt-5 w-full md:w-60 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
+          className="mt-5 mb-10 select-none w-full md:w-60 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
         >
           🐾 &nbsp;Join this Jam
         </button>
