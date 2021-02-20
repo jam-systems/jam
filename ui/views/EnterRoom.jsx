@@ -60,7 +60,7 @@ export default function EnterRoom({roomId, name, description, logoURI}) {
         */}
         <button
           onClick={() => enterRoom(roomId)}
-          className="ml-2 mt-8 mb-10 select-none mt-5 w-full md:w-60 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
+          className="m-2 mt-8 mb-10 select-none mt-5 w-full md:w-60 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
         >
           🐾 &nbsp;Join this Jam
         </button>
