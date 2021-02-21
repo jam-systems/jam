@@ -11,7 +11,9 @@
 
 With Jam you can create audio rooms that can be used for panel discussions, jam sessions, free flowing conversations, debates, theatre plays, musicals and more. The only limit is your imagination.
 
-[https://jam.systems/](https://jam.systems/)
+try Jam on [https://jam.systems/](https://jam.systems/)
+
+join the [Jam community on Discord](https://discord.gg/BfakmCuXSX)
 
 ## Features
 
