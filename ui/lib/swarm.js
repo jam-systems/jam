@@ -106,7 +106,6 @@ function createPeer(peerId, connId, initiator) {
   peer.connId = connId;
   peer.streams = {...localStreams};
   peers[peerId] = peer;
-  // swarm.update('peers');
 
   peer.connectStart = Date.now();
   peer.didSignal = false;
@@ -141,7 +140,6 @@ function createPeer(peerId, connId, initiator) {
   peer.on('connect', () => {
     log('connected peer', s(peerId), 'after', Date.now() - peer.connectStart);
     handlePeerSuccess(peerId);
-    // swarm.update('peers');
   });
 
   peer.on('data', rawData => {
@@ -228,12 +226,8 @@ function handlePeerSuccess(peerId) {
 function handlePeerFail(peerId) {
   // peer either took too long to fire 'connect', or fired an error-like event
   // depending how long we already tried, either reconnect or remove peer
-  // let {peerId, connId} = peer;
   let {stickyPeers, hub} = swarm;
   stopTimeout(peerId);
-
-  // don't do anything if we already replaced this Peer instance
-  // if (peers[peerId] !== peer || peer.garbage) return;
 
   let peer = stickyPeers[peerId];
   let now = Date.now();
@@ -253,7 +247,6 @@ function handlePeerFail(peerId) {
 
 function removePeer(peerId) {
   let {peers} = swarm;
-  // if (!peers[peerId] || (peer && peer !== peers[peerId])) return;
   console.log('removing peer', s(peerId));
   delete peers[peerId];
   let {remoteStreams} = swarm;
@@ -263,7 +256,6 @@ function removePeer(peerId) {
       remoteStreams.filter(streamObj => streamObj.peerId !== peerId)
     );
   }
-  // swarm.update('peers');
 }
 
 function addPeerMetaData(peer, data) {
@@ -287,7 +279,6 @@ function addStreamToPeers(stream, name) {
       peer.streams[name] = stream;
       if (stream) peer.addStream(stream);
     };
-    // log(kind, 'old', oldStream, 'new', stream);
     if (oldStream) {
       if (oldStream === stream) return; // avoid error if listener is called twice
       try {

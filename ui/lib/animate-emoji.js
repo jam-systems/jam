@@ -1,5 +1,5 @@
 // floating emoji animation 😅
-// Gregor Mitscha-Baude 2020
+// Gregor Mitscha-Baude 2021
 
 // physical constants
 const g = -0.4e-4; // gravity (~ length scale on which emoji moves)
