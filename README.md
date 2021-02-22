@@ -39,6 +39,21 @@ An overview for how 🍞 Jam compares to similar services like Clubhouse or Twit
 
 💵 Earn Money: dedicated support for linkinging to off-platform services to charge money or sell your own products
 
+
+## Known Issues and Solutions
+
+*📱 iPhone: audio output sometimes switches randomly between loudspeaker and earspeaker.*
+
+Workaround: use bluetooth or cable headphones, this way audio will always go through the headphones.
+
+*📱 Android: when Android phone goes to sleep/lockscreen because of inactivity the microphone or sound output might stop working until you unlock the screen*
+
+Workaround: make sure the phone does not go to sleep
+
+*Participants can hear me but I can not hear them*
+
+When participants join a room on 🍞 Jam they start in the _audience_, you can add them to the stage by tapping on them and by tapping the `"invite to stage"` button
+
 ## Host Your Own Server
 
 Hosting your own Jam server is easy.
