@@ -2,7 +2,6 @@ import SimplePeer from 'simple-peer-light';
 import State from './minimal-state.js';
 import signalhub from './signalhub.js';
 
-const LOGGING = false;
 const MAX_CONNECT_TIME = 6000;
 const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;
 const MIN_MAX_CONNECT_TIME_AFTER_SIGNAL = 2000;
@@ -23,6 +22,7 @@ const swarm = State({
   peers: {},
   url: '',
   room: '',
+  debug: false,
   hub: null,
   localStreams: {},
   // events
@@ -35,13 +35,14 @@ const swarm = State({
 
 export default swarm;
 
-function config({url, room, myPeerId, sign, verify, pcConfig}) {
+function config({url, room, myPeerId, sign, verify, pcConfig, debug}) {
   if (url) swarm.url = url;
   if (room) swarm.room = room;
   if (myPeerId) swarm.myPeerId = myPeerId;
   if (sign) swarm.sign = sign; // sign(state): string
   if (verify) swarm.verify = verify; // verify(signedState, peerId): state | undefined
   if (pcConfig) swarm.pcConfig = pcConfig;
+  if (debug) swarm.debug = debug;
 }
 
 function addLocalStream(stream, name) {
@@ -517,12 +518,11 @@ function randomHex4() {
 
 let s = id => id.slice(0, 2);
 
-let log = LOGGING
-  ? (...a) => {
-      let d = new Date();
-      let time = `[${d.toLocaleTimeString('de-DE')},${String(
-        d.getMilliseconds()
-      ).padStart(3, '0')}]`;
-      console.log(time, ...a);
-    }
-  : () => {};
+let log = (...a) => {
+  if (!swarm.debug) return;
+  let d = new Date();
+  let time = `[${d.toLocaleTimeString('de-DE')},${String(
+    d.getMilliseconds()
+  ).padStart(3, '0')}]`;
+  console.log(time, ...a);
+};
