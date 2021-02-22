@@ -15,6 +15,8 @@ try Jam on [https://jam.systems/](https://jam.systems/)
 
 join the [Jam community on Discord](https://discord.gg/BfakmCuXSX)
 
+follow [Jam on Twitter](https://twitter.com/jam_systems)
+
 ## Feature Comparison
 
 An overview for how 🍞 Jam compares to similar services like Clubhouse or Twitter Spaces. We intend to keep this table up to date as the services evolve. Please let us know what you care about and how we can make it easier for you to understand whether 🍞 Jam is right for you.
