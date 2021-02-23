@@ -27,6 +27,8 @@ services:
     environment:
       GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD}"
       GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_SERVER_ROOT_URL: "https://${JAM_HOST}/_/grafana"
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
     restart: always
     labels:
       - traefik.http.routers.grafana.rule=(Host(`${JAM_HOST}`) && PathPrefix(`/_/grafana`))
