@@ -16,7 +16,7 @@ if(!local) {
     const roomCount = async () => (await client.keys("rooms/*")).length;
     const identityCount = async () => (await client.keys("identities/*")).length;
     const set = (key, value) => client.set(key, JSON.stringify(value));
-    const get = async (key) => JSON.parse(await clinet.get(key));
+    const get = async (key) => JSON.parse(await client.get(key));
 
     _exports = {
         get,
