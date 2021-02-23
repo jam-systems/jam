@@ -269,10 +269,10 @@ export default function Room({room, roomId}) {
           <br />
 
           <h3 className="text-gray-400">Audience</h3>
-          <ol className="flex space-x-4 pt-6">
+          <ol className="flex flex-wrap space-x-4 pt-6">
             {!iSpeak && (
               <li
-                className="flex-shrink w-16 h-16 md:w-24 md:h-24 text-xs"
+                className="flex-none w-16 h-16 md:w-24 md:h-24 text-xs"
                 style={{cursor: 'pointer'}}
                 onClick={() => setEditIdentity(!editIdentity)}
               >
@@ -298,7 +298,7 @@ export default function Room({room, roomId}) {
                   <li
                     key={peerId}
                     title={peerInfo.displayName}
-                    className="flex-shrink w-16 h-16 md:w-24 md:h-24 text-xs"
+                    className="flex-none w-16 h-16 md:w-24 md:h-24 text-xs"
                     style={iModerate ? {cursor: 'pointer'} : undefined}
                     onClick={iModerate ? () => setEditRole(peerId) : undefined}
                   >
