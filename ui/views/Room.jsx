@@ -131,7 +131,7 @@ export default function Room({room, roomId}) {
         <div className="">
           {/* Stage */}
           <div className="">
-            <ol className="flex flex-wrap space-x-2 pt-6">
+            <ol className="flex flex-wrap pt-6">
               {iSpeak && (
                 <li
                   className="relative items-center space-y-1 mt-4"
