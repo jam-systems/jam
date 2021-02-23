@@ -13,15 +13,17 @@ With Jam you can create audio rooms that can be used for panel discussions, jam 
 
 try Jam on [https://jam.systems/](https://jam.systems/)
 
-join the [Jam community on Discord](https://discord.gg/BfakmCuXSX)
+join the [Jam community on 🎧 Discord](https://discord.gg/BfakmCuXSX)
 
-follow [Jam on Twitter](https://twitter.com/jam_systems)
+follow [Jam on 🐣 Twitter](https://twitter.com/jam_systems)
+
+find [Jam on 😽 Product Hunt](https://www.producthunt.com/posts/jam-d17ff3cc-556c-4c17-8140-5211cb1cd81f)
 
 ## Feature Comparison
 
 An overview for how 🍞 Jam compares to similar services like Clubhouse or Twitter Spaces. We intend to keep this table up to date as the services evolve. Please let us know what you care about and how we can make it easier for you to understand whether 🍞 Jam is right for you.
 
-|                                 | 🍞 Jam                 | 👋 Clubhouse      | 🐥 Twitter Spaces          |
+|                                 | 🍞 Jam                 | 👋 Clubhouse      | 🐣 Twitter Spaces          |
 |---------------------------------|------------------------|--------------------|----------------------------|
 | 🧑‍🍳 Branded Rooms                | ✅ set your own logo, color   | ❌                | ❌                  |
 | 💯 Animated Reactions           | ✅ (❤️ 💯 😂 😅 😳 🤔)| ❌                | ✅ (💯 ✋ ✊ ✌️ 👋)       |
