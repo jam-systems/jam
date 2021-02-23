@@ -247,7 +247,7 @@ function handlePeerFail(peerId) {
 
 function removePeer(peerId) {
   let {peers} = swarm;
-  console.log('removing peer', s(peerId));
+  log('removing peer', s(peerId));
   delete peers[peerId];
   let {remoteStreams} = swarm;
   if (remoteStreams.find(streamObj => streamObj.peerId === peerId)) {
