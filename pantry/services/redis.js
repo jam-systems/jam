@@ -6,21 +6,12 @@ const localStore = {};
 let _exports = {
     get: (key) => localStore[key],
     set: (key, value) => localStore[key] = value,
-    roomCount: Object.keys(localStore).filter((key) => key.startsWith("rooms/")).length,
-    identityCount: Object.keys(localStore).filter((key) => key.startsWith("identities/")).length
+    roomCount: () => Object.keys(localStore).filter((key) => key.startsWith("rooms/")).length,
+    identityCount: () => Object.keys(localStore).filter((key) => key.startsWith("identities/")).length
 }
 
 if(!local) {
     const client = createNodeRedisClient({host: 'pantryredis'});
-
-
-    client.on('connect', () => {
-        console.log('Redis client connected');
-    });
-
-    client.on("error", (error) => {
-        console.error(error);
-    });
     const _get = client.get;
     const _set = client.set;
 

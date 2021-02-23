@@ -1,6 +1,7 @@
 const signalhub = require('signalhub')
 const { jamHost } = require('../config')
 const nets = require('nets')
+const { promisify } = require('util')
 
 
 const signalHubUrl = `https://signalhub.${jamHost}/`;
@@ -10,7 +11,7 @@ const hub = function(roomId) {
     ]);
 }
 
-const activeUserCount = async () => Math.floor((await promisify(nets)({url: signalHubUrl})).subscribers / 6);
+const activeUserCount = async () => Math.floor(JSON.parse((await promisify(nets)({url: signalHubUrl, encoding: undefined})).body).subscribers / 6);
 
 module.exports = {
     hub,
