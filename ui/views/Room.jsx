@@ -473,14 +473,16 @@ function Reactions({reactions, className}) {
   return (
     <>
       {reactions.map(([r, id]) => (
-        <AnimatedEmoji
-          key={id}
-          emoji={r}
-          className={className}
-          style={{
-            alignSelf: 'center',
-          }}
-        />
+        (reactionEmojis.includes(r)) && (
+          <AnimatedEmoji
+            key={id}
+            emoji={r}
+            className={className}
+            style={{
+              alignSelf: 'center',
+            }}
+          />
+        )
       ))}
     </>
   );
