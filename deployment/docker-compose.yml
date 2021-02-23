@@ -29,9 +29,9 @@ services:
       GF_USERS_ALLOW_SIGN_UP: "false"
     restart: always
     labels:
-      - traefik.http.routers.ui.rule=(Host(`${JAM_HOST}`) && PathPrefix(`/_/grafana`))
-      - traefik.http.routers.ui.tls=true
-      - traefik.http.routers.ui.tls.certresolver=letsencrypt
+      - traefik.http.routers.grafana.rule=(Host(`${JAM_HOST}`) && PathPrefix(`/_/grafana`))
+      - traefik.http.routers.grafana.tls=true
+      - traefik.http.routers.grafana.tls.certresolver=letsencrypt
       - traefik.enable=true
   postgres:
     image: postgres:12
