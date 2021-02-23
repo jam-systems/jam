@@ -12,13 +12,11 @@ let _exports = {
 
 if(!local) {
     const client = createNodeRedisClient({host: 'pantryredis'});
-    const _get = client.get;
-    const _set = client.set;
 
     const roomCount = async () => (await client.keys("rooms/*")).length;
     const identityCount = async () => (await client.keys("identities/*")).length;
-    const set = (key, value) => _set(key, JSON.stringify(value));
-    const get = async (key) => JSON.parse(await _get(key));
+    const set = (key, value) => client.set(key, JSON.stringify(value));
+    const get = async (key) => JSON.parse(await clinet.get(key));
 
     _exports = {
         get,
