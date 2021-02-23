@@ -9,7 +9,7 @@ services:
     image: prom/prometheus:latest
     volumes:
       - ./prometheus/:/etc/prometheus/
-      - ../data/prometheus:/prometheus
+      - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -22,7 +22,7 @@ services:
     depends_on:
       - prometheus
     volumes:
-      - ../data/grafana:/var/lib/grafana
+      - grafana_data:/var/lib/grafana
       - ./grafana/provisioning/:/etc/grafana/provisioning/
     environment:
       GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD}"
@@ -103,5 +103,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ../data/traefik/acme:/acme
-
+volumes:
+  prometheus_data: {}
+  grafana_data: {}
 
