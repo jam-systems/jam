@@ -5,6 +5,34 @@ services:
     volumes:
       - "./turnserver.conf:/var/lib/coturn/turnserver.conf"
     network_mode: host
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - ../data/prometheus:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    restart: always
+  grafana:
+    image: grafana/grafana
+    user: "472"
+    depends_on:
+      - prometheus
+    volumes:
+      - ../data/grafana:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD}"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    restart: always
+    labels:
+      - traefik.http.routers.ui.rule=(Host(`${JAM_HOST}`) && PathPrefix(`/_/grafana`))
+      - traefik.http.routers.ui.tls=true
+      - traefik.http.routers.ui.tls.certresolver=letsencrypt
+      - traefik.enable=true
   postgres:
     image: postgres:12
     restart: always
@@ -53,17 +81,22 @@ services:
     command:
       - "--entryPoints.web.address=:80"
       - "--entryPoints.websecure.address=:443"
+      - "--entryPoints.metrics.address=:8080"
       - "--certificatesResolvers.letsencrypt.acme.email=admin@${JAM_HOST}"
       - "--certificatesResolvers.letsencrypt.acme.storage=/acme/acme.json"
       - "--certificatesResolvers.letsencrypt.acme.httpChallenge.entryPoint=web"
       - "--providers.docker=true"
       - "--providers.docker.exposedByDefault=false"
+      - "--metrics.prometheus.entryPoint=metrics"
+      - "--metrics.prometheus=true"
+      - "--metrics.prometheus.addEntryPointsLabels=true"
+      - "--metrics.prometheus.addServicesLabels=true"
     labels:
-      traefik.http.routers.http-catchall.rule: hostregexp(`{host:.+}`)
-      traefik.http.routers.http-catchall.entrypoints: web
-      traefik.http.routers.http-catchall.middlewares: redirect-to-https@docker
-      traefik.http.middlewares.redirect-to-https.redirectscheme.scheme: https
-      traefik.enable: "true"
+      - traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)
+      - traefik.http.routers.http-catchall.entrypoints=web
+      - traefik.http.routers.http-catchall.middlewares=redirect-to-https@docker
+      - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
+      - traefik.enable=true
     ports:
       - "80:80"
       - "443:443"

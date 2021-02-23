@@ -1,0 +1,15 @@
+# my global config
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'jam.systems'
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+  - job_name: 'traefik'
+    static_configs:
+      - targets: ['traefik:8080']
+
+
