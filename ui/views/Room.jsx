@@ -346,6 +346,8 @@ export default function Room({room, roomId}) {
             onCancel={() => setEditRole(null)}
           />
         )}
+        {/* microphone mute/unmute button */}
+        {iSpeak && (
         <div className="flex">
           <button
             onClick={() => state.set('micMuted', !micMuted)}
@@ -362,9 +364,8 @@ export default function Room({room, roomId}) {
               : "🙊 You're off"}
           </button>
         </div>
-
+        )}
         <br />
-
         <div className="flex relative">
           {/* <button
             onClick={() => state.set('soundMuted', !soundMuted)}
