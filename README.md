@@ -13,7 +13,7 @@ With Jam you can create audio rooms that can be used for panel discussions, jam 
 
 try Jam on [https://jam.systems/](https://jam.systems/)
 
-** [apply to Jam Pro _Early Access_ here](https://forms.ops.jam.systems/pro/) (Get your own branded version of Jam and use your own custom domain) **
+**[apply to Jam Pro _Early Access_ here](https://forms.ops.jam.systems/pro/) (Get your own branded version of Jam and use your own custom domain)**
 
 join the [Jam community on 🎧 Discord](https://discord.gg/BfakmCuXSX)
 
