@@ -27,19 +27,19 @@ An overview for how 🍞 Jam compares to similar services like Clubhouse or Twit
 
 |                                 | 🍞 Jam                 | 👋 Clubhouse      | 🐣 Twitter Spaces          |
 |---------------------------------|------------------------|--------------------|----------------------------|
-| 🧑‍🍳 Branded Rooms                | ✅ set your own logo, color   | ❌                | ❌                  |
+| 🎨 Branded Rooms                | ✅ set your own logo, color   | ❌                | ❌                  |
 | 💯 Animated Reactions           | ✅ (❤️ 💯 😂 😅 😳 🤔)| ❌                | ✅ (💯 ✋ ✊ ✌️ 👋)       |
 | 📎 Description w/ Links         | ✅ w/ Markdown support | ❌                | ☑️ show tweets              |
 | 💵 Earn Money                   | ✅ dedicated support for<br/>PayPal.me, Bitcoin:, Gumroad | ❌ no built in support<br/><br/>currently not allowed<br/>unless specifically authorized<br/> see Terms of Service<br/>[(Conditions of Use #9)](https://www.notion.so/Terms-of-Service-cfbd1824d4704e1fa4a83f0312b8cf88) | ❌  no built in support |
-| 🧑🏽‍🚀 Platform support             | ✅ Web, iOS, Android,<br/>macOS, Windows, Linux, … | ☑️ iOS App Store & invite | ☑️ iOS App Store & invite |
+| 📱 Platform support             | ✅ Web, iOS, Android,<br/>macOS, Windows, Linux, … | ☑️ iOS App Store & invite | ☑️ iOS App Store & invite |
 | 🌏 [Data Sovereignty](https://en.wikipedia.org/wiki/Data_sovereignty) | ☑️ EU 🇪🇺 (Frankfurt, Germany 🇩🇪)<br/><br/> ✅ open source, host wherever you want | ☑️ USA 🇺🇸, China 🇨🇳 (Audio API Provider)<br/><br/>❌ proprietary, no self-hosting   | ☑️ USA 🇺🇸 (?)<br/><br/>❌ proprietary, no self-hosting |
-| 👩🏽‍🎤 Number of Speakers in a Room | ✅ ~ 15+ (limited by p2p bandwidth) | ✅ ~ 100s (?) | ☑️ 10             |
-| 🧑🏽‍🎤 Number of People in a Room   | ☑️ ~ 30+ (limited by p2p bandwidth),<br/>we're working on lifting this limit!<br/><br/>current workaround: stream browser tab to<br/>Youtube, Twitch, Facebook Live … | ✅ ~ 8000     | ✅ ~ millions (?) |
+| 🎙 Number of Speakers in a Room | ✅ ~ 15+ (limited by p2p bandwidth) | ✅ ~ 100s (?) | ☑️ 10             |
+| 🎫 Number of People in a Room   | ☑️ ~ 30+ (limited by p2p bandwidth),<br/>we're working on lifting this limit!<br/><br/>current workaround: stream browser tab to<br/>Youtube, Twitch, Facebook Live … | ✅ ~ 8000     | ✅ ~ millions (?) |
 | 🗓 Discovery                    | ☑️ off-platform (social networks, messengers) | ✅ hallway, upcoming events, off-platform | ✅ fleet bar, off-platform |
 
 💯 Animated Reactions (🎬 [see a demo](https://twitter.com/__tosh/status/1362558104412565504/video/1))
 
-🧑‍🍳 Branded Rooms: set a picture and a color for your room
+🎨 Branded Rooms: set a picture and a color for your room
 
 💵 Earn Money: dedicated support for linkinging to off-platform services to charge money or sell your own products
 
