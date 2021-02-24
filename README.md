@@ -21,6 +21,8 @@ follow [Jam on 🐣 Twitter](https://twitter.com/jam_systems)
 
 find [Jam on 😽 Product Hunt](https://www.producthunt.com/posts/jam-d17ff3cc-556c-4c17-8140-5211cb1cd81f)
 
+🗓 join our weekly Jam Jam (a Jam where we jam about Jam) every [Wed @ 7pm UTC / 12pm EST](http://jam.systems/jam-jam-ns4a)
+
 ## Feature Comparison
 
 An overview for how 🍞 Jam compares to similar services like Clubhouse or Twitter Spaces. We intend to keep this table up to date as the services evolve. Please let us know what you care about and how we can make it easier for you to understand whether 🍞 Jam is right for you.
