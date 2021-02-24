@@ -9,7 +9,7 @@ app.use(express.static(process.env.STATIC_FILES_DIR || '.'))
 
 const jamHost = process.env.JAM_HOST || 'beta.jam.systems';
 
-const pantryApiPrefix = `https://pantry.${jamHost}/api/v1/rooms`;
+const pantryApiPrefix = `https://${jamHost}/_/pantry/api/v1/rooms`;
 
 const defaultMetaInfo = {
     ogTitle: "Jam",

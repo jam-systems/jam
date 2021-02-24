@@ -2,7 +2,6 @@ import SimplePeer from 'simple-peer-light';
 import State from './minimal-state.js';
 import signalhub from './signalhub.js';
 
-const LOGGING = false;
 const MAX_CONNECT_TIME = 6000;
 const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;
 const MIN_MAX_CONNECT_TIME_AFTER_SIGNAL = 2000;
@@ -23,6 +22,7 @@ const swarm = State({
   peers: {},
   url: '',
   room: '',
+  debug: false,
   hub: null,
   localStreams: {},
   // events
@@ -35,13 +35,14 @@ const swarm = State({
 
 export default swarm;
 
-function config({url, room, myPeerId, sign, verify, pcConfig}) {
+function config({url, room, myPeerId, sign, verify, pcConfig, debug}) {
   if (url) swarm.url = url;
   if (room) swarm.room = room;
   if (myPeerId) swarm.myPeerId = myPeerId;
   if (sign) swarm.sign = sign; // sign(state): string
   if (verify) swarm.verify = verify; // verify(signedState, peerId): state | undefined
   if (pcConfig) swarm.pcConfig = pcConfig;
+  if (debug) swarm.debug = debug;
 }
 
 function addLocalStream(stream, name) {
@@ -105,7 +106,6 @@ function createPeer(peerId, connId, initiator) {
   peer.connId = connId;
   peer.streams = {...localStreams};
   peers[peerId] = peer;
-  // swarm.update('peers');
 
   peer.connectStart = Date.now();
   peer.didSignal = false;
@@ -140,7 +140,6 @@ function createPeer(peerId, connId, initiator) {
   peer.on('connect', () => {
     log('connected peer', s(peerId), 'after', Date.now() - peer.connectStart);
     handlePeerSuccess(peerId);
-    // swarm.update('peers');
   });
 
   peer.on('data', rawData => {
@@ -227,12 +226,8 @@ function handlePeerSuccess(peerId) {
 function handlePeerFail(peerId) {
   // peer either took too long to fire 'connect', or fired an error-like event
   // depending how long we already tried, either reconnect or remove peer
-  // let {peerId, connId} = peer;
   let {stickyPeers, hub} = swarm;
   stopTimeout(peerId);
-
-  // don't do anything if we already replaced this Peer instance
-  // if (peers[peerId] !== peer || peer.garbage) return;
 
   let peer = stickyPeers[peerId];
   let now = Date.now();
@@ -252,8 +247,7 @@ function handlePeerFail(peerId) {
 
 function removePeer(peerId) {
   let {peers} = swarm;
-  // if (!peers[peerId] || (peer && peer !== peers[peerId])) return;
-  console.log('removing peer', s(peerId));
+  log('removing peer', s(peerId));
   delete peers[peerId];
   let {remoteStreams} = swarm;
   if (remoteStreams.find(streamObj => streamObj.peerId === peerId)) {
@@ -262,7 +256,6 @@ function removePeer(peerId) {
       remoteStreams.filter(streamObj => streamObj.peerId !== peerId)
     );
   }
-  // swarm.update('peers');
 }
 
 function addPeerMetaData(peer, data) {
@@ -286,7 +279,6 @@ function addStreamToPeers(stream, name) {
       peer.streams[name] = stream;
       if (stream) peer.addStream(stream);
     };
-    // log(kind, 'old', oldStream, 'new', stream);
     if (oldStream) {
       if (oldStream === stream) return; // avoid error if listener is called twice
       try {
@@ -517,12 +509,11 @@ function randomHex4() {
 
 let s = id => id.slice(0, 2);
 
-let log = LOGGING
-  ? (...a) => {
-      let d = new Date();
-      let time = `[${d.toLocaleTimeString('de-DE')},${String(
-        d.getMilliseconds()
-      ).padStart(3, '0')}]`;
-      console.log(time, ...a);
-    }
-  : () => {};
+let log = (...a) => {
+  if (!swarm.debug) return;
+  let d = new Date();
+  let time = `[${d.toLocaleTimeString('de-DE')},${String(
+    d.getMilliseconds()
+  ).padStart(3, '0')}]`;
+  console.log(time, ...a);
+};

@@ -12,7 +12,9 @@
     "debug": "^4.3.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "handy-redis": "^2.2.1",
     "morgan": "^1.10.0",
+    "nets": "^3.2.0",
     "redis": "^3.0.2",
     "signalhub": "^4.9.0",
     "tweetnacl": "^1.0.3"

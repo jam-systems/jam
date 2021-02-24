@@ -6,6 +6,8 @@ const nacl = require('tweetnacl');
 const base64 = require('compact-base64');
 
 const indexRouter = require('./routes/index');
+const metricsRouter = require('./routes/metrics');
+
 const {controller, permitAllAuthenticator} = require('./routes/controller');
 const { get } = require('./services/redis');
 const app = express();
@@ -74,7 +76,9 @@ const identityAuthenticator = {
 
 
 app.use('/', indexRouter);
+app.use('/metrics', metricsRouter);
 app.use('/api/v1/', controller('rooms', roomAuthenticator, (id) => id, () => 'room-info'));
 app.use('/api/v1/', controller('identities', identityAuthenticator));
+
 
 module.exports = app;

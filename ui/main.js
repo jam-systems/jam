@@ -18,6 +18,7 @@ swarm.config({
   pcConfig: {
     iceTransportPolicy: 'all',
     iceServers: [
+      {urls: `stun:stun.jam.systems:3478`},
       {urls: `stun:stun.${jamHost()}:3478`},
       {
         urls: `turn:turn.${jamHost()}:3478`,
@@ -45,7 +46,7 @@ export function leaveRoom() {
 
 export function connectRoom(roomId) {
   if (swarm.connected) swarm.disconnect();
-  swarm.connect(`https://signalhub.${jamHost()}/`, roomId);
+  swarm.connect(`https://${jamHost()}/_/signalhub/`, roomId);
   swarm.hub.subscribe('identity-updates', async id => {
     state.set('identities', {
       ...state.get('identities'),
@@ -75,9 +76,14 @@ state.on('queries', () => {
 
 export function sendReaction(reaction) {
   swarm.emit('sharedEvent', {reaction});
+  showReaction(reaction, swarm.myPeerId);
 }
 swarm.on('peerEvent', (peerId, data) => {
+  if (peerId === swarm.myPeerId) return;
   let {reaction} = data;
+  showReaction(reaction, peerId);
+});
+function showReaction(reaction, peerId) {
   let {reactions} = state;
   if (reaction) {
     if (!reactions[peerId]) reactions[peerId] = [];
@@ -90,7 +96,7 @@ swarm.on('peerEvent', (peerId, data) => {
       state.update('reactions');
     }, 5000);
   }
-});
+}
 
 export function createAudioContext() {
   const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -222,7 +228,6 @@ function listenIfSpeaking(peerId, stream) {
     state.on('audioContext', onAudioContext);
     return;
   }
-  console.log('audio destination', state.audioContext?.destination);
   let options = {audioContext: state.audioContext};
   let speechEvents = hark(stream, options);
 

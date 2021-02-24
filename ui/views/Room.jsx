@@ -131,7 +131,7 @@ export default function Room({room, roomId}) {
         <div className="">
           {/* Stage */}
           <div className="">
-            <ol className="flex flex-wrap space-x-2 pt-6">
+            <ol className="flex flex-wrap pt-6">
               {iSpeak && (
                 <li
                   className="relative items-center space-y-1 mt-4"
@@ -178,7 +178,7 @@ export default function Room({room, roomId}) {
                           x="0px"
                           y="0px"
                           viewBox="0 0 1000 1000"
-                          enable-background="new 0 0 1000 1000"
+                          enableBackground="new 0 0 1000 1000"
                           fill="currentColor"
                           xmlns="http://www.w3.org/2000/svg"
                         >
@@ -247,7 +247,7 @@ export default function Room({room, roomId}) {
                               x="0px"
                               y="0px"
                               viewBox="0 0 1000 1000"
-                              enable-background="new 0 0 1000 1000"
+                              enableBackground="new 0 0 1000 1000"
                               fill="currentColor"
                               xmlns="http://www.w3.org/2000/svg"
                             >
@@ -269,10 +269,10 @@ export default function Room({room, roomId}) {
           <br />
 
           <h3 className="text-gray-400">Audience</h3>
-          <ol className="flex space-x-4 pt-6">
+          <ol className="flex flex-wrap pt-6">
             {!iSpeak && (
               <li
-                className="flex-shrink w-16 h-16 md:w-24 md:h-24 text-xs"
+                className="flex-none m-2 w-16 h-32 md:w-24 md:h-36 text-xs"
                 style={{cursor: 'pointer'}}
                 onClick={() => setEditIdentity(!editIdentity)}
               >
@@ -298,7 +298,7 @@ export default function Room({room, roomId}) {
                   <li
                     key={peerId}
                     title={peerInfo.displayName}
-                    className="flex-shrink w-16 h-16 md:w-24 md:h-24 text-xs"
+                    className="flex-none m-2 w-16 h-32 md:w-24 md:h-36 text-xs"
                     style={iModerate ? {cursor: 'pointer'} : undefined}
                     onClick={iModerate ? () => setEditRole(peerId) : undefined}
                   >
@@ -346,6 +346,8 @@ export default function Room({room, roomId}) {
             onCancel={() => setEditRole(null)}
           />
         )}
+        {/* microphone mute/unmute button */}
+        {iSpeak && (
         <div className="flex">
           <button
             onClick={() => state.set('micMuted', !micMuted)}
@@ -362,9 +364,8 @@ export default function Room({room, roomId}) {
               : "🙊 You're off"}
           </button>
         </div>
-
+        )}
         <br />
-
         <div className="flex relative">
           {/* <button
             onClick={() => state.set('soundMuted', !soundMuted)}
@@ -472,14 +473,16 @@ function Reactions({reactions, className}) {
   return (
     <>
       {reactions.map(([r, id]) => (
-        <AnimatedEmoji
-          key={id}
-          emoji={r}
-          className={className}
-          style={{
-            alignSelf: 'center',
-          }}
-        />
+        (reactionEmojis.includes(r)) && (
+          <AnimatedEmoji
+            key={id}
+            emoji={r}
+            className={className}
+            style={{
+              alignSelf: 'center',
+            }}
+          />
+        )
       ))}
     </>
   );

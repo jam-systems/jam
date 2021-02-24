@@ -5,6 +5,36 @@ services:
     volumes:
       - "./turnserver.conf:/var/lib/coturn/turnserver.conf"
     network_mode: host
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    restart: always
+  grafana:
+    image: grafana/grafana
+    user: "472"
+    depends_on:
+      - prometheus
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD}"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_SERVER_ROOT_URL: "https://${JAM_HOST}/_/grafana"
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+    restart: always
+    labels:
+      - traefik.http.routers.grafana.rule=(Host(`${JAM_HOST}`) && PathPrefix(`/_/grafana`))
+      - traefik.http.routers.grafana.tls=true
+      - traefik.http.routers.grafana.tls.certresolver=letsencrypt
+      - traefik.enable=true
   postgres:
     image: postgres:12
     restart: always
@@ -34,7 +64,9 @@ services:
     env_file:
       - ".env"
     labels:
-      - traefik.http.routers.pantry.rule=Host(`pantry.${JAM_HOST}`)
+      - traefik.http.routers.pantry.rule=(Host(`${JAM_HOST}`) && PathPrefix(`/_/pantry`))
+      - traefik.http.routers.pantry.middlewares=pantry-stripprefix
+      - traefik.http.middlewares.pantry-stripprefix.stripprefix.prefixes=/_/pantry
       - traefik.http.routers.pantry.tls=true
       - traefik.http.routers.pantry.tls.certresolver=letsencrypt
       - traefik.enable=true
@@ -42,7 +74,9 @@ services:
     image: registry.gitlab.com/jam-systems/jam/signalhub:${CHANNEL}
     restart: always
     labels:
-      - traefik.http.routers.signalhub.rule=Host(`signalhub.${JAM_HOST}`)
+      - traefik.http.routers.signalhub.rule=(Host(`${JAM_HOST}`) && PathPrefix(`/_/signalhub`))
+      - traefik.http.routers.signalhub.middlewares=signalhub-stripprefix
+      - traefik.http.middlewares.signalhub-stripprefix.stripprefix.prefixes=/_/signalhub
       - traefik.http.routers.signalhub.tls=true
       - traefik.http.routers.signalhub.tls.certresolver=letsencrypt
       - traefik.enable=true
@@ -53,22 +87,29 @@ services:
     command:
       - "--entryPoints.web.address=:80"
       - "--entryPoints.websecure.address=:443"
+      - "--entryPoints.metrics.address=:8080"
       - "--certificatesResolvers.letsencrypt.acme.email=admin@${JAM_HOST}"
       - "--certificatesResolvers.letsencrypt.acme.storage=/acme/acme.json"
       - "--certificatesResolvers.letsencrypt.acme.httpChallenge.entryPoint=web"
       - "--providers.docker=true"
       - "--providers.docker.exposedByDefault=false"
+      - "--metrics.prometheus.entryPoint=metrics"
+      - "--metrics.prometheus=true"
+      - "--metrics.prometheus.addEntryPointsLabels=true"
+      - "--metrics.prometheus.addServicesLabels=true"
     labels:
-      traefik.http.routers.http-catchall.rule: hostregexp(`{host:.+}`)
-      traefik.http.routers.http-catchall.entrypoints: web
-      traefik.http.routers.http-catchall.middlewares: redirect-to-https@docker
-      traefik.http.middlewares.redirect-to-https.redirectscheme.scheme: https
-      traefik.enable: "true"
+      - traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)
+      - traefik.http.routers.http-catchall.entrypoints=web
+      - traefik.http.routers.http-catchall.middlewares=redirect-to-https@docker
+      - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
+      - traefik.enable=true
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ../data/traefik/acme:/acme
-
+volumes:
+  prometheus_data: {}
+  grafana_data: {}
 
