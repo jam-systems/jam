@@ -18,6 +18,7 @@ swarm.config({
   pcConfig: {
     iceTransportPolicy: 'all',
     iceServers: [
+      {urls: `stun:stun.jam.systems:3478`},
       {urls: `stun:stun.${jamHost()}:3478`},
       {
         urls: `turn:turn.${jamHost()}:3478`,
