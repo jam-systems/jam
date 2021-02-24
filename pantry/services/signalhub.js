@@ -4,7 +4,7 @@ const nets = require('nets')
 const { promisify } = require('util')
 
 
-const signalHubUrl = `https://signalhub.${jamHost}/`;
+const signalHubUrl = `https://${jamHost}/_/signalhub/`;
 const hub = function(roomId) {
     return signalhub(roomId, [
         signalHubUrl

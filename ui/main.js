@@ -45,7 +45,7 @@ export function leaveRoom() {
 
 export function connectRoom(roomId) {
   if (swarm.connected) swarm.disconnect();
-  swarm.connect(`https://signalhub.${jamHost()}/`, roomId);
+  swarm.connect(`https://${jamHost()}/_/signalhub/`, roomId);
   swarm.hub.subscribe('identity-updates', async id => {
     state.set('identities', {
       ...state.get('identities'),

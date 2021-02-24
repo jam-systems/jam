@@ -64,7 +64,9 @@ services:
     env_file:
       - ".env"
     labels:
-      - traefik.http.routers.pantry.rule=Host(`pantry.${JAM_HOST}`)
+      - traefik.http.routers.pantry.rule=Host(`${JAM_HOST}`) && PathPrefix(`/_/pantry`))
+      - traefik.http.routers.pantry.middlewares=pantry-stripprefix
+      - traefik.http.middlewares.pantry-stripprefix.stripprefix.prefixes=/_/pantry
       - traefik.http.routers.pantry.tls=true
       - traefik.http.routers.pantry.tls.certresolver=letsencrypt
       - traefik.enable=true
@@ -72,7 +74,9 @@ services:
     image: registry.gitlab.com/jam-systems/jam/signalhub:${CHANNEL}
     restart: always
     labels:
-      - traefik.http.routers.signalhub.rule=Host(`signalhub.${JAM_HOST}`)
+      - traefik.http.routers.signalhub.rule=Host(`${JAM_HOST}`) && PathPrefix(`/_/signalhub`))
+      - traefik.http.routers.signalhub.middlewares=signalhub-stripprefix
+      - traefik.http.middlewares.signalhub-stripprefix.stripprefix.prefixes=/_/signalhub
       - traefik.http.routers.signalhub.tls=true
       - traefik.http.routers.signalhub.tls.certresolver=letsencrypt
       - traefik.enable=true
