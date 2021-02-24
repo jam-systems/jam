@@ -76,7 +76,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Panel Title",
+      "title": "Active Users",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -171,7 +171,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Panel Title",
+      "title": "Total Rooms",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -266,7 +266,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Panel Title",
+      "title": "Total Identities",
       "tooltip": {
         "shared": true,
         "sort": 0,
