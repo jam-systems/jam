@@ -178,7 +178,7 @@ export default function Room({room, roomId}) {
                           x="0px"
                           y="0px"
                           viewBox="0 0 1000 1000"
-                          enable-background="new 0 0 1000 1000"
+                          enableBackground="new 0 0 1000 1000"
                           fill="currentColor"
                           xmlns="http://www.w3.org/2000/svg"
                         >
@@ -247,7 +247,7 @@ export default function Room({room, roomId}) {
                               x="0px"
                               y="0px"
                               viewBox="0 0 1000 1000"
-                              enable-background="new 0 0 1000 1000"
+                              enableBackground="new 0 0 1000 1000"
                               fill="currentColor"
                               xmlns="http://www.w3.org/2000/svg"
                             >
