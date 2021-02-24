@@ -143,8 +143,18 @@ export default function Start({urlRoomId}) {
             <a
               href="https://gitlab.com/jam-systems/jam"
               className="underline text-blue-800 active:text-blue-600"
+              target="_blank"
             >
               Learn&nbsp;more&nbsp;about&nbsp;Jam.
+            </a><br/><br/><br/>
+            Jam <b className="font-semibold">Pro</b> (Early Access): Make Jam your own.<br/>
+            Set your own colors and logo, use your own domain.<br/><br/>
+            <a
+              href="https://forms.ops.jam.systems/pro/"
+              className="underline text-blue-800 active:text-blue-600"
+              target="_blank"
+            >
+              Apply to the Jam Pro Early Access Program.
             </a>
           </div>
           <div className="flex-initial">
