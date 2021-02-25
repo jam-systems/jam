@@ -66,11 +66,12 @@ Hosting your own Jam server is easy.
 
 1. Install docker and docker-compose (eg. `apt install docker.io docker-compose`)
 2. `git clone https://gitlab.com/jam-systems/jam.git`
-3. `cd jam/deployment`
-4. `cp .env.example .env`
-5. `nano .env` set `JAM_HOST` to your domain
-6. In your DNS settings point `${JAM_HOST}`, and `*.${JAM_HOST}` to your IP address (if you don't want a wildcard you need the subdomains `pantry`, `signalhub`, `stun` and `turn`)
-7. `docker-compose up -d`
+3. `git checkout stable`  
+4. `cd jam/deployment`
+5. `cp .env.example .env`
+6. `nano .env` set `JAM_HOST` to your domain
+7. In your DNS settings point `${JAM_HOST}`, and `*.${JAM_HOST}` to your IP address (if you don't want a wildcard you need the subdomains `stun` and `turn`)
+8. `docker-compose up -d`
 
 ## Develop
 
