@@ -11,7 +11,7 @@ import {signedToken} from '../identity';
 import animateEmoji from '../lib/animate-emoji';
 import {openModal} from './Modal';
 import {EditRoomModal} from './EditRoom';
-import SparkMD5 from "spark-md5";
+import SparkMD5 from 'spark-md5';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
@@ -148,7 +148,7 @@ export default function Room({room, roomId}) {
                   >
                     <div className="human-radius p-1 bg-white relative flex justify-center">
                       <img
-                        className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28"
+                        className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28 object-cover"
                         alt="me"
                         src={avatarUrl(myInfo)}
                       />
@@ -217,7 +217,7 @@ export default function Room({room, roomId}) {
                       >
                         <div className="human-radius p-1 bg-white relative flex justify-center">
                           <img
-                            className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28"
+                            className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28 object-cover"
                             alt={peerInfo.displayName}
                             src={avatarUrl(peerInfo)}
                           />
@@ -280,7 +280,7 @@ export default function Room({room, roomId}) {
                 <div className="relative flex justify-center">
                   <img
                     alt={myInfo.displayName}
-                    className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50"
+                    className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50 object-cover"
                     src={avatarUrl(myInfo)}
                   />
                   <Reactions
@@ -306,7 +306,7 @@ export default function Room({room, roomId}) {
                   >
                     <div className="relative flex justify-center">
                       <img
-                        className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50"
+                        className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50 object-cover"
                         alt={peerInfo.displayName}
                         src={avatarUrl(peerInfo)}
                       />
@@ -350,22 +350,22 @@ export default function Room({room, roomId}) {
         )}
         {/* microphone mute/unmute button */}
         {iSpeak && (
-        <div className="flex">
-          <button
-            onClick={() => state.set('micMuted', !micMuted)}
-            className="select-none h-12 mt-4 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline active:bg-yellow-300 w-screen"
-            style={{
-              backgroundColor: color || '#FDE68A',
-              color: isColorDark ? 'white' : 'black',
-            }}
-          >
-            {micOn
-              ? micMuted
-                ? "🙊 You're silent"
-                : "🐵 You're on"
-              : "🙊 You're off"}
-          </button>
-        </div>
+          <div className="flex">
+            <button
+              onClick={() => state.set('micMuted', !micMuted)}
+              className="select-none h-12 mt-4 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline active:bg-yellow-300 w-screen"
+              style={{
+                backgroundColor: color || '#FDE68A',
+                color: isColorDark ? 'white' : 'black',
+              }}
+            >
+              {micOn
+                ? micMuted
+                  ? "🙊 You're silent"
+                  : "🐵 You're on"
+                : "🙊 You're off"}
+            </button>
+          </div>
         )}
         <br />
         <div className="flex relative">
@@ -474,18 +474,19 @@ function Reactions({reactions, className}) {
   if (!reactions) return null;
   return (
     <>
-      {reactions.map(([r, id]) => (
-        (reactionEmojis.includes(r)) && (
-          <AnimatedEmoji
-            key={id}
-            emoji={r}
-            className={className}
-            style={{
-              alignSelf: 'center',
-            }}
-          />
-        )
-      ))}
+      {reactions.map(
+        ([r, id]) =>
+          reactionEmojis.includes(r) && (
+            <AnimatedEmoji
+              key={id}
+              emoji={r}
+              className={className}
+              style={{
+                alignSelf: 'center',
+              }}
+            />
+          )
+      )}
     </>
   );
 }
@@ -572,15 +573,16 @@ function EditIdentity({info, onSubmit, onCancel}) {
   let [email, setEmail] = useState(info?.email);
   let emailHash = email ? SparkMD5.hash(email) : undefined;
   let submit = e => {
-    let selectedFile = document.querySelector('.edit-profile-file-input').files[0];
+    let selectedFile = document.querySelector('.edit-profile-file-input')
+      .files[0];
     if (selectedFile) {
-      console.log("file selected");
+      console.log('file selected');
       let reader = new FileReader();
       reader.readAsDataURL(selectedFile);
       reader.onloadend = () => {
         e.preventDefault();
         let avatar = reader.result;
-        console.log(avatar)
+        console.log(avatar);
         onSubmit({displayName, emailHash, avatar});
       };
     }
