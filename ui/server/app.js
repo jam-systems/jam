@@ -40,7 +40,7 @@ const getRoomMetaInfo = async (roomPath) => {
 
 app.use(async (req, res) => {
     if (req.path === '/service-worker.js') {
-      return res.send(`console.log('hello from service-worker.js)'`);
+      return res.send(`console.log('hello from service-worker.js')`);
     }
 
     const metaInfo = req.path === '/' ? defaultMetaInfo : {
@@ -49,7 +49,6 @@ app.use(async (req, res) => {
     };
 
     if (req.path.endsWith('manifest.json')) {
-      res.type('application/json');
       return res.json({
         "short_name": metaInfo.ogTitle,
         "name": metaInfo.ogTitle,
