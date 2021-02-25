@@ -1,6 +1,6 @@
 import SimplePeer from 'simple-peer-light';
 import State from './minimal-state.js';
-import signalhub from './signalhub.js';
+import {authenticatedHub} from './signalhub.js';
 
 const MAX_CONNECT_TIME = 6000;
 const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;
@@ -45,11 +45,23 @@ function config({url, room, myPeerId, sign, verify, pcConfig, debug}) {
   if (debug) swarm.debug = debug;
 }
 
-function addLocalStream(stream, name) {
+// TODO FIXME: the fact that this function can CHANGE the stream that's given to it
+// is an awful hack that destroys the intended encapsulation of this module
+function addLocalStream(stream, name, onNewStream) {
   log('addlocalstream', stream, name);
   if (!name) name = randomHex4();
   swarm.localStreams[name] = stream;
-  addStreamToPeers(stream, name);
+  try {
+    addStreamToPeers(stream, name);
+  } catch (err) {
+    console.log('cloning tracks');
+    // clone tracks to handle error on removing and readding the same stream
+    let clonedTracks = stream.getTracks().map(t => t.clone());
+    let clonedStream = new MediaStream(clonedTracks);
+    // we have to re-add that cloned stream and notify caller
+    addStreamToPeers(clonedStream, name);
+    onNewStream?.(clonedStream);
+  }
 }
 
 swarm.on('sharedState', state => {
@@ -271,36 +283,24 @@ function addPeerMetaData(peer, data) {
 
 function addStreamToPeers(stream, name) {
   let {peers} = swarm;
+
   for (let peerId in peers) {
     let peer = peers[peerId];
     let oldStream = peer.streams[name];
-    let addStream = () => {
-      log('adding stream to', s(peerId), name);
-      peer.streams[name] = stream;
-      if (stream) {
-        try {
-          peer.addStream(stream);
-        } catch (err) {
-          console.log('cloning stream!');
-          // clone tracks to handle error on removing and readding the same stream
-          let clonedTracks = stream.getTracks().map(t => t.clone());
-          let clonedStream = new MediaStream(clonedTracks);
-          peer.streams[name] = clonedStream;
-          peer.addStream(clonedStream);
-        }
-      }
-    };
+    if (oldStream && oldStream === stream) return; // avoid error if listener is called twice
     if (oldStream) {
-      if (oldStream === stream) return; // avoid error if listener is called twice
       try {
         // avoid TypeError: this._senderMap is null
         peer.removeStream(oldStream);
       } catch (err) {
         console.warn(err);
       }
-      addStream();
-    } else {
-      addStream();
+    }
+
+    log('adding stream to', s(peerId), name);
+    peer.streams[name] = stream;
+    if (stream) {
+      peer.addStream(stream);
     }
   }
 }
@@ -368,8 +368,15 @@ function connect(url, room) {
   }
   let myConnId = randomHex4();
   log('connecting. conn id', myConnId);
-  let hub = signalhub(swarm.room, swarm.url);
-  let {myPeerId} = swarm;
+  let {myPeerId, sign, verify} = swarm;
+  let hub = authenticatedHub({
+    room: swarm.room,
+    url: swarm.url,
+    myPeerId,
+    sign,
+    verify,
+  });
+
   hub
     .broadcast('connect-me', {
       peerId: myPeerId,

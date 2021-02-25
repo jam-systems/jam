@@ -47,13 +47,13 @@ export function leaveRoom() {
 export function connectRoom(roomId) {
   if (swarm.connected) swarm.disconnect();
   swarm.connect(`https://${jamHost()}/_/signalhub/`, roomId);
-  swarm.hub.subscribe('identity-updates', async id => {
+  swarm.hub.subscribe('identity-updates', async ({peerId}) => {
     state.set('identities', {
       ...state.get('identities'),
-      [id]: await get(`/identities/${id}`),
+      [peerId]: await get(`/identities/${peerId}`),
     });
   });
-  swarm.hub.subscribe('room-info', data => {
+  swarm.hub.subscribeAnonymous('room-info', data => {
     console.log('new room info', data);
     updateApiQuery(`/rooms/${swarm.room}`, data, 200);
   });
@@ -72,7 +72,9 @@ state.on('room', (room = emptyRoom, oldRoom = emptyRoom) => {
   let {myPeerId} = swarm;
   if (!oldSpeakers.includes(myPeerId) && speakers.includes(myPeerId)) {
     if (state.myAudio) {
-      swarm.addLocalStream(state.myAudio, 'audio');
+      swarm.addLocalStream(state.myAudio, 'audio', stream =>
+        state.set('myAudio', stream)
+      );
     }
   }
   // or stop sending stream when I become audience member
@@ -131,7 +133,11 @@ state.on('myAudio', stream => {
   // if (!stream) return; // TODO ok?
   // if i am speaker, send audio to peers
   let {speakers} = currentRoom();
-  if (speakers.includes(swarm.myPeerId)) swarm.addLocalStream(stream, 'audio');
+  if (speakers.includes(swarm.myPeerId)) {
+    swarm.addLocalStream(stream, 'audio', stream =>
+      state.set('myAudio', stream)
+    );
+  }
 });
 
 let speaker = {};
