@@ -47,8 +47,8 @@ export default function Room({room, roomId}) {
 
   let [showShareInfo, setShowShareInfo] = useState(false);
 
-  let updateInfo = ({displayName, email, avatar}) => {
-    state.set('myInfo', {displayName, email, avatar});
+  let updateInfo = ({displayName, emailHash, avatar}) => {
+    state.set('myInfo', {displayName, emailHash, avatar});
     setEditIdentity(false);
     swarm.hub.broadcast('identity-updates', swarm.myPeerId);
   };
