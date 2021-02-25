@@ -50,7 +50,7 @@ export default function Room({room, roomId}) {
   let updateInfo = ({displayName, emailHash, avatar}) => {
     state.set('myInfo', {displayName, emailHash, avatar});
     setEditIdentity(false);
-    swarm.hub.broadcast('identity-updates', swarm.myPeerId);
+    swarm.hub.broadcast('identity-updates', {});
   };
 
   let {name, description, logoURI, color, speakers, moderators} = room || {};
