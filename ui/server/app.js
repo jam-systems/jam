@@ -49,6 +49,7 @@ app.use(async (req, res) => {
     };
 
     if (req.path.endsWith('manifest.json')) {
+      res.setHeader('Content-Type', 'application/json');
       return res.json({
         "short_name": metaInfo.ogTitle,
         "name": metaInfo.ogTitle,
