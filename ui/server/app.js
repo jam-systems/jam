@@ -39,10 +39,6 @@ const getRoomMetaInfo = async (roomPath) => {
 }
 
 app.use(async (req, res) => {
-    if (req.path === '/service-worker.js') {
-      res.setHeader('content-type', 'text/javascript');
-      return res.send(`console.log('hello from service-worker.js')`);
-    }
 
     const metaInfo = req.path === '/' ? defaultMetaInfo : {
         ...defaultMetaInfo,
