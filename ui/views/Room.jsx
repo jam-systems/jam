@@ -4,13 +4,14 @@ import {useMany} from '../lib/use-state.js';
 import swarm from '../lib/swarm.js';
 import EnterRoom from './EnterRoom.jsx';
 import RoomHeader from './RoomHeader.jsx';
-import {gravatarUrl} from '../lib/gravatar';
+import {avatarUrl} from '../lib/avatar';
 import copyToClipboard from '../lib/copy-to-clipboard';
 import {put} from '../backend';
 import {signedToken} from '../identity';
 import animateEmoji from '../lib/animate-emoji';
 import {openModal} from './Modal';
 import {EditRoomModal} from './EditRoom';
+import SparkMD5 from "spark-md5";
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
@@ -46,8 +47,8 @@ export default function Room({room, roomId}) {
 
   let [showShareInfo, setShowShareInfo] = useState(false);
 
-  let updateInfo = ({displayName, email}) => {
-    state.set('myInfo', {displayName, email});
+  let updateInfo = ({displayName, email, avatar}) => {
+    state.set('myInfo', {displayName, email, avatar});
     setEditIdentity(false);
     swarm.hub.broadcast('identity-updates', swarm.myPeerId);
   };
@@ -57,7 +58,7 @@ export default function Room({room, roomId}) {
   let isColorDark = useMemo(() => isDark(color), [color]);
 
   useLayoutEffect(() => {
-    if (color && color != '#FDE68A') {
+    if (color && color !== '#FDE68A') {
       document.body.style.backgroundColor = hexToRGB(color, '0.123');
     }
   }, [color]);
@@ -149,7 +150,7 @@ export default function Room({room, roomId}) {
                       <img
                         className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28"
                         alt="me"
-                        src={gravatarUrl(myInfo)}
+                        src={avatarUrl(myInfo)}
                       />
 
                       <Reactions
@@ -218,7 +219,7 @@ export default function Room({room, roomId}) {
                           <img
                             className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28"
                             alt={peerInfo.displayName}
-                            src={gravatarUrl(peerInfo)}
+                            src={avatarUrl(peerInfo)}
                           />
                           <Reactions
                             reactions={reactions_}
@@ -278,8 +279,9 @@ export default function Room({room, roomId}) {
               >
                 <div className="relative flex justify-center">
                   <img
+                    alt={myInfo.displayName}
                     className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50"
-                    src={gravatarUrl(myInfo)}
+                    src={avatarUrl(myInfo)}
                   />
                   <Reactions
                     reactions={myReactions}
@@ -306,7 +308,7 @@ export default function Room({room, roomId}) {
                       <img
                         className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50"
                         alt={peerInfo.displayName}
-                        src={gravatarUrl(peerInfo)}
+                        src={avatarUrl(peerInfo)}
                       />
                       <Reactions
                         reactions={reactions_}
@@ -568,6 +570,7 @@ function EditRole({
 function EditIdentity({info, onSubmit, onCancel}) {
   let [displayName, setDisplayName] = useState(info?.displayName);
   let [email, setEmail] = useState(info?.email);
+  let emailHash = email ? SparkMD5.hash(email) : undefined;
   let submit = e => {
     let selectedFile = document.querySelector('.edit-profile-file-input').files[0];
     if (selectedFile) {
@@ -576,13 +579,13 @@ function EditIdentity({info, onSubmit, onCancel}) {
       reader.readAsDataURL(selectedFile);
       reader.onloadend = () => {
         e.preventDefault();
-        let base64Image = reader.result;
-        console.log(base64Image);
-        onSubmit({displayName, email});
+        let avatar = reader.result;
+        console.log(avatar)
+        onSubmit({displayName, emailHash, avatar});
       };
     }
     e.preventDefault();
-    onSubmit({displayName, email});
+    onSubmit({displayName, emailHash});
   };
   let cancel = e => {
     e.preventDefault();
