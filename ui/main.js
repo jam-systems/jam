@@ -1,6 +1,6 @@
 import swarm from './lib/swarm.js';
 import hark from 'hark';
-import {get, updateApiQuery} from './backend';
+import {forwardApiQuery, get, updateApiQuery} from './backend';
 import {signData, updateInfo, verifyData} from './identity';
 import state from './state.js';
 import {jamHost} from './config';
@@ -57,13 +57,26 @@ export function connectRoom(roomId) {
     console.log('new room info', data);
     updateApiQuery(`/rooms/${swarm.room}`, data, 200);
   });
+  forwardApiQuery(`/rooms/${roomId}`, 'room');
 }
 const emptyRoom = {name: '', description: '', speakers: [], moderators: []};
 function currentRoom() {
-  return state.queries[`/rooms/${swarm.room}`]?.data || emptyRoom;
+  return state.room || emptyRoom;
 }
-state.on('queries', () => {
-  let {speakers} = currentRoom();
+
+state.on('room', (room = emptyRoom, oldRoom = emptyRoom) => {
+  let {speakers: oldSpeakers} = oldRoom;
+  let {speakers} = room;
+
+  // detect when I become speaker & send audio stream
+  let {myPeerId} = swarm;
+  if (!oldSpeakers.includes(myPeerId) && speakers.includes(myPeerId)) {
+    if (state.myAudio) {
+      swarm.addLocalStream(state.myAudio, 'audio');
+    }
+  }
+
+  // unmute new speakers, mute new audience members
   if (!state.soundMuted) {
     speakers.forEach(id => {
       if (speaker[id]?.muted) speaker[id].muted = false;
@@ -107,8 +120,14 @@ export function createAudioContext() {
   // }
 }
 
+// TODO: detect when you become speaker
+// => need a way to compare old & new State
+// => powered by state.set or a custom updater
 state.on('myAudio', stream => {
-  swarm.addLocalStream(stream, 'audio');
+  if (!stream) return; // TODO ok?
+  // if i am speaker, send audio to peers
+  let {speakers} = currentRoom();
+  if (speakers.includes(swarm.myPeerId)) swarm.addLocalStream(stream, 'audio');
 });
 
 let speaker = {};
@@ -157,23 +176,14 @@ swarm.on('stream', (stream, name, peer) => {
       });
     });
   });
-  // these don't seem to be useful
-  // audio.addEventListener('suspend', () => console.log('EVENT: suspend', id));
-  // audio.addEventListener('stalled', () => console.log('EVENT: stalled', id));
-  // audio.addEventListener('waiting', () => console.log('EVENT: waiting', id));
-  // audio.addEventListener('volumechange', () =>
-  //   console.log('EVENT: volumechange', id)
-  // );
-
   listenIfSpeaking(id, stream);
 });
 
-// TODO: this does not fix iOS speaker consistency
-// TODO: worth it to detect OS?
+// TODO: this did not fix iOS speaker consistency
 async function play(audio) {
   await audio.play();
-  audio.pause();
-  await audio.play();
+  // audio.pause();
+  // await audio.play();
 }
 
 async function requestAudio() {
