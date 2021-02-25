@@ -569,6 +569,18 @@ function EditIdentity({info, onSubmit, onCancel}) {
   let [displayName, setDisplayName] = useState(info?.displayName);
   let [email, setEmail] = useState(info?.email);
   let submit = e => {
+    let selectedFile = document.querySelector('.edit-profile-file-input').files[0];
+    if (selectedFile) {
+      console.log("file selected");
+      let reader = new FileReader();
+      reader.readAsDataURL(selectedFile);
+      reader.onloadend = () => {
+        e.preventDefault();
+        let base64Image = reader.result;
+        console.log(base64Image);
+        onSubmit({displayName, email});
+      };
+    }
     e.preventDefault();
     onSubmit({displayName, email});
   };
