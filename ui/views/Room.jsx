@@ -584,6 +584,16 @@ function EditIdentity({info, onSubmit, onCancel}) {
       <br />
       <form onSubmit={submit}>
         <input
+          type="file"
+          accept="image/*"
+          className="edit-profile-file-input rounded placeholder-gray-400 bg-gray-50 w-72"
+        />
+        <div className="p-2 text-gray-500 italic">
+          Select your profile picture
+          <span className="text-gray-300"> (optional)</span>
+        </div>
+        <br />
+        <input
           className="rounded placeholder-gray-400 bg-gray-50 w-48"
           type="text"
           placeholder="Display name"
