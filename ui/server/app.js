@@ -56,7 +56,7 @@ app.use(async (req, res) => {
           {
             "src": metaInfo.ogImage,
             "type": "image/jpg",
-            "sizes": "600x600",
+            "sizes": "1024x1024",
             "purpose": "any"
           }
         ],
