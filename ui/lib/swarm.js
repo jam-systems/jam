@@ -277,7 +277,18 @@ function addStreamToPeers(stream, name) {
     let addStream = () => {
       log('adding stream to', s(peerId), name);
       peer.streams[name] = stream;
-      if (stream) peer.addStream(stream);
+      if (stream) {
+        try {
+          peer.addStream(stream);
+        } catch (err) {
+          console.log('cloning stream!');
+          // clone tracks to handle error on removing and readding the same stream
+          let clonedTracks = stream.getTracks().map(t => t.clone());
+          let clonedStream = new MediaStream(clonedTracks);
+          peer.streams[name] = clonedStream;
+          peer.addStream(clonedStream);
+        }
+      }
     };
     if (oldStream) {
       if (oldStream === stream) return; // avoid error if listener is called twice
@@ -287,11 +298,6 @@ function addStreamToPeers(stream, name) {
       } catch (err) {
         console.warn(err);
       }
-
-      // this code path throws an error if the stream already existed at the peer earlier
-      // -- but that shouldn't happen!
-      // if it should ever do, maybe we could use replaceTrack() instead of removeStream()
-      // in the catch handler
       addStream();
     } else {
       addStream();

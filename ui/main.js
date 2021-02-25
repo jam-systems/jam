@@ -75,6 +75,10 @@ state.on('room', (room = emptyRoom, oldRoom = emptyRoom) => {
       swarm.addLocalStream(state.myAudio, 'audio');
     }
   }
+  // or stop sending stream when I become audience member
+  if (oldSpeakers.includes(myPeerId) && !speakers.includes(myPeerId)) {
+    swarm.addLocalStream(null, 'audio');
+  }
 
   // unmute new speakers, mute new audience members
   if (!state.soundMuted) {
@@ -124,7 +128,7 @@ export function createAudioContext() {
 // => need a way to compare old & new State
 // => powered by state.set or a custom updater
 state.on('myAudio', stream => {
-  if (!stream) return; // TODO ok?
+  // if (!stream) return; // TODO ok?
   // if i am speaker, send audio to peers
   let {speakers} = currentRoom();
   if (speakers.includes(swarm.myPeerId)) swarm.addLocalStream(stream, 'audio');
