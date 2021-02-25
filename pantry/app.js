@@ -21,13 +21,17 @@ const timeCodeFromBytes = (timeCodeBytes) => timeCodeBytes[0] +
     (timeCodeBytes[2] << 16) +
     (timeCodeBytes[3] << 24);
 const currentTimeCode = () => Math.round(Date.now() / 30000);
+const timeCodeValid = code => Math.abs(code - currentTimeCode()) <= 1;
 
 const verify = (authToken, key) => {
     const timeCodeBytes = nacl.sign.open(
         decode(authToken),
         decode(key)
     );
-    return timeCodeBytes && timeCodeFromBytes(timeCodeBytes) === currentTimeCode();
+    return (
+      timeCodeBytes &&
+      timeCodeValid(timeCodeFromBytes(timeCodeBytes))
+    );
 }
 
 const roomAuthenticator = {

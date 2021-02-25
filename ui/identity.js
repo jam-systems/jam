@@ -23,8 +23,9 @@ const timeCodeToBytes = timeCode =>
     (timeCode >> 16) % 256,
     (timeCode >> 24) % 256
   );
-// TODO maybe better 10 sec instead of 30?
+
 const currentTimeCode = () => Math.round(Date.now() / 30000);
+const timeCodeValid = code => Math.abs(code - currentTimeCode()) <= 1;
 
 export function initializeIdentity() {
   if (!localStorage.identity) {
@@ -90,9 +91,7 @@ export function sign(data) {
 
 export const verifyToken = (authToken, key) => {
   const timeCodeBytes = nacl.sign.open(decode(authToken), decode(key));
-  return (
-    timeCodeBytes && timeCodeFromBytes(timeCodeBytes) === currentTimeCode()
-  );
+  return timeCodeBytes && timeCodeValid(timeCodeFromBytes(timeCodeBytes));
 };
 
 export function signedToken() {
@@ -110,7 +109,7 @@ export function verifyData(signed, key) {
   try {
     let bytes = nacl.sign.open(decode(signed), decode(key));
     let timeCode = timeCodeFromBytes(bytes.subarray(0, 4));
-    if (timeCode !== currentTimeCode()) return;
+    if (!timeCodeValid(timeCode)) return;
     let dataBytes = bytes.subarray(4);
     return JSON.parse(new TextDecoder().decode(dataBytes));
   } catch (err) {
