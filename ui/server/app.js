@@ -55,7 +55,9 @@ app.use(async (req, res) => {
         "icons": [
           {
             "src": metaInfo.ogImage,
-            "sizes": "512x512"
+            "type": "image/jpg",
+            "sizes": "1024x1014",
+            "purpose": "any"
           }
         ],
         "start_url": "/?source=pwa",
