@@ -266,6 +266,6 @@ function listenIfSpeaking(peerId, stream) {
 // add service worker to comply with manifest.json requirements
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js');
+    navigator.serviceWorker.register('/service-worker.js', {scope: "/"});
   });
 }
