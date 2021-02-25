@@ -54,9 +54,15 @@ app.use(async (req, res) => {
         "name": metaInfo.ogTitle,
         "icons": [
           {
-            "src": metaInfo.ogImage,
-            "type": "image/jpg",
-            "sizes": "1024x1024",
+            "src": `https://${jamHost}/img/jam-app-icon-512.png`,
+            "type": "image/png",
+            "sizes": "512x512",
+            "purpose": "any"
+          },
+          {
+            "src": `https://${jamHost}/img/jam-app-icon-192.png`,
+            "type": "image/png",
+            "sizes": "192x192",
             "purpose": "any"
           }
         ],
