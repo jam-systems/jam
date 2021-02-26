@@ -560,7 +560,7 @@ function EditRole({
 function EditIdentity({info, onSubmit, onCancel}) {
   let [displayName, setDisplayName] = useState(info?.displayName);
   let [email, setEmail] = useState(info?.email);
-  let emailHash = email ? SparkMD5.hash(email) : undefined;
+  let emailHash = email ? SparkMD5.hash(email) : info?.emailHash;
   let submit = e => {
     let selectedFile = document.querySelector('.edit-profile-file-input')
       .files[0];
