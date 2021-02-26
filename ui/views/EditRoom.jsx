@@ -21,7 +21,7 @@ export function EditRoomModal({roomId, room, close}) {
 function EditRoom({room = {}, onSubmit, onCancel}) {
   let [name, setName] = useState(room.name || '');
   let [description, setDescription] = useState(room.description || '');
-  let [color, setColor] = useState(room.color || '#FDE68A');
+  let [color, setColor] = useState(room.color || '#4B5563');
   let [logoURI, setLogoURI] = useState(room.logoURI || '');
 
   let submit = e => {

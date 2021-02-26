@@ -42,7 +42,7 @@ export default function Room({room, roomId}) {
   let isColorDark = useMemo(() => isDark(color), [color]);
 
   useLayoutEffect(() => {
-    if (color && color !== '#FDE68A') {
+    if (color && color !== '#4B5563') {
       document.body.style.backgroundColor = hexToRGB(color, '0.123');
     }
   }, [color]);
@@ -418,9 +418,9 @@ export default function Room({room, roomId}) {
           <div className="flex">
             <button
               onClick={() => state.set('micMuted', !micMuted)}
-              className="select-none h-12 mt-4 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline active:bg-yellow-300 w-screen"
+              className="select-none h-12 mt-4 px-6 text-lg text-white bg-gray-600 rounded-lg focus:outline-none active:bg-gray-600 w-screen"
               style={{
-                backgroundColor: color || '#FDE68A',
+                backgroundColor: color || '#4B5563',
                 color: isColorDark ? 'white' : 'black',
               }}
             >

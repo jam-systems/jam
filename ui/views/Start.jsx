@@ -9,7 +9,7 @@ import {enterRoom, state} from '../main';
 export default function Start({urlRoomId}) {
   let [name, setName] = useState('');
   let [description, setDescription] = useState('');
-  let [color, setColor] = useState('#FDE68A');
+  let [color, setColor] = useState('#4B5563');
   let [logoURI, setLogoURI] = useState('');
 
   const [showAdvanced, setShowAdvanced] = useState(false);
