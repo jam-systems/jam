@@ -65,7 +65,6 @@ function currentRoom() {
 }
 
 state.on('room', (room = emptyRoom, oldRoom = emptyRoom) => {
-  console.log(room, oldRoom);
   let {speakers: oldSpeakers} = oldRoom;
   let {speakers} = room;
 
