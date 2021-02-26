@@ -132,7 +132,6 @@ export default function Room({room, roomId}) {
                 <li
                   className="relative items-center space-y-1 mt-4 ml-1 mr-1"
                   style={{cursor: 'pointer'}}
-                  onClick={() => setEditIdentity(!editIdentity)}
                 >
                   <div
                     className={
@@ -146,6 +145,7 @@ export default function Room({room, roomId}) {
                         className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28 object-cover"
                         alt="me"
                         src={avatarUrl(myInfo)}
+                        onClick={() => setEditIdentity(!editIdentity)}
                       />
 
                       <Reactions
@@ -221,9 +221,6 @@ export default function Room({room, roomId}) {
                       className="relative items-center space-y-1 mt-4 ml-1 mr-1"
                       title={peerInfo.displayName}
                       style={iModerate ? {cursor: 'pointer'} : undefined}
-                      onClick={
-                        iModerate ? () => setEditRole(peerId) : undefined
-                      }
                     >
                       <div
                         className={
@@ -237,6 +234,9 @@ export default function Room({room, roomId}) {
                             className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28 object-cover"
                             alt={peerInfo.displayName}
                             src={avatarUrl(peerInfo)}
+                            onClick={
+                              iModerate ? () => setEditRole(peerId) : undefined
+                            }
                           />
                           <Reactions
                             reactions={reactions_}
@@ -314,13 +314,13 @@ export default function Room({room, roomId}) {
               <li
                 className="flex-none m-2 w-16 h-32 md:w-24 md:h-36 text-xs"
                 style={{cursor: 'pointer'}}
-                onClick={() => setEditIdentity(!editIdentity)}
               >
                 <div className="relative flex justify-center">
                   <img
                     alt={myInfo.displayName}
                     className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50 object-cover"
                     src={avatarUrl(myInfo)}
+                    onClick={() => setEditIdentity(!editIdentity)}
                   />
                   <Reactions
                     reactions={myReactions}
@@ -362,13 +362,13 @@ export default function Room({room, roomId}) {
                     title={peerInfo.displayName}
                     className="flex-none m-2 w-16 h-32 md:w-24 md:h-36 text-xs"
                     style={iModerate ? {cursor: 'pointer'} : undefined}
-                    onClick={iModerate ? () => setEditRole(peerId) : undefined}
                   >
                     <div className="relative flex justify-center">
                       <img
                         className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50 object-cover"
                         alt={peerInfo.displayName}
                         src={avatarUrl(peerInfo)}
+                        onClick={iModerate ? () => setEditRole(peerId) : undefined}
                       />
                       <Reactions
                         reactions={reactions_}
