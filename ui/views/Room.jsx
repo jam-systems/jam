@@ -38,8 +38,12 @@ export default function Room({room, roomId}) {
 
   let [showShareInfo, setShowShareInfo] = useState(false);
 
-  let updateInfo = ({displayName, emailHash, avatar}) => {
-    state.set('myInfo', {displayName, emailHash, avatar});
+  let updateInfo = ({displayName, twitter, emailHash, avatar}) => {
+    twitter = twitter.trim();
+    if (twitter && !twitter.includes('@')) {
+      twitter = "@" + twitter;
+    }
+    state.set('myInfo', {displayName, twitter, emailHash, avatar});
     setEditIdentity(false);
     swarm.hub.broadcast('identity-updates', {});
   };
@@ -126,7 +130,7 @@ export default function Room({room, roomId}) {
             <ol className="flex flex-wrap pt-6">
               {iSpeak && (
                 <li
-                  className="relative items-center space-y-1 mt-4"
+                  className="relative items-center space-y-1 mt-4 ml-1 mr-1"
                   style={{cursor: 'pointer'}}
                   onClick={() => setEditIdentity(!editIdentity)}
                 >
@@ -155,18 +159,19 @@ export default function Room({room, roomId}) {
                       🙊
                     </div>
                   </div>
-                  <div className="font-medium w-20 md:w-28 m-2">
+                  <div className="w-20 md:w-28 m-2">
                     <div className="flex">
                       <div
-                        style={{lineHeight: '30px', marginTop: '4px'}}
+                        style={{marginTop: '6px'}}
                         className={
                           iModerate
-                            ? 'flex-none block bg-gray-600 text-white w-5 h-5 rounded-full'
+                            ? 'flex-none block bg-gray-600 text-white w-3 h-3 rounded-full -ml-3'
                             : 'hidden'
                         }
                       >
                         <svg
-                          className="m-1 w-3 h-3"
+                          className="w-2 h-2"
+                          style={{margin: '2px 0 0 2px'}}
                           x="0px"
                           y="0px"
                           viewBox="0 0 1000 1000"
@@ -177,8 +182,29 @@ export default function Room({room, roomId}) {
                           <path d="M894.5,633.4L663.3,500l231.1-133.4c39.1-22.6,52.4-72.5,29.9-111.6c-22.6-39.1-72.5-52.4-111.6-29.9L581.7,358.5V91.7c0-45.1-36.6-81.7-81.7-81.7c-45.1,0-81.7,36.6-81.7,81.7v266.9L187.2,225.1c-39.1-22.6-89-9.2-111.6,29.9c-22.6,39.1-9.2,89,29.9,111.6L336.7,500L105.5,633.4C66.5,656,53.1,705.9,75.6,745c22.6,39.1,72.5,52.4,111.6,29.9l231.1-133.4v266.9c0,45.1,36.6,81.7,81.7,81.7c45.1,0,81.7-36.6,81.7-81.7V641.5l231.1,133.4c39.1,22.6,89,9.2,111.6-29.9C946.9,705.9,933.5,656,894.5,633.4z" />
                         </svg>
                       </div>
-                      <div className="flex-none pl-1 overflow-ellipsis w-20 md:w-28">
-                        {myInfo.displayName}
+                      <div className="flex-none pl-1 w-20 md:w-28">
+                        <span className="overflow-hidden whitespace-nowrap w-22 md:w-30 block text-black font-medium">
+                          {myInfo.displayName}
+                        </span>
+                        { /* twitter */}
+                        <div className={
+                          myInfo.twitter
+                          ? 'text-center'
+                          : 'hidden'}
+                        >
+                          <span className="text-sm">
+                            <span className="text-gray-800">
+                              @
+                            </span>
+                            <a
+                            className="text-gray-500 font-medium ml-1"
+                            style={{textDecoration: "none", fontWeight: "normal"}}
+                            href={"https://twitter.com/" + myInfo.twitter}
+                            target="_blank">
+                              {myInfo.twitter?.substring(1)}
+                            </a>
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -192,7 +218,7 @@ export default function Room({room, roomId}) {
                   inRoom && (
                     <li
                       key={peerId}
-                      className="relative items-center space-y-1 mt-4"
+                      className="relative items-center space-y-1 mt-4 ml-1 mr-1"
                       title={peerInfo.displayName}
                       style={iModerate ? {cursor: 'pointer'} : undefined}
                       onClick={
@@ -227,15 +253,16 @@ export default function Room({room, roomId}) {
                       <div className="font-medium w-20 md:w-28 m-2">
                         <div className="flex">
                           <div
-                            style={{lineHeight: '30px', marginTop: '4px'}}
+                            style={{marginTop: '6px'}}
                             className={
                               moderators.includes(peerId)
-                                ? 'flex-none block bg-gray-600 text-white w-5 h-5 rounded-full'
+                                ? 'flex-none block bg-gray-600 text-white w-3 h-3 rounded-full -ml-3'
                                 : 'hidden'
                             }
                           >
                             <svg
-                              className="m-1 w-3 h-3"
+                              className="w-2 h-2"
+                              style={{margin: '2px 0 0 2px'}}
                               x="0px"
                               y="0px"
                               viewBox="0 0 1000 1000"
@@ -246,8 +273,29 @@ export default function Room({room, roomId}) {
                               <path d="M894.5,633.4L663.3,500l231.1-133.4c39.1-22.6,52.4-72.5,29.9-111.6c-22.6-39.1-72.5-52.4-111.6-29.9L581.7,358.5V91.7c0-45.1-36.6-81.7-81.7-81.7c-45.1,0-81.7,36.6-81.7,81.7v266.9L187.2,225.1c-39.1-22.6-89-9.2-111.6,29.9c-22.6,39.1-9.2,89,29.9,111.6L336.7,500L105.5,633.4C66.5,656,53.1,705.9,75.6,745c22.6,39.1,72.5,52.4,111.6,29.9l231.1-133.4v266.9c0,45.1,36.6,81.7,81.7,81.7c45.1,0,81.7-36.6,81.7-81.7V641.5l231.1,133.4c39.1,22.6,89,9.2,111.6-29.9C946.9,705.9,933.5,656,894.5,633.4z" />
                             </svg>
                           </div>
-                          <div className="flex-none pl-1 overflow-ellipsis w-20 md:w-28">
-                            {peerInfo.displayName}
+                          <div className="flex-none pl-1 w-20 md:w-28">
+                            <span className="overflow-hidden whitespace-nowrap w-22 md:w-30 block text-black font-medium">
+                              {peerInfo.displayName}
+                            </span>
+                            { /* twitter */}
+                            <div className={
+                              peerInfo.twitter
+                              ? 'text-center'
+                              : 'hidden'}
+                            >
+                              <span className="text-sm">
+                                <span className="text-gray-800">
+                                  @
+                                </span>
+                                <a
+                                className="text-gray-500 font-medium ml-1"
+                                style={{textDecoration: "none", fontWeight: "normal"}}
+                                href={"https://twitter.com/" + peerInfo.twitter}
+                                target="_blank">
+                                  {peerInfo.twitter?.substring(1)}
+                                </a>
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -279,7 +327,28 @@ export default function Room({room, roomId}) {
                     className="absolute bg-white text-4xl md:text-6xl pt-3 md:pt-4 human-radius w-16 h-16 md:w-24 md:h-24 border text-center"
                   />
                 </div>
-                <div className="text-center mt-2">{myInfo.displayName}</div>
+                <div className="overflow-hidden whitespace-nowrap text-center mt-2">
+                  {myInfo.displayName}
+                </div>
+                { /* twitter */}
+                <div className={
+                  myInfo.twitter
+                  ? 'text-center mt-1'
+                  : 'hidden'}
+                >
+                  <span className="text-xs">
+                    <span className="text-gray-800">
+                      @
+                    </span>
+                    <a
+                    className="text-gray-500 font-medium ml-1"
+                    style={{textDecoration: "none", fontWeight: "normal"}}
+                    href={"https://twitter.com/" + myInfo.twitter}
+                    target="_blank">
+                      {myInfo.twitter?.substring(1)}
+                    </a>
+                  </span>
+                </div>
               </li>
             )}
             {audiencePeers.map(peerId => {
@@ -306,8 +375,27 @@ export default function Room({room, roomId}) {
                         className="absolute bg-white text-4xl md:text-6xl pt-3 md:pt-4 human-radius w-16 h-16 md:w-24 md:h-24 border text-center"
                       />
                     </div>
-                    <div className="text-center mt-2">
+                    <div className="overflow-hidden whitespace-nowrap text-center mt-2">
                       {peerInfo.displayName}
+                    </div>
+                    { /* twitter */}
+                    <div className={
+                      peerInfo.twitter
+                      ? 'text-center mt-1'
+                      : 'hidden'}
+                    >
+                      <span className="text-xs">
+                        <span className="text-gray-800">
+                          @
+                        </span>
+                        <a
+                        className="text-gray-500 font-medium ml-1"
+                        style={{textDecoration: "none", fontWeight: "normal"}}
+                        href={"https://twitter.com/" + peerInfo.twitter}
+                        target="_blank">
+                          {peerInfo.twitter?.substring(1)}
+                        </a>
+                      </span>
                     </div>
                   </li>
                 )
@@ -562,6 +650,7 @@ function EditRole({
 function EditIdentity({info, onSubmit, onCancel}) {
   let [displayName, setDisplayName] = useState(info?.displayName);
   let [email, setEmail] = useState(info?.email);
+  let [twitter, setTwitter] = useState(info?.twitter);
   let emailHash = email ? SparkMD5.hash(email) : info?.emailHash;
   let submit = e => {
     let selectedFile = document.querySelector('.edit-profile-file-input')
@@ -574,11 +663,11 @@ function EditIdentity({info, onSubmit, onCancel}) {
         e.preventDefault();
         let avatar = reader.result;
         console.log(avatar);
-        onSubmit({displayName, emailHash, avatar});
+        onSubmit({displayName, twitter, emailHash, avatar});
       };
     }
     e.preventDefault();
-    onSubmit({displayName, emailHash});
+    onSubmit({displayName, twitter, emailHash});
   };
   let cancel = e => {
     e.preventDefault();
@@ -616,6 +705,21 @@ function EditIdentity({info, onSubmit, onCancel}) {
           <span className="text-gray-300"> (optional)</span>
         </div>
         <br />
+        <input
+          className="rounded placeholder-gray-400 bg-gray-50 w-72"
+          type="text"
+          placeholder="@twitter"
+          value={twitter || ''}
+          name="twitter"
+          onChange={e => {
+            setTwitter(e.target.value);
+          }}
+        />
+        <div className="p-2 text-gray-500 italic">
+          {`What's your twitter?`}
+          <span className="text-gray-300"> (optional)</span>
+        </div>
+        <br/>
         <input
           className="rounded placeholder-gray-400 bg-gray-50 w-72"
           type="email"
