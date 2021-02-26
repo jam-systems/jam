@@ -125,7 +125,7 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
 
       <button
         onClick={submit}
-        className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
+        className="mt-5 h-12 px-6 text-lg text-white bg-gray-600 rounded-lg focus:shadow-outline active:bg-gray-600 mr-2"
       >
         Update Room
       </button>
