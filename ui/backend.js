@@ -41,8 +41,15 @@ export function useApiQuery(path, doFetch = true) {
 }
 
 export function updateApiQuery(path, data, status) {
-  state.queries[path] = data && {data, status};
-  state.update('queries');
+  state.set('queries', {...state.queries, [path]: data && {data, status}});
+}
+
+export function forwardApiQuery(path, key) {
+  state.set(key, state.queries[path]);
+  state.on('queries', (queries, oldQueries) => {
+    let data = queries[path]?.data;
+    if (data !== oldQueries[path]?.data) state.set(key, data);
+  });
 }
 
 async function authenticatedApiRequest(method, token, path, payload) {
@@ -81,7 +88,14 @@ export async function put(token, path, payload) {
   return authenticatedApiRequest('PUT', token, path, payload);
 }
 
-export async function createRoom(roomId, name, description, logoURI, color, peerId) {
+export async function createRoom(
+  roomId,
+  name,
+  description,
+  logoURI,
+  color,
+  peerId
+) {
   return post('', `/rooms/${roomId}`, {
     name,
     description,

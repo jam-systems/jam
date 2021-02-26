@@ -28,6 +28,8 @@ const getRoomMetaInfo = async (roomPath) => {
         ogDescription: roomInfo['description'],
         ogUrl: `https://${jamHost}${roomPath}`,
         ogImage: roomInfo['logoURI'] || `https://${jamHost}/img/jam-app-icon.jpg`,
+        color: roomInfo['color'] || '',
+        id: roomInfo['id'] || '',
         favIcon: roomInfo['logoURI'] || '/img/jam-app-icon.jpg',
     }
   } catch(e) {
@@ -37,10 +39,37 @@ const getRoomMetaInfo = async (roomPath) => {
 }
 
 app.use(async (req, res) => {
+
     const metaInfo = req.path === '/' ? defaultMetaInfo : {
         ...defaultMetaInfo,
         ...(await getRoomMetaInfo(req.path))
     };
+
+    if (req.path.endsWith('manifest.json')) {
+      return res.json({
+        "short_name": metaInfo.ogTitle,
+        "name": metaInfo.ogTitle,
+        "icons": [
+          {
+            "src": `https://${jamHost}/img/jam-app-icon-512.png`,
+            "type": "image/png",
+            "sizes": "512x512",
+            "purpose": "any"
+          },
+          {
+            "src": `https://${jamHost}/img/jam-app-icon-192.png`,
+            "type": "image/png",
+            "sizes": "192x192",
+            "purpose": "any"
+          }
+        ],
+        "start_url": "/?source=pwa",
+        "display": "standalone",
+        "scope": "/",
+        "theme_color": metaInfo.color,
+        "description": metaInfo.ogDescription,
+      });
+    }
 
     res.send(ejs.render(`
 <!DOCTYPE html>
@@ -71,6 +100,7 @@ app.use(async (req, res) => {
       href="/css/main.css"
       rel="stylesheet"
     />
+    <link rel="manifest" href="<%= metaInfo.ogUrl %>/manifest.json">
     <title><%= metaInfo.ogTitle %></title>
   </head>
   <body>

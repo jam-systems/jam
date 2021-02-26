@@ -1,6 +1,6 @@
 import SimplePeer from 'simple-peer-light';
 import State from './minimal-state.js';
-import signalhub from './signalhub.js';
+import {authenticatedHub} from './signalhub.js';
 
 const MAX_CONNECT_TIME = 6000;
 const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;
@@ -45,30 +45,42 @@ function config({url, room, myPeerId, sign, verify, pcConfig, debug}) {
   if (debug) swarm.debug = debug;
 }
 
-function addLocalStream(stream, name) {
+// TODO FIXME: the fact that this function can CHANGE the stream that's given to it
+// is an awful hack that destroys the intended encapsulation of this module
+function addLocalStream(stream, name, onNewStream) {
   log('addlocalstream', stream, name);
   if (!name) name = randomHex4();
   swarm.localStreams[name] = stream;
-  addStreamToPeers(stream, name);
+  try {
+    addStreamToPeers(stream, name);
+  } catch (err) {
+    console.log('cloning tracks');
+    // clone tracks to handle error on removing and readding the same stream
+    let clonedTracks = stream.getTracks().map(t => t.clone());
+    let clonedStream = new MediaStream(clonedTracks);
+    // we have to re-add that cloned stream and notify caller
+    addStreamToPeers(clonedStream, name);
+    onNewStream?.(clonedStream);
+  }
 }
 
-swarm.on('sharedState', state => {
-  let {hub, myPeerId, sign} = swarm;
+swarm.on('sharedState', data => {
+  let {hub, myPeerId} = swarm;
   if (!hub || !myPeerId) return;
   hub.broadcast('all', {
     type: 'shared-state',
     peerId: myPeerId,
-    data: sign ? sign(state) : state,
+    data,
   });
 });
 
 swarm.on('sharedEvent', data => {
-  let {hub, myPeerId, sign} = swarm;
+  let {hub, myPeerId} = swarm;
   if (!hub || !myPeerId) return;
   hub.broadcast('all', {
     type: 'shared-event',
     peerId: myPeerId,
-    data: sign ? sign(data) : data,
+    data,
   });
 });
 
@@ -127,7 +139,7 @@ function createPeer(peerId, connId, initiator) {
     if (!peer.didSignal) {
       data.first = true;
       peer.didSignal = true;
-      sharedState = signedState();
+      sharedState = swarm.sharedState;
     }
     hub.broadcast(`signal-${peerId}`, {
       peerId: myPeerId,
@@ -271,39 +283,29 @@ function addPeerMetaData(peer, data) {
 
 function addStreamToPeers(stream, name) {
   let {peers} = swarm;
+
   for (let peerId in peers) {
     let peer = peers[peerId];
     let oldStream = peer.streams[name];
-    let addStream = () => {
-      log('adding stream to', s(peerId), name);
-      peer.streams[name] = stream;
-      if (stream) peer.addStream(stream);
-    };
+    if (oldStream && oldStream === stream) return; // avoid error if listener is called twice
     if (oldStream) {
-      if (oldStream === stream) return; // avoid error if listener is called twice
       try {
         // avoid TypeError: this._senderMap is null
         peer.removeStream(oldStream);
       } catch (err) {
         console.warn(err);
       }
+    }
 
-      // this code path throws an error if the stream already existed at the peer earlier
-      // -- but that shouldn't happen!
-      // if it should ever do, maybe we could use replaceTrack() instead of removeStream()
-      // in the catch handler
-      addStream();
-    } else {
-      addStream();
+    log('adding stream to', s(peerId), name);
+    peer.streams[name] = stream;
+    if (stream) {
+      peer.addStream(stream);
     }
   }
 }
 
 function updatePeerState(peerId, state) {
-  if (swarm.verify) {
-    state = swarm.verify(state, peerId);
-    if (state === undefined) return;
-  }
   swarm.peerState[peerId] = state;
   swarm.update('peerState');
 }
@@ -330,7 +332,7 @@ function connectPeer(hub, peerId, connId) {
   // -) this has to work in every state of swarm.peers (e.g. with or without existing Peer instance)
   log('connecting peer', s(peerId), connId);
   timeoutPeer(peerId, MAX_CONNECT_TIME);
-  let {myPeerId, peers} = swarm;
+  let {myPeerId, peers, sharedState} = swarm;
   if (myPeerId > peerId) {
     log('i initiate, and override any previous peer!');
     createPeer(peerId, connId, true);
@@ -340,7 +342,7 @@ function connectPeer(hub, peerId, connId) {
       peerId: myPeerId,
       connId: hub.connId,
       yourConnId: connId,
-      sharedState: signedState(),
+      sharedState,
     });
     let peer = peers[peerId];
     if (peer) {
@@ -362,13 +364,20 @@ function connect(url, room) {
   }
   let myConnId = randomHex4();
   log('connecting. conn id', myConnId);
-  let hub = signalhub(swarm.room, swarm.url);
-  let {myPeerId} = swarm;
+  let {myPeerId, sign, verify, sharedState} = swarm;
+  let hub = authenticatedHub({
+    room: swarm.room,
+    url: swarm.url,
+    myPeerId,
+    sign,
+    verify,
+  });
+
   hub
     .broadcast('connect-me', {
       peerId: myPeerId,
       connId: myConnId,
-      sharedState: signedState(),
+      sharedState,
     })
     .then(() => {
       swarm.set('connected', true);
@@ -471,18 +480,9 @@ function connect(url, room) {
       updatePeerState(peerId, data);
     }
     if (type === 'shared-event') {
-      if (swarm.verify) {
-        data = swarm.verify(data, peerId);
-        if (data === undefined) return;
-      }
       swarm.emit('peerEvent', peerId, data);
     }
   });
-}
-
-function signedState() {
-  let {sign, sharedState} = swarm;
-  return sign ? sign(sharedState) : sharedState;
 }
 
 function disconnect() {

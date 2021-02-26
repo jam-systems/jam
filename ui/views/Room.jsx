@@ -4,13 +4,14 @@ import {useMany} from '../lib/use-state.js';
 import swarm from '../lib/swarm.js';
 import EnterRoom from './EnterRoom.jsx';
 import RoomHeader from './RoomHeader.jsx';
-import {gravatarUrl} from '../lib/gravatar';
+import {avatarUrl} from '../lib/avatar';
 import copyToClipboard from '../lib/copy-to-clipboard';
 import {put} from '../backend';
 import {signedToken} from '../identity';
 import animateEmoji from '../lib/animate-emoji';
 import {openModal} from './Modal';
 import {EditRoomModal} from './EditRoom';
+import SparkMD5 from 'spark-md5';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
@@ -46,10 +47,10 @@ export default function Room({room, roomId}) {
 
   let [showShareInfo, setShowShareInfo] = useState(false);
 
-  let updateInfo = ({displayName, email}) => {
-    state.set('myInfo', {displayName, email});
+  let updateInfo = ({displayName, emailHash, avatar}) => {
+    state.set('myInfo', {displayName, emailHash, avatar});
     setEditIdentity(false);
-    swarm.hub.broadcast('identity-updates', swarm.myPeerId);
+    swarm.hub.broadcast('identity-updates', {});
   };
 
   let {name, description, logoURI, color, speakers, moderators} = room || {};
@@ -57,7 +58,7 @@ export default function Room({room, roomId}) {
   let isColorDark = useMemo(() => isDark(color), [color]);
 
   useLayoutEffect(() => {
-    if (color && color != '#FDE68A') {
+    if (color && color !== '#FDE68A') {
       document.body.style.backgroundColor = hexToRGB(color, '0.123');
     }
   }, [color]);
@@ -147,9 +148,9 @@ export default function Room({room, roomId}) {
                   >
                     <div className="human-radius p-1 bg-white relative flex justify-center">
                       <img
-                        className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28"
+                        className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28 object-cover"
                         alt="me"
-                        src={gravatarUrl(myInfo)}
+                        src={avatarUrl(myInfo)}
                       />
 
                       <Reactions
@@ -216,9 +217,9 @@ export default function Room({room, roomId}) {
                       >
                         <div className="human-radius p-1 bg-white relative flex justify-center">
                           <img
-                            className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28"
+                            className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28 object-cover"
                             alt={peerInfo.displayName}
-                            src={gravatarUrl(peerInfo)}
+                            src={avatarUrl(peerInfo)}
                           />
                           <Reactions
                             reactions={reactions_}
@@ -278,8 +279,9 @@ export default function Room({room, roomId}) {
               >
                 <div className="relative flex justify-center">
                   <img
-                    className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50"
-                    src={gravatarUrl(myInfo)}
+                    alt={myInfo.displayName}
+                    className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50 object-cover"
+                    src={avatarUrl(myInfo)}
                   />
                   <Reactions
                     reactions={myReactions}
@@ -304,9 +306,9 @@ export default function Room({room, roomId}) {
                   >
                     <div className="relative flex justify-center">
                       <img
-                        className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50"
+                        className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50 object-cover"
                         alt={peerInfo.displayName}
-                        src={gravatarUrl(peerInfo)}
+                        src={avatarUrl(peerInfo)}
                       />
                       <Reactions
                         reactions={reactions_}
@@ -348,22 +350,22 @@ export default function Room({room, roomId}) {
         )}
         {/* microphone mute/unmute button */}
         {iSpeak && (
-        <div className="flex">
-          <button
-            onClick={() => state.set('micMuted', !micMuted)}
-            className="select-none h-12 mt-4 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline active:bg-yellow-300 w-screen"
-            style={{
-              backgroundColor: color || '#FDE68A',
-              color: isColorDark ? 'white' : 'black',
-            }}
-          >
-            {micOn
-              ? micMuted
-                ? "🙊 You're silent"
-                : "🐵 You're on"
-              : "🙊 You're off"}
-          </button>
-        </div>
+          <div className="flex">
+            <button
+              onClick={() => state.set('micMuted', !micMuted)}
+              className="select-none h-12 mt-4 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline active:bg-yellow-300 w-screen"
+              style={{
+                backgroundColor: color || '#FDE68A',
+                color: isColorDark ? 'white' : 'black',
+              }}
+            >
+              {micOn
+                ? micMuted
+                  ? "🙊 You're silent"
+                  : "🐵 You're on"
+                : "🙊 You're off"}
+            </button>
+          </div>
         )}
         <br />
         <div className="flex relative">
@@ -472,18 +474,19 @@ function Reactions({reactions, className}) {
   if (!reactions) return null;
   return (
     <>
-      {reactions.map(([r, id]) => (
-        (reactionEmojis.includes(r)) && (
-          <AnimatedEmoji
-            key={id}
-            emoji={r}
-            className={className}
-            style={{
-              alignSelf: 'center',
-            }}
-          />
-        )
-      ))}
+      {reactions.map(
+        ([r, id]) =>
+          reactionEmojis.includes(r) && (
+            <AnimatedEmoji
+              key={id}
+              emoji={r}
+              className={className}
+              style={{
+                alignSelf: 'center',
+              }}
+            />
+          )
+      )}
     </>
   );
 }
@@ -568,9 +571,23 @@ function EditRole({
 function EditIdentity({info, onSubmit, onCancel}) {
   let [displayName, setDisplayName] = useState(info?.displayName);
   let [email, setEmail] = useState(info?.email);
+  let emailHash = email ? SparkMD5.hash(email) : undefined;
   let submit = e => {
+    let selectedFile = document.querySelector('.edit-profile-file-input')
+      .files[0];
+    if (selectedFile) {
+      console.log('file selected');
+      let reader = new FileReader();
+      reader.readAsDataURL(selectedFile);
+      reader.onloadend = () => {
+        e.preventDefault();
+        let avatar = reader.result;
+        console.log(avatar);
+        onSubmit({displayName, emailHash, avatar});
+      };
+    }
     e.preventDefault();
-    onSubmit({displayName, email});
+    onSubmit({displayName, emailHash});
   };
   let cancel = e => {
     e.preventDefault();
@@ -583,6 +600,16 @@ function EditIdentity({info, onSubmit, onCancel}) {
       <h3 className="font-medium">Edit Profile</h3>
       <br />
       <form onSubmit={submit}>
+        <input
+          type="file"
+          accept="image/*"
+          className="edit-profile-file-input rounded placeholder-gray-400 bg-gray-50 w-72"
+        />
+        <div className="p-2 text-gray-500 italic">
+          Select your profile picture
+          <span className="text-gray-300"> (optional)</span>
+        </div>
+        <br />
         <input
           className="rounded placeholder-gray-400 bg-gray-50 w-48"
           type="text"

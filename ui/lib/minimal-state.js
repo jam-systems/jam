@@ -9,12 +9,15 @@ export default function State(initialState) {
       return key == undefined ? state : state[key];
     },
     set(key, valueOrFunction) {
+      let oldValue = state[key];
       let value =
         typeof valueOrFunction === 'function'
-          ? valueOrFunction(state[key])
+          ? valueOrFunction(oldValue)
           : valueOrFunction;
       state[key] = value;
-      api.update(key);
+      if (LOGGING) console.log('update', key, value);
+      api.emit(key, value, oldValue);
+      api.emit(undefined, state);
     },
     update(key) {
       if (LOGGING) console.log('update', key, state[key]);

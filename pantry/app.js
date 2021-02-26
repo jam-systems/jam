@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const bodyParser = require('body-parser');
 const logger = require('morgan');
 const nacl = require('tweetnacl');
 const base64 = require('compact-base64');
@@ -14,8 +13,7 @@ const app = express();
 
 app.use(logger('dev'));
 app.use(cors());
-app.use(bodyParser.json())
-app.use(express.json());
+app.use(express.json({limit: "500kb"}));
 
 const decode = (base64String) => Uint8Array.from(base64.decodeUrl(base64String, 'binary'));
 const timeCodeFromBytes = (timeCodeBytes) => timeCodeBytes[0] +
@@ -23,13 +21,17 @@ const timeCodeFromBytes = (timeCodeBytes) => timeCodeBytes[0] +
     (timeCodeBytes[2] << 16) +
     (timeCodeBytes[3] << 24);
 const currentTimeCode = () => Math.round(Date.now() / 30000);
+const timeCodeValid = code => Math.abs(code - currentTimeCode()) <= 1;
 
 const verify = (authToken, key) => {
     const timeCodeBytes = nacl.sign.open(
         decode(authToken),
         decode(key)
     );
-    return timeCodeBytes && timeCodeFromBytes(timeCodeBytes) === currentTimeCode();
+    return (
+      timeCodeBytes &&
+      timeCodeValid(timeCodeFromBytes(timeCodeBytes))
+    );
 }
 
 const roomAuthenticator = {
