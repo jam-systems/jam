@@ -41,7 +41,7 @@ export default function Room({room, roomId}) {
   let updateInfo = ({displayName, twitter, emailHash, avatar}) => {
     twitter = twitter.trim();
     if (twitter && !twitter.includes('@')) {
-      twitter = "@" + twitter;
+      twitter = '@' + twitter;
     }
     state.set('myInfo', {displayName, twitter, emailHash, avatar});
     setEditIdentity(false);
@@ -164,12 +164,12 @@ export default function Room({room, roomId}) {
                       <div className="flex-none text-center pl-1 w-20 md:w-28">
                         <span className="text-sm md:text-base whitespace-nowrap w-22 md:w-30 text-black font-medium">
                           <span
-                          style={{margin: '0 3px 0 -4px'}}
-                          className={
-                            iModerate
-                              ? 'flex-none inline-block leading-3 bg-gray-600 text-white w-3 h-3 rounded-full -ml-3'
-                              : 'hidden'
-                          }
+                            style={{margin: '0 3px 0 -4px'}}
+                            className={
+                              iModerate
+                                ? 'flex-none inline-block leading-3 bg-gray-600 text-white w-3 h-3 rounded-full -ml-3'
+                                : 'hidden'
+                            }
                           >
                             <svg
                               className="inline-block w-2 h-2"
@@ -182,23 +182,26 @@ export default function Room({room, roomId}) {
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path d="M894.5,633.4L663.3,500l231.1-133.4c39.1-22.6,52.4-72.5,29.9-111.6c-22.6-39.1-72.5-52.4-111.6-29.9L581.7,358.5V91.7c0-45.1-36.6-81.7-81.7-81.7c-45.1,0-81.7,36.6-81.7,81.7v266.9L187.2,225.1c-39.1-22.6-89-9.2-111.6,29.9c-22.6,39.1-9.2,89,29.9,111.6L336.7,500L105.5,633.4C66.5,656,53.1,705.9,75.6,745c22.6,39.1,72.5,52.4,111.6,29.9l231.1-133.4v266.9c0,45.1,36.6,81.7,81.7,81.7c45.1,0,81.7-36.6,81.7-81.7V641.5l231.1,133.4c39.1,22.6,89,9.2,111.6-29.9C946.9,705.9,933.5,656,894.5,633.4z" />
-                            </svg></span>{myInfo.displayName.substring(0,12)}
+                            </svg>
+                          </span>
+                          {myInfo.displayName.substring(0, 12)}
                         </span>
-                        { /* twitter */}
-                        <div className={
-                          myInfo.twitter
-                          ? 'text-center'
-                          : 'hidden'}
+                        {/* twitter */}
+                        <div
+                          className={myInfo.twitter ? 'text-center' : 'hidden'}
                         >
                           <span className="text-sm">
-                            <span className="text-gray-800">
-                              @
-                            </span>
+                            <span className="text-gray-800">@</span>
                             <a
-                            className="text-gray-500 font-medium ml-1"
-                            style={{textDecoration: "none", fontWeight: "normal"}}
-                            href={"https://twitter.com/" + myInfo.twitter}
-                            target="_blank">
+                              className="text-gray-500 font-medium ml-1"
+                              style={{
+                                textDecoration: 'none',
+                                fontWeight: 'normal',
+                              }}
+                              href={'https://twitter.com/' + myInfo.twitter}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
                               {myInfo.twitter?.substring(1)}
                             </a>
                           </span>
@@ -253,12 +256,12 @@ export default function Room({room, roomId}) {
                           <div className="flex-none text-center pl-1 w-20 md:w-28">
                             <span className="text-sm md:text-base whitespace-nowrap w-22 md:w-30 text-black font-medium">
                               <span
-                              style={{margin: '0 3px 0 -4px'}}
-                              className={
-                                moderators.includes(peerId)
-                                  ? 'flex-none inline-block leading-3 bg-gray-600 text-white w-3 h-3 rounded-full -ml-3'
-                                  : 'hidden'
-                              }
+                                style={{margin: '0 3px 0 -4px'}}
+                                className={
+                                  moderators.includes(peerId)
+                                    ? 'flex-none inline-block leading-3 bg-gray-600 text-white w-3 h-3 rounded-full -ml-3'
+                                    : 'hidden'
+                                }
                               >
                                 <svg
                                   className="inline-block w-2 h-2"
@@ -271,23 +274,30 @@ export default function Room({room, roomId}) {
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path d="M894.5,633.4L663.3,500l231.1-133.4c39.1-22.6,52.4-72.5,29.9-111.6c-22.6-39.1-72.5-52.4-111.6-29.9L581.7,358.5V91.7c0-45.1-36.6-81.7-81.7-81.7c-45.1,0-81.7,36.6-81.7,81.7v266.9L187.2,225.1c-39.1-22.6-89-9.2-111.6,29.9c-22.6,39.1-9.2,89,29.9,111.6L336.7,500L105.5,633.4C66.5,656,53.1,705.9,75.6,745c22.6,39.1,72.5,52.4,111.6,29.9l231.1-133.4v266.9c0,45.1,36.6,81.7,81.7,81.7c45.1,0,81.7-36.6,81.7-81.7V641.5l231.1,133.4c39.1,22.6,89,9.2,111.6-29.9C946.9,705.9,933.5,656,894.5,633.4z" />
-                                </svg></span>{peerInfo.displayName.substring(0,12)}
+                                </svg>
+                              </span>
+                              {peerInfo.displayName.substring(0, 12)}
                             </span>
-                            { /* twitter */}
-                            <div className={
-                              peerInfo.twitter
-                              ? 'text-center'
-                              : 'hidden'}
+                            {/* twitter */}
+                            <div
+                              className={
+                                peerInfo.twitter ? 'text-center' : 'hidden'
+                              }
                             >
                               <span className="text-sm">
-                                <span className="text-gray-800">
-                                  @
-                                </span>
+                                <span className="text-gray-800">@</span>
                                 <a
-                                className="text-gray-500 font-medium ml-1"
-                                style={{textDecoration: "none", fontWeight: "normal"}}
-                                href={"https://twitter.com/" + peerInfo.twitter}
-                                target="_blank">
+                                  className="text-gray-500 font-medium ml-1"
+                                  style={{
+                                    textDecoration: 'none',
+                                    fontWeight: 'normal',
+                                  }}
+                                  href={
+                                    'https://twitter.com/' + peerInfo.twitter
+                                  }
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
                                   {peerInfo.twitter?.substring(1)}
                                 </a>
                               </span>
@@ -326,21 +336,17 @@ export default function Room({room, roomId}) {
                 <div className="overflow-hidden whitespace-nowrap text-center mt-2">
                   {myInfo.displayName}
                 </div>
-                { /* twitter */}
-                <div className={
-                  myInfo.twitter
-                  ? 'text-center mt-1'
-                  : 'hidden'}
-                >
+                {/* twitter */}
+                <div className={myInfo.twitter ? 'text-center mt-1' : 'hidden'}>
                   <span className="text-xs">
-                    <span className="text-gray-800">
-                      @
-                    </span>
+                    <span className="text-gray-800">@</span>
                     <a
-                    className="text-gray-500 font-medium ml-1"
-                    style={{textDecoration: "none", fontWeight: "normal"}}
-                    href={"https://twitter.com/" + myInfo.twitter}
-                    target="_blank">
+                      className="text-gray-500 font-medium ml-1"
+                      style={{textDecoration: 'none', fontWeight: 'normal'}}
+                      href={'https://twitter.com/' + myInfo.twitter}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
                       {myInfo.twitter?.substring(1)}
                     </a>
                   </span>
@@ -364,7 +370,9 @@ export default function Room({room, roomId}) {
                         className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50 object-cover"
                         alt={peerInfo.displayName}
                         src={avatarUrl(peerInfo)}
-                        onClick={iModerate ? () => setEditRole(peerId) : undefined}
+                        onClick={
+                          iModerate ? () => setEditRole(peerId) : undefined
+                        }
                       />
                       <Reactions
                         reactions={reactions_}
@@ -374,21 +382,21 @@ export default function Room({room, roomId}) {
                     <div className="overflow-hidden whitespace-nowrap text-center mt-2">
                       {peerInfo.displayName}
                     </div>
-                    { /* twitter */}
-                    <div className={
-                      peerInfo.twitter
-                      ? 'text-center mt-1'
-                      : 'hidden'}
+                    {/* twitter */}
+                    <div
+                      className={
+                        peerInfo.twitter ? 'text-center mt-1' : 'hidden'
+                      }
                     >
                       <span className="text-xs">
-                        <span className="text-gray-800">
-                          @
-                        </span>
+                        <span className="text-gray-800">@</span>
                         <a
-                        className="text-gray-500 font-medium ml-1"
-                        style={{textDecoration: "none", fontWeight: "normal"}}
-                        href={"https://twitter.com/" + peerInfo.twitter}
-                        target="_blank">
+                          className="text-gray-500 font-medium ml-1"
+                          style={{textDecoration: 'none', fontWeight: 'normal'}}
+                          href={'https://twitter.com/' + peerInfo.twitter}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
                           {peerInfo.twitter?.substring(1)}
                         </a>
                       </span>
@@ -715,7 +723,7 @@ function EditIdentity({info, onSubmit, onCancel}) {
           {`What's your twitter?`}
           <span className="text-gray-300"> (optional)</span>
         </div>
-        <br/>
+        <br />
         <input
           className="rounded placeholder-gray-400 bg-gray-50 w-72"
           type="email"
