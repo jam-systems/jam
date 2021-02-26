@@ -11,6 +11,7 @@ export default function Modals() {
 export function Modal({close, children}) {
   return (
     <div
+      className="p-0 md:p-5 items-stretch sm:items-center"
       style={{
         position: 'absolute',
         zIndex: '10',
@@ -20,24 +21,20 @@ export function Modal({close, children}) {
         width: '100vw',
         backgroundColor: '#00000033',
         display: 'flex',
-        alignItems: 'center',
-        padding: '1.25rem',
       }}
       onClick={close}
     >
       <div
-        className="relative p-5 pt-10 pb-10"
+        className="relative p-1 pt-10 pb-10 sm:rounded-xl w-sm"
         style={{
           flex: 'none',
           display: 'flex',
           flexDirection: 'column',
           margin: '0 auto',
-          width: '600px',
           maxWidth: '100%',
           maxHeight: '100%',
           overflowY: 'hidden',
           backgroundColor: 'white',
-          borderRadius: '13px',
         }}
         onClick={e => {
           e.stopPropagation();
@@ -52,11 +49,11 @@ export function Modal({close, children}) {
           </div>
         </div>
         <div
+          className="px-5 sm:px-8"
           style={{
             flex: '0 1 auto',
             overflowY: 'auto',
             minHeight: '0',
-            padding: '0 1rem',
           }}
         >
           {children}
@@ -81,15 +78,11 @@ export function openModal(Component, props, id) {
 }
 
 export function closeModal(id) {
-  let toDelete = [];
   for (let modal of state.modals) {
-    let [id_] = modal;
-    if (id_ === id) {
-      toDelete.push(modal);
+    if (modal[0] === id) {
+      state.modals.delete(modal);
+      break;
     }
-  }
-  for (let modal of toDelete) {
-    state.modals.delete(modal);
   }
   state.update('modals');
 }

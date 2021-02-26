@@ -98,6 +98,10 @@ table td {
     border-radius: 42%;
 }
 
+.w-sm {
+    width: 640px;
+}
+
 @media (max-width: 640px) {
     .container {
         width: 100%;
@@ -120,5 +124,9 @@ table td {
         margin-left: -12px; /* adapt negative margin left from desktop view? */
 
         box-sizing: border-box;
+    }
+
+    .w-sm {
+        width: 100%;
     }
 }
