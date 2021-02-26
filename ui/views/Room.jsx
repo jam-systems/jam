@@ -12,11 +12,13 @@ import animateEmoji from '../lib/animate-emoji';
 import {openModal} from './Modal';
 import {EditRoomModal} from './EditRoom';
 import SparkMD5 from 'spark-md5';
+import useWakeLock from '../lib/use-wake-lock';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
 export default function Room({room, roomId}) {
   // room = {name, description, moderators: [peerId], speakers: [peerId]}
+  useWakeLock();
   let [myInfo, myAudio, micMuted, reactions, identities, speaking] = use(
     state,
     ['myInfo', 'myAudio', 'micMuted', 'reactions', 'identities', 'speaking']
