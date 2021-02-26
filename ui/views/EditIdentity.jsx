@@ -4,12 +4,13 @@ import swarm from '../lib/swarm';
 import state from '../state';
 import {Modal} from './Modal';
 
-let updateInfo = ({displayName, twitter, emailHash, avatar}) => {
-  if (twitter) twitter = twitter.trim();
-  if (twitter && !twitter.includes('@')) {
-    twitter = '@' + twitter;
+let updateInfo = info => {
+  if (info.twitter) {
+    let twitter = info.twitter.trim();
+    if (!twitter.includes('@')) twitter = '@' + twitter;
+    info.twitter = twitter;
   }
-  state.set('myInfo', {displayName, twitter, emailHash, avatar});
+  state.set('myInfo', oldInfo => ({...oldInfo, ...info}));
   swarm.hub.broadcast('identity-updates', {});
 };
 
