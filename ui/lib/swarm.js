@@ -300,7 +300,12 @@ function addStreamToPeers(stream, name) {
     log('adding stream to', s(peerId), name);
     peer.streams[name] = stream;
     if (stream) {
-      peer.addStream(stream);
+      try {
+        peer.addStream(stream);
+      } catch (err) {
+        peer.streams[name] = null;
+        throw err;
+      }
     }
   }
 }
