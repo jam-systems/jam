@@ -81,16 +81,6 @@ state.on('room', (room = emptyRoom, oldRoom = emptyRoom) => {
   if (oldSpeakers.includes(myPeerId) && !speakers.includes(myPeerId)) {
     swarm.addLocalStream(null, 'audio');
   }
-
-  // unmute new speakers, mute new audience members
-  if (!state.soundMuted) {
-    speakers.forEach(id => {
-      if (speaker[id]?.muted) speaker[id].muted = false;
-    });
-    for (let id in speaker) {
-      if (!speakers.includes(id)) speaker[id].muted = true;
-    }
-  }
 });
 
 export function sendReaction(reaction) {
@@ -126,11 +116,7 @@ export function createAudioContext() {
   // }
 }
 
-// TODO: detect when you become speaker
-// => need a way to compare old & new State
-// => powered by state.set or a custom updater
 state.on('myAudio', stream => {
-  // if (!stream) return; // TODO ok?
   // if i am speaker, send audio to peers
   let {speakers} = currentRoom();
   if (speakers.includes(swarm.myPeerId)) {
@@ -142,9 +128,8 @@ state.on('myAudio', stream => {
 
 let speaker = {};
 state.on('soundMuted', muted => {
-  let {speakers} = currentRoom();
   for (let id in speaker) {
-    speaker[id].muted = muted || !speakers.includes(id);
+    speaker[id].muted = muted;
   }
 });
 
@@ -168,11 +153,10 @@ swarm.on('stream', (stream, name, peer) => {
     delete speaker[id];
     return;
   }
-  let {speakers} = currentRoom();
   let audio = new Audio();
   speaker[id] = audio;
   audio.srcObject = stream;
-  audio.muted = state.soundMuted || !speakers.includes(id);
+  audio.muted = state.soundMuted;
   audio.addEventListener('canplay', () => {
     play(audio).catch(() => {
       // console.log('deferring audio.play');
