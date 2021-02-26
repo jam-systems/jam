@@ -1,5 +1,5 @@
 import React from 'react';
-import use from '../lib/use-state';
+import {use} from 'use-minimal-state';
 import state from '../state';
 
 export default function Modals() {
@@ -43,9 +43,7 @@ export function Modal({close, children}) {
           e.stopPropagation();
         }}
       >
-        <div
-          className="absolute top-2 right-2"
-        >
+        <div className="absolute top-2 right-2">
           <div
             onClick={close}
             style={{padding: '0.75rem', borderRadius: '50%', cursor: 'pointer'}}

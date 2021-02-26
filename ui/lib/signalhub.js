@@ -31,8 +31,8 @@ export function authenticatedHub({room, url, myPeerId, sign, verify}) {
 
     broadcastAnonymous: (...args) => hub.broadcast(...args),
     subscribeAnonymous: (...args) => hub.subscribe(...args),
-    unsubscribe: hub.unsubscribe,
-    close: hub.close,
+    unsubscribe: (...args) => hub.unsubscribe(...args),
+    close: (...args) => hub.close(...args),
   };
 }
 

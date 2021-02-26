@@ -1,5 +1,5 @@
 import SimplePeer from 'simple-peer-light';
-import State from './minimal-state.js';
+import State from 'use-minimal-state';
 import {authenticatedHub} from './signalhub.js';
 
 const MAX_CONNECT_TIME = 6000;
@@ -59,6 +59,7 @@ function addLocalStream(stream, name, onNewStream) {
     let clonedTracks = stream.getTracks().map(t => t.clone());
     let clonedStream = new MediaStream(clonedTracks);
     // we have to re-add that cloned stream and notify caller
+    swarm.localStreams[name] = clonedStream;
     addStreamToPeers(clonedStream, name);
     onNewStream?.(clonedStream);
   }
@@ -296,7 +297,6 @@ function addStreamToPeers(stream, name) {
         console.warn(err);
       }
     }
-
     log('adding stream to', s(peerId), name);
     peer.streams[name] = stream;
     if (stream) {

@@ -1,16 +1,14 @@
 import {useEffect} from 'react';
-import State from './minimal-state';
-import use from './use-state';
+import State, {use} from 'use-minimal-state';
 
 let state = State({});
 
 export function useLocation() {
   use(state);
   useEffect(() => {
-    window.addEventListener('popstate', () => {
-      state.update();
-    });
-  });
+    window.addEventListener('popstate', state.update);
+    return () => window.removeEventListener('popstate', state.update);
+  }, []);
   return location;
 }
 

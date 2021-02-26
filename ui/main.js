@@ -49,7 +49,7 @@ export function connectRoom(roomId) {
   swarm.connect(`https://${jamHost()}/_/signalhub/`, roomId);
   swarm.hub.subscribe('identity-updates', async ({peerId}) => {
     state.set('identities', {
-      ...state.get('identities'),
+      ...state.identities,
       [peerId]: await get(`/identities/${peerId}`),
     });
   });
