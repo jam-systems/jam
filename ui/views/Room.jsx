@@ -11,8 +11,8 @@ import {signedToken} from '../identity';
 import animateEmoji from '../lib/animate-emoji';
 import {openModal} from './Modal';
 import {EditRoomModal} from './EditRoom';
-import SparkMD5 from 'spark-md5';
 import useWakeLock from '../lib/use-wake-lock';
+import EditIdentity from './EditIdentity';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
@@ -32,21 +32,10 @@ export default function Room({room, roomId}) {
   let micOn = myAudio?.active;
   let hasEnteredRoom = sharedState?.inRoom;
 
-  let [editIdentity, setEditIdentity] = useState(false);
   let [editRole, setEditRole] = useState(null);
   let [showReactions, setShowReactions] = useState(false);
 
   let [showShareInfo, setShowShareInfo] = useState(false);
-
-  let updateInfo = ({displayName, twitter, emailHash, avatar}) => {
-    twitter = twitter.trim();
-    if (twitter && !twitter.includes('@')) {
-      twitter = '@' + twitter;
-    }
-    state.set('myInfo', {displayName, twitter, emailHash, avatar});
-    setEditIdentity(false);
-    swarm.hub.broadcast('identity-updates', {});
-  };
 
   let {name, description, logoURI, color, speakers, moderators} = room || {};
 
@@ -145,7 +134,7 @@ export default function Room({room, roomId}) {
                         className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28 object-cover"
                         alt="me"
                         src={avatarUrl(myInfo)}
-                        onClick={() => setEditIdentity(!editIdentity)}
+                        onClick={() => openModal(EditIdentity, {info: myInfo})}
                       />
 
                       <Reactions
@@ -326,7 +315,7 @@ export default function Room({room, roomId}) {
                     alt={myInfo.displayName}
                     className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50 object-cover"
                     src={avatarUrl(myInfo)}
-                    onClick={() => setEditIdentity(!editIdentity)}
+                    onClick={() => openModal(EditIdentity, {info: myInfo})}
                   />
                   <Reactions
                     reactions={myReactions}
@@ -414,13 +403,6 @@ export default function Room({room, roomId}) {
 
       {/* Navigation */}
       <div className="z-10 navigation bg-white p-4">
-        {editIdentity && (
-          <EditIdentity
-            info={myInfo}
-            onSubmit={updateInfo}
-            onCancel={() => setEditIdentity(false)}
-          />
-        )}
         {editRole && (
           <EditRole
             peerId={editRole}
@@ -645,114 +627,6 @@ function EditRole({
         Cancel
       </button>
       <br />
-      <br />
-      <hr />
-    </div>
-  );
-}
-
-function EditIdentity({info, onSubmit, onCancel}) {
-  let [displayName, setDisplayName] = useState(info?.displayName);
-  let [email, setEmail] = useState(info?.email);
-  let [twitter, setTwitter] = useState(info?.twitter);
-  let emailHash = email ? SparkMD5.hash(email) : info?.emailHash;
-  let submit = e => {
-    let selectedFile = document.querySelector('.edit-profile-file-input')
-      .files[0];
-    if (selectedFile) {
-      console.log('file selected');
-      let reader = new FileReader();
-      reader.readAsDataURL(selectedFile);
-      reader.onloadend = () => {
-        e.preventDefault();
-        let avatar = reader.result;
-        console.log(avatar);
-        onSubmit({displayName, twitter, emailHash, avatar});
-      };
-    }
-    e.preventDefault();
-    onSubmit({displayName, twitter, emailHash});
-  };
-  let cancel = e => {
-    e.preventDefault();
-    onCancel();
-  };
-  return (
-    <div className="child md:p-10">
-      <hr />
-      <br />
-      <h3 className="font-medium">Edit Profile</h3>
-      <br />
-      <form onSubmit={submit}>
-        <input
-          className="rounded placeholder-gray-400 bg-gray-50 w-48"
-          type="text"
-          placeholder="Display name"
-          value={displayName || ''}
-          name="display-name"
-          onChange={e => {
-            setDisplayName(e.target.value);
-          }}
-        />
-        <div className="p-2 text-gray-500 italic">
-          {`What's your name?`}
-          <span className="text-gray-300"> (optional)</span>
-        </div>
-        <br />
-        <input
-          type="file"
-          accept="image/*"
-          className="edit-profile-file-input rounded placeholder-gray-400 bg-gray-50 w-72"
-        />
-        <div className="p-2 text-gray-500 italic">
-          Select your profile picture
-          <span className="text-gray-300"> (optional)</span>
-        </div>
-        <br />
-        <input
-          className="rounded placeholder-gray-400 bg-gray-50 w-48"
-          type="text"
-          placeholder="@twitter"
-          value={twitter || ''}
-          name="twitter"
-          onChange={e => {
-            setTwitter(e.target.value);
-          }}
-        />
-        <div className="p-2 text-gray-500 italic">
-          {`What's your twitter?`}
-          <span className="text-gray-300"> (optional)</span>
-        </div>
-        <br />
-        <input
-          className="rounded placeholder-gray-400 bg-gray-50 w-72"
-          type="email"
-          placeholder="email@example.com"
-          value={email || ''}
-          name="email"
-          onChange={e => {
-            setEmail(e.target.value);
-          }}
-        />
-        <div className="p-2 text-gray-500 italic">
-          {`What's your email?`}
-          <span className="text-gray-300"> (used for Gravatar)</span>
-        </div>
-        <div className="flex">
-          <button
-            onClick={submit}
-            className="flex-grow mt-5 h-12 px-6 text-lg text-white bg-gray-600 rounded-lg focus:shadow-outline active:bg-gray-600 mr-2"
-          >
-            Done
-          </button>
-          <button
-            onClick={cancel}
-            className="flex-none mt-5 h-12 px-6 text-lg text-black bg-gray-100 rounded-lg focus:shadow-outline active:bg-gray-300"
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
       <br />
       <hr />
     </div>
