@@ -21,7 +21,7 @@ follow [Jam on 🐣 Twitter](https://twitter.com/jam_systems)
 
 find [Jam on 😽 Product Hunt](https://www.producthunt.com/posts/jam-d17ff3cc-556c-4c17-8140-5211cb1cd81f)
 
-🗓 join our weekly Jam Jam (a Jam where we jam about Jam) every [Wed @ 7pm UTC / 12pm EST](http://jam.systems/jam-jam-ns4a)
+🗓 join our weekly Jam Jam (a Jam where we jam about Jam) every [Wed @ 7pm UTC / 2pm EST](http://jam.systems/jam-jam-ns4a)
 
 ## Feature Comparison
 
