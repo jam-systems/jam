@@ -681,16 +681,6 @@ function EditIdentity({info, onSubmit, onCancel}) {
       <br />
       <form onSubmit={submit}>
         <input
-          type="file"
-          accept="image/*"
-          className="edit-profile-file-input rounded placeholder-gray-400 bg-gray-50 w-72"
-        />
-        <div className="p-2 text-gray-500 italic">
-          Select your profile picture
-          <span className="text-gray-300"> (optional)</span>
-        </div>
-        <br />
-        <input
           className="rounded placeholder-gray-400 bg-gray-50 w-48"
           type="text"
           placeholder="Display name"
@@ -706,7 +696,17 @@ function EditIdentity({info, onSubmit, onCancel}) {
         </div>
         <br />
         <input
-          className="rounded placeholder-gray-400 bg-gray-50 w-72"
+          type="file"
+          accept="image/*"
+          className="edit-profile-file-input rounded placeholder-gray-400 bg-gray-50 w-72"
+        />
+        <div className="p-2 text-gray-500 italic">
+          Select your profile picture
+          <span className="text-gray-300"> (optional)</span>
+        </div>
+        <br />
+        <input
+          className="rounded placeholder-gray-400 bg-gray-50 w-48"
           type="text"
           placeholder="@twitter"
           value={twitter || ''}
@@ -734,18 +734,20 @@ function EditIdentity({info, onSubmit, onCancel}) {
           {`What's your email?`}
           <span className="text-gray-300"> (used for Gravatar)</span>
         </div>
-        <button
-          onClick={submit}
-          className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
-        >
-          Update Profile
-        </button>
-        <button
-          onClick={cancel}
-          className="mt-5 h-12 px-6 text-lg text-black bg-gray-100 rounded-lg focus:shadow-outline active:bg-gray-300"
-        >
-          Cancel
-        </button>
+        <div className="flex">
+          <button
+            onClick={submit}
+            className="flex-grow mt-5 h-12 px-6 text-lg text-white bg-gray-600 rounded-lg focus:shadow-outline active:bg-gray-600 mr-2"
+          >
+            Done
+          </button>
+          <button
+            onClick={cancel}
+            className="flex-none mt-5 h-12 px-6 text-lg text-black bg-gray-100 rounded-lg focus:shadow-outline active:bg-gray-300"
+          >
+            Cancel
+          </button>
+        </div>
       </form>
       <br />
       <hr />
