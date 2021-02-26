@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useState} from 'react';
-import use from './lib/use-state';
+import {use} from 'use-minimal-state';
 import state from './state.js';
 import {jamHost} from './config';
 // POST https://jam.systems/_/pantry/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}

@@ -1,6 +1,6 @@
 import React, {useEffect, useLayoutEffect, useMemo, useState} from 'react';
 import {leaveRoom, sendReaction, state} from '../main';
-import {useMany} from '../lib/use-state.js';
+import {use} from 'use-minimal-state';
 import swarm from '../lib/swarm.js';
 import EnterRoom from './EnterRoom.jsx';
 import RoomHeader from './RoomHeader.jsx';
@@ -17,22 +17,11 @@ const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
 export default function Room({room, roomId}) {
   // room = {name, description, moderators: [peerId], speakers: [peerId]}
-  let [
-    myInfo,
-    myAudio,
-    micMuted,
-    reactions,
-    identities,
-    speaking,
-  ] = useMany(state, [
-    'myInfo',
-    'myAudio',
-    'micMuted',
-    'reactions',
-    'identities',
-    'speaking',
-  ]);
-  let [peers, peerState, sharedState] = useMany(swarm, [
+  let [myInfo, myAudio, micMuted, reactions, identities, speaking] = use(
+    state,
+    ['myInfo', 'myAudio', 'micMuted', 'reactions', 'identities', 'speaking']
+  );
+  let [peers, peerState, sharedState] = use(swarm, [
     'stickyPeers',
     'peerState',
     'sharedState',

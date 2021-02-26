@@ -6,12 +6,12 @@
     "build": "esbuild --bundle ./App.jsx --outfile=./bundle.js --format=esm --target=es6 --define:process.env.NODE_ENV='\"development\"'"
   },
   "devDependencies": {
+    "ejs": "^3.1.6",
     "esbuild": "^0.8.41",
     "eslint": "^7.19.0",
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0",
     "express": "^4.17.1",
-    "ejs": "^3.1.6",
     "node-fetch": "^2.6.1",
     "serve": "^11.3.2"
   },
@@ -26,6 +26,7 @@
     "simple-peer-light": "^1.0.0",
     "slugify": "^1.4.6",
     "spark-md5": "^3.0.1",
-    "tweetnacl": "^1.0.3"
+    "tweetnacl": "^1.0.3",
+    "use-minimal-state": "^2.1.0"
   }
 }

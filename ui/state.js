@@ -1,4 +1,4 @@
-import State from './lib/minimal-state.js';
+import State from 'use-minimal-state';
 const state = State({
   room: {name: '', description: '', speakers: [], moderators: []},
   myInfo: {},
