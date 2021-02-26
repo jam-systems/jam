@@ -47,6 +47,8 @@ function config({url, room, myPeerId, sign, verify, pcConfig, debug}) {
 
 // TODO FIXME: the fact that this function can CHANGE the stream that's given to it
 // is an awful hack that destroys the intended encapsulation of this module
+// for reference: https://github.com/feross/simple-peer/issues/606
+// should be possible with cloning + (replaceTrack or addTrack, depending on whether a track exists)
 function addLocalStream(stream, name, onNewStream) {
   log('addlocalstream', stream, name);
   if (!name) name = randomHex4();
@@ -300,7 +302,12 @@ function addStreamToPeers(stream, name) {
     log('adding stream to', s(peerId), name);
     peer.streams[name] = stream;
     if (stream) {
-      peer.addStream(stream);
+      try {
+        peer.addStream(stream);
+      } catch (err) {
+        peer.streams[name] = null;
+        throw err;
+      }
     }
   }
 }

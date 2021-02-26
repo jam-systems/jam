@@ -11,12 +11,14 @@ import {signedToken} from '../identity';
 import animateEmoji from '../lib/animate-emoji';
 import {openModal} from './Modal';
 import {EditRoomModal} from './EditRoom';
-import SparkMD5 from 'spark-md5';
+import useWakeLock from '../lib/use-wake-lock';
+import EditIdentity from './EditIdentity';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
 export default function Room({room, roomId}) {
   // room = {name, description, moderators: [peerId], speakers: [peerId]}
+  useWakeLock();
   let [myInfo, myAudio, micMuted, reactions, identities, speaking] = use(
     state,
     ['myInfo', 'myAudio', 'micMuted', 'reactions', 'identities', 'speaking']
@@ -30,24 +32,17 @@ export default function Room({room, roomId}) {
   let micOn = myAudio?.active;
   let hasEnteredRoom = sharedState?.inRoom;
 
-  let [editIdentity, setEditIdentity] = useState(false);
   let [editRole, setEditRole] = useState(null);
   let [showReactions, setShowReactions] = useState(false);
 
   let [showShareInfo, setShowShareInfo] = useState(false);
-
-  let updateInfo = ({displayName, emailHash, avatar}) => {
-    state.set('myInfo', {displayName, emailHash, avatar});
-    setEditIdentity(false);
-    swarm.hub.broadcast('identity-updates', {});
-  };
 
   let {name, description, logoURI, color, speakers, moderators} = room || {};
 
   let isColorDark = useMemo(() => isDark(color), [color]);
 
   useLayoutEffect(() => {
-    if (color && color !== '#FDE68A') {
+    if (color && color !== '#4B5563') {
       document.body.style.backgroundColor = hexToRGB(color, '0.123');
     }
   }, [color]);
@@ -124,9 +119,8 @@ export default function Room({room, roomId}) {
             <ol className="flex flex-wrap pt-6">
               {iSpeak && (
                 <li
-                  className="relative items-center space-y-1 mt-4"
+                  className="relative items-center space-y-1 mt-4 ml-2 mr-2"
                   style={{cursor: 'pointer'}}
-                  onClick={() => setEditIdentity(!editIdentity)}
                 >
                   <div
                     className={
@@ -140,6 +134,7 @@ export default function Room({room, roomId}) {
                         className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28 object-cover"
                         alt="me"
                         src={avatarUrl(myInfo)}
+                        onClick={() => openModal(EditIdentity, {info: myInfo})}
                       />
 
                       <Reactions
@@ -153,30 +148,53 @@ export default function Room({room, roomId}) {
                       🙊
                     </div>
                   </div>
-                  <div className="font-medium w-20 md:w-28 m-2">
+                  <div className="w-20 md:w-28 m-2">
                     <div className="flex">
-                      <div
-                        style={{lineHeight: '30px', marginTop: '4px'}}
-                        className={
-                          iModerate
-                            ? 'flex-none block bg-gray-600 text-white w-5 h-5 rounded-full'
-                            : 'hidden'
-                        }
-                      >
-                        <svg
-                          className="m-1 w-3 h-3"
-                          x="0px"
-                          y="0px"
-                          viewBox="0 0 1000 1000"
-                          enableBackground="new 0 0 1000 1000"
-                          fill="currentColor"
-                          xmlns="http://www.w3.org/2000/svg"
+                      <div className="flex-none text-center pl-1 w-20 md:w-28">
+                        <span className="text-sm md:text-base whitespace-nowrap w-22 md:w-30 text-black font-medium">
+                          <span
+                            style={{margin: '0 3px 0 -4px'}}
+                            className={
+                              iModerate
+                                ? 'flex-none inline-block leading-3 bg-gray-600 text-white w-3 h-3 rounded-full -ml-3'
+                                : 'hidden'
+                            }
+                          >
+                            <svg
+                              className="inline-block w-2 h-2"
+                              style={{margin: '-3px 0 0 0'}}
+                              x="0px"
+                              y="0px"
+                              viewBox="0 0 1000 1000"
+                              enableBackground="new 0 0 1000 1000"
+                              fill="currentColor"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path d="M894.5,633.4L663.3,500l231.1-133.4c39.1-22.6,52.4-72.5,29.9-111.6c-22.6-39.1-72.5-52.4-111.6-29.9L581.7,358.5V91.7c0-45.1-36.6-81.7-81.7-81.7c-45.1,0-81.7,36.6-81.7,81.7v266.9L187.2,225.1c-39.1-22.6-89-9.2-111.6,29.9c-22.6,39.1-9.2,89,29.9,111.6L336.7,500L105.5,633.4C66.5,656,53.1,705.9,75.6,745c22.6,39.1,72.5,52.4,111.6,29.9l231.1-133.4v266.9c0,45.1,36.6,81.7,81.7,81.7c45.1,0,81.7-36.6,81.7-81.7V641.5l231.1,133.4c39.1,22.6,89,9.2,111.6-29.9C946.9,705.9,933.5,656,894.5,633.4z" />
+                            </svg>
+                          </span>
+                          {myInfo.displayName.substring(0, 12)}
+                        </span>
+                        {/* twitter */}
+                        <div
+                          className={myInfo.twitter ? 'text-center' : 'hidden'}
                         >
-                          <path d="M894.5,633.4L663.3,500l231.1-133.4c39.1-22.6,52.4-72.5,29.9-111.6c-22.6-39.1-72.5-52.4-111.6-29.9L581.7,358.5V91.7c0-45.1-36.6-81.7-81.7-81.7c-45.1,0-81.7,36.6-81.7,81.7v266.9L187.2,225.1c-39.1-22.6-89-9.2-111.6,29.9c-22.6,39.1-9.2,89,29.9,111.6L336.7,500L105.5,633.4C66.5,656,53.1,705.9,75.6,745c22.6,39.1,72.5,52.4,111.6,29.9l231.1-133.4v266.9c0,45.1,36.6,81.7,81.7,81.7c45.1,0,81.7-36.6,81.7-81.7V641.5l231.1,133.4c39.1,22.6,89,9.2,111.6-29.9C946.9,705.9,933.5,656,894.5,633.4z" />
-                        </svg>
-                      </div>
-                      <div className="flex-none pl-1 overflow-ellipsis w-20 md:w-28">
-                        {myInfo.displayName}
+                          <span className="text-sm">
+                            <span className="text-gray-800">@</span>
+                            <a
+                              className="text-gray-500 font-medium ml-1"
+                              style={{
+                                textDecoration: 'none',
+                                fontWeight: 'normal',
+                              }}
+                              href={'https://twitter.com/' + myInfo.twitter}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              {myInfo.twitter?.substring(1)}
+                            </a>
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -190,12 +208,9 @@ export default function Room({room, roomId}) {
                   inRoom && (
                     <li
                       key={peerId}
-                      className="relative items-center space-y-1 mt-4"
+                      className="relative items-center space-y-1 mt-4 ml-2 mr-2"
                       title={peerInfo.displayName}
                       style={iModerate ? {cursor: 'pointer'} : undefined}
-                      onClick={
-                        iModerate ? () => setEditRole(peerId) : undefined
-                      }
                     >
                       <div
                         className={
@@ -209,6 +224,9 @@ export default function Room({room, roomId}) {
                             className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28 object-cover"
                             alt={peerInfo.displayName}
                             src={avatarUrl(peerInfo)}
+                            onClick={
+                              iModerate ? () => setEditRole(peerId) : undefined
+                            }
                           />
                           <Reactions
                             reactions={reactions_}
@@ -224,28 +242,55 @@ export default function Room({room, roomId}) {
                       </div>
                       <div className="font-medium w-20 md:w-28 m-2">
                         <div className="flex">
-                          <div
-                            style={{lineHeight: '30px', marginTop: '4px'}}
-                            className={
-                              moderators.includes(peerId)
-                                ? 'flex-none block bg-gray-600 text-white w-5 h-5 rounded-full'
-                                : 'hidden'
-                            }
-                          >
-                            <svg
-                              className="m-1 w-3 h-3"
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 1000 1000"
-                              enableBackground="new 0 0 1000 1000"
-                              fill="currentColor"
-                              xmlns="http://www.w3.org/2000/svg"
+                          <div className="flex-none text-center pl-1 w-20 md:w-28">
+                            <span className="text-sm md:text-base whitespace-nowrap w-22 md:w-30 text-black font-medium">
+                              <span
+                                style={{margin: '0 3px 0 -4px'}}
+                                className={
+                                  moderators.includes(peerId)
+                                    ? 'flex-none inline-block leading-3 bg-gray-600 text-white w-3 h-3 rounded-full -ml-3'
+                                    : 'hidden'
+                                }
+                              >
+                                <svg
+                                  className="inline-block w-2 h-2"
+                                  style={{margin: '-3px 0 0 0'}}
+                                  x="0px"
+                                  y="0px"
+                                  viewBox="0 0 1000 1000"
+                                  enableBackground="new 0 0 1000 1000"
+                                  fill="currentColor"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path d="M894.5,633.4L663.3,500l231.1-133.4c39.1-22.6,52.4-72.5,29.9-111.6c-22.6-39.1-72.5-52.4-111.6-29.9L581.7,358.5V91.7c0-45.1-36.6-81.7-81.7-81.7c-45.1,0-81.7,36.6-81.7,81.7v266.9L187.2,225.1c-39.1-22.6-89-9.2-111.6,29.9c-22.6,39.1-9.2,89,29.9,111.6L336.7,500L105.5,633.4C66.5,656,53.1,705.9,75.6,745c22.6,39.1,72.5,52.4,111.6,29.9l231.1-133.4v266.9c0,45.1,36.6,81.7,81.7,81.7c45.1,0,81.7-36.6,81.7-81.7V641.5l231.1,133.4c39.1,22.6,89,9.2,111.6-29.9C946.9,705.9,933.5,656,894.5,633.4z" />
+                                </svg>
+                              </span>
+                              {peerInfo.displayName.substring(0, 12)}
+                            </span>
+                            {/* twitter */}
+                            <div
+                              className={
+                                peerInfo.twitter ? 'text-center' : 'hidden'
+                              }
                             >
-                              <path d="M894.5,633.4L663.3,500l231.1-133.4c39.1-22.6,52.4-72.5,29.9-111.6c-22.6-39.1-72.5-52.4-111.6-29.9L581.7,358.5V91.7c0-45.1-36.6-81.7-81.7-81.7c-45.1,0-81.7,36.6-81.7,81.7v266.9L187.2,225.1c-39.1-22.6-89-9.2-111.6,29.9c-22.6,39.1-9.2,89,29.9,111.6L336.7,500L105.5,633.4C66.5,656,53.1,705.9,75.6,745c22.6,39.1,72.5,52.4,111.6,29.9l231.1-133.4v266.9c0,45.1,36.6,81.7,81.7,81.7c45.1,0,81.7-36.6,81.7-81.7V641.5l231.1,133.4c39.1,22.6,89,9.2,111.6-29.9C946.9,705.9,933.5,656,894.5,633.4z" />
-                            </svg>
-                          </div>
-                          <div className="flex-none pl-1 overflow-ellipsis w-20 md:w-28">
-                            {peerInfo.displayName}
+                              <span className="text-sm">
+                                <span className="text-gray-800">@</span>
+                                <a
+                                  className="text-gray-500 font-medium ml-1"
+                                  style={{
+                                    textDecoration: 'none',
+                                    fontWeight: 'normal',
+                                  }}
+                                  href={
+                                    'https://twitter.com/' + peerInfo.twitter
+                                  }
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  {peerInfo.twitter?.substring(1)}
+                                </a>
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -264,20 +309,37 @@ export default function Room({room, roomId}) {
               <li
                 className="flex-none m-2 w-16 h-32 md:w-24 md:h-36 text-xs"
                 style={{cursor: 'pointer'}}
-                onClick={() => setEditIdentity(!editIdentity)}
               >
                 <div className="relative flex justify-center">
                   <img
                     alt={myInfo.displayName}
                     className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50 object-cover"
                     src={avatarUrl(myInfo)}
+                    onClick={() => openModal(EditIdentity, {info: myInfo})}
                   />
                   <Reactions
                     reactions={myReactions}
                     className="absolute bg-white text-4xl md:text-6xl pt-3 md:pt-4 human-radius w-16 h-16 md:w-24 md:h-24 border text-center"
                   />
                 </div>
-                <div className="text-center mt-2">{myInfo.displayName}</div>
+                <div className="overflow-hidden whitespace-nowrap text-center mt-2">
+                  {myInfo.displayName}
+                </div>
+                {/* twitter */}
+                <div className={myInfo.twitter ? 'text-center mt-1' : 'hidden'}>
+                  <span className="text-xs">
+                    <span className="text-gray-800">@</span>
+                    <a
+                      className="text-gray-500 font-medium ml-1"
+                      style={{textDecoration: 'none', fontWeight: 'normal'}}
+                      href={'https://twitter.com/' + myInfo.twitter}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {myInfo.twitter?.substring(1)}
+                    </a>
+                  </span>
+                </div>
               </li>
             )}
             {audiencePeers.map(peerId => {
@@ -291,21 +353,42 @@ export default function Room({room, roomId}) {
                     title={peerInfo.displayName}
                     className="flex-none m-2 w-16 h-32 md:w-24 md:h-36 text-xs"
                     style={iModerate ? {cursor: 'pointer'} : undefined}
-                    onClick={iModerate ? () => setEditRole(peerId) : undefined}
                   >
                     <div className="relative flex justify-center">
                       <img
                         className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50 object-cover"
                         alt={peerInfo.displayName}
                         src={avatarUrl(peerInfo)}
+                        onClick={
+                          iModerate ? () => setEditRole(peerId) : undefined
+                        }
                       />
                       <Reactions
                         reactions={reactions_}
                         className="absolute bg-white text-4xl md:text-6xl pt-3 md:pt-4 human-radius w-16 h-16 md:w-24 md:h-24 border text-center"
                       />
                     </div>
-                    <div className="text-center mt-2">
+                    <div className="overflow-hidden whitespace-nowrap text-center mt-2">
                       {peerInfo.displayName}
+                    </div>
+                    {/* twitter */}
+                    <div
+                      className={
+                        peerInfo.twitter ? 'text-center mt-1' : 'hidden'
+                      }
+                    >
+                      <span className="text-xs">
+                        <span className="text-gray-800">@</span>
+                        <a
+                          className="text-gray-500 font-medium ml-1"
+                          style={{textDecoration: 'none', fontWeight: 'normal'}}
+                          href={'https://twitter.com/' + peerInfo.twitter}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {peerInfo.twitter?.substring(1)}
+                        </a>
+                      </span>
                     </div>
                   </li>
                 )
@@ -320,13 +403,6 @@ export default function Room({room, roomId}) {
 
       {/* Navigation */}
       <div className="z-10 navigation bg-white p-4">
-        {editIdentity && (
-          <EditIdentity
-            info={myInfo}
-            onSubmit={updateInfo}
-            onCancel={() => setEditIdentity(false)}
-          />
-        )}
         {editRole && (
           <EditRole
             peerId={editRole}
@@ -342,9 +418,9 @@ export default function Room({room, roomId}) {
           <div className="flex">
             <button
               onClick={() => state.set('micMuted', !micMuted)}
-              className="select-none h-12 mt-4 px-6 text-lg text-black bg-yellow-200 rounded-lg focus:shadow-outline active:bg-yellow-300 w-screen"
+              className="select-none h-12 mt-4 px-6 text-lg text-white bg-gray-600 rounded-lg focus:outline-none active:bg-gray-600 w-screen"
               style={{
-                backgroundColor: color || '#FDE68A',
+                backgroundColor: color || '#4B5563',
                 color: isColorDark ? 'white' : 'black',
               }}
             >
@@ -551,96 +627,6 @@ function EditRole({
         Cancel
       </button>
       <br />
-      <br />
-      <hr />
-    </div>
-  );
-}
-
-function EditIdentity({info, onSubmit, onCancel}) {
-  let [displayName, setDisplayName] = useState(info?.displayName);
-  let [email, setEmail] = useState(info?.email);
-  let emailHash = email ? SparkMD5.hash(email) : info?.emailHash;
-  let submit = e => {
-    let selectedFile = document.querySelector('.edit-profile-file-input')
-      .files[0];
-    if (selectedFile) {
-      console.log('file selected');
-      let reader = new FileReader();
-      reader.readAsDataURL(selectedFile);
-      reader.onloadend = () => {
-        e.preventDefault();
-        let avatar = reader.result;
-        console.log(avatar);
-        onSubmit({displayName, emailHash, avatar});
-      };
-    }
-    e.preventDefault();
-    onSubmit({displayName, emailHash});
-  };
-  let cancel = e => {
-    e.preventDefault();
-    onCancel();
-  };
-  return (
-    <div className="child md:p-10">
-      <hr />
-      <br />
-      <h3 className="font-medium">Edit Profile</h3>
-      <br />
-      <form onSubmit={submit}>
-        <input
-          type="file"
-          accept="image/*"
-          className="edit-profile-file-input rounded placeholder-gray-400 bg-gray-50 w-72"
-        />
-        <div className="p-2 text-gray-500 italic">
-          Select your profile picture
-          <span className="text-gray-300"> (optional)</span>
-        </div>
-        <br />
-        <input
-          className="rounded placeholder-gray-400 bg-gray-50 w-48"
-          type="text"
-          placeholder="Display name"
-          value={displayName || ''}
-          name="display-name"
-          onChange={e => {
-            setDisplayName(e.target.value);
-          }}
-        />
-        <div className="p-2 text-gray-500 italic">
-          {`What's your name?`}
-          <span className="text-gray-300"> (optional)</span>
-        </div>
-        <br />
-        <input
-          className="rounded placeholder-gray-400 bg-gray-50 w-72"
-          type="email"
-          placeholder="email@example.com"
-          value={email || ''}
-          name="email"
-          onChange={e => {
-            setEmail(e.target.value);
-          }}
-        />
-        <div className="p-2 text-gray-500 italic">
-          {`What's your email?`}
-          <span className="text-gray-300"> (used for Gravatar)</span>
-        </div>
-        <button
-          onClick={submit}
-          className="mt-5 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
-        >
-          Update Profile
-        </button>
-        <button
-          onClick={cancel}
-          className="mt-5 h-12 px-6 text-lg text-black bg-gray-100 rounded-lg focus:shadow-outline active:bg-gray-300"
-        >
-          Cancel
-        </button>
-      </form>
       <br />
       <hr />
     </div>
