@@ -3,7 +3,7 @@ import hark from 'hark';
 import {forwardApiQuery, get, updateApiQuery} from './backend';
 import {signData, updateInfo, verifyData} from './identity';
 import state from './state.js';
-import {jamHost} from './config';
+import {DEV, jamHost} from './config';
 
 window.state = state; // for debugging
 window.swarm = swarm;
@@ -13,6 +13,7 @@ export {state};
 state.on('myInfo', updateInfo);
 
 swarm.config({
+  debug: DEV,
   sign: signData,
   verify: verifyData,
   pcConfig: {
@@ -71,14 +72,17 @@ state.on('room', (room = emptyRoom, oldRoom = emptyRoom) => {
   // detect when I become speaker & send audio stream
   let {myPeerId} = swarm;
   if (!oldSpeakers.includes(myPeerId) && speakers.includes(myPeerId)) {
-    if (state.myAudio) {
-      swarm.addLocalStream(state.myAudio, 'audio', stream =>
-        state.set('myAudio', stream)
+    let {myAudio} = state;
+    if (myAudio) {
+      connectVolumeMeter('me', myAudio);
+      swarm.addLocalStream(myAudio, 'audio', myAudio =>
+        state.set('myAudio', myAudio)
       );
     }
   }
   // or stop sending stream when I become audience member
   if (oldSpeakers.includes(myPeerId) && !speakers.includes(myPeerId)) {
+    disconnectVolumeMeter('me');
     swarm.addLocalStream(null, 'audio');
   }
 });
@@ -90,21 +94,19 @@ export function sendReaction(reaction) {
 swarm.on('peerEvent', (peerId, data) => {
   if (peerId === swarm.myPeerId) return;
   let {reaction} = data;
-  showReaction(reaction, peerId);
+  if (reaction) showReaction(reaction, peerId);
 });
 function showReaction(reaction, peerId) {
   let {reactions} = state;
-  if (reaction) {
-    if (!reactions[peerId]) reactions[peerId] = [];
-    let reactionObj = [reaction, Math.random()];
-    reactions[peerId].push(reactionObj);
+  if (!reactions[peerId]) reactions[peerId] = [];
+  let reactionObj = [reaction, Math.random()];
+  reactions[peerId].push(reactionObj);
+  state.update('reactions');
+  setTimeout(() => {
+    let i = reactions[peerId].indexOf(reactionObj);
+    if (i !== -1) reactions[peerId].splice(i, 1);
     state.update('reactions');
-    setTimeout(() => {
-      let i = reactions[peerId].indexOf(reactionObj);
-      if (i !== -1) reactions[peerId].splice(i, 1);
-      state.update('reactions');
-    }, 5000);
-  }
+  }, 5000);
 }
 
 export function createAudioContext() {
@@ -116,12 +118,13 @@ export function createAudioContext() {
   // }
 }
 
-state.on('myAudio', stream => {
+state.on('myAudio', myAudio => {
   // if i am speaker, send audio to peers
   let {speakers} = currentRoom();
   if (speakers.includes(swarm.myPeerId)) {
-    swarm.addLocalStream(stream, 'audio', stream =>
-      state.set('myAudio', stream)
+    connectVolumeMeter('me', myAudio);
+    swarm.addLocalStream(myAudio, 'audio', myAudio =>
+      state.set('myAudio', myAudio)
     );
   }
 });
@@ -170,7 +173,7 @@ swarm.on('stream', (stream, name, peer) => {
       });
     });
   });
-  listenIfSpeaking(id, stream);
+  connectVolumeMeter(id, stream);
 });
 
 // TODO: this did not fix iOS speaker consistency
@@ -197,7 +200,6 @@ async function requestAudio() {
   if (!stream) return;
   state.set('myAudio', stream);
   state.set('micMuted', false);
-  listenIfSpeaking('me', stream);
   return stream;
 }
 
@@ -222,26 +224,40 @@ state.on('micMuted', micMuted => {
   swarm.set('sharedState', state => ({...state, micMuted}));
 });
 
-function listenIfSpeaking(peerId, stream) {
+let volumeMeters = {};
+function connectVolumeMeter(peerId, stream) {
+  if (!stream) {
+    disconnectVolumeMeter(peerId);
+    return;
+  }
   if (!state.audioContext) {
     // if no audio context exists yet, retry as soon as it is available
     let onAudioContext = () => {
-      listenIfSpeaking(peerId, stream);
+      connectVolumeMeter(peerId, stream);
       state.off('audioContext', onAudioContext);
     };
     state.on('audioContext', onAudioContext);
     return;
   }
   let options = {audioContext: state.audioContext};
-  let speechEvents = hark(stream, options);
+  let volumeMeter = hark(stream, options);
 
-  speechEvents.on('speaking', () => {
+  volumeMeter.on('speaking', () => {
     state.speaking.add(peerId);
     state.update('speaking');
   });
 
-  speechEvents.on('stopped_speaking', () => {
+  volumeMeter.on('stopped_speaking', () => {
     state.speaking.delete(peerId);
     state.update('speaking');
   });
+
+  disconnectVolumeMeter(peerId);
+  volumeMeters[peerId] = volumeMeter;
+}
+
+function disconnectVolumeMeter(peerId) {
+  let volumeMeter = volumeMeters[peerId];
+  if (volumeMeter) volumeMeter.stop();
+  volumeMeters[peerId] = null;
 }
