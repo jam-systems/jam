@@ -3,6 +3,8 @@ const cors = require('cors');
 const logger = require('morgan');
 const nacl = require('tweetnacl');
 const base64 = require('compact-base64');
+const nets = require("nets");
+const { promisify } = require('util')
 
 const indexRouter = require('./routes/index');
 const metricsRouter = require('./routes/metrics');
@@ -61,12 +63,47 @@ const roomAuthenticator = {
 
 const identityAuthenticator = {
     ...permitAllAuthenticator,
-    canPut: (req, res, next) => {
+    canPut: async (req, res, next) => {
+        console.log('in canPut');
+
         const authHeader = req.header("Authorization");
         if(authHeader) {
             const token = authHeader.substring(6);
             if(verify(token, req.params.id)) {
-                next();
+                console.log('in verify');
+
+                if (req.body.tweet) {
+                    console.log('in tweet');
+
+                    let twitter = req.body.twitter;
+                    let tweet = req.body.tweet
+
+                    // only store tweet if it is verifiable
+                    if (tweet.startsWith("https://twitter.com/" + twitter.substring(1) + "/status/")) {
+                        console.log("tweet start ok");
+
+                        let tweetResponse = await promisify(nets)({
+                            url: tweet,
+                            method: "GET",
+                            headers: {
+                            "User-Agent": "WhatsApp/2"
+                            }
+                        });
+
+                        if (tweetResponse.body.includes(req.params.id)) {
+                            console.log("verified");
+                            next();
+                        } else {
+                            console.log("NOT verified");
+                            res.sendStatus(400);
+                        }
+                    } else {
+                        console.log("tweet start not ok");
+                        res.sendStatus(400);
+                    }
+                } else {
+                    next();
+                }
             } else {
                 res.sendStatus(403);
             }
