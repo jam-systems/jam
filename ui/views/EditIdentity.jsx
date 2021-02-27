@@ -70,7 +70,7 @@ export default function EditIdentity({close, info, id}) {
           className="edit-profile-file-input rounded placeholder-gray-400 bg-gray-50 w-72"
         />
         <div className="p-2 text-gray-500 italic">
-          Select your profile picture
+          Set your profile picture
           <span className="text-gray-300"> (optional)</span>
         </div>
         <br />
