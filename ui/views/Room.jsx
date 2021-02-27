@@ -134,7 +134,7 @@ export default function Room({room, roomId}) {
                         className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28 object-cover"
                         alt="me"
                         src={avatarUrl(myInfo)}
-                        onClick={() => openModal(EditIdentity, {info: myInfo})}
+                        onClick={() => openModal(EditIdentity, {info: myInfo, id: myPeerId})}
                       />
 
                       <Reactions
