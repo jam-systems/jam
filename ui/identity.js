@@ -1,7 +1,7 @@
 import nacl from 'tweetnacl';
 import base64 from 'compact-base64';
 import {adjectives, nouns} from './lib/names';
-import {post, put} from './backend';
+import {post, put, get} from './backend';
 
 function decode(base64String) {
   return Uint8Array.from(base64.decodeUrl(base64String, 'binary'));
@@ -61,6 +61,13 @@ export function getInfo() {
     ...info,
     id: getId(),
   };
+}
+
+export async function getInfoServer() {
+  const identity = JSON.parse(localStorage.identity);
+  return await get(
+    `/identities/${identity.keyPair.publicKey}`
+  );
 }
 
 export async function updateInfo(info) {
