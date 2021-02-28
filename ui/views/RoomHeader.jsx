@@ -8,7 +8,7 @@ function customUriTransformer(uri) {
 
 export default function RoomHeader({name, description, logoURI, buttonURI, buttonText, editRoom}) {
   return (
-    <div className="flex">
+    <div className="flex room-header">
       {logoURI && (
         <div className="flex-none">
           <img
