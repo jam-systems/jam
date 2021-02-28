@@ -127,6 +127,14 @@ body {
   text-decoration: underline;
 }
 
+.room-header a[href^='https://instagram.com'] {
+  background-image: url('/img/bazaar/instagram-logo.svg');
+  background-repeat: no-repeat;
+  background-size: 18px;
+  padding-left: 23px;
+  text-decoration: underline;
+}
+
 .room-header .call-to-action a {
   background-repeat: no-repeat;
   background-size: 18px;
@@ -206,6 +214,13 @@ body {
 .room-header .call-to-action a[href^='https://youtube.com']
 {
   background-image: url('/img/bazaar/youtube-logo.svg');
+  background-position: 20px 50%;
+  padding-left: 48px;
+}
+
+.room-header .call-to-action a[href^='https://instagram.com']
+{
+  background-image: url('/img/bazaar/instagram-logo.svg');
   background-position: 20px 50%;
   padding-left: 48px;
 }
