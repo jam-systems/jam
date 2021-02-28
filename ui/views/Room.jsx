@@ -37,7 +37,7 @@ export default function Room({room, roomId}) {
 
   let [showShareInfo, setShowShareInfo] = useState(false);
 
-  let {name, description, logoURI, color, speakers, moderators} = room || {};
+  let {name, description, logoURI, buttonURI, buttonText, color, speakers, moderators} = room || {};
 
   let isColorDark = useMemo(() => isDark(color), [color]);
 
@@ -106,7 +106,7 @@ export default function Room({room, roomId}) {
         style={{flex: '1', overflowY: 'auto', minHeight: '0'}}
       >
         <RoomHeader
-          {...{name, description, logoURI}}
+          {...{name, description, logoURI, buttonURI, buttonText}}
           editRoom={
             iModerate && (() => openModal(EditRoomModal, {roomId, room}))
           }

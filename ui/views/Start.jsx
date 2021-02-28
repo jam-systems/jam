@@ -11,6 +11,8 @@ export default function Start({urlRoomId}) {
   let [description, setDescription] = useState('');
   let [color, setColor] = useState('#4B5563');
   let [logoURI, setLogoURI] = useState('');
+  let [buttonText, setButtonText] = useState('');
+  let [buttonURI, setButtonURI] = useState('');
 
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -115,6 +117,40 @@ export default function Start({urlRoomId}) {
             ></input>
             <div className="p-2 text-gray-500 italic">
               Set primary color for your Room.{' '}
+              <span className="text-gray-400">(optional)</span>
+            </div>
+
+            <br/>
+            <input
+              className="rounded placeholder-gray-400 bg-gray-50 w-full md:w-full"
+              type="text"
+              placeholder="Button URI"
+              value={buttonURI}
+              name="jam-room-button-uri"
+              autoComplete="off"
+              onChange={e => {
+                setButtonURI(e.target.value);
+              }}
+            ></input>
+            <div className="p-2 text-gray-500 italic">
+              Set the link for the 'call to action' button.{' '}
+              <span className="text-gray-400">(optional)</span>
+            </div>
+
+            <br/>
+            <input
+              className="rounded placeholder-gray-400 bg-gray-50 w-full md:w-96"
+              type="text"
+              placeholder="Button Text"
+              value={buttonText}
+              name="jam-room-button-text"
+              autoComplete="off"
+              onChange={e => {
+                setButtonText(e.target.value);
+              }}
+            ></input>
+            <div className="p-2 text-gray-500 italic">
+              Set the text for the 'call to action' button.{' '}
               <span className="text-gray-400">(optional)</span>
             </div>
           </div>
