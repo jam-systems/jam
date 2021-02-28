@@ -442,11 +442,11 @@ export default function Room({room, roomId}) {
           </button> */}
           <button
             onClick={() => setShowReactions(s => !s)}
-            className="select-none text-center h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
+            className="flex-grow select-none text-center h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
           >
             {/* heroicons/emoji-happy */}
             <svg
-              className="text-gray-600 w-6 h-6"
+              className="text-gray-600 w-6 h-6 inline-block"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -518,7 +518,7 @@ export default function Room({room, roomId}) {
 
           {/* Leave */}
           <button
-            className="ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow"
+            className="flex-shrink ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
             onClick={() => leaveRoom(roomId)}
           >
             🖖🏽&nbsp;Leave
