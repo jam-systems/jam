@@ -7,14 +7,14 @@ import EnterRoom from './EnterRoom.jsx';
 import RoomHeader from './RoomHeader.jsx';
 import {avatarUrl} from '../lib/avatar';
 import copyToClipboard from '../lib/copy-to-clipboard';
-import {put} from '../logic/backend';
-import identity, {signedToken} from '../logic/identity';
+import identity from '../logic/identity';
 import animateEmoji from '../lib/animate-emoji';
 import {openModal} from './Modal';
 import {EditRoomModal} from './EditRoom';
 import useWakeLock from '../lib/use-wake-lock';
 import EditIdentity from './EditIdentity';
 import {sendReaction} from '../logic/reactions';
+import EditRole from './EditRole';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
@@ -22,12 +22,22 @@ export default function Room({room, roomId}) {
   // room = {name, description, moderators: [peerId], speakers: [peerId]}
   useWakeLock();
   let myInfo = use(identity, 'info');
-  let [myAudio, micMuted, reactions, identities, speaking] = use(state, [
+  let [
+    myAudio,
+    micMuted,
+    reactions,
+    identities,
+    speaking,
+    iSpeak,
+    iModerate,
+  ] = use(state, [
     'myAudio',
     'micMuted',
     'reactions',
     'identities',
     'speaking',
+    'iAmSpeaker',
+    'iAmModerator',
   ]);
   let [peers, peerState, sharedState] = use(swarm, [
     'stickyPeers',
@@ -62,39 +72,10 @@ export default function Room({room, roomId}) {
     }
   }, [color]);
 
-  let {myPeerId} = swarm;
-
   let stagePeers = (speakers || []).filter(id => id in peers);
   let audiencePeers = Object.keys(peers || {}).filter(
     id => !stagePeers.includes(id)
   );
-
-  let iSpeak = (speakers || []).includes(myPeerId);
-  let iModerate = (moderators || []).includes(myPeerId);
-
-  let addRole = async (id, role) => {
-    if (!room) return;
-    if (!moderators.includes(swarm.myPeerId)) return;
-    if (role !== 'speakers' && role !== 'moderators') return;
-    let existing = role === 'speakers' ? speakers : moderators;
-    if (existing.includes(id)) return;
-    console.log('adding to', role, id);
-    let newRoom = {...room, [role]: [...existing, id]};
-    await put(signedToken(), `/rooms/${roomId}`, newRoom);
-    setEditRole(null);
-  };
-
-  let removeRole = async (id, role) => {
-    if (!room) return;
-    if (!moderators.includes(swarm.myPeerId)) return;
-    if (role !== 'speakers' && role !== 'moderators') return;
-    let existing = role === 'speakers' ? speakers : moderators;
-    if (!existing.includes(id)) return;
-    console.log('removing from', role, id);
-    let newRoom = {...room, [role]: existing.filter(id_ => id_ !== id)};
-    await put(signedToken(), `/rooms/${roomId}`, newRoom);
-    setEditRole(null);
-  };
 
   if (!hasEnteredRoom)
     return (
@@ -106,7 +87,7 @@ export default function Room({room, roomId}) {
       />
     );
 
-  let myReactions = reactions[myPeerId];
+  let myReactions = reactions[identity.publicKey];
 
   return (
     <div
@@ -421,8 +402,6 @@ export default function Room({room, roomId}) {
         {editRole && (
           <EditRole
             peerId={editRole}
-            addRole={addRole}
-            removeRole={removeRole}
             speakers={speakers}
             moderators={moderators}
             onCancel={() => setEditRole(null)}
@@ -579,71 +558,6 @@ function AnimatedEmoji({emoji, ...props}) {
   return (
     <div ref={setElement} {...props}>
       {emoji}
-    </div>
-  );
-}
-
-function EditRole({
-  peerId,
-  addRole,
-  removeRole,
-  speakers,
-  moderators,
-  onCancel,
-}) {
-  return (
-    <div className="child md:p-10">
-      <h3 className="font-medium">Moderator Actions</h3>
-      <br />
-      <button
-        onClick={() => addRole(peerId, 'speakers')}
-        className={
-          speakers.includes(peerId)
-            ? 'hidden'
-            : 'mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2'
-        }
-      >
-        ↑ Invite to Stage
-      </button>
-      <button
-        onClick={() => removeRole(peerId, 'speakers')}
-        className={
-          speakers.includes(peerId)
-            ? 'mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2'
-            : 'hidden'
-        }
-      >
-        ↓ Move to Audience
-      </button>
-      <button
-        onClick={() => addRole(peerId, 'moderators')}
-        className={
-          !speakers.includes(peerId) || moderators.includes(peerId)
-            ? 'hidden'
-            : 'mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2'
-        }
-      >
-        ✳️ Make Moderator
-      </button>
-      <button
-        onClick={() => removeRole(peerId, 'moderators')}
-        className={
-          moderators.includes(peerId)
-            ? 'mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2'
-            : 'hidden'
-        }
-      >
-        ❎ Demote Moderator
-      </button>
-      <button
-        onClick={onCancel}
-        className="mb-2 h-12 px-6 text-lg text-black bg-gray-100 rounded-lg focus:shadow-outline active:bg-gray-300"
-      >
-        Cancel
-      </button>
-      <br />
-      <br />
-      <hr />
     </div>
   );
 }

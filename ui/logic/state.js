@@ -2,6 +2,7 @@ import State from 'use-minimal-state';
 import {DEV} from './config';
 const state = State(
   {
+    roomId: null,
     room: {name: '', description: '', speakers: [], moderators: []},
     iAmSpeaker: false,
     iAmModerator: false,

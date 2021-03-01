@@ -1,7 +1,9 @@
 import swarm from '../lib/swarm';
 import state from './state';
 
-export function sendReaction(reaction) {
+export {sendReaction};
+
+function sendReaction(reaction) {
   swarm.emit('sharedEvent', {reaction});
   showReaction(reaction, swarm.myPeerId);
 }

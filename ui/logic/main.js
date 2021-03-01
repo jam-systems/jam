@@ -3,12 +3,7 @@ import state from './state';
 import {get} from './backend';
 import {signData, verifyData} from './identity';
 import {DEV, jamHost} from './config';
-import {
-  requestAudio,
-  stopAudio,
-  connectVolumeMeter,
-  disconnectVolumeMeter,
-} from './audio';
+import {requestAudio, stopAudio} from './audio';
 import './reactions';
 import './room';
 
@@ -47,23 +42,6 @@ export function leaveRoom() {
   stopAudio();
   state.set('soundMuted', true);
 }
-
-state.on('iAmSpeaker', iAmSpeaker => {
-  if (iAmSpeaker) {
-    // send audio stream when I become speaker
-    let {myAudio} = state;
-    if (myAudio) {
-      connectVolumeMeter('me', myAudio);
-      swarm.addLocalStream(myAudio, 'audio', myAudio =>
-        state.set('myAudio', myAudio)
-      );
-    }
-  } else {
-    // stop sending stream when I become audience member
-    disconnectVolumeMeter('me');
-    swarm.addLocalStream(null, 'audio');
-  }
-});
 
 swarm.on('newPeer', async id => {
   for (let i = 0; i < 5; i++) {

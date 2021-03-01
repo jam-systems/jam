@@ -3,18 +3,7 @@ import hark from 'hark';
 import state from './state.js';
 import {once} from 'use-minimal-state';
 
-state.on('userInteracted', i => i && createAudioContext());
-
-export {requestAudio, stopAudio, connectVolumeMeter, disconnectVolumeMeter};
-
-export function createAudioContext() {
-  const AudioContext = window.AudioContext || window.webkitAudioContext;
-  if (AudioContext && !state.audioContext) {
-    state.set('audioContext', new AudioContext());
-  } //  else {
-  //   state.audioContext.resume();
-  // }
-}
+export {requestAudio, stopAudio};
 
 state.on('myAudio', myAudio => {
   // if i am speaker, send audio to peers
@@ -23,6 +12,23 @@ state.on('myAudio', myAudio => {
     swarm.addLocalStream(myAudio, 'audio', myAudio =>
       state.set('myAudio', myAudio)
     );
+  }
+});
+
+state.on('iAmSpeaker', iAmSpeaker => {
+  if (iAmSpeaker) {
+    // send audio stream when I become speaker
+    let {myAudio} = state;
+    if (myAudio) {
+      connectVolumeMeter('me', myAudio);
+      swarm.addLocalStream(myAudio, 'audio', myAudio =>
+        state.set('myAudio', myAudio)
+      );
+    }
+  } else {
+    // stop sending stream when I become audience member
+    disconnectVolumeMeter('me');
+    swarm.addLocalStream(null, 'audio');
   }
 });
 
@@ -140,4 +146,14 @@ function disconnectVolumeMeter(peerId) {
   let volumeMeter = volumeMeters[peerId];
   if (volumeMeter) volumeMeter.stop();
   volumeMeters[peerId] = null;
+}
+
+state.on('userInteracted', i => i && createAudioContext());
+function createAudioContext() {
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  if (AudioContext && !state.audioContext) {
+    state.set('audioContext', new AudioContext());
+  } //  else {
+  //   state.audioContext.resume();
+  // }
 }
