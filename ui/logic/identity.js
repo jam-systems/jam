@@ -54,6 +54,24 @@ if (!identity.publicKey && identity.keyPair.publicKey) {
   set(identity, 'publicKey', identity.keyPair.publicKey);
   set(identity, 'secretKey', identity.keyPair.secretKey);
 }
+
+// REMOVE WHEN ALL old twitter identities converted
+if(identity.info.twitter) {
+  let twitterIdentity = {
+    type: 'twitter',
+    id: identity.info.twitter,
+    verificationInfo: identity.info.tweet,
+  }
+  if(!identity.info.identities || !identity.info.identities.length || !identity.info.identities[0].id) {
+    set(identity, 'info', {
+      ...identity.info,
+      identities: [twitterIdentity]});
+  }
+  set(identity, 'info', {
+    twitter: undefined,
+    tweet: undefined});
+}
+
 export default identity;
 
 export async function initializeIdentity() {
