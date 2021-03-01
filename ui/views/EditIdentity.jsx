@@ -17,6 +17,7 @@ let updateInfo = async info => {
     identity.set('info', newInfo);
     swarm.hub.broadcast('identity-updates', {});
   }
+  return ok;
 };
 
 export default function EditIdentity({close}) {
@@ -31,7 +32,8 @@ export default function EditIdentity({close}) {
 
   const [showTwitterVerify, setShowTwitterVerify] = useState(false);
 
-  let submit = e => {
+  let submit = async e => {
+    e.preventDefault();
     let tweet = tweetInput;
     console.log('submitting tweet', tweet);
 
@@ -41,16 +43,23 @@ export default function EditIdentity({close}) {
       console.log('file selected');
       let reader = new FileReader();
       reader.readAsDataURL(selectedFile);
-      reader.onloadend = () => {
+      reader.onloadend = async () => {
         e.preventDefault();
         let avatar = reader.result;
         console.log(avatar);
-        updateInfo({displayName, twitter, tweet, emailHash, avatar});
+        let ok = await updateInfo({
+          displayName,
+          twitter,
+          tweet,
+          emailHash,
+          avatar,
+        });
+        if (ok) close();
       };
+    } else {
+      let ok = await updateInfo({displayName, twitter, tweet, emailHash});
+      if (ok) close();
     }
-    e.preventDefault();
-    updateInfo({displayName, twitter, tweet, emailHash});
-    close();
   };
   let cancel = e => {
     e.preventDefault();
