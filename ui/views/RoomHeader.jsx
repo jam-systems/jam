@@ -29,7 +29,7 @@ export default function RoomHeader({name, description, logoURI, buttonURI, butto
           >
             {description || 'This is a Room on Jam'}
           </ReactMarkdown>
-          <div className={buttonURI ? "call-to-action" : "hidden"}>
+          <div className={(buttonURI && buttonText) ? "call-to-action" : "hidden"}>
             <a href={buttonURI}
                className="select-none align-middle inline-block mt-2 py-2 px-6 text-lg text-black bg-gray-200 border border-gray-300 rounded-lg focus:shadow-outline active:bg-gray-300"
                target="_blank">
