@@ -1,14 +1,15 @@
-import swarm from '../lib/swarm.js';
+import swarm from '../lib/swarm';
 import hark from 'hark';
-import state from './state.js';
+import state from './state';
 import {once} from 'use-minimal-state';
+import identity from './identity';
 
 export {requestAudio, stopAudio};
 
 state.on('myAudio', myAudio => {
   // if i am speaker, send audio to peers
   if (state.iAmSpeaker) {
-    connectVolumeMeter('me', myAudio);
+    connectVolumeMeter(identity.publicKey, myAudio);
     swarm.addLocalStream(myAudio, 'audio', myAudio =>
       state.set('myAudio', myAudio)
     );
@@ -20,14 +21,14 @@ state.on('iAmSpeaker', iAmSpeaker => {
     // send audio stream when I become speaker
     let {myAudio} = state;
     if (myAudio) {
-      connectVolumeMeter('me', myAudio);
+      connectVolumeMeter(identity.publicKey, myAudio);
       swarm.addLocalStream(myAudio, 'audio', myAudio =>
         state.set('myAudio', myAudio)
       );
     }
   } else {
     // stop sending stream when I become audience member
-    disconnectVolumeMeter('me');
+    disconnectVolumeMeter(identity.publicKey);
     swarm.addLocalStream(null, 'audio');
   }
 });

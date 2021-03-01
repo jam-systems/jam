@@ -15,6 +15,7 @@ import useWakeLock from '../lib/use-wake-lock';
 import EditIdentity from './EditIdentity';
 import {sendReaction} from '../logic/reactions';
 import EditRole from './EditRole';
+import {AudienceAvatar, StageAvatar} from './Avatar';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
@@ -72,11 +73,6 @@ export default function Room({room, roomId}) {
     }
   }, [color]);
 
-  let stagePeers = (speakers || []).filter(id => id in peers);
-  let audiencePeers = Object.keys(peers || {}).filter(
-    id => !stagePeers.includes(id)
-  );
-
   if (!hasEnteredRoom)
     return (
       <EnterRoom
@@ -87,7 +83,11 @@ export default function Room({room, roomId}) {
       />
     );
 
-  let myReactions = reactions[identity.publicKey];
+  let myPeerId = identity.publicKey;
+  let stagePeers = (speakers || []).filter(id => id in peers);
+  let audiencePeers = Object.keys(peers || {}).filter(
+    id => !stagePeers.includes(id)
+  );
 
   return (
     <div
@@ -114,282 +114,50 @@ export default function Room({room, roomId}) {
           <div className="">
             <ol className="flex flex-wrap pt-6">
               {iSpeak && (
-                <li
-                  className="relative items-center space-y-1 mt-4 ml-2 mr-2"
-                  style={{cursor: 'pointer'}}
-                >
-                  <div
-                    className={
-                      speaking.has('me')
-                        ? 'human-radius p-1 bg-gray-300'
-                        : 'human-radius p-1 bg-white'
-                    }
-                  >
-                    <div className="human-radius p-1 bg-white relative flex justify-center">
-                      <img
-                        className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28 object-cover"
-                        alt="me"
-                        src={avatarUrl(myInfo)}
-                        onClick={() => openModal(EditIdentity)}
-                      />
-
-                      <Reactions
-                        reactions={myReactions}
-                        className="absolute bg-white text-5xl md:text-7xl pt-4 md:pt-5 human-radius w-20 h-20 md:w-28 md:h-28 border text-center"
-                      />
-                    </div>
-                  </div>
-                  <div className={micMuted ? '' : 'hidden'}>
-                    <div className="absolute w-10 h-10 right-0 top-12 md:top-20 rounded-full bg-white border-2 text-2xl border-gray-400 flex items-center justify-center">
-                      🙊
-                    </div>
-                  </div>
-                  <div className="w-20 md:w-28 m-2">
-                    <div className="flex">
-                      <div className="flex-none text-center pl-1 w-20 md:w-28">
-                        <span className="text-sm md:text-base whitespace-nowrap w-22 md:w-30 text-black font-medium">
-                          <span
-                            style={{margin: '0 3px 0 -4px'}}
-                            className={
-                              iModerate
-                                ? 'flex-none inline-block leading-3 bg-gray-600 text-white w-3 h-3 rounded-full -ml-3'
-                                : 'hidden'
-                            }
-                          >
-                            <svg
-                              className="inline-block w-2 h-2"
-                              style={{margin: '-3px 0 0 0'}}
-                              x="0px"
-                              y="0px"
-                              viewBox="0 0 1000 1000"
-                              enableBackground="new 0 0 1000 1000"
-                              fill="currentColor"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path d="M894.5,633.4L663.3,500l231.1-133.4c39.1-22.6,52.4-72.5,29.9-111.6c-22.6-39.1-72.5-52.4-111.6-29.9L581.7,358.5V91.7c0-45.1-36.6-81.7-81.7-81.7c-45.1,0-81.7,36.6-81.7,81.7v266.9L187.2,225.1c-39.1-22.6-89-9.2-111.6,29.9c-22.6,39.1-9.2,89,29.9,111.6L336.7,500L105.5,633.4C66.5,656,53.1,705.9,75.6,745c22.6,39.1,72.5,52.4,111.6,29.9l231.1-133.4v266.9c0,45.1,36.6,81.7,81.7,81.7c45.1,0,81.7-36.6,81.7-81.7V641.5l231.1,133.4c39.1,22.6,89,9.2,111.6-29.9C946.9,705.9,933.5,656,894.5,633.4z" />
-                            </svg>
-                          </span>
-                          {myInfo.displayName?.substring(0, 12)}
-                        </span>
-                        {/* twitter */}
-                        <div
-                          className={myInfo.twitter ? 'text-center' : 'hidden'}
-                        >
-                          <span className="text-sm">
-                            <span className="text-gray-800">@</span>
-                            <a
-                              className="text-gray-500 font-medium ml-1"
-                              style={{
-                                textDecoration: 'none',
-                                fontWeight: 'normal',
-                              }}
-                              href={'https://twitter.com/' + myInfo.twitter}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              {myInfo.twitter?.substring(1)}
-                            </a>
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </li>
+                <StageAvatar
+                  key={myPeerId}
+                  peerId={myPeerId}
+                  {...{speaking, moderators, reactions}}
+                  peerState={sharedState}
+                  info={myInfo}
+                  onClick={() => openModal(EditIdentity)}
+                />
               )}
-              {stagePeers.map(peerId => {
-                let {micMuted, inRoom} = peerState[peerId] || {};
-                let reactions_ = reactions[peerId];
-                const peerInfo = identities[peerId] || {id: peerId};
-                return (
-                  inRoom && (
-                    <li
-                      key={peerId}
-                      className="relative items-center space-y-1 mt-4 ml-2 mr-2"
-                      title={peerInfo.displayName}
-                      style={iModerate ? {cursor: 'pointer'} : undefined}
-                    >
-                      <div
-                        className={
-                          speaking.has(peerId)
-                            ? 'human-radius p-1 bg-gray-300'
-                            : 'human-radius p-1 bg-white'
-                        }
-                      >
-                        <div className="human-radius p-1 bg-white relative flex justify-center">
-                          <img
-                            className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28 object-cover"
-                            alt={peerInfo.displayName}
-                            src={avatarUrl(peerInfo)}
-                            onClick={
-                              iModerate ? () => setEditRole(peerId) : undefined
-                            }
-                          />
-                          <Reactions
-                            reactions={reactions_}
-                            className="absolute bg-white text-5xl md:text-7xl pt-4 md:pt-5 human-radius w-20 h-20 md:w-28 md:h-28 border text-center"
-                          />
-                        </div>
-                      </div>
-                      {/* div for showing mute/unmute status */}
-                      <div className={micMuted ? '' : 'hidden'}>
-                        <div className="absolute w-10 h-10 right-0 top-12 md:top-20 rounded-full bg-white border-2 text-2xl border-gray-400 flex items-center justify-center">
-                          🙊
-                        </div>
-                      </div>
-                      <div className="font-medium w-20 md:w-28 m-2">
-                        <div className="flex">
-                          <div className="flex-none text-center pl-1 w-20 md:w-28">
-                            <span className="text-sm md:text-base whitespace-nowrap w-22 md:w-30 text-black font-medium">
-                              <span
-                                style={{margin: '0 3px 0 -4px'}}
-                                className={
-                                  moderators.includes(peerId)
-                                    ? 'flex-none inline-block leading-3 bg-gray-600 text-white w-3 h-3 rounded-full -ml-3'
-                                    : 'hidden'
-                                }
-                              >
-                                <svg
-                                  className="inline-block w-2 h-2"
-                                  style={{margin: '-3px 0 0 0'}}
-                                  x="0px"
-                                  y="0px"
-                                  viewBox="0 0 1000 1000"
-                                  enableBackground="new 0 0 1000 1000"
-                                  fill="currentColor"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path d="M894.5,633.4L663.3,500l231.1-133.4c39.1-22.6,52.4-72.5,29.9-111.6c-22.6-39.1-72.5-52.4-111.6-29.9L581.7,358.5V91.7c0-45.1-36.6-81.7-81.7-81.7c-45.1,0-81.7,36.6-81.7,81.7v266.9L187.2,225.1c-39.1-22.6-89-9.2-111.6,29.9c-22.6,39.1-9.2,89,29.9,111.6L336.7,500L105.5,633.4C66.5,656,53.1,705.9,75.6,745c22.6,39.1,72.5,52.4,111.6,29.9l231.1-133.4v266.9c0,45.1,36.6,81.7,81.7,81.7c45.1,0,81.7-36.6,81.7-81.7V641.5l231.1,133.4c39.1,22.6,89,9.2,111.6-29.9C946.9,705.9,933.5,656,894.5,633.4z" />
-                                </svg>
-                              </span>
-                              {peerInfo.displayName?.substring(0, 12)}
-                            </span>
-                            {/* twitter */}
-                            <div
-                              className={
-                                peerInfo.twitter ? 'text-center' : 'hidden'
-                              }
-                            >
-                              <span className="text-sm">
-                                <span className="text-gray-800">@</span>
-                                <a
-                                  className="text-gray-500 font-medium ml-1"
-                                  style={{
-                                    textDecoration: 'none',
-                                    fontWeight: 'normal',
-                                  }}
-                                  href={
-                                    'https://twitter.com/' + peerInfo.twitter
-                                  }
-                                  target="_blank"
-                                  rel="noreferrer"
-                                >
-                                  {peerInfo.twitter?.substring(1)}
-                                </a>
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </li>
-                  )
-                );
-              })}
+              {stagePeers.map(peerId => (
+                <StageAvatar
+                  key={peerId}
+                  {...{speaking, moderators}}
+                  {...{peerId, peerState, reactions}}
+                  peerState={peerState[peerId]}
+                  info={identities[peerId]}
+                  onClick={iModerate ? () => setEditRole(peerId) : undefined}
+                />
+              ))}
             </ol>
           </div>
 
           <br />
-
+          {/* Audience */}
           <h3 className="text-gray-400">Audience</h3>
           <ol className="flex flex-wrap pt-6">
             {!iSpeak && (
-              <li
-                className="flex-none m-2 w-16 h-32 md:w-24 md:h-36 text-xs"
-                style={{cursor: 'pointer'}}
-              >
-                <div className="relative flex justify-center">
-                  <img
-                    alt={myInfo.displayName}
-                    className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50 object-cover"
-                    src={avatarUrl(myInfo)}
-                    onClick={() => openModal(EditIdentity)}
-                  />
-                  <Reactions
-                    reactions={myReactions}
-                    className="absolute bg-white text-4xl md:text-6xl pt-3 md:pt-4 human-radius w-16 h-16 md:w-24 md:h-24 border text-center"
-                  />
-                </div>
-                <div className="overflow-hidden whitespace-nowrap text-center mt-2">
-                  {myInfo.displayName}
-                </div>
-                {/* twitter */}
-                <div className={myInfo.twitter ? 'text-center mt-1' : 'hidden'}>
-                  <span className="text-xs">
-                    <span className="text-gray-800">@</span>
-                    <a
-                      className="text-gray-500 font-medium ml-1"
-                      style={{textDecoration: 'none', fontWeight: 'normal'}}
-                      href={'https://twitter.com/' + myInfo.twitter}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {myInfo.twitter?.substring(1)}
-                    </a>
-                  </span>
-                </div>
-              </li>
+              <AudienceAvatar
+                {...{reactions}}
+                peerId={myPeerId}
+                peerState={sharedState}
+                info={myInfo}
+                onClick={() => openModal(EditIdentity)}
+              />
             )}
-            {audiencePeers.map(peerId => {
-              let {inRoom} = peerState[peerId] || {};
-              let reactions_ = reactions[peerId];
-              const peerInfo = identities[peerId] || {id: peerId};
-              return (
-                inRoom && (
-                  <li
-                    key={peerId}
-                    title={peerInfo.displayName}
-                    className="flex-none m-2 w-16 h-32 md:w-24 md:h-36 text-xs"
-                    style={iModerate ? {cursor: 'pointer'} : undefined}
-                  >
-                    <div className="relative flex justify-center">
-                      <img
-                        className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50 object-cover"
-                        alt={peerInfo.displayName}
-                        src={avatarUrl(peerInfo)}
-                        onClick={
-                          iModerate ? () => setEditRole(peerId) : undefined
-                        }
-                      />
-                      <Reactions
-                        reactions={reactions_}
-                        className="absolute bg-white text-4xl md:text-6xl pt-3 md:pt-4 human-radius w-16 h-16 md:w-24 md:h-24 border text-center"
-                      />
-                    </div>
-                    <div className="overflow-hidden whitespace-nowrap text-center mt-2">
-                      {peerInfo.displayName}
-                    </div>
-                    {/* twitter */}
-                    <div
-                      className={
-                        peerInfo.twitter ? 'text-center mt-1' : 'hidden'
-                      }
-                    >
-                      <span className="text-xs">
-                        <span className="text-gray-800">@</span>
-                        <a
-                          className="text-gray-500 font-medium ml-1"
-                          style={{textDecoration: 'none', fontWeight: 'normal'}}
-                          href={'https://twitter.com/' + peerInfo.twitter}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {peerInfo.twitter?.substring(1)}
-                        </a>
-                      </span>
-                    </div>
-                  </li>
-                )
-              );
-            })}
+            {audiencePeers.map(peerId => (
+              <AudienceAvatar
+                key={peerId}
+                {...{peerId, peerState, reactions}}
+                peerState={peerState[peerId]}
+                info={identities[peerId]}
+                onClick={iModerate ? () => setEditRole(peerId) : undefined}
+              />
+            ))}
           </ol>
         </div>
 
@@ -525,39 +293,6 @@ export default function Room({room, roomId}) {
           </button>
         </div>
       </div>
-    </div>
-  );
-}
-
-function Reactions({reactions, className}) {
-  if (!reactions) return null;
-  return (
-    <>
-      {reactions.map(
-        ([r, id]) =>
-          reactionEmojis.includes(r) && (
-            <AnimatedEmoji
-              key={id}
-              emoji={r}
-              className={className}
-              style={{
-                alignSelf: 'center',
-              }}
-            />
-          )
-      )}
-    </>
-  );
-}
-
-function AnimatedEmoji({emoji, ...props}) {
-  let [element, setElement] = useState(null);
-  useEffect(() => {
-    if (element) animateEmoji(element);
-  }, [element]);
-  return (
-    <div ref={setElement} {...props}>
-      {emoji}
     </div>
   );
 }
