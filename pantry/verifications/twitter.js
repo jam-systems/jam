@@ -22,3 +22,5 @@ const verify = async (identity, publicKey) => {
         throw new Error(`Tweet at ${tweet} does not contain public key ${publicKey}`)
     }
 }
+
+module.exports = verify;

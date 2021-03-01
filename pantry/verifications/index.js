@@ -9,7 +9,9 @@ const verifyIdentities = async (identities, publicKey) => {
             if(!verifiers[identity.type]) {
                 throw new Error(`No verifier for identity type ${identity.type}`);
             }
-            await verifiers[identity.type](identity, publicKey);
+            if(identity.verificationInfo) {
+                await verifiers[identity.type](identity, publicKey);
+            }
         }
     } else {
         throw new Error("Identities object is not an array")
