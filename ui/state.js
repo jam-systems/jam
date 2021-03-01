@@ -1,8 +1,16 @@
 import State from 'use-minimal-state';
 import {DEV} from './config';
+
+export const emptyRoom = {
+  name: '',
+  description: '',
+  speakers: [],
+  moderators: [],
+};
+
 const state = State(
   {
-    room: {name: '', description: '', speakers: [], moderators: []},
+    room: emptyRoom,
     soundMuted: true,
     micMuted: true,
     myAudio: null,
@@ -17,3 +25,7 @@ const state = State(
   {debug: DEV}
 );
 export default state;
+
+export function currentRoom() {
+  return state.room || emptyRoom;
+}
