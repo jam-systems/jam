@@ -11,7 +11,6 @@ FROM node:alpine
 RUN mkdir /app
 WORKDIR /app
 
-COPY docker/set-jam-host /usr/local/bin/
 COPY css ./css/
 COPY img ./img/
 COPY server ./server/
