@@ -12,8 +12,8 @@ const jamSchema = process.env.JAM_SCHEMA || 'https://';
 const jamUrl = process.env.JAM_URL || `${jamSchema}${jamHost}`;
 const pantryUrl = process.env.JAM_PANTRY_URL || `${jamUrl}/_/pantry`
 const signalHubUrl = process.env.JAM_SIGNALHUB_URL || `${jamUrl}/_/signalhub`
-const stunServer = process.env.STUN_SERVER || `stun.${jamHost}:3478`;
-const turnServer = process.env.TURN_SERVER || `turn.${jamHost}:3478`;
+const stunServer = process.env.JAM_STUN_SERVER || `stun.${jamHost}:3478`;
+const turnServer = process.env.JAM_TURN_SERVER || `turn.${jamHost}:3478`;
 
 
 
