@@ -361,12 +361,12 @@ function connectPeer(hub, peerId, connId) {
   }
 }
 
-function connect(url, room) {
+function connect(room) {
   if (swarm.hub) return;
-  swarm.config({url, room});
+  swarm.config({room});
   if (!swarm.room || !swarm.url) {
     return console.error(
-      'Must call swarm.config(url, room) before connecting!'
+      'Must call swarm.config({url, room}) before connecting!'
     );
   }
   let myConnId = randomHex4();

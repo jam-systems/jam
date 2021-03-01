@@ -1,18 +1,20 @@
 import React, {useEffect, useLayoutEffect, useMemo, useState} from 'react';
-import {leaveRoom, sendReaction, state} from '../main';
+import {leaveRoom} from '../logic/main';
+import state from '../logic/state';
 import {use} from 'use-minimal-state';
 import swarm from '../lib/swarm.js';
 import EnterRoom from './EnterRoom.jsx';
 import RoomHeader from './RoomHeader.jsx';
 import {avatarUrl} from '../lib/avatar';
 import copyToClipboard from '../lib/copy-to-clipboard';
-import {put} from '../backend';
-import identity, {signedToken} from '../identity';
+import {put} from '../logic/backend';
+import identity, {signedToken} from '../logic/identity';
 import animateEmoji from '../lib/animate-emoji';
 import {openModal} from './Modal';
 import {EditRoomModal} from './EditRoom';
 import useWakeLock from '../lib/use-wake-lock';
 import EditIdentity from './EditIdentity';
+import {sendReaction} from '../logic/reactions';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 

@@ -2,10 +2,11 @@ import React, {useEffect} from 'react';
 import {render} from 'react-dom';
 import Start from './views/Start.jsx';
 import Room from './views/Room.jsx';
-import identity, {initializeIdentity} from './identity';
-import {useApiQuery} from './backend.js';
+import './logic/main';
+import identity, {initializeIdentity} from './logic/identity';
+import {useApiQuery} from './logic/backend.js';
 import {usePath} from './lib/use-location.js';
-import {connectRoom} from './main.js';
+import {connectRoom} from './logic/room';
 import swarm from './lib/swarm.js';
 import Modals from './views/Modal.jsx';
 

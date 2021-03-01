@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import SparkMD5 from 'spark-md5';
 import swarm from '../lib/swarm';
 import {Modal} from './Modal';
-import identity, {updateInfoServer} from '../identity';
+import identity, {updateInfoServer} from '../logic/identity';
 import {use} from 'use-minimal-state';
 
 let updateInfo = async info => {

@@ -1,6 +1,6 @@
-import swarm from './lib/swarm.js';
+import swarm from '../lib/swarm.js';
 import hark from 'hark';
-import state, {currentRoom} from './state.js';
+import state from './state.js';
 import {once} from 'use-minimal-state';
 
 state.on('userInteracted', i => i && createAudioContext());
@@ -18,8 +18,7 @@ export function createAudioContext() {
 
 state.on('myAudio', myAudio => {
   // if i am speaker, send audio to peers
-  let {speakers} = currentRoom();
-  if (speakers.includes(swarm.myPeerId)) {
+  if (state.iAmSpeaker) {
     connectVolumeMeter('me', myAudio);
     swarm.addLocalStream(myAudio, 'audio', myAudio =>
       state.set('myAudio', myAudio)
