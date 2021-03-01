@@ -1,14 +1,12 @@
-import React, {useEffect, useLayoutEffect, useMemo, useState} from 'react';
+import React, {useLayoutEffect, useMemo, useState} from 'react';
 import {leaveRoom} from '../logic/main';
 import state from '../logic/state';
 import {use} from 'use-minimal-state';
 import swarm from '../lib/swarm.js';
 import EnterRoom from './EnterRoom.jsx';
 import RoomHeader from './RoomHeader.jsx';
-import {avatarUrl} from '../lib/avatar';
 import copyToClipboard from '../lib/copy-to-clipboard';
 import identity from '../logic/identity';
-import animateEmoji from '../lib/animate-emoji';
 import {openModal} from './Modal';
 import {EditRoomModal} from './EditRoom';
 import useWakeLock from '../lib/use-wake-lock';

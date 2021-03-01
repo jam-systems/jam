@@ -79,24 +79,7 @@ export function StageAvatar({
                 </span>
                 {info.displayName?.substring(0, 12)}
               </span>
-              {/* twitter */}
-              <div className={info.twitter ? 'text-center' : 'hidden'}>
-                <span className="text-sm">
-                  <span className="text-gray-800">@</span>
-                  <a
-                    className="text-gray-500 font-medium ml-1"
-                    style={{
-                      textDecoration: 'none',
-                      fontWeight: 'normal',
-                    }}
-                    href={'https://twitter.com/' + info.twitter}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {info.twitter?.substring(1)}
-                  </a>
-                </span>
-              </div>
+              <TwitterHandle info={info} fontClass="text-sm" />
             </div>
           </div>
         </div>
@@ -131,23 +114,28 @@ export function AudienceAvatar({peerId, peerState, reactions, info, onClick}) {
         <div className="overflow-hidden whitespace-nowrap text-center mt-2">
           {info.displayName}
         </div>
-        {/* twitter */}
-        <div className={info.twitter ? 'text-center mt-1' : 'hidden'}>
-          <span className="text-xs">
-            <span className="text-gray-800">@</span>
-            <a
-              className="text-gray-500 font-medium ml-1"
-              style={{textDecoration: 'none', fontWeight: 'normal'}}
-              href={'https://twitter.com/' + info.twitter}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {info.twitter?.substring(1)}
-            </a>
-          </span>
-        </div>
+        <TwitterHandle info={info} fontClass="text-xs" />
       </li>
     )
+  );
+}
+
+function TwitterHandle({info, fontClass}) {
+  return (
+    <div className={info.twitter ? 'text-center mt-1' : 'hidden'}>
+      <span className={fontClass}>
+        {/* <span className="text-gray-800">@</span> */}
+        <a
+          className="text-gray-500 font-medium ml-1"
+          style={{textDecoration: 'none', fontWeight: 'normal'}}
+          href={'https://twitter.com/' + info.twitter}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {info.twitter}
+        </a>
+      </span>
+    </div>
   );
 }
 
