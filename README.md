@@ -64,6 +64,8 @@ When participants join a room on 🍞 Jam they start in the _audience_, you can 
 
 Hosting your own Jam server is easy.
 
+### Install
+
 1. Install docker and docker-compose (eg. `apt install docker.io docker-compose`)
 2. `git clone https://gitlab.com/jam-systems/jam.git`
 3. `git checkout stable`  
@@ -72,6 +74,14 @@ Hosting your own Jam server is easy.
 6. `nano .env` set `JAM_HOST` to your domain
 7. In your DNS settings point `${JAM_HOST}`, and `*.${JAM_HOST}` to your IP address (if you don't want a wildcard you need the subdomains `stun` and `turn`)
 8. `docker-compose up -d`
+
+### Update
+
+1. `cd jam/deployment`
+2. `git checkout stable`
+3. `git pull`
+4. `docker-compose pull`
+5. `docker-compose up -d`
 
 ## Develop
 
