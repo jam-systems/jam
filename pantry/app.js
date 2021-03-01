@@ -3,9 +3,8 @@ const cors = require('cors');
 const logger = require('morgan');
 const nacl = require('tweetnacl');
 const base64 = require('compact-base64');
-const nets = require("nets");
-const { promisify } = require('util')
 
+const verifyIdentities = require("./verifications");
 const indexRouter = require('./routes/index');
 const metricsRouter = require('./routes/metrics');
 
@@ -64,51 +63,35 @@ const roomAuthenticator = {
 const identityAuthenticator = {
     ...permitAllAuthenticator,
     canPut: async (req, res, next) => {
-        console.log('in canPut');
-
         const authHeader = req.header("Authorization");
-        if(authHeader) {
-            const token = authHeader.substring(6);
-            if(verify(token, req.params.id)) {
-                console.log('in verify');
 
-                if (req.body.tweet) {
-                    console.log('in tweet');
+        if(!authHeader) {
+            res.sendStatus(401);
+            return
+        }
 
-                    let twitter = req.body.twitter;
-                    let tweet = req.body.tweet
+        const token = authHeader.substring(6);
+        if(!verify(token, req.params.id)) {
+            res.sendStatus(403);
+            return
+        }
 
-                    // only store tweet if it is verifiable
-                    if (tweet.startsWith("https://twitter.com/" + twitter.substring(1) + "/status/")) {
-                        console.log("tweet start ok");
-
-                        let tweetResponse = await promisify(nets)({
-                            url: tweet,
-                            method: "GET",
-                            headers: {
-                            "User-Agent": "WhatsApp/2"
-                            }
-                        });
-
-                        if (tweetResponse.body.includes(req.params.id)) {
-                            console.log("verified");
-                            next();
-                        } else {
-                            console.log("NOT verified");
-                            res.sendStatus(400);
+        if(req.body.identities) {
+            try {
+                await verifyIdentities(req.body.identities, req.params.id);
+                next();
+            } catch(error) {
+                res.status(400).json(
+                    {
+                        success: false,
+                        error: {
+                            code: "identity-verification-failed",
+                            message: error.message
                         }
-                    } else {
-                        console.log("tweet start not ok");
-                        res.sendStatus(400);
-                    }
-                } else {
-                    next();
-                }
-            } else {
-                res.sendStatus(403);
+                    });
             }
         } else {
-            res.sendStatus(401);
+            next();
         }
     },
 }
