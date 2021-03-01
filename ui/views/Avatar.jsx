@@ -129,19 +129,22 @@ export function AudienceAvatar({peerId, peerState, reactions, info, onClick}) {
 }
 
 function TwitterHandle({info, divClass, fontClass}) {
+  let twitterIdentity = info?.identities?.filter((identity) => identity.type === 'twitter').length > 0 ?
+      info?.identities?.filter((identity) => identity.type === 'twitter')[0] :
+      undefined
   return (
-    (info.twitter || null) && (
+    (twitterIdentity || null) && (
       <div className={divClass}>
         <span className={fontClass}>
           {/* <span className="text-gray-800">@</span> */}
           <a
             className="text-gray-500 font-medium ml-1"
             style={{textDecoration: 'none', fontWeight: 'normal'}}
-            href={'https://twitter.com/' + info.twitter}
+            href={'https://twitter.com/' + twitterIdentity.id.substring(1)}
             target="_blank"
             rel="noreferrer"
           >
-            {info.twitter}
+            {twitterIdentity.id}
           </a>
         </span>
       </div>
