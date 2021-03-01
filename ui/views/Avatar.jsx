@@ -79,7 +79,11 @@ export function StageAvatar({
                 </span>
                 {info.displayName?.substring(0, 12)}
               </span>
-              <TwitterHandle info={info} fontClass="text-sm" />
+              <TwitterHandle
+                info={info}
+                divClass="text-center"
+                fontClass="text-sm"
+              />
             </div>
           </div>
         </div>
@@ -114,28 +118,34 @@ export function AudienceAvatar({peerId, peerState, reactions, info, onClick}) {
         <div className="overflow-hidden whitespace-nowrap text-center mt-2">
           {info.displayName}
         </div>
-        <TwitterHandle info={info} fontClass="text-xs" />
+        <TwitterHandle
+          info={info}
+          divClass="text-center mt-1"
+          fontClass="text-xs"
+        />
       </li>
     )
   );
 }
 
-function TwitterHandle({info, fontClass}) {
+function TwitterHandle({info, divClass, fontClass}) {
   return (
-    <div className={info.twitter ? 'text-center mt-1' : 'hidden'}>
-      <span className={fontClass}>
-        {/* <span className="text-gray-800">@</span> */}
-        <a
-          className="text-gray-500 font-medium ml-1"
-          style={{textDecoration: 'none', fontWeight: 'normal'}}
-          href={'https://twitter.com/' + info.twitter}
-          target="_blank"
-          rel="noreferrer"
-        >
-          {info.twitter}
-        </a>
-      </span>
-    </div>
+    (info.twitter || null) && (
+      <div className={divClass}>
+        <span className={fontClass}>
+          {/* <span className="text-gray-800">@</span> */}
+          <a
+            className="text-gray-500 font-medium ml-1"
+            style={{textDecoration: 'none', fontWeight: 'normal'}}
+            href={'https://twitter.com/' + info.twitter}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {info.twitter}
+          </a>
+        </span>
+      </div>
+    )
   );
 }
 
