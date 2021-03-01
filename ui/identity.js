@@ -2,6 +2,9 @@ import nacl from 'tweetnacl';
 import base64 from 'compact-base64';
 import {adjectives, nouns} from './lib/names';
 import {post, put, get} from './backend';
+import {StoredState} from './lib/local-storage';
+import {DEV} from './config';
+import {set} from 'use-minimal-state';
 
 function decode(base64String) {
   return Uint8Array.from(base64.decodeUrl(base64String, 'binary'));
@@ -27,71 +30,53 @@ const timeCodeToBytes = timeCode =>
 const currentTimeCode = () => Math.round(Date.now() / 30000);
 const timeCodeValid = code => Math.abs(code - currentTimeCode()) <= 1;
 
-export function initializeIdentity() {
-  if (!localStorage.identity) {
+const identity = StoredState(
+  'identity',
+  () => {
     const keypair = nacl.sign.keyPair();
-    const identity = {
-      keyPair: {
-        publicKey: encode(keypair.publicKey),
-        secretKey: encode(keypair.secretKey),
-      },
+    let publicKey = encode(keypair.publicKey);
+    let secretKey = encode(keypair.secretKey);
+    return {
+      synced: false,
+      publicKey,
+      secretKey,
       info: {
         displayName: `${
           adjectives[Math.floor(Math.random() * adjectives.length)]
         } ${nouns[Math.floor(Math.random() * nouns.length)]}`,
-        email: null,
       },
     };
-    localStorage.identity = JSON.stringify(identity);
-    post(
+  },
+  {debug: DEV}
+);
+// backwards compatibility
+if (!identity.publicKey && identity.keyPair.publicKey) {
+  set(identity, 'publicKey', identity.keyPair.publicKey);
+  set(identity, 'secretKey', identity.keyPair.secretKey);
+}
+export default identity;
+
+export async function initializeIdentity() {
+  if (!identity.synced) {
+    let ok = await post(
       signedToken(),
-      `/identities/${identity.keyPair.publicKey}`,
+      `/identities/${identity.publicKey}`,
       identity.info
     );
+    if (ok) identity.set('synced', true);
   }
-}
-
-export function getId() {
-  return JSON.parse(localStorage.identity).keyPair.publicKey;
-}
-
-export function getInfo() {
-  const info = JSON.parse(localStorage.identity).info;
-  return {
-    ...info,
-    id: getId(),
-  };
 }
 
 export async function getInfoServer() {
-  const identity = JSON.parse(localStorage.identity);
-  return await get(
-    `/identities/${identity.keyPair.publicKey}`
-  );
+  return await get(`/identities/${identity.publicKey}`);
 }
 
-export async function updateInfo(info) {
-  const identity = JSON.parse(localStorage.identity);
-  identity.info = info;
-  identity.info.id = undefined;
-  localStorage.identity = JSON.stringify(identity);
-  if (
-    !(await put(
-      signedToken(),
-      `/identities/${identity.keyPair.publicKey}`,
-      identity.info
-    ))
-  ) {
-    post(
-      signedToken(),
-      `/identities/${identity.keyPair.publicKey}`,
-      identity.info
-    );
-  }
+export async function updateInfoServer(info) {
+  return await put(signedToken(), `/identities/${identity.publicKey}`, info);
 }
 
 export function sign(data) {
-  const secretKeyB64 = JSON.parse(localStorage.identity).keyPair.secretKey;
+  const secretKeyB64 = identity.secretKey;
   const secretKey = decode(secretKeyB64);
   return encode(nacl.sign(data, secretKey));
 }

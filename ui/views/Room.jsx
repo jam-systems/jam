@@ -7,7 +7,7 @@ import RoomHeader from './RoomHeader.jsx';
 import {avatarUrl} from '../lib/avatar';
 import copyToClipboard from '../lib/copy-to-clipboard';
 import {put} from '../backend';
-import {signedToken} from '../identity';
+import identity, {signedToken} from '../identity';
 import animateEmoji from '../lib/animate-emoji';
 import {openModal} from './Modal';
 import {EditRoomModal} from './EditRoom';
@@ -19,10 +19,14 @@ const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 export default function Room({room, roomId}) {
   // room = {name, description, moderators: [peerId], speakers: [peerId]}
   useWakeLock();
-  let [myInfo, myAudio, micMuted, reactions, identities, speaking] = use(
-    state,
-    ['myInfo', 'myAudio', 'micMuted', 'reactions', 'identities', 'speaking']
-  );
+  let myInfo = use(identity, 'info');
+  let [myAudio, micMuted, reactions, identities, speaking] = use(state, [
+    'myAudio',
+    'micMuted',
+    'reactions',
+    'identities',
+    'speaking',
+  ]);
   let [peers, peerState, sharedState] = use(swarm, [
     'stickyPeers',
     'peerState',
@@ -37,7 +41,16 @@ export default function Room({room, roomId}) {
 
   let [showShareInfo, setShowShareInfo] = useState(false);
 
-  let {name, description, logoURI, buttonURI, buttonText, color, speakers, moderators} = room || {};
+  let {
+    name,
+    description,
+    logoURI,
+    buttonURI,
+    buttonText,
+    color,
+    speakers,
+    moderators,
+  } = room || {};
 
   let isColorDark = useMemo(() => isDark(color), [color]);
 
@@ -134,7 +147,7 @@ export default function Room({room, roomId}) {
                         className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28 object-cover"
                         alt="me"
                         src={avatarUrl(myInfo)}
-                        onClick={() => openModal(EditIdentity, {info: myInfo, id: myPeerId})}
+                        onClick={() => openModal(EditIdentity)}
                       />
 
                       <Reactions
@@ -315,7 +328,7 @@ export default function Room({room, roomId}) {
                     alt={myInfo.displayName}
                     className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50 object-cover"
                     src={avatarUrl(myInfo)}
-                    onClick={() => openModal(EditIdentity, {info: myInfo})}
+                    onClick={() => openModal(EditIdentity)}
                   />
                   <Reactions
                     reactions={myReactions}

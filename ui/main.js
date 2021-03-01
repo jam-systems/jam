@@ -1,16 +1,15 @@
 import swarm from './lib/swarm.js';
 import hark from 'hark';
 import {forwardApiQuery, get, updateApiQuery} from './backend';
-import {signData, updateInfo, verifyData} from './identity';
+import {signData, verifyData} from './identity';
 import state from './state.js';
+import {once} from 'use-minimal-state';
 import {DEV, jamHost} from './config';
 
 window.state = state; // for debugging
 window.swarm = swarm;
 
 export {state};
-
-state.on('myInfo', updateInfo);
 
 swarm.config({
   debug: DEV,
@@ -232,11 +231,7 @@ function connectVolumeMeter(peerId, stream) {
   }
   if (!state.audioContext) {
     // if no audio context exists yet, retry as soon as it is available
-    let onAudioContext = () => {
-      connectVolumeMeter(peerId, stream);
-      state.off('audioContext', onAudioContext);
-    };
-    state.on('audioContext', onAudioContext);
+    once(state, 'audioContext', () => connectVolumeMeter(peerId, stream));
     return;
   }
   let options = {audioContext: state.audioContext};

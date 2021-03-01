@@ -3,7 +3,6 @@ import {DEV} from './config';
 const state = State(
   {
     room: {name: '', description: '', speakers: [], moderators: []},
-    myInfo: {},
     soundMuted: true,
     micMuted: true,
     myAudio: null,

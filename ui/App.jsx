@@ -2,10 +2,10 @@ import React, {useEffect} from 'react';
 import {render} from 'react-dom';
 import Start from './views/Start.jsx';
 import Room from './views/Room.jsx';
-import {initializeIdentity, getInfo, getId} from './identity';
+import identity, {initializeIdentity} from './identity';
 import {useApiQuery} from './backend.js';
 import {usePath} from './lib/use-location.js';
-import {connectRoom, state} from './main.js';
+import {connectRoom} from './main.js';
 import swarm from './lib/swarm.js';
 import Modals from './views/Modal.jsx';
 
@@ -15,8 +15,7 @@ function App() {
   // initialize identity
   useEffect(() => {
     initializeIdentity();
-    state.set('myInfo', getInfo());
-    swarm.config({myPeerId: getId()});
+    swarm.config({myPeerId: identity.publicKey});
     swarm.set('sharedState', {inRoom: false});
   }, []);
 
