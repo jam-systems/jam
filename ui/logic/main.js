@@ -2,7 +2,7 @@ import swarm from '../lib/swarm';
 import state from './state';
 import {get} from './backend';
 import {signData, verifyData} from './identity';
-import {DEV, jamHost} from './config';
+import {DEV, config} from './config';
 import {requestAudio, stopAudio} from './audio';
 import './reactions';
 import './room';
@@ -14,16 +14,16 @@ export {state};
 
 swarm.config({
   debug: DEV,
-  url: `https://${jamHost()}/_/signalhub/`,
+  url: config.signalHubUrl +'/',
   sign: signData,
   verify: verifyData,
   pcConfig: {
     iceTransportPolicy: 'all',
     iceServers: [
       {urls: `stun:stun.jam.systems:3478`},
-      {urls: `stun:stun.${jamHost()}:3478`},
+      {urls: `stun:${config.stunServer}`},
       {
-        urls: `turn:turn.${jamHost()}:3478`,
+        urls: `turn:${config.turnServer}`,
         username: 'test',
         credential: 'yieChoi0PeoKo8ni',
       },

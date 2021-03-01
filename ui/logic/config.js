@@ -1,6 +1,5 @@
-const host = '__JAM_HOST__';
+export const config = window.jamConfig;
 
-export const jamHost = () =>
-  host.replace(/_/g, '') === 'JAMHOST' ? 'beta.jam.systems' : host;
+export const DEV = config.development;
 
-export const DEV = host.replace(/_/g, '') === 'JAMHOST';
+

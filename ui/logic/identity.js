@@ -57,14 +57,17 @@ if (!identity.publicKey && identity.keyPair.publicKey) {
 export default identity;
 
 export async function initializeIdentity() {
-  if (!identity.synced) {
-    let ok = await post(
+  const ok = await put(
       signedToken(),
       `/identities/${identity.publicKey}`,
       identity.info
-    );
-    if (ok) identity.set('synced', true);
-  }
+      ) ||
+      await post(
+          signedToken(),
+          `/identities/${identity.publicKey}`,
+          identity.info
+      );
+  if (ok) identity.set('synced', true);
 }
 
 export async function getInfoServer() {
@@ -72,7 +75,9 @@ export async function getInfoServer() {
 }
 
 export async function updateInfoServer(info) {
-  return await put(signedToken(), `/identities/${identity.publicKey}`, info);
+  return await put(signedToken(), `/identities/${identity.publicKey}`, info)
+         ||
+         await post(signedToken(), `/identities/${identity.publicKey}`, info);
 }
 
 export function sign(data) {

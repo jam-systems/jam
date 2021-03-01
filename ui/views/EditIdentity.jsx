@@ -21,43 +21,55 @@ let updateInfo = async info => {
 };
 
 export default function EditIdentity({close}) {
+
   let [info, id] = use(identity, ['info', 'publicKey']);
   let [displayName, setDisplayName] = useState(info?.displayName);
   let [email, setEmail] = useState(info?.email);
-  let [twitter, setTwitter] = useState(info?.twitter);
-  let [tweetInput, setTweetInput] = useState(info?.tweet);
-  let tweet = info?.tweet;
+  let twitterIdentity = info?.identities?.filter((identity) => identity.type === 'twitter').length > 0 ?
+      info?.identities?.filter((identity) => identity.type === 'twitter')[0] :
+      undefined
+  let [twitter, setTwitter] = useState(twitterIdentity?.id);
+  let [tweetInput, setTweetInput] = useState(twitterIdentity?.verificationInfo);
+
+  let tweet = twitterIdentity?.verificationInfo;
 
   let emailHash = email ? SparkMD5.hash(email) : info?.emailHash;
 
   const [showTwitterVerify, setShowTwitterVerify] = useState(false);
+
+  console.log(twitterIdentity);
 
   let submit = async e => {
     e.preventDefault();
     let tweet = tweetInput;
     console.log('submitting tweet', tweet);
 
-    let selectedFile = document.querySelector('.edit-profile-file-input')
-      .files[0];
+    let identities = [
+      {
+        type: 'twitter',
+        id: twitter,
+        verificationInfo: tweet
+      }
+    ];
+
+    let selectedFile = document.querySelector('.edit-profile-file-input').files[0];
+
     if (selectedFile) {
-      console.log('file selected');
       let reader = new FileReader();
       reader.readAsDataURL(selectedFile);
       reader.onloadend = async () => {
         e.preventDefault();
         let avatar = reader.result;
-        console.log(avatar);
         let ok = await updateInfo({
           displayName,
-          twitter,
-          tweet,
           emailHash,
           avatar,
+          identities
         });
         if (ok) close();
       };
     } else {
-      let ok = await updateInfo({displayName, twitter, tweet, emailHash});
+      let ok = await updateInfo({displayName, identities, emailHash});
       if (ok) close();
     }
   };

@@ -8,14 +8,23 @@ let ejs = require('ejs');
 app.use(express.static(process.env.STATIC_FILES_DIR || '.'))
 
 const jamHost = process.env.JAM_HOST || 'beta.jam.systems';
+const jamSchema = process.env.JAM_SCHEMA || 'https://';
+const jamUrl = process.env.JAM_URL || `${jamSchema}${jamHost}`;
+const pantryUrl = process.env.JAM_PANTRY_URL || `${jamUrl}/_/pantry`
+const signalHubUrl = process.env.JAM_SIGNALHUB_URL || `${jamUrl}/_/signalhub`
+const stunServer = process.env.STUN_SERVER || `stun.${jamHost}:3478`;
+const turnServer = process.env.TURN_SERVER || `turn.${jamHost}:3478`;
 
-const pantryApiPrefix = `https://${jamHost}/_/pantry/api/v1/rooms`;
+
+
+
+const pantryApiPrefix = `${pantryUrl}/api/v1/rooms`;
 
 const defaultMetaInfo = {
     ogTitle: "Jam",
     ogDescription: "Join this Jam audio space",
-    ogUrl: `https://${jamHost}/`,
-    ogImage: `https://${jamHost}/img/jam-app-icon.jpg`,
+    ogUrl: jamUrl,
+    ogImage: `${jamUrl}/img/jam-app-icon.jpg`,
     favIcon: '/img/jam-app-icon.jpg',
 }
 
@@ -26,8 +35,8 @@ const getRoomMetaInfo = async (roomPath) => {
     return {
         ogTitle: roomInfo['name'],
         ogDescription: roomInfo['description'],
-        ogUrl: `https://${jamHost}${roomPath}`,
-        ogImage: roomInfo['logoURI'] || `https://${jamHost}/img/jam-app-icon.jpg`,
+        ogUrl: `${jamUrl}${roomPath}`,
+        ogImage: roomInfo['logoURI'] || `${jamUrl}/img/jam-app-icon.jpg`,
         color: roomInfo['color'] || '',
         id: roomInfo['id'] || '',
         favIcon: roomInfo['logoURI'] || '/img/jam-app-icon.jpg',
@@ -37,6 +46,19 @@ const getRoomMetaInfo = async (roomPath) => {
     return {};
   }
 }
+
+const jamConfig = {
+    jamHost,
+    jamUrl,
+    pantryUrl,
+    signalHubUrl,
+    stunServer,
+    turnServer,
+    development: !!process.env.DEVELOPMENT
+};
+app.use("/config.json", (_, res) => {
+    res.json(jamConfig);
+})
 
 app.use(async (req, res) => {
 
@@ -105,10 +127,13 @@ app.use(async (req, res) => {
   </head>
   <body>
     <div id="root" class="outer-container"></div>
+    <script>
+        window.jamConfig = ${JSON.stringify(jamConfig)};
+    </script>
     <script type="module" src="./bundle.js"></script>
   </body>
 </html>
-`, {metaInfo: metaInfo}));
+`, {metaInfo}));
 })
 
 module.exports = app;
