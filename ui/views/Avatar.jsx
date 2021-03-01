@@ -133,7 +133,7 @@ function TwitterHandle({info, divClass, fontClass}) {
       info?.identities?.filter((identity) => identity.type === 'twitter')[0] :
       undefined
   return (
-    (twitterIdentity.id || null) && (
+    (twitterIdentity?.id || null) && (
       <div className={divClass}>
         <span className={fontClass}>
           {/* <span className="text-gray-800">@</span> */}
