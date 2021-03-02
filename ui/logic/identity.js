@@ -68,6 +68,7 @@ if(identity.info.twitter) {
       identities: [twitterIdentity]});
   }
   set(identity, 'info', {
+    ...identity.info,
     twitter: undefined,
     tweet: undefined});
 }
