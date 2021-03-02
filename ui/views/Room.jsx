@@ -203,6 +203,26 @@ export default function Room({room, roomId}) {
             </button>
           </div>
         )}
+        {!iSpeak && (
+          <div className="flex relative">
+            <button
+              className="select-none h-12 px-6 text-lg text-white bg-gray-600 rounded-lg focus:shadow-outline active:bg-gray-600 flex-grow"
+              style={{
+                backgroundColor: color || '#4B5563',
+                color: isColorDark ? 'white' : 'black',
+              }}
+              onClick={() =>
+                swarm.set('sharedState', s => ({...s, handRaised: !myHandRaised}))
+              }
+            >
+              {myHandRaised ? (
+                <>✋🏽&nbsp;Lower&nbsp;hand</>
+              ) : (
+                <>✋🏽&nbsp;Raise&nbsp;hand</>
+              )}
+            </button>
+          </div>
+        )}
         <br />
         <div className="flex relative">
           {/* <button
@@ -293,21 +313,6 @@ export default function Room({room, roomId}) {
             onClick={() => leaveRoom(roomId)}
           >
             🖖🏽&nbsp;Leave
-          </button>
-        </div>
-
-        <div className="flex relative">
-          <button
-            className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow"
-            onClick={() =>
-              swarm.set('sharedState', s => ({...s, handRaised: !myHandRaised}))
-            }
-          >
-            {myHandRaised ? (
-              <>✋🏽&nbsp;Lower&nbsp;hand</>
-            ) : (
-              <>✋🏽&nbsp;Raise&nbsp;hand</>
-            )}
           </button>
         </div>
       </div>
