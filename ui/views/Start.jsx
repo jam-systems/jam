@@ -13,8 +13,51 @@ export default function Start({urlRoomId}) {
   let [logoURI, setLogoURI] = useState('');
   let [buttonText, setButtonText] = useState('');
   let [buttonURI, setButtonURI] = useState('');
+  let [roomFromURIError, setRoomFromURIError] = useState(false);
 
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  if ("/" !== window.location.pathname) {
+    let roomId = window.location.pathname.substring(1);
+    let roomConfigHash = window.location.hash;
+    let roomConfig;
+    console.log(roomId);
+    console.log(roomConfigHash);
+
+    if (roomConfigHash) {
+      let parseParams = params => {
+        let res = params.split('&').reduce(function (res, item) {
+          var parts = item.split('=');
+          res[parts[0]] = parts[1];
+          return res;
+        }, {});
+        return res;
+      };
+
+      roomConfig = parseParams(decodeURI(roomConfigHash.substring(1)));
+      console.log(roomConfig);
+    }
+
+    (async () => {
+      let roomCreated = await createRoom(
+        roomId,
+        (roomConfig?.name || ''),
+        (roomConfig?.description || ''),
+        logoURI,
+        color,
+        swarm.myPeerId
+      );
+      if(roomCreated) {
+        console.log('room created, redirecting');
+        navigate('/' + roomId);
+        enterRoom(roomId);
+      } else {
+        console.log('room not created');
+        setRoomFromURIError(true);
+      }
+    })();
+
+  }
 
   let submit = e => {
     e.preventDefault();
@@ -49,6 +92,19 @@ export default function Start({urlRoomId}) {
   return (
     <div className="container md:min-h-full" style={{height: 'initial'}}>
       <div className="child p-6 md:p-10">
+
+        <div className={roomFromURIError ? "mb-12 p-4 text-gray-700 rounded-lg border border-yellow-100 bg-yellow-50" : "hidden"}>
+          The Room ID <code className="text-gray-900 bg-yellow-200">{window.location.pathname.substring(1)}</code> is not valid.<br/>
+
+          <a href="https://gitlab.com/jam-systems/jam"
+             target="_blank"
+             className="underline text-blue-800 active:text-blue-600">
+            Learn more about Room IDs
+          </a>
+          <br/><br/>
+          You can use the form below to start a room.
+        </div>
+
         <h1>Start a Room</h1>
 
         <form className="pt-12" onSubmit={submit}>
