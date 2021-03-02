@@ -97,12 +97,14 @@ export async function createRoom(
   color,
   peerId
 ) {
-  return post('', `/rooms/${roomId}`, {
+  let room = {
     name,
     description,
     logoURI,
     color,
     moderators: [peerId],
     speakers: [peerId],
-  });
+  };
+  let ok = await post('', `/rooms/${roomId}`, room);
+  if (ok) return room;
 }
