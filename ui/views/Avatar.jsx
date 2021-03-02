@@ -115,7 +115,7 @@ export function AudienceAvatar({peerId, peerState, reactions, info, handRaised, 
             className="absolute bg-white text-4xl md:text-6xl pt-3 md:pt-4 human-radius w-16 h-16 md:w-24 md:h-24 border text-center"
           />
           <div className={handRaised ? '' : 'hidden'}>
-            <div className="absolute w-9 h-9 top-7 left-11 md:top-16 md:right-0 md:-mr-10 rounded-full bg-white text-lg border-2 border-gray-400 flex items-center justify-center">
+            <div className="absolute w-9 h-9 top-7 left-11 md:top-16 md:left-13 rounded-full bg-white text-lg border-2 border-gray-400 flex items-center justify-center">
               ✋🏽
             </div>
           </div>
