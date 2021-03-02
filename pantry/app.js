@@ -37,6 +37,14 @@ const verify = (authToken, key) => {
 
 const roomAuthenticator = {
     ...permitAllAuthenticator,
+    canPost: (req, res, next) => {
+        const roomId = req.params.id;
+        if(/^[\w-]{4,}$/.test(roomId)) {
+            next();
+        } else {
+            res.sendStatus(403);
+        }
+    },
     canPut: async (req, res, next) => {
         const authHeader = req.header("Authorization");
         if(authHeader) {
