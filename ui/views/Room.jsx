@@ -87,6 +87,17 @@ export default function Room({room, roomId}) {
     id => !stagePeers.includes(id)
   );
 
+  let myHandRaised = sharedState?.handRaised;
+  let raisedHands = [];
+  if (iModerate) {
+    for (let peerId in peerState) {
+      if (peerState[peerId]?.handRaised) {
+        raisedHands.push(peerId);
+      }
+    }
+  }
+  console.log('raised hands', raisedHands);
+
   return (
     <div
       className="container"
@@ -286,8 +297,17 @@ export default function Room({room, roomId}) {
         </div>
 
         <div className="flex relative">
-          <button className="select-none hidden h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow">
-            ✋🏽&nbsp;Raise&nbsp;hand
+          <button
+            className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow"
+            onClick={() =>
+              swarm.set('sharedState', s => ({...s, handRaised: !myHandRaised}))
+            }
+          >
+            {myHandRaised ? (
+              <>✋🏽&nbsp;Lower&nbsp;hand</>
+            ) : (
+              <>✋🏽&nbsp;Raise&nbsp;hand</>
+            )}
           </button>
         </div>
       </div>
