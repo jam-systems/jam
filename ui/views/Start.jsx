@@ -17,48 +17,6 @@ export default function Start({urlRoomId}) {
 
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  if ("/" !== window.location.pathname) {
-    let roomId = window.location.pathname.substring(1);
-    let roomConfigHash = window.location.hash;
-    let roomConfig;
-    console.log(roomId);
-    console.log(roomConfigHash);
-
-    if (roomConfigHash) {
-      let parseParams = params => {
-        let res = params.split('&').reduce(function (res, item) {
-          var parts = item.split('=');
-          res[parts[0]] = parts[1];
-          return res;
-        }, {});
-        return res;
-      };
-
-      roomConfig = parseParams(decodeURI(roomConfigHash.substring(1)));
-      console.log(roomConfig);
-    }
-
-    (async () => {
-      let roomCreated = await createRoom(
-        roomId,
-        (roomConfig?.name || ''),
-        (roomConfig?.description || ''),
-        logoURI,
-        color,
-        swarm.myPeerId
-      );
-      if(roomCreated) {
-        console.log('room created, redirecting');
-        navigate('/' + roomId);
-        enterRoom(roomId);
-      } else {
-        console.log('room not created');
-        setRoomFromURIError(true);
-      }
-    })();
-
-  }
-
   let submit = e => {
     e.preventDefault();
     state.set('userInteracted', true);
