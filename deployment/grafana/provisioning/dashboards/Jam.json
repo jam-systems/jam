@@ -33,9 +33,106 @@
       "fillGradient": 0,
       "gridPos": {
         "h": 7,
-        "w": 10,
+        "w": 20,
         "x": 0,
         "y": 0
+      },
+      "hiddenSeries": false,
+      "id": 18,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.4.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum_over_time(jam_users_active[10y])/4",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Total people minutes in rooms",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:1483",
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "$$hashKey": "object:1484",
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 7,
+        "w": 10,
+        "x": 0,
+        "y": 7
       },
       "hiddenSeries": false,
       "id": 10,
@@ -67,15 +164,29 @@
         {
           "expr": "avg_over_time(jam_users_active[1h])",
           "interval": "",
-          "legendFormat": "",
-          "refId": "A"
+          "legendFormat": "avg",
+          "refId": "average"
+        },
+        {
+          "expr": "min_over_time(jam_users_active[1h])",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "min",
+          "refId": "min"
+        },
+        {
+          "expr": "max_over_time(jam_users_active[1h])",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "max",
+          "refId": "max"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Active Users (hourly average)",
+      "title": "Active Users (hourly stats)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -132,7 +243,7 @@
         "h": 7,
         "w": 10,
         "x": 10,
-        "y": 0
+        "y": 7
       },
       "hiddenSeries": false,
       "id": 16,
@@ -227,7 +338,7 @@
         "h": 7,
         "w": 10,
         "x": 0,
-        "y": 7
+        "y": 14
       },
       "hiddenSeries": false,
       "id": 8,
@@ -325,7 +436,7 @@
         "h": 7,
         "w": 10,
         "x": 10,
-        "y": 7
+        "y": 14
       },
       "hiddenSeries": false,
       "id": 12,
@@ -422,7 +533,7 @@
         "h": 8,
         "w": 10,
         "x": 0,
-        "y": 14
+        "y": 21
       },
       "hiddenSeries": false,
       "id": 6,
@@ -520,7 +631,7 @@
         "h": 8,
         "w": 10,
         "x": 10,
-        "y": 14
+        "y": 21
       },
       "hiddenSeries": false,
       "id": 14,
@@ -598,7 +709,7 @@
       }
     }
   ],
-  "refresh": "5s",
+  "refresh": "30s",
   "schemaVersion": 27,
   "style": "dark",
   "tags": [],
