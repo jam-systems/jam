@@ -21,13 +21,10 @@ let updateInfo = async info => {
 };
 
 export default function EditIdentity({close}) {
-
   let [info, id] = use(identity, ['info', 'publicKey']);
   let [displayName, setDisplayName] = useState(info?.displayName);
   let [email, setEmail] = useState(info?.email);
-  let twitterIdentity = info?.identities?.filter((identity) => identity.type === 'twitter').length > 0 ?
-      info?.identities?.filter((identity) => identity.type === 'twitter')[0] :
-      undefined
+  let twitterIdentity = info?.identities?.find(i => i.type === 'twitter');
   let [twitter, setTwitter] = useState(twitterIdentity?.id);
   let [tweetInput, setTweetInput] = useState(twitterIdentity?.verificationInfo);
 
@@ -48,11 +45,12 @@ export default function EditIdentity({close}) {
       {
         type: 'twitter',
         id: twitter,
-        verificationInfo: tweet
-      }
+        verificationInfo: tweet,
+      },
     ];
 
-    let selectedFile = document.querySelector('.edit-profile-file-input').files[0];
+    let selectedFile = document.querySelector('.edit-profile-file-input')
+      .files[0];
 
     if (selectedFile) {
       let reader = new FileReader();
@@ -64,7 +62,7 @@ export default function EditIdentity({close}) {
           displayName,
           emailHash,
           avatar,
-          identities
+          identities,
         });
         if (ok) close();
       };
