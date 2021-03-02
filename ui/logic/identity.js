@@ -4,7 +4,7 @@ import {adjectives, nouns} from '../lib/names';
 import {post, put, get} from './backend';
 import {StoredState} from '../lib/local-storage';
 import {DEV} from './config';
-import {set} from 'use-minimal-state';
+import {set, update} from 'use-minimal-state';
 
 function decode(base64String) {
   return Uint8Array.from(base64.decodeUrl(base64String, 'binary'));
@@ -30,6 +30,12 @@ const timeCodeToBytes = timeCode =>
 const currentTimeCode = () => Math.round(Date.now() / 30000);
 const timeCodeValid = code => Math.abs(code - currentTimeCode()) <= 1;
 
+function randomName() {
+  let adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+  let noun = nouns[Math.floor(Math.random() * nouns.length)];
+  return `${adj} ${noun}`;
+}
+
 const identity = StoredState(
   'identity',
   () => {
@@ -41,51 +47,70 @@ const identity = StoredState(
       publicKey,
       secretKey,
       info: {
-        displayName: `${
-          adjectives[Math.floor(Math.random() * adjectives.length)]
-        } ${nouns[Math.floor(Math.random() * nouns.length)]}`,
+        id: publicKey,
+        displayName: randomName(),
       },
     };
   },
   {debug: DEV}
 );
-// backwards compatibility
+// MIGRATIONS
 if (!identity.publicKey && identity.keyPair.publicKey) {
   set(identity, 'publicKey', identity.keyPair.publicKey);
   set(identity, 'secretKey', identity.keyPair.secretKey);
 }
+// nuked identity.info
+if (!identity.info) {
+  set(identity, 'info', {displayName: randomName(), id: identity.publicKey});
+}
+if (!identity.info.displayName) {
+  identity.info.displayName = randomName();
+  update(identity, 'info');
+}
+// missing .id
+if (!identity.info.id) {
+  identity.info.id = identity.publicKey;
+  update(identity, 'info');
+}
 
 // REMOVE WHEN ALL old twitter identities converted
-if(identity.info.twitter) {
+if (identity.info.twitter) {
   let twitterIdentity = {
     type: 'twitter',
     id: identity.info.twitter,
     verificationInfo: identity.info.tweet,
-  }
-  if(!identity.info.identities || !identity.info.identities.length || !identity.info.identities[0].id) {
+  };
+  if (
+    !identity.info.identities ||
+    !identity.info.identities.length ||
+    !identity.info.identities[0].id
+  ) {
     set(identity, 'info', {
       ...identity.info,
-      identities: [twitterIdentity]});
+      identities: [twitterIdentity],
+    });
   }
   set(identity, 'info', {
     ...identity.info,
     twitter: undefined,
-    tweet: undefined});
+    tweet: undefined,
+  });
 }
 
 export default identity;
 
 export async function initializeIdentity() {
-  const ok = await put(
+  const ok =
+    (await put(
       signedToken(),
       `/identities/${identity.publicKey}`,
       identity.info
-      ) ||
-      await post(
-          signedToken(),
-          `/identities/${identity.publicKey}`,
-          identity.info
-      );
+    )) ||
+    (await post(
+      signedToken(),
+      `/identities/${identity.publicKey}`,
+      identity.info
+    ));
   if (ok) identity.set('synced', true);
 }
 
@@ -94,9 +119,10 @@ export async function getInfoServer() {
 }
 
 export async function updateInfoServer(info) {
-  return await put(signedToken(), `/identities/${identity.publicKey}`, info)
-         ||
-         await post(signedToken(), `/identities/${identity.publicKey}`, info);
+  return (
+    (await put(signedToken(), `/identities/${identity.publicKey}`, info)) ||
+    (await post(signedToken(), `/identities/${identity.publicKey}`, info))
+  );
 }
 
 export function sign(data) {
