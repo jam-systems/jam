@@ -96,3 +96,10 @@ Directory overview:
 `signalhub`/ a simple server for managing WebRTC connections for Jam
 
 `ui`/ web based user interface based on the React framework
+
+
+## Buy Us ☕
+
+[BTC](bitcoin:3HM1zPtLuwCGarbihNYVjFVwbFrFe9keqh)
+
+[ETH](ethereum:0xe15265b2a309f0d20038e10b8df5a12fb5e916f8?gas=40000)
