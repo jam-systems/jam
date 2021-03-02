@@ -17,10 +17,14 @@ if(!local) {
     const identityCount = async () => (await client.keys("identities/*")).length;
     const set = (key, value) => client.set(key, JSON.stringify(value));
     const get = async (key) => JSON.parse(await client.get(key));
+    const del = (key) => client.del(key);
+    const list = (prefix) => client.keys(`${prefix}*`);
 
     _exports = {
         get,
         set,
+        del,
+        list,
         roomCount,
         identityCount
     };

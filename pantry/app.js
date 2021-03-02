@@ -1,39 +1,20 @@
 const express = require('express');
 const cors = require('cors');
 const logger = require('morgan');
-const nacl = require('tweetnacl');
-const base64 = require('compact-base64');
 
 const verifyIdentities = require("./verifications");
 const indexRouter = require('./routes/index');
 const metricsRouter = require('./routes/metrics');
 
+const {verify, isModerator} = require('./auth');
 const {controller, permitAllAuthenticator} = require('./routes/controller');
-const { get } = require('./services/redis');
+const raiseHandRouter = require('./routes/raiseHand');
 const app = express();
 
 app.use(logger('dev'));
 app.use(cors());
 app.use(express.json({limit: "500kb"}));
 
-const decode = (base64String) => Uint8Array.from(base64.decodeUrl(base64String, 'binary'));
-const timeCodeFromBytes = (timeCodeBytes) => timeCodeBytes[0] +
-    (timeCodeBytes[1] << 8) +
-    (timeCodeBytes[2] << 16) +
-    (timeCodeBytes[3] << 24);
-const currentTimeCode = () => Math.round(Date.now() / 30000);
-const timeCodeValid = code => Math.abs(code - currentTimeCode()) <= 1;
-
-const verify = (authToken, key) => {
-    const timeCodeBytes = nacl.sign.open(
-        decode(authToken),
-        decode(key)
-    );
-    return (
-      timeCodeBytes &&
-      timeCodeValid(timeCodeFromBytes(timeCodeBytes))
-    );
-}
 
 const roomAuthenticator = {
     ...permitAllAuthenticator,
@@ -46,26 +27,18 @@ const roomAuthenticator = {
         }
     },
     canPut: async (req, res, next) => {
-        const authHeader = req.header("Authorization");
-        if(authHeader) {
-            const token = authHeader.substring(6);
-            const roomInfo = await get('rooms/' + req.params.id);
-            let authenticated = false;
-            for (const moderatorKey of roomInfo['moderators']) {
-                if(verify(token, moderatorKey)) {
-                    authenticated = true;
-                    break;
-                }
-            }
-            if(authenticated) {
-                next();
-            } else {
-                res.sendStatus(403);
-            }
-        } else {
+        const roomId = req.params.id;
+
+        if(!req.header("Authorization")) {
             res.sendStatus(401);
+            return
         }
-    },
+        if(!isModerator(req, roomId)) {
+            res.sendStatus(403);
+            return
+        }
+        next();
+    }
 }
 
 const identityAuthenticator = {
@@ -107,7 +80,10 @@ const identityAuthenticator = {
 
 app.use('/', indexRouter);
 app.use('/metrics', metricsRouter);
+
 app.use('/api/v1/', controller('rooms', roomAuthenticator, (id) => id, () => 'room-info'));
+app.use('/api/v1/rooms/:id/raisedHands', raiseHandRouter);
+
 app.use('/api/v1/', controller('identities', identityAuthenticator));
 
 

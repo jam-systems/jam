@@ -39,7 +39,7 @@ const controller = (prefix, authenticator, broadcastRoom, broadcastChannel) => {
     router.put(path, _authenticator.canPut, async function(req, res, next) {
         const key = redisKey(req);
         if(await get(key)) {
-            set(key, req.body)
+            await set(key, req.body)
             if(broadcastRoom && broadcastChannel)
             hub(broadcastRoom(req.params.id)).broadcast(broadcastChannel(req.params.id), req.body)
             res.send(req.body)
