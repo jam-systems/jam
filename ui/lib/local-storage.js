@@ -14,11 +14,13 @@ export function StoredState(name, initialize = () => ({}), options) {
   window.addEventListener('storage', event => {
     if (event.key === name) {
       forwardUpdates = false;
-      let storedState = getStorage(localStorage, name) ?? initialize();
-      for (let key in storedState) {
-        let value = storedState[key];
-        if (state[key] !== value) set(state, key, value);
-      }
+      try {
+        let storedState = getStorage(localStorage, name) ?? initialize();
+        for (let key in storedState) {
+          let value = storedState[key];
+          if (state[key] !== value) set(state, key, value);
+        }
+      } catch (_) {}
       forwardUpdates = true;
     }
   });
