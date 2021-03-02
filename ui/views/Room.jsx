@@ -218,7 +218,7 @@ export default function Room({room, roomId}) {
               }
             >
               {myHandRaised ? (
-                <>✋🏽&nbsp;Stop&nbsp;raising&nbsp;hand</>
+                <>Stop&nbsp;raising&nbsp;hand</>
               ) : (
                 <>✋🏽&nbsp;Raise&nbsp;hand&nbsp;to&nbsp;get&nbsp;on&nbsp;stage</>
               )}
