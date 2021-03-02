@@ -3,7 +3,13 @@ import ReactMarkdown from 'react-markdown';
 import gfm from 'remark-gfm';
 
 function customUriTransformer(uri) {
-  return uri.startsWith('bitcoin:') ? uri : ReactMarkdown.uriTransformer(uri);
+  const schemes = ['bitcoin:', 'ethereum:'];
+  for (const scheme of schemes) {
+    if(uri.startsWith(scheme)){
+      return uri;
+    }
+  }
+  return ReactMarkdown.uriTransformer(uri);
 }
 
 export default function RoomHeader({name, description, logoURI, buttonURI, buttonText, editRoom}) {
