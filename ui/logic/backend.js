@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import {use} from 'use-minimal-state';
 import state from './state.js';
-import {jamHost} from './config';
+import {config} from './config';
 // POST https://jam.systems/_/pantry/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
 // Creates room, returns 409 conflict if room exists
 
@@ -11,7 +11,7 @@ import {jamHost} from './config';
 // PUT https://jam.systems/_/pantry/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
 // updates room and broadcasts to roomId / channel room-info on signal hub
 
-const API = `https://${jamHost()}/_/pantry/api/v1`;
+const API = `${config.pantryUrl}/api/v1`;
 
 export function useApiQuery(path, doFetch = true) {
   let cached = use(state, 'queries')[path];
@@ -44,11 +44,12 @@ export function updateApiQuery(path, data, status) {
   state.set('queries', {...state.queries, [path]: data && {data, status}});
 }
 
-export function forwardApiQuery(path, key) {
-  state.set(key, state.queries[path]?.data);
+export function forwardApiQuery(path, key, defaultQuery) {
+  state.set(key, state.queries[path]?.data || defaultQuery);
   state.on('queries', (queries, oldQueries) => {
-    let data = queries[path]?.data;
-    if (data !== oldQueries[path]?.data) state.set(key, data);
+    let data = queries[path]?.data || defaultQuery;
+    let oldData = oldQueries[path]?.data || defaultQuery;
+    if (data !== oldData) state.set(key, data);
   });
 }
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import {use} from 'use-minimal-state';
-import state from '../state';
+import state from '../logic/state';
 
 export default function Modals() {
   let modals = use(state, 'modals');

@@ -4,6 +4,7 @@ const logger = require('morgan');
 const nacl = require('tweetnacl');
 const base64 = require('compact-base64');
 
+const verifyIdentities = require("./verifications");
 const indexRouter = require('./routes/index');
 const metricsRouter = require('./routes/metrics');
 
@@ -61,17 +62,36 @@ const roomAuthenticator = {
 
 const identityAuthenticator = {
     ...permitAllAuthenticator,
-    canPut: (req, res, next) => {
+    canPut: async (req, res, next) => {
         const authHeader = req.header("Authorization");
-        if(authHeader) {
-            const token = authHeader.substring(6);
-            if(verify(token, req.params.id)) {
+
+        if(!authHeader) {
+            res.sendStatus(401);
+            return
+        }
+
+        const token = authHeader.substring(6);
+        if(!verify(token, req.params.id)) {
+            res.sendStatus(403);
+            return
+        }
+
+        if(req.body.identities) {
+            try {
+                await verifyIdentities(req.body.identities, req.params.id);
                 next();
-            } else {
-                res.sendStatus(403);
+            } catch(error) {
+                res.status(400).json(
+                    {
+                        success: false,
+                        error: {
+                            code: "identity-verification-failed",
+                            message: error.message
+                        }
+                    });
             }
         } else {
-            res.sendStatus(401);
+            next();
         }
     },
 }

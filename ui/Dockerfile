@@ -11,13 +11,12 @@ FROM node:alpine
 RUN mkdir /app
 WORKDIR /app
 
-COPY docker/set-jam-host /usr/local/bin/
 COPY css ./css/
 COPY img ./img/
 COPY server ./server/
 COPY --from=builder /bundle.js ./
 RUN yarn add express ejs node-fetch
 
-CMD set-jam-host && node server/bin/www
+CMD node server/bin/www
 
 EXPOSE 3000

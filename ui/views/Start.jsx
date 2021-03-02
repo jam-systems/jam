@@ -1,19 +1,20 @@
 import React, {useState, useMemo} from 'react';
 import slugify from 'slugify';
 
-import {createRoom} from '../backend';
+import {createRoom} from '../logic/backend';
 import swarm from '../lib/swarm.js';
 import {navigate} from '../lib/use-location';
-import {enterRoom, state} from '../main';
+import {enterRoom, state} from '../logic/main';
 
 export default function Start({urlRoomId}) {
   let [name, setName] = useState('');
   let [description, setDescription] = useState('');
   let [color, setColor] = useState('#4B5563');
   let [logoURI, setLogoURI] = useState('');
+  let [buttonText, setButtonText] = useState('');
+  let [buttonURI, setButtonURI] = useState('');
 
   const [showAdvanced, setShowAdvanced] = useState(false);
-
 
   let submit = e => {
     e.preventDefault();
@@ -27,21 +28,27 @@ export default function Start({urlRoomId}) {
     }
 
     (async () => {
-      await createRoom(roomId, name, description, logoURI, color, swarm.myPeerId);
+      await createRoom(
+        roomId,
+        name,
+        description,
+        logoURI,
+        color,
+        swarm.myPeerId
+      );
       if (urlRoomId !== roomId) navigate('/' + roomId);
       enterRoom(roomId);
     })();
   };
 
   let humins = useMemo(() => {
-    let humins = ['DoubleMalt', 'mitschabaude', '__tosh']
-    return humins.sort(() => Math.random() - 0.5)},
-    []);
+    let humins = ['DoubleMalt', 'mitschabaude', '__tosh'];
+    return humins.sort(() => Math.random() - 0.5);
+  }, []);
 
   return (
-    <div className="container md:min-h-full" style={{height: "initial"}}>
+    <div className="container md:min-h-full" style={{height: 'initial'}}>
       <div className="child p-6 md:p-10">
-
         <h1>Start a Room</h1>
 
         <form className="pt-12" onSubmit={submit}>
@@ -74,18 +81,40 @@ export default function Start({urlRoomId}) {
           ></textarea>
           <div className="p-2 text-gray-500 italic">
             Describe what this room is about.{' '}
-            <span className="text-gray-400">(optional) (supports <a className="underline" href="https://guides.github.com/pdfs/markdown-cheatsheet-online.pdf" target="_blank">Markdown</a>)</span>{' '}
+            <span className="text-gray-400">
+              (optional) (supports{' '}
+              <a
+                className="underline"
+                href="https://guides.github.com/pdfs/markdown-cheatsheet-online.pdf"
+                target="_blank"
+              >
+                Markdown
+              </a>
+              )
+            </span>{' '}
             <span onClick={() => setShowAdvanced(!showAdvanced)}>
               {/* heroicons/gift */}
-              <svg style={{cursor: 'pointer'}} className="pb-1 h-5 w-5 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+              <svg
+                style={{cursor: 'pointer'}}
+                className="pb-1 h-5 w-5 inline-block"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"
+                />
               </svg>
             </span>
           </div>
 
           {/* advanced Room options */}
-          <div className={showAdvanced ? "" : "hidden"}>
-            <br/>
+          <div className={showAdvanced ? '' : 'hidden'}>
+            <br />
             <input
               className="rounded placeholder-gray-400 bg-gray-50 w-full md:w-full"
               type="text"
@@ -102,7 +131,7 @@ export default function Start({urlRoomId}) {
               <span className="text-gray-400">(optional)</span>
             </div>
 
-            <br/>
+            <br />
             <input
               className="rounded w-44 h-12"
               type="color"
@@ -115,6 +144,40 @@ export default function Start({urlRoomId}) {
             ></input>
             <div className="p-2 text-gray-500 italic">
               Set primary color for your Room.{' '}
+              <span className="text-gray-400">(optional)</span>
+            </div>
+
+            <br />
+            <input
+              className="rounded placeholder-gray-400 bg-gray-50 w-full md:w-full"
+              type="text"
+              placeholder="Button URI"
+              value={buttonURI}
+              name="jam-room-button-uri"
+              autoComplete="off"
+              onChange={e => {
+                setButtonURI(e.target.value);
+              }}
+            ></input>
+            <div className="p-2 text-gray-500 italic">
+              Set the link for the 'call to action' button.{' '}
+              <span className="text-gray-400">(optional)</span>
+            </div>
+
+            <br />
+            <input
+              className="rounded placeholder-gray-400 bg-gray-50 w-full md:w-96"
+              type="text"
+              placeholder="Button Text"
+              value={buttonText}
+              name="jam-room-button-text"
+              autoComplete="off"
+              onChange={e => {
+                setButtonText(e.target.value);
+              }}
+            ></input>
+            <div className="p-2 text-gray-500 italic">
+              Set the text for the 'call to action' button.{' '}
               <span className="text-gray-400">(optional)</span>
             </div>
           </div>
@@ -146,9 +209,16 @@ export default function Start({urlRoomId}) {
               target="_blank"
             >
               Learn&nbsp;more&nbsp;about&nbsp;Jam.
-            </a><br/><br/><br/>
-            Jam <b className="font-semibold">Pro</b> (Early Access): Make Jam your own.<br/>
-            Set your own colors and logo, use your own domain.<br/><br/>
+            </a>
+            <br />
+            <br />
+            <br />
+            Jam <b className="font-semibold">Pro</b> (Early Access): Make Jam
+            your own.
+            <br />
+            Set your own colors and logo, use your own domain.
+            <br />
+            <br />
             <a
               href="https://forms.ops.jam.systems/pro/"
               className="underline text-blue-800 active:text-blue-600"
@@ -167,7 +237,6 @@ export default function Start({urlRoomId}) {
             />
           </div>
         </div>
-
 
         <div className="pt-32 text-xs text-gray-400 text-center">
           <a href="https://gitlab.com/jam-systems/jam" target="_blank">

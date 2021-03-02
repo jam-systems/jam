@@ -1459,10 +1459,10 @@ mime@1.6.0:
   resolved "https://registry.yarnpkg.com/mime/-/mime-1.6.0.tgz#32cd9e5c64553bd58d19a568af452acff04981b1"
   integrity sha512-x0Vn8spI+wuJ1O6S7gnbaQg8Pxh4NNHb7KSINmEWKiPE4RKOplvijn+NkmYmmRgP68mc70j2EbeTFRsrswaQeg==
 
-minimal-state@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/minimal-state/-/minimal-state-4.1.0.tgz#68f7cf7ea15179f56fda7d3b6f1b25ecda6af0bd"
-  integrity sha512-QrOMHFMgoHAtulLlbRaJLe1H+yoTCykxdEScDWl/+URL3JTmr6ZLHn2PYd18ICGa+qEroEiw9tx0gEJyqG/wIA==
+minimal-state@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/minimal-state/-/minimal-state-5.0.0.tgz#a8e4cc81169b1ddccb31cc0465d84727b3eafa29"
+  integrity sha512-qldoMItGYgCMhI3r/JvnSEZ3yYRk2QWEXlx1cmzeAhU7+HPW0F904fV13SXVYf0phLOVbkU0P0VIVJmVE7CKPQ==
 
 minimatch@3.0.4, minimatch@^3.0.4:
   version "3.0.4"
@@ -2233,12 +2233,12 @@ uri-js@^4.2.2:
   dependencies:
     punycode "^2.1.0"
 
-use-minimal-state@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/use-minimal-state/-/use-minimal-state-2.1.0.tgz#0aa99b9c43bba23141c9e6e9ae2a9fb7cdc523ad"
-  integrity sha512-hynEPH5oFmjZkLlGxwt7g+DcoY2Bv5KLhACvGxJU/2BvOKaHV64N4W4FqPu0MLWiHoC8tcPJItZSj6DjCaQVgg==
+use-minimal-state@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/use-minimal-state/-/use-minimal-state-3.0.0.tgz#806a631bc47b750d6cabcacdb8d216b22feb0075"
+  integrity sha512-dc7jHcilMSBm9ELYKw3i6fP4mKjcDwe1a3LxCbap5NGvMcGl2V5d/K32zXGXzUzqDbhD5UH3QKqyrPZZ4vUIRw==
   dependencies:
-    minimal-state "^4.1.0"
+    minimal-state "^5.0.0"
 
 utils-merge@1.0.1:
   version "1.0.1"

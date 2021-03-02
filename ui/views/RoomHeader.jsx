@@ -6,9 +6,9 @@ function customUriTransformer(uri) {
   return uri.startsWith('bitcoin:') ? uri : ReactMarkdown.uriTransformer(uri);
 }
 
-export default function RoomHeader({name, description, logoURI, editRoom}) {
+export default function RoomHeader({name, description, logoURI, buttonURI, buttonText, editRoom}) {
   return (
-    <div className="flex">
+    <div className="flex room-header">
       {logoURI && (
         <div className="flex-none">
           <img
@@ -29,6 +29,13 @@ export default function RoomHeader({name, description, logoURI, editRoom}) {
           >
             {description || 'This is a Room on Jam'}
           </ReactMarkdown>
+          <div className={(buttonURI && buttonText) ? "call-to-action" : "hidden"}>
+            <a href={buttonURI}
+               className="select-none align-middle inline-block mt-2 py-2 px-6 text-lg text-black bg-gray-200 border border-gray-300 rounded-lg focus:shadow-outline active:bg-gray-300"
+               target="_blank">
+              {buttonText}
+            </a>
+          </div>
         </div>
       </div>
       {editRoom && (
