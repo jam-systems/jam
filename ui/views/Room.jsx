@@ -155,6 +155,7 @@ export default function Room({room, roomId}) {
                 peerId={myPeerId}
                 peerState={sharedState}
                 info={myInfo}
+                handRaised={myHandRaised}
                 onClick={() => openModal(EditIdentity)}
               />
             )}
@@ -164,6 +165,7 @@ export default function Room({room, roomId}) {
                 {...{peerId, peerState, reactions}}
                 peerState={peerState[peerId]}
                 info={identities[peerId]}
+                handRaised={(iModerate && raisedHands.includes(peerId))}
                 onClick={iModerate ? () => setEditRole(peerId) : undefined}
               />
             ))}
@@ -216,9 +218,9 @@ export default function Room({room, roomId}) {
               }
             >
               {myHandRaised ? (
-                <>✋🏽&nbsp;Lower&nbsp;hand</>
+                <>✋🏽&nbsp;Stop&nbsp;raising&nbsp;hand</>
               ) : (
-                <>✋🏽&nbsp;Raise&nbsp;hand</>
+                <>✋🏽&nbsp;Raise&nbsp;hand&nbsp;to&nbsp;get&nbsp;on&nbsp;stage</>
               )}
             </button>
           </div>
