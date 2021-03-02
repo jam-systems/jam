@@ -129,9 +129,7 @@ export function AudienceAvatar({peerId, peerState, reactions, info, onClick}) {
 }
 
 function TwitterHandle({info, divClass, fontClass}) {
-  let twitterIdentity = info?.identities?.filter((identity) => identity.type === 'twitter').length > 0 ?
-      info?.identities?.filter((identity) => identity.type === 'twitter')[0] :
-      undefined
+  let twitterIdentity = info?.identities?.find(i => i.type === 'twitter');
   return (
     (twitterIdentity?.id || null) && (
       <div className={divClass}>
