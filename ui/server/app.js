@@ -67,6 +67,7 @@ app.use(async (req, res) => {
           "blocks": [
           {
             "type": "section",
+            "response_type": "in_channel",
             "text": {
               "type": "mrkdwn",
               "text": "https://beta.jam.systems/slack-integration-test"
