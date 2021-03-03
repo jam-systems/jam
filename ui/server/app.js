@@ -62,7 +62,7 @@ app.use("/config.json", (_, res) => {
 
 app.use(async (req, res) => {
 
-    if (req.path === '/_/slack') {
+    if (req.path === '/_/integrations/slack') {
       return res.json({
           "blocks": [
           {
