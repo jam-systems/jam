@@ -65,7 +65,7 @@ app.use(async (req, res) => {
     if (req.path === '/_/integrations/slack') {
       return res.json({
         "response_type": "in_channel",
-        "text": "https://beta.jam.systems/slack-integration-test"
+        "text": `https://${jamHost}/${Math.random().toString(36).substr(2, 6)}`
       });
     }
 
