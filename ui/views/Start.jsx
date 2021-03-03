@@ -80,7 +80,7 @@ export default function Start({urlRoomId, roomFromURIError}) {
           Click on the button below to start a room.
         </p>
 
-        <form className="pt-12" onSubmit={submit}>
+        <form className="pt-6" onSubmit={submit}>
           <div className="hidden">
             <input
               className="rounded placeholder-gray-400 bg-gray-50 w-full md:w-96"
