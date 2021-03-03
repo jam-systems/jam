@@ -62,6 +62,20 @@ app.use("/config.json", (_, res) => {
 
 app.use(async (req, res) => {
 
+    if (req.path === '/_/slack') {
+      return res.json({
+          "blocks": [
+          {
+            "type": "section",
+            "text": {
+              "type": "mrkdwn",
+              "text": "https://beta.jam.systems/slack-integration-test"
+            }
+          }
+        ]
+      });
+    }
+
     const metaInfo = req.path === '/' ? defaultMetaInfo : {
         ...defaultMetaInfo,
         ...(await getRoomMetaInfo(req.path))
