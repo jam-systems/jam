@@ -64,16 +64,8 @@ app.use(async (req, res) => {
 
     if (req.path === '/_/integrations/slack') {
       return res.json({
-          "blocks": [
-          {
-            "type": "section",
-            "response_type": "in_channel",
-            "text": {
-              "type": "mrkdwn",
-              "text": "https://beta.jam.systems/slack-integration-test"
-            }
-          }
-        ]
+        "response_type": "in_channel",
+        "text": "https://beta.jam.systems/slack-integration-test"
       });
     }
 
