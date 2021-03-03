@@ -116,7 +116,8 @@ export async function initializeIdentity() {
 }
 
 export async function getInfoServer() {
-  return await get(`/identities/${identity.publicKey}`);
+  let [data, ok] = await get(`/identities/${identity.publicKey}`);
+  return ok && data;
 }
 
 export async function updateInfoServer(info) {

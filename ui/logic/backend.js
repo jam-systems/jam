@@ -66,6 +66,7 @@ async function authenticatedApiRequest(method, token, path, payload) {
   return res.ok;
 }
 
+// returns [data, ok, status]
 export async function get(path) {
   let res = await fetch(API + path, {
     method: 'GET',
@@ -73,12 +74,21 @@ export async function get(path) {
       Accept: 'application/json',
     },
   });
-  if (res.status < 400) return res.json();
-  else {
-    let err = new Error();
-    err.status = res.status;
-    throw err;
-  }
+  if (res.status < 400) return [await res.json(), true, res.status];
+  else return [undefined, false, res.status];
+}
+
+// returns [data, ok, status]
+export async function authedGet(token, path) {
+  let res = await fetch(API + path, {
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Token ${token}`,
+    },
+  });
+  if (res.status < 400) return [await res.json(), true, res.status];
+  else return [undefined, false, res.status];
 }
 
 export async function post(token, path, payload) {

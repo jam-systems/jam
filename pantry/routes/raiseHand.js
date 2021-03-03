@@ -16,6 +16,7 @@ const verifyHandler = (req, res, next) => {
     }
 
     const token = authHeader.substring(6);
+    console.log('req params', req.params)
     if(!verify(token, req.params.identityKey)) {
         res.sendStatus(403);
         return
@@ -43,7 +44,7 @@ router.delete('/:identityKey', verifyHandler, async function(req, res) {
     res.json({success: true});
 });
 
-router.get('', async (req, res) => {
+router.get('', verifyHandler, async (req, res) => {
     const roomId = req.params.id;
     if(!isModerator(req, roomId)) {
         res.sendStatus(403);

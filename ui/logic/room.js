@@ -11,10 +11,11 @@ function connectRoom(roomId) {
   set(state, 'roomId', roomId);
   swarm.connect(roomId);
   swarm.hub.subscribe('identity-updates', async ({peerId}) => {
-    state.set('identities', {
-      ...state.identities,
-      [peerId]: await get(`/identities/${peerId}`),
-    });
+    let [data, ok] = await get(`/identities/${peerId}`);
+    if (ok) {
+      state.identities[peerId] = data;
+      state.update('identities');
+    }
   });
   swarm.hub.subscribeAnonymous('room-info', data => {
     console.log('new room info', data);

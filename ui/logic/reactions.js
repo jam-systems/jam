@@ -1,6 +1,6 @@
 import {set, update, on} from 'use-minimal-state';
 import swarm from '../lib/swarm';
-import {get, post, deleteRequest} from './backend';
+import {post, deleteRequest, authedGet} from './backend';
 import identity, {signedToken} from './identity';
 import state from './state';
 
@@ -39,24 +39,22 @@ async function raiseHand(raise) {
 // fetch raised hands when we become moderator
 on(state, 'iAmModerator', async i => {
   if (i) {
-    try {
-      let hands = await get(`/rooms/${state.roomId}/raisedHands`);
-      set(state, 'raisedHands', new Set(hands));
-    } catch (err) {
-      console.warn(err);
-    }
+    let [hands, ok] = await authedGet(
+      signedToken(),
+      `/rooms/${state.roomId}/raisedHands`
+    );
+    if (ok) set(state, 'raisedHands', new Set(hands));
   }
 });
 // listen for raised hands
 async function onRaiseHand() {
   let {iAmModerator, roomId} = state;
   if (iAmModerator && roomId) {
-    try {
-      let hands = await get(`/rooms/${roomId}/raisedHands`);
-      set(state, 'raisedHands', new Set(hands));
-    } catch (err) {
-      console.warn(err);
-    }
+    let [hands, ok] = await authedGet(
+      signedToken(),
+      `/rooms/${state.roomId}/raisedHands`
+    );
+    if (ok) set(state, 'raisedHands', new Set(hands));
   }
 }
 swarm.on('connected', () => {
