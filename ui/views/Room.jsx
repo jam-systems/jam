@@ -11,7 +11,7 @@ import {openModal} from './Modal';
 import {EditRoomModal} from './EditRoom';
 import useWakeLock from '../lib/use-wake-lock';
 import EditIdentity from './EditIdentity';
-import {sendReaction} from '../logic/reactions';
+import {sendReaction, raiseHand} from '../logic/reactions';
 import EditRole from './EditRole';
 import {AudienceAvatar, StageAvatar} from './Avatar';
 
@@ -25,6 +25,7 @@ export default function Room({room, roomId}) {
     myAudio,
     micMuted,
     reactions,
+    raisedHands,
     identities,
     speaking,
     iSpeak,
@@ -33,6 +34,7 @@ export default function Room({room, roomId}) {
     'myAudio',
     'micMuted',
     'reactions',
+    'raisedHands',
     'identities',
     'speaking',
     'iAmSpeaker',
@@ -87,15 +89,7 @@ export default function Room({room, roomId}) {
     id => !stagePeers.includes(id)
   );
 
-  let myHandRaised = sharedState?.handRaised;
-  let raisedHands = [];
-  if (iModerate) {
-    for (let peerId in peerState) {
-      if (peerState[peerId]?.handRaised) {
-        raisedHands.push(peerId);
-      }
-    }
-  }
+  let myHandRaised = raisedHands.has(myPeerId);
   console.log('raised hands', raisedHands);
 
   return (
@@ -165,7 +159,7 @@ export default function Room({room, roomId}) {
                 {...{peerId, peerState, reactions}}
                 peerState={peerState[peerId]}
                 info={identities[peerId]}
-                handRaised={(iModerate && raisedHands.includes(peerId))}
+                handRaised={iModerate && raisedHands.has(peerId)}
                 onClick={iModerate ? () => setEditRole(peerId) : undefined}
               />
             ))}
@@ -213,9 +207,9 @@ export default function Room({room, roomId}) {
                 backgroundColor: color || '#4B5563',
                 color: isColorDark ? 'white' : 'black',
               }}
-              onClick={() =>
-                swarm.set('sharedState', s => ({...s, handRaised: !myHandRaised}))
-              }
+              onClick={() => {
+                raiseHand(!myHandRaised);
+              }}
             >
               {myHandRaised ? (
                 <>Stop&nbsp;raising&nbsp;hand</>

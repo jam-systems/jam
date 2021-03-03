@@ -61,7 +61,7 @@ async function authenticatedApiRequest(method, token, path, payload) {
       'Content-Type': 'application/json',
       Authorization: `Token ${token}`,
     },
-    body: JSON.stringify(payload),
+    body: payload ? JSON.stringify(payload) : undefined,
   });
   return res.ok;
 }
@@ -87,6 +87,10 @@ export async function post(token, path, payload) {
 
 export async function put(token, path, payload) {
   return authenticatedApiRequest('PUT', token, path, payload);
+}
+
+export async function deleteRequest(token, path, payload = null) {
+  return authenticatedApiRequest('DELETE', token, path, payload);
 }
 
 export async function createRoom(

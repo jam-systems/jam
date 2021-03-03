@@ -100,6 +100,7 @@ if (identity.info.twitter) {
 export default identity;
 
 export async function initializeIdentity() {
+  if (DEV) console.log('identity', identity);
   const ok =
     (await put(
       signedToken(),

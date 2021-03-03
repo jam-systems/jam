@@ -27,6 +27,6 @@
     "slugify": "^1.4.6",
     "spark-md5": "^3.0.1",
     "tweetnacl": "^1.0.3",
-    "use-minimal-state": "^3.0.0"
+    "use-minimal-state": "^3.0.2"
   }
 }

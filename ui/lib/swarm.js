@@ -31,6 +31,7 @@ const swarm = State({
   newPeer: null,
   sharedEvent: null,
   peerEvent: null,
+  anonymous: null,
 });
 
 export default swarm;
@@ -489,6 +490,9 @@ function connect(room) {
     if (type === 'shared-event') {
       swarm.emit('peerEvent', peerId, data);
     }
+  });
+  hub.subscribeAnonymous('anonymous', data => {
+    swarm.emit('anonymous', data);
   });
 }
 

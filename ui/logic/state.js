@@ -9,6 +9,7 @@ const state = State(
     identities: {},
 
     reactions: {},
+    raisedHands: new Set(),
 
     soundMuted: true,
     micMuted: true,
