@@ -1,11 +1,11 @@
 const express = require('express');
 const {verify, isModerator} = require('../auth');
-const {set, del, list} = require('../services/redis');
+const {set, get, del, list} = require('../services/redis');
 const {hub} = require('../services/signalhub');
 
 const router = express.Router({mergeParams: true});
 
-const verifyPost = (req, res, next) => {
+const verifyIdentity = (req, res, next) => {
   const authHeader = req.header('Authorization');
 
   if (!authHeader) {
@@ -14,7 +14,6 @@ const verifyPost = (req, res, next) => {
   }
 
   const token = authHeader.substring(6);
-  console.log('req params', req.params);
   if (!verify(token, req.params.identityKey)) {
     res.sendStatus(403);
     return;
@@ -39,27 +38,32 @@ const verifyModerator = (req, res, next) => {
   next();
 };
 
-router.post('/:identityKey', verifyPost, async function (req, res) {
+router.post('/:identityKey', verifyIdentity, async function (req, res) {
   const roomId = req.params.id;
   const identityKey = req.params.identityKey;
-  await set(`rooms/${roomId}/raisedHands/${identityKey}`, true);
-  hub(roomId).broadcast('anonymous', {raisedHands: true});
+  await set(`rooms/${roomId}/modMessage/${identityKey}`, req.body);
+  hub(roomId).broadcast('anonymous', {modMessage: true});
   res.json({success: true});
 });
 
-router.delete('/:identityKey', verifyPost, async function (req, res) {
+router.delete('/:identityKey', verifyIdentity, async function (req, res) {
   const roomId = req.params.id;
   const identityKey = req.params.identityKey;
-  await del(`rooms/${roomId}/raisedHands/${identityKey}`);
-  hub(roomId).broadcast('anonymous', {raisedHands: true});
+  await del(`rooms/${roomId}/modMessage/${identityKey}`);
+  hub(roomId).broadcast('anonymous', {modMessage: true});
   res.json({success: true});
 });
 
 router.get('', verifyModerator, async (req, res) => {
   const roomId = req.params.id;
-  const prefix = `rooms/${roomId}/raisedHands/`;
-  const raisedHands = (await list(prefix)).map(key => key.replace(prefix, ''));
-  res.json(raisedHands);
+  const prefix = `rooms/${roomId}/modMessage/`;
+  let modMessages = {};
+  let keys = await list(prefix);
+  for (let key of keys) {
+    let id = key.slice(prefix.length);
+    modMessages[id] = await get(key);
+  }
+  res.json(modMessages);
 });
 
 module.exports = router;

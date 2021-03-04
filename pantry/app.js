@@ -8,7 +8,7 @@ const metricsRouter = require('./routes/metrics');
 
 const {verify, isModerator} = require('./auth');
 const {controller, permitAllAuthenticator} = require('./routes/controller');
-const raiseHandRouter = require('./routes/raiseHand');
+const modMessageRouter = require('./routes/raiseHand');
 const app = express();
 
 app.use(logger('dev'));
@@ -82,7 +82,7 @@ app.use('/', indexRouter);
 app.use('/metrics', metricsRouter);
 
 app.use('/api/v1/', controller('rooms', roomAuthenticator, (id) => id, () => 'room-info'));
-app.use('/api/v1/rooms/:id/raisedHands', raiseHandRouter);
+app.use('/api/v1/rooms/:id/modMessage', modMessageRouter);
 
 app.use('/api/v1/', controller('identities', identityAuthenticator));
 
