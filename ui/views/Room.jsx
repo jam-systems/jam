@@ -165,8 +165,7 @@ export default function Room({room, roomId}) {
           </ol>
         </div>
 
-        <br />
-        <br />
+        <div style={{height: '136px', flex: 'none'}} />
       </div>
 
       {/* Navigation */}
