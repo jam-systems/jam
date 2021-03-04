@@ -26,3 +26,6 @@ const state = State(
   {debug: DEV}
 );
 export default state;
+
+// mod visible state
+export const modState = State({raiseHand: false});

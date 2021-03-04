@@ -1,9 +1,7 @@
-import State, {set, update, on} from 'use-minimal-state';
+import {set, update, on} from 'use-minimal-state';
 import swarm from '../lib/swarm';
-import {post, authedGet} from './backend';
 import identity from './identity';
-import state from './state';
-import {pure} from '../lib/local-storage';
+import state, {modState} from './state';
 
 export {sendReaction, raiseHand};
 
@@ -30,7 +28,7 @@ function showReaction(reaction, peerId) {
   }, 5000);
 }
 
-async function raiseHand(raise) {
+function raiseHand(raise) {
   // make visible to me
   if (raise) {
     state.raisedHands.add(identity.publicKey);
@@ -41,6 +39,7 @@ async function raiseHand(raise) {
   // make visible to mods
   set(modState, 'raiseHand', !!raise);
 }
+
 // listen for raised hands
 on(state, 'modMessages', modMessages => {
   let hands = new Set();
@@ -48,37 +47,4 @@ on(state, 'modMessages', modMessages => {
     if (modMessages[peerId].raiseHand) hands.add(peerId);
   }
   set(state, 'raisedHands', hands);
-});
-
-// mod message / mod visible state
-const modState = State({raiseHand: false});
-
-// post initial status on entering room
-on(state, 'inRoom', () => {
-  sendModMessage(pure(modState));
-});
-// post on changes
-on(modState, () => {
-  sendModMessage(pure(modState));
-});
-async function sendModMessage(msg) {
-  let {inRoom} = state;
-  if (inRoom) {
-    await post(`/rooms/${inRoom}/modMessage/${identity.publicKey}`, msg);
-  }
-}
-// fetch mod messages when we become moderator
-on(state, 'iAmModerator', async iAmModerator => {
-  if (iAmModerator) {
-    let [msgs, ok] = await authedGet(`/rooms/${state.roomId}/modMessage`);
-    if (ok) set(state, 'modMessages', msgs);
-  }
-});
-// listen for mod message pings and fetch if we are moderator
-on(swarm, 'anonymous', async ({modMessage}) => {
-  let {iAmModerator, roomId} = state;
-  if (modMessage && iAmModerator && roomId) {
-    let [msgs, ok] = await authedGet(`/rooms/${state.roomId}/modMessage`);
-    if (ok) set(state, 'modMessages', msgs);
-  }
 });

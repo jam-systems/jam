@@ -1,8 +1,10 @@
 import {useCallback, useEffect, useState} from 'react';
-import {use} from 'use-minimal-state';
-import state from './state';
+import {on, set, use} from 'use-minimal-state';
+import state, {modState} from './state';
 import {config, DEV} from './config';
 import identity, {signedToken} from './identity';
+import {pure} from '../lib/local-storage';
+import swarm from '../lib/swarm';
 // POST https://jam.systems/_/pantry/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
 // Creates room, returns 409 conflict if room exists
 
@@ -124,6 +126,8 @@ export async function createRoom(
   if (ok) return room;
 }
 
+// identity
+
 export async function initializeIdentity() {
   if (DEV) console.log('identity', identity);
   const ok =
@@ -144,3 +148,35 @@ export async function updateInfoServer(info) {
     (await post(`/identities/${identity.publicKey}`, info))
   );
 }
+
+// mod message / mod state
+
+// post initial status on entering room
+on(state, 'inRoom', () => {
+  sendModMessage(pure(modState));
+});
+// post on changes
+on(modState, () => {
+  sendModMessage(pure(modState));
+});
+async function sendModMessage(msg) {
+  let {inRoom} = state;
+  if (inRoom) {
+    await post(`/rooms/${inRoom}/modMessage/${identity.publicKey}`, msg);
+  }
+}
+// fetch mod messages when we become moderator
+on(state, 'iAmModerator', async iAmModerator => {
+  if (iAmModerator) {
+    let [msgs, ok] = await authedGet(`/rooms/${state.roomId}/modMessage`);
+    if (ok) set(state, 'modMessages', msgs);
+  }
+});
+// listen for mod message pings and fetch if we are moderator
+on(swarm, 'anonymous', async ({modMessage}) => {
+  let {iAmModerator, roomId} = state;
+  if (modMessage && iAmModerator && roomId) {
+    let [msgs, ok] = await authedGet(`/rooms/${state.roomId}/modMessage`);
+    if (ok) set(state, 'modMessages', msgs);
+  }
+});
