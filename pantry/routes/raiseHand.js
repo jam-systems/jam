@@ -43,7 +43,7 @@ router.post('/:identityKey', verifyPost, async function (req, res) {
   const roomId = req.params.id;
   const identityKey = req.params.identityKey;
   await set(`rooms/${roomId}/raisedHands/${identityKey}`, true);
-  hub(roomId).broadcast('raised-hands-changed', 'ping');
+  hub(roomId).broadcast('anonymous', {raisedHands: true});
   res.json({success: true});
 });
 
@@ -51,7 +51,7 @@ router.delete('/:identityKey', verifyPost, async function (req, res) {
   const roomId = req.params.id;
   const identityKey = req.params.identityKey;
   await del(`rooms/${roomId}/raisedHands/${identityKey}`);
-  hub(roomId).broadcast('raised-hands-changed', 'ping');
+  hub(roomId).broadcast('anonymous', {raisedHands: true});
   res.json({success: true});
 });
 

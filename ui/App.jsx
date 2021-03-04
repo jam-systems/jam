@@ -67,7 +67,7 @@ function App() {
         if (roomCreated) {
           updateApiQuery(`/rooms/${roomId}`, roomCreated, 200);
           navigate('/' + roomId);
-          enterRoom();
+          enterRoom(roomId);
         } else {
           setRoomFromURIError(true);
         }

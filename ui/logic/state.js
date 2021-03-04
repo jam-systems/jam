@@ -3,6 +3,7 @@ import {DEV} from './config';
 const state = State(
   {
     roomId: null,
+    inRoom: null, // === roomId but only if entered
     room: {name: '', description: '', speakers: [], moderators: []},
     iAmSpeaker: false,
     iAmModerator: false,

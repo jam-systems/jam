@@ -31,13 +31,15 @@ swarm.config({
   },
 });
 
-export function enterRoom() {
+export function enterRoom(roomId) {
   state.set('userInteracted', true);
+  state.set('inRoom', roomId);
   swarm.set('sharedState', state => ({...state, inRoom: true}));
   requestAudio().then(() => state.set('soundMuted', false));
 }
 
 export function leaveRoom() {
+  state.set('inRoom', null);
   swarm.set('sharedState', state => ({...state, inRoom: false}));
   stopAudio();
   state.set('soundMuted', true);

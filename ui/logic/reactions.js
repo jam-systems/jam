@@ -36,9 +36,13 @@ async function raiseHand(raise) {
     );
   }
 }
+// post initial raised hand status on entering room
+on(state, 'inRoom', id => {
+  if (id) raiseHand(false);
+});
 // fetch raised hands when we become moderator
-on(state, 'iAmModerator', async i => {
-  if (i) {
+on(state, 'iAmModerator', async iAmModerator => {
+  if (iAmModerator) {
     let [hands, ok] = await authedGet(
       signedToken(),
       `/rooms/${state.roomId}/raisedHands`
@@ -47,25 +51,16 @@ on(state, 'iAmModerator', async i => {
   }
 });
 // listen for raised hands
-async function onRaiseHand() {
+swarm.on('anonymous', async ({raisedHands}) => {
   let {iAmModerator, roomId} = state;
-  if (iAmModerator && roomId) {
+  if (raisedHands && iAmModerator && roomId) {
     let [hands, ok] = await authedGet(
       signedToken(),
       `/rooms/${state.roomId}/raisedHands`
     );
     if (ok) set(state, 'raisedHands', new Set(hands));
   }
-}
-swarm.on('connected', () => {
-  swarm.hub?.subscribeAnonymous('raised-hands-changed', () => {
-    onRaiseHand();
-  });
 });
-// v this is the API i'd want instead
-// swarm.on('anonymous', async ({raisedHand}) => {
-//   if (raisedHand) onRaiseHand();
-// }
 
 function showReaction(reaction, peerId) {
   let {reactions} = state;
