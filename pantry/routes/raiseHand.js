@@ -1,59 +1,65 @@
 const express = require('express');
 const {verify, isModerator} = require('../auth');
-const { set, del, list } = require('../services/redis');
-const { hub } = require('../services/signalhub');
+const {set, del, list} = require('../services/redis');
+const {hub} = require('../services/signalhub');
 
+const router = express.Router({mergeParams: true});
 
+const verifyPost = (req, res, next) => {
+  const authHeader = req.header('Authorization');
 
-const router = express.Router();
+  if (!authHeader) {
+    res.sendStatus(401);
+    return;
+  }
 
-const verifyHandler = (req, res, next) => {
-    const authHeader = req.header("Authorization");
+  const token = authHeader.substring(6);
+  console.log('req params', req.params);
+  if (!verify(token, req.params.identityKey)) {
+    res.sendStatus(403);
+    return;
+  }
 
-    if(!authHeader) {
-        res.sendStatus(401);
-        return
-    }
+  next();
+};
 
-    const token = authHeader.substring(6);
-    console.log('req params', req.params)
-    if(!verify(token, req.params.identityKey)) {
-        res.sendStatus(403);
-        return
-    }
+const verifyModerator = (req, res, next) => {
+  const authHeader = req.header('Authorization');
 
-    next()
+  if (!authHeader) {
+    res.sendStatus(401);
+    return;
+  }
 
-}
+  if (!isModerator(req, req.params.id)) {
+    res.sendStatus(403);
+    return;
+  }
 
+  next();
+};
 
-
-router.post('/:identityKey', verifyHandler, async function(req, res) {
-    const roomId = req.params.id;
-    const identityKey = req.params.identityKey;
-    await set(`/rooms/${roomId}/raisedHands/${identityKey}`, true);
-    hub(roomId).broadcast("raised-hands-changed", "ping");
-    res.json({success: true});
+router.post('/:identityKey', verifyPost, async function (req, res) {
+  const roomId = req.params.id;
+  const identityKey = req.params.identityKey;
+  await set(`/rooms/${roomId}/raisedHands/${identityKey}`, true);
+  hub(roomId).broadcast('raised-hands-changed', 'ping');
+  res.json({success: true});
 });
 
-router.delete('/:identityKey', verifyHandler, async function(req, res) {
-    const roomId = req.params.id;
-    const identityKey = req.params.identityKey;
-    await del(`/rooms/${roomId}/raisedHands/${identityKey}`);
-    hub(roomId).broadcast("raised-hands-changed", "ping");
-    res.json({success: true});
+router.delete('/:identityKey', verifyPost, async function (req, res) {
+  const roomId = req.params.id;
+  const identityKey = req.params.identityKey;
+  await del(`/rooms/${roomId}/raisedHands/${identityKey}`);
+  hub(roomId).broadcast('raised-hands-changed', 'ping');
+  res.json({success: true});
 });
 
-router.get('', verifyHandler, async (req, res) => {
-    const roomId = req.params.id;
-    if(!isModerator(req, roomId)) {
-        res.sendStatus(403);
-    } else {
-        const prefix = `/rooms/${roomId}/raisedHands/`;
-        const raisedHands = (await list(prefix)).map((key) => key.replace(prefix, ''));
-        res.json(raisedHands);
-    }
+router.get('', verifyModerator, async (req, res) => {
+  const roomId = req.params.id;
+  const prefix = `/rooms/${roomId}/raisedHands/`;
+  const raisedHands = (await list(prefix)).map(key => key.replace(prefix, ''));
+  res.json(raisedHands);
 });
-
 
 module.exports = router;

@@ -27,6 +27,7 @@ const isModerator = async (req, roomId) => {
     const authHeader = req.header("Authorization");
     const token = authHeader.substring(6);
     const roomInfo = await get('rooms/' + roomId);
+    if (!roomInfo) return false;
     for (const moderatorKey of roomInfo['moderators']) {
         if (verify(token, moderatorKey)) {
             return true;

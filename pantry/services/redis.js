@@ -6,6 +6,8 @@ const localStore = {};
 let _exports = {
     get: (key) => localStore[key],
     set: (key, value) => localStore[key] = value,
+    del: (key) => { delete localStore[key]; },
+    list: (prefix) => Object.keys(localStore).filter(key => key.startsWith(prefix)),
     roomCount: () => Object.keys(localStore).filter((key) => key.startsWith("rooms/")).length,
     identityCount: () => Object.keys(localStore).filter((key) => key.startsWith("identities/")).length
 }
