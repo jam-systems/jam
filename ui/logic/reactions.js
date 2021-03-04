@@ -1,8 +1,9 @@
-import {set, update, on} from 'use-minimal-state';
+import State, {set, update, on} from 'use-minimal-state';
 import swarm from '../lib/swarm';
 import {post, authedGet} from './backend';
 import identity, {signedToken} from './identity';
 import state from './state';
+import {pure} from '../lib/local-storage';
 
 export {sendReaction, raiseHand};
 
@@ -30,20 +31,16 @@ function showReaction(reaction, peerId) {
 }
 
 async function raiseHand(raise) {
+  // make visible to me
   if (raise) {
     state.raisedHands.add(identity.publicKey);
-    update(state, 'raisedHands');
-    sendModMessage({raiseHand: true});
   } else {
     state.raisedHands.delete(identity.publicKey);
-    update(state, 'raisedHands');
-    sendModMessage({raiseHand: false});
   }
+  update(state, 'raisedHands');
+  // make visible to mods
+  set(modState, 'raiseHand', !!raise);
 }
-// post initial raised hand status on entering room
-on(state, 'inRoom', id => {
-  if (id) raiseHand(false);
-});
 // listen for raised hands
 on(state, 'modMessages', modMessages => {
   let hands = new Set();
@@ -53,6 +50,17 @@ on(state, 'modMessages', modMessages => {
   set(state, 'raisedHands', hands);
 });
 
+// mod message / mod visible state
+const modState = State({raiseHand: false});
+
+// post initial status on entering room
+on(state, 'inRoom', () => {
+  sendModMessage(pure(modState));
+});
+// post on changes
+on(modState, () => {
+  sendModMessage(pure(modState));
+});
 async function sendModMessage(msg) {
   let {inRoom} = state;
   if (inRoom) {

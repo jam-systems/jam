@@ -27,7 +27,7 @@ export function StoredState(name, initialize = () => ({}), options) {
   return state;
 }
 
-function pure(state) {
+export function pure(state) {
   let {_debug, _events, set, update, on, emit, clear, ...pureState} = state;
   return pureState;
 }
