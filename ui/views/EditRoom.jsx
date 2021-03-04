@@ -1,12 +1,11 @@
 import React, {useState} from 'react';
 import {put} from '../logic/backend';
-import {signedToken} from '../logic/identity';
 import {Modal} from './Modal';
 
 export function EditRoomModal({roomId, room, close}) {
   let updateRoom = async room_ => {
     if (!roomId || !room_) return;
-    await put(signedToken(), `/rooms/${roomId}`, room_);
+    await put(`/rooms/${roomId}`, room_);
     close();
   };
   return (
@@ -145,7 +144,7 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
             }}
           ></input>
           <div className="p-2 text-gray-500 italic">
-            Set the link for the 'call to action' button.{' '}
+            Set the link for the {`'call to action'`} button.{' '}
             <span className="text-gray-400">(optional)</span>
           </div>
 
@@ -162,7 +161,7 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
             }}
           ></input>
           <div className="p-2 text-gray-500 italic">
-            Set the text for the 'call to action' button.{' '}
+            Set the text for the {`'call to action'`} button.{' '}
             <span className="text-gray-400">(optional)</span>
           </div>
         </div>

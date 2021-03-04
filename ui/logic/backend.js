@@ -1,7 +1,8 @@
 import {useCallback, useEffect, useState} from 'react';
 import {use} from 'use-minimal-state';
-import state from './state.js';
-import {config} from './config';
+import state from './state';
+import {config, DEV} from './config';
+import identity, {signedToken} from './identity';
 // POST https://jam.systems/_/pantry/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
 // Creates room, returns 409 conflict if room exists
 
@@ -53,13 +54,13 @@ export function forwardApiQuery(path, key, defaultQuery) {
   });
 }
 
-async function authenticatedApiRequest(method, token, path, payload) {
+async function authenticatedApiRequest(method, path, payload) {
   let res = await fetch(API + path, {
     method: method.toUpperCase(),
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      Authorization: `Token ${token}`,
+      Authorization: `Token ${signedToken()}`,
     },
     body: payload ? JSON.stringify(payload) : undefined,
   });
@@ -79,28 +80,28 @@ export async function get(path) {
 }
 
 // returns [data, ok, status]
-export async function authedGet(token, path) {
+export async function authedGet(path) {
   let res = await fetch(API + path, {
     method: 'GET',
     headers: {
       Accept: 'application/json',
-      Authorization: `Token ${token}`,
+      Authorization: `Token ${signedToken()}`,
     },
   });
   if (res.status < 400) return [await res.json(), true, res.status];
   else return [undefined, false, res.status];
 }
 
-export async function post(token, path, payload) {
-  return authenticatedApiRequest('POST', token, path, payload);
+export async function post(path, payload) {
+  return authenticatedApiRequest('POST', path, payload);
 }
 
-export async function put(token, path, payload) {
-  return authenticatedApiRequest('PUT', token, path, payload);
+export async function put(path, payload) {
+  return authenticatedApiRequest('PUT', path, payload);
 }
 
-export async function deleteRequest(token, path, payload = null) {
-  return authenticatedApiRequest('DELETE', token, path, payload);
+export async function deleteRequest(path, payload = null) {
+  return authenticatedApiRequest('DELETE', path, payload);
 }
 
 export async function createRoom(
@@ -119,6 +120,27 @@ export async function createRoom(
     moderators: [peerId],
     speakers: [peerId],
   };
-  let ok = await post('', `/rooms/${roomId}`, room);
+  let ok = await post(`/rooms/${roomId}`, room);
   if (ok) return room;
+}
+
+export async function initializeIdentity() {
+  if (DEV) console.log('identity', identity);
+  const ok =
+    (await put(`/identities/${identity.publicKey}`, identity.info)) ||
+    (await post(`/identities/${identity.publicKey}`, identity.info));
+  if (ok) identity.set('synced', true);
+}
+
+// UNUSED
+async function getInfoServer() {
+  let [data, ok] = await get(`/identities/${identity.publicKey}`);
+  return ok && data;
+}
+
+export async function updateInfoServer(info) {
+  return (
+    (await put(`/identities/${identity.publicKey}`, info)) ||
+    (await post(`/identities/${identity.publicKey}`, info))
+  );
 }

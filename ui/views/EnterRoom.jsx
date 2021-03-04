@@ -1,6 +1,6 @@
 import React from 'react';
 import {enterRoom} from '../logic/main';
-import RoomHeader from './RoomHeader.jsx';
+import RoomHeader from './RoomHeader';
 
 export default function EnterRoom({roomId, name, description, logoURI}) {
   return (

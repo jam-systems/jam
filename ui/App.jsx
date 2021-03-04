@@ -1,18 +1,19 @@
 import React, {useEffect, useState} from 'react';
 import {render} from 'react-dom';
-import Start from './views/Start.jsx';
-import Room from './views/Room.jsx';
-import './logic/main';
-
-import identity, {initializeIdentity} from './logic/identity';
-import {updateApiQuery, useApiQuery} from './logic/backend.js';
-import {createRoom} from './logic/backend';
-import {usePath} from './lib/use-location.js';
-import {navigate} from './lib/use-location';
-import {connectRoom} from './logic/room';
-import swarm from './lib/swarm.js';
-import Modals from './views/Modal.jsx';
 import {enterRoom} from './logic/main';
+import Start from './views/Start';
+import Room from './views/Room';
+import identity from './logic/identity';
+import {
+  createRoom,
+  updateApiQuery,
+  useApiQuery,
+  initializeIdentity,
+} from './logic/backend';
+import {usePath, navigate} from './lib/use-location';
+import {connectRoom} from './logic/room';
+import swarm from './lib/swarm';
+import Modals from './views/Modal';
 
 render(
   <>

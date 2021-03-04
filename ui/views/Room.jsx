@@ -2,9 +2,9 @@ import React, {useLayoutEffect, useMemo, useState} from 'react';
 import {leaveRoom} from '../logic/main';
 import state from '../logic/state';
 import {use} from 'use-minimal-state';
-import swarm from '../lib/swarm.js';
-import EnterRoom from './EnterRoom.jsx';
-import RoomHeader from './RoomHeader.jsx';
+import swarm from '../lib/swarm';
+import EnterRoom from './EnterRoom';
+import RoomHeader from './RoomHeader';
 import copyToClipboard from '../lib/copy-to-clipboard';
 import identity from '../logic/identity';
 import {openModal} from './Modal';
@@ -90,7 +90,6 @@ export default function Room({room, roomId}) {
   );
 
   let myHandRaised = raisedHands.has(myPeerId);
-  console.log('raised hands', raisedHands);
 
   return (
     <div

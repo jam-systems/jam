@@ -2,7 +2,7 @@ import swarm from '../lib/swarm';
 import state from './state';
 import {get, updateApiQuery, forwardApiQuery, put} from './backend';
 import {on, set} from 'use-minimal-state';
-import identity, {signedToken} from './identity';
+import identity from './identity';
 
 export {connectRoom, addRole, removeRole};
 
@@ -52,7 +52,7 @@ async function addRole(id, role) {
   if (existing.includes(id)) return;
   console.log('adding to', role, id);
   let newRoom = {...state.room, [role]: [...existing, id]};
-  await put(signedToken(), `/rooms/${state.roomId}`, newRoom);
+  await put(`/rooms/${state.roomId}`, newRoom);
 }
 
 async function removeRole(id, role) {
@@ -63,7 +63,7 @@ async function removeRole(id, role) {
   if (!existing.includes(id)) return;
   console.log('removing from', role, id);
   let newRoom = {...state.room, [role]: existing.filter(id_ => id_ !== id)};
-  await put(signedToken(), `/rooms/${state.roomId}`, newRoom);
+  await put(`/rooms/${state.roomId}`, newRoom);
 }
 
 const emptyRoom = {

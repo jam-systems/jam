@@ -1,6 +1,6 @@
 import SimplePeer from 'simple-peer-light';
 import State from 'use-minimal-state';
-import {authenticatedHub} from './signalhub.js';
+import {authenticatedHub} from './signalhub';
 
 const MAX_CONNECT_TIME = 6000;
 const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;

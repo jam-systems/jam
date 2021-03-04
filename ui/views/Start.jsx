@@ -2,7 +2,7 @@ import React, {useState, useMemo} from 'react';
 import slugify from 'slugify';
 
 import {createRoom} from '../logic/backend';
-import swarm from '../lib/swarm.js';
+import swarm from '../lib/swarm';
 import {navigate} from '../lib/use-location';
 import {enterRoom, state} from '../logic/main';
 

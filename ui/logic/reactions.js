@@ -1,7 +1,7 @@
 import State, {set, update, on} from 'use-minimal-state';
 import swarm from '../lib/swarm';
 import {post, authedGet} from './backend';
-import identity, {signedToken} from './identity';
+import identity from './identity';
 import state from './state';
 import {pure} from '../lib/local-storage';
 
@@ -64,20 +64,13 @@ on(modState, () => {
 async function sendModMessage(msg) {
   let {inRoom} = state;
   if (inRoom) {
-    await post(
-      signedToken(),
-      `/rooms/${inRoom}/modMessage/${identity.publicKey}`,
-      msg
-    );
+    await post(`/rooms/${inRoom}/modMessage/${identity.publicKey}`, msg);
   }
 }
 // fetch mod messages when we become moderator
 on(state, 'iAmModerator', async iAmModerator => {
   if (iAmModerator) {
-    let [msgs, ok] = await authedGet(
-      signedToken(),
-      `/rooms/${state.roomId}/modMessage`
-    );
+    let [msgs, ok] = await authedGet(`/rooms/${state.roomId}/modMessage`);
     if (ok) set(state, 'modMessages', msgs);
   }
 });
@@ -85,10 +78,7 @@ on(state, 'iAmModerator', async iAmModerator => {
 on(swarm, 'anonymous', async ({modMessage}) => {
   let {iAmModerator, roomId} = state;
   if (modMessage && iAmModerator && roomId) {
-    let [msgs, ok] = await authedGet(
-      signedToken(),
-      `/rooms/${state.roomId}/modMessage`
-    );
+    let [msgs, ok] = await authedGet(`/rooms/${state.roomId}/modMessage`);
     if (ok) set(state, 'modMessages', msgs);
   }
 });
