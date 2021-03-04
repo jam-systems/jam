@@ -62,6 +62,13 @@ app.use("/config.json", (_, res) => {
 
 app.use(async (req, res) => {
 
+    if (req.path === '/_/integrations/slack') {
+      return res.json({
+        "response_type": "in_channel",
+        "text": `https://${jamHost}/${Math.random().toString(36).substr(2, 6)}`
+      });
+    }
+
     const metaInfo = req.path === '/' ? defaultMetaInfo : {
         ...defaultMetaInfo,
         ...(await getRoomMetaInfo(req.path))

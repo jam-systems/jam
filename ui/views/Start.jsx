@@ -2,11 +2,11 @@ import React, {useState, useMemo} from 'react';
 import slugify from 'slugify';
 
 import {createRoom} from '../logic/backend';
-import swarm from '../lib/swarm.js';
+import swarm from '../lib/swarm';
 import {navigate} from '../lib/use-location';
 import {enterRoom, state} from '../logic/main';
 
-export default function Start({urlRoomId}) {
+export default function Start({urlRoomId, roomFromURIError}) {
   let [name, setName] = useState('');
   let [description, setDescription] = useState('');
   let [color, setColor] = useState('#4B5563');
@@ -28,7 +28,7 @@ export default function Start({urlRoomId}) {
     }
 
     (async () => {
-      await createRoom(
+      let ok = await createRoom(
         roomId,
         name,
         description,
@@ -36,7 +36,7 @@ export default function Start({urlRoomId}) {
         color,
         swarm.myPeerId
       );
-      if (urlRoomId !== roomId) navigate('/' + roomId);
+      if (ok && urlRoomId !== roomId) navigate('/' + roomId);
       enterRoom(roomId);
     })();
   };
@@ -49,67 +49,100 @@ export default function Start({urlRoomId}) {
   return (
     <div className="container md:min-h-full" style={{height: 'initial'}}>
       <div className="child p-6 md:p-10">
+        <div
+          className={
+            roomFromURIError
+              ? 'mb-12 p-4 text-gray-700 rounded-lg border border-yellow-100 bg-yellow-50'
+              : 'hidden'
+          }
+        >
+          The Room ID{' '}
+          <code className="text-gray-900 bg-yellow-200">
+            {window.location.pathname.substring(1)}
+          </code>{' '}
+          is not valid.
+          <br />
+          <a
+            href="https://gitlab.com/jam-systems/jam"
+            target="_blank"
+            rel="noreferrer"
+            className="underline text-blue-800 active:text-blue-600"
+          >
+            Learn more about Room IDs
+          </a>
+          <br />
+          <br />
+          You can use the form below to start a room.
+        </div>
+
         <h1>Start a Room</h1>
 
-        <form className="pt-12" onSubmit={submit}>
-          <input
-            className="rounded placeholder-gray-400 bg-gray-50 w-full md:w-96"
-            type="text"
-            placeholder="Room topic"
-            value={name}
-            name="jam-room-topic"
-            autoComplete="off"
-            onChange={e => {
-              setName(e.target.value);
-            }}
-          ></input>
-          <div className="p-2 text-gray-500 italic">
-            Pick a topic to talk about.{' '}
-            <span className="text-gray-400">(optional)</span>
-          </div>
-          <br />
-          <textarea
-            className="rounded placeholder-gray-400 bg-gray-50 w-full md:w-full"
-            placeholder="Room description"
-            value={description}
-            name="jam-room-description"
-            autoComplete="off"
-            rows="2"
-            onChange={e => {
-              setDescription(e.target.value);
-            }}
-          ></textarea>
-          <div className="p-2 text-gray-500 italic">
-            Describe what this room is about.{' '}
-            <span className="text-gray-400">
-              (optional) (supports{' '}
-              <a
-                className="underline"
-                href="https://guides.github.com/pdfs/markdown-cheatsheet-online.pdf"
-                target="_blank"
-              >
-                Markdown
-              </a>
-              )
-            </span>{' '}
-            <span onClick={() => setShowAdvanced(!showAdvanced)}>
-              {/* heroicons/gift */}
-              <svg
-                style={{cursor: 'pointer'}}
-                className="pb-1 h-5 w-5 inline-block"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"
-                />
-              </svg>
-            </span>
+        <p className="text-gray-600">
+          Click on the button below to start a room.
+        </p>
+
+        <form className="pt-6" onSubmit={submit}>
+          <div className="hidden">
+            <input
+              className="rounded placeholder-gray-400 bg-gray-50 w-full md:w-96"
+              type="text"
+              placeholder="Room topic"
+              value={name}
+              name="jam-room-topic"
+              autoComplete="off"
+              onChange={e => {
+                setName(e.target.value);
+              }}
+            ></input>
+            <div className="p-2 text-gray-500 italic">
+              Pick a topic to talk about.{' '}
+              <span className="text-gray-400">(optional)</span>
+            </div>
+            <br />
+            <textarea
+              className="rounded placeholder-gray-400 bg-gray-50 w-full md:w-full"
+              placeholder="Room description"
+              value={description}
+              name="jam-room-description"
+              autoComplete="off"
+              rows="2"
+              onChange={e => {
+                setDescription(e.target.value);
+              }}
+            ></textarea>
+            <div className="p-2 text-gray-500 italic">
+              Describe what this room is about.{' '}
+              <span className="text-gray-400">
+                (optional) (supports{' '}
+                <a
+                  className="underline"
+                  href="https://guides.github.com/pdfs/markdown-cheatsheet-online.pdf"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Markdown
+                </a>
+                )
+              </span>{' '}
+              <span onClick={() => setShowAdvanced(!showAdvanced)}>
+                {/* heroicons/gift */}
+                <svg
+                  style={{cursor: 'pointer'}}
+                  className="pb-1 h-5 w-5 inline-block"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"
+                  />
+                </svg>
+              </span>
+            </div>
           </div>
 
           {/* advanced Room options */}
@@ -160,7 +193,7 @@ export default function Start({urlRoomId}) {
               }}
             ></input>
             <div className="p-2 text-gray-500 italic">
-              Set the link for the 'call to action' button.{' '}
+              Set the link for the {`'call to action'`} button.{' '}
               <span className="text-gray-400">(optional)</span>
             </div>
 
@@ -177,14 +210,14 @@ export default function Start({urlRoomId}) {
               }}
             ></input>
             <div className="p-2 text-gray-500 italic">
-              Set the text for the 'call to action' button.{' '}
+              Set the text for the {`'call to action'`} button.{' '}
               <span className="text-gray-400">(optional)</span>
             </div>
           </div>
 
           <button
             onClick={submit}
-            className="select-none mt-6 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
+            className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
           >
             🌱 Start room
           </button>
@@ -207,6 +240,7 @@ export default function Start({urlRoomId}) {
               href="https://gitlab.com/jam-systems/jam"
               className="underline text-blue-800 active:text-blue-600"
               target="_blank"
+              rel="noreferrer"
             >
               Learn&nbsp;more&nbsp;about&nbsp;Jam.
             </a>
@@ -223,6 +257,7 @@ export default function Start({urlRoomId}) {
               href="https://forms.ops.jam.systems/pro/"
               className="underline text-blue-800 active:text-blue-600"
               target="_blank"
+              rel="noreferrer"
             >
               Apply to the Jam Pro Early Access Program.
             </a>
@@ -239,20 +274,32 @@ export default function Start({urlRoomId}) {
         </div>
 
         <div className="pt-32 text-xs text-gray-400 text-center">
-          <a href="https://gitlab.com/jam-systems/jam" target="_blank">
+          <a
+            href="https://gitlab.com/jam-systems/jam"
+            target="_blank"
+            rel="noreferrer"
+          >
             built
           </a>{' '}
           w/ ♥ by{' '}
           {humins.map((humin, idx) => (
             <span key={idx}>
               {' '}
-              <a href={'https://twitter.com/' + humin} target="_blank">
+              <a
+                href={'https://twitter.com/' + humin}
+                target="_blank"
+                rel="noreferrer"
+              >
                 @{humin}
               </a>
             </span>
           ))}{' '}
           in Berlin &amp; Vienna,{' '}
-          <a href="https://www.digitalocean.com" target="_blank">
+          <a
+            href="https://www.digitalocean.com"
+            target="_blank"
+            rel="noreferrer"
+          >
             hosted in Frankfurt
           </a>
         </div>

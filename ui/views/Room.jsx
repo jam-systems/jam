@@ -2,16 +2,16 @@ import React, {useLayoutEffect, useMemo, useState} from 'react';
 import {leaveRoom} from '../logic/main';
 import state from '../logic/state';
 import {use} from 'use-minimal-state';
-import swarm from '../lib/swarm.js';
-import EnterRoom from './EnterRoom.jsx';
-import RoomHeader from './RoomHeader.jsx';
+import swarm from '../lib/swarm';
+import EnterRoom from './EnterRoom';
+import RoomHeader from './RoomHeader';
 import copyToClipboard from '../lib/copy-to-clipboard';
 import identity from '../logic/identity';
 import {openModal} from './Modal';
 import {EditRoomModal} from './EditRoom';
 import useWakeLock from '../lib/use-wake-lock';
 import EditIdentity from './EditIdentity';
-import {sendReaction} from '../logic/reactions';
+import {sendReaction, raiseHand} from '../logic/reactions';
 import EditRole from './EditRole';
 import {AudienceAvatar, StageAvatar} from './Avatar';
 
@@ -25,6 +25,7 @@ export default function Room({room, roomId}) {
     myAudio,
     micMuted,
     reactions,
+    raisedHands,
     identities,
     speaking,
     iSpeak,
@@ -33,6 +34,7 @@ export default function Room({room, roomId}) {
     'myAudio',
     'micMuted',
     'reactions',
+    'raisedHands',
     'identities',
     'speaking',
     'iAmSpeaker',
@@ -86,6 +88,8 @@ export default function Room({room, roomId}) {
   let audiencePeers = Object.keys(peers || {}).filter(
     id => !stagePeers.includes(id)
   );
+
+  let myHandRaised = raisedHands.has(myPeerId);
 
   return (
     <div
@@ -144,6 +148,7 @@ export default function Room({room, roomId}) {
                 peerId={myPeerId}
                 peerState={sharedState}
                 info={myInfo}
+                handRaised={myHandRaised}
                 onClick={() => openModal(EditIdentity)}
               />
             )}
@@ -153,14 +158,14 @@ export default function Room({room, roomId}) {
                 {...{peerId, peerState, reactions}}
                 peerState={peerState[peerId]}
                 info={identities[peerId]}
+                handRaised={iModerate && raisedHands.has(peerId)}
                 onClick={iModerate ? () => setEditRole(peerId) : undefined}
               />
             ))}
           </ol>
         </div>
 
-        <br />
-        <br />
+        <div style={{height: '136px', flex: 'none'}} />
       </div>
 
       {/* Navigation */}
@@ -189,6 +194,26 @@ export default function Room({room, roomId}) {
                   ? "🙊 You're silent"
                   : "🐵 You're on"
                 : "🙊 You're off"}
+            </button>
+          </div>
+        )}
+        {!iSpeak && (
+          <div className="flex relative">
+            <button
+              className="select-none h-12 px-6 text-lg text-white bg-gray-600 rounded-lg focus:shadow-outline active:bg-gray-600 flex-grow"
+              style={{
+                backgroundColor: color || '#4B5563',
+                color: isColorDark ? 'white' : 'black',
+              }}
+              onClick={() => {
+                raiseHand(!myHandRaised);
+              }}
+            >
+              {myHandRaised ? (
+                <>Stop&nbsp;raising&nbsp;hand</>
+              ) : (
+                <>✋🏽&nbsp;Raise&nbsp;hand&nbsp;to&nbsp;get&nbsp;on&nbsp;stage</>
+              )}
             </button>
           </div>
         )}
@@ -284,12 +309,6 @@ export default function Room({room, roomId}) {
             🖖🏽&nbsp;Leave
           </button>
         </div>
-
-        <div className="flex relative">
-          <button className="select-none hidden h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow">
-            ✋🏽&nbsp;Raise&nbsp;hand
-          </button>
-        </div>
       </div>
     </div>
   );
@@ -308,7 +327,7 @@ function hexToRGB(hex, alpha) {
 }
 
 function isDark(hex) {
-  if (!hex) return false;
+  if (!hex) return true;
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);

@@ -159,6 +159,14 @@ body {
   text-decoration: underline;
 }
 
+.room-header a[href^='ethereum:'] {
+  background-image: url('/img/bazaar/ethereum-logo.svg');
+  background-repeat: no-repeat;
+  background-size: 16px;
+  padding-left: 23px;
+  text-decoration: underline;
+}
+
 .room-header .call-to-action a {
   background-repeat: no-repeat;
   background-size: 18px;
@@ -267,6 +275,14 @@ body {
 {
   background-image: url('/img/bazaar/transistorfm-logo.png');
   background-position: 20px 50%;
+  padding-left: 48px;
+}
+
+.room-header .call-to-action a[href^='ethereum:']
+{
+  background-image: url('/img/bazaar/ethereum-logo.svg');
+  background-position: 20px 50%;
+  background-size: 16px;
   padding-left: 48px;
 }
 

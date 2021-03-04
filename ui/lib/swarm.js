@@ -1,6 +1,6 @@
 import SimplePeer from 'simple-peer-light';
 import State from 'use-minimal-state';
-import {authenticatedHub} from './signalhub.js';
+import {authenticatedHub} from './signalhub';
 
 const MAX_CONNECT_TIME = 6000;
 const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;
@@ -31,6 +31,7 @@ const swarm = State({
   newPeer: null,
   sharedEvent: null,
   peerEvent: null,
+  anonymous: null,
 });
 
 export default swarm;
@@ -489,6 +490,9 @@ function connect(room) {
     if (type === 'shared-event') {
       swarm.emit('peerEvent', peerId, data);
     }
+  });
+  hub.subscribeAnonymous('anonymous', data => {
+    swarm.emit('anonymous', data);
   });
 }
 

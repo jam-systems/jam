@@ -14,7 +14,7 @@ export {state};
 
 swarm.config({
   debug: DEV,
-  url: config.signalHubUrl +'/',
+  url: config.signalHubUrl + '/',
   sign: signData,
   verify: verifyData,
   pcConfig: {
@@ -31,13 +31,15 @@ swarm.config({
   },
 });
 
-export function enterRoom() {
+export function enterRoom(roomId) {
   state.set('userInteracted', true);
+  state.set('inRoom', roomId);
   swarm.set('sharedState', state => ({...state, inRoom: true}));
   requestAudio().then(() => state.set('soundMuted', false));
 }
 
 export function leaveRoom() {
+  state.set('inRoom', null);
   swarm.set('sharedState', state => ({...state, inRoom: false}));
   stopAudio();
   state.set('soundMuted', true);
@@ -46,12 +48,11 @@ export function leaveRoom() {
 swarm.on('newPeer', async id => {
   for (let i = 0; i < 5; i++) {
     // try multiple times to lose race with the first POST /identities
-    try {
-      state.identities[id] = await get(`/identities/${id}`);
+    let [data, ok] = await get(`/identities/${id}`);
+    if (ok) {
+      state.identities[id] = data;
       state.update('identities');
       return;
-    } catch (e) {
-      console.warn(e);
     }
   }
 });

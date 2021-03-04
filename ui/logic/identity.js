@@ -1,40 +1,9 @@
 import nacl from 'tweetnacl';
 import base64 from 'compact-base64';
 import {adjectives, nouns} from '../lib/names';
-import {post, put, get} from './backend';
 import {StoredState} from '../lib/local-storage';
 import {DEV} from './config';
 import {set, update} from 'use-minimal-state';
-
-function decode(base64String) {
-  return Uint8Array.from(base64.decodeUrl(base64String, 'binary'));
-}
-
-function encode(binaryData) {
-  return base64.encodeUrl(binaryData, 'binary');
-}
-
-const timeCodeFromBytes = timeCodeBytes =>
-  timeCodeBytes[0] +
-  (timeCodeBytes[1] << 8) +
-  (timeCodeBytes[2] << 16) +
-  (timeCodeBytes[3] << 24);
-const timeCodeToBytes = timeCode =>
-  Uint8Array.of(
-    timeCode % 256,
-    (timeCode >> 8) % 256,
-    (timeCode >> 16) % 256,
-    (timeCode >> 24) % 256
-  );
-
-const currentTimeCode = () => Math.round(Date.now() / 30000);
-const timeCodeValid = code => Math.abs(code - currentTimeCode()) <= 1;
-
-function randomName() {
-  let adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-  let noun = nouns[Math.floor(Math.random() * nouns.length)];
-  return `${adj} ${noun}`;
-}
 
 const identity = StoredState(
   'identity',
@@ -99,32 +68,6 @@ if (identity.info.twitter) {
 
 export default identity;
 
-export async function initializeIdentity() {
-  const ok =
-    (await put(
-      signedToken(),
-      `/identities/${identity.publicKey}`,
-      identity.info
-    )) ||
-    (await post(
-      signedToken(),
-      `/identities/${identity.publicKey}`,
-      identity.info
-    ));
-  if (ok) identity.set('synced', true);
-}
-
-export async function getInfoServer() {
-  return await get(`/identities/${identity.publicKey}`);
-}
-
-export async function updateInfoServer(info) {
-  return (
-    (await put(signedToken(), `/identities/${identity.publicKey}`, info)) ||
-    (await post(signedToken(), `/identities/${identity.publicKey}`, info))
-  );
-}
-
 export function sign(data) {
   const secretKeyB64 = identity.secretKey;
   const secretKey = decode(secretKeyB64);
@@ -157,6 +100,36 @@ export function verifyData(signed, key) {
   } catch (err) {
     console.warn(err);
   }
+}
+
+function decode(base64String) {
+  return Uint8Array.from(base64.decodeUrl(base64String, 'binary'));
+}
+
+function encode(binaryData) {
+  return base64.encodeUrl(binaryData, 'binary');
+}
+
+const timeCodeFromBytes = timeCodeBytes =>
+  timeCodeBytes[0] +
+  (timeCodeBytes[1] << 8) +
+  (timeCodeBytes[2] << 16) +
+  (timeCodeBytes[3] << 24);
+const timeCodeToBytes = timeCode =>
+  Uint8Array.of(
+    timeCode % 256,
+    (timeCode >> 8) % 256,
+    (timeCode >> 16) % 256,
+    (timeCode >> 24) % 256
+  );
+
+const currentTimeCode = () => Math.round(Date.now() / 30000);
+const timeCodeValid = code => Math.abs(code - currentTimeCode()) <= 1;
+
+function randomName() {
+  let adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+  let noun = nouns[Math.floor(Math.random() * nouns.length)];
+  return `${adj} ${noun}`;
 }
 
 // util for uint8array

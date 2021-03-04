@@ -2233,10 +2233,10 @@ uri-js@^4.2.2:
   dependencies:
     punycode "^2.1.0"
 
-use-minimal-state@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/use-minimal-state/-/use-minimal-state-3.0.0.tgz#806a631bc47b750d6cabcacdb8d216b22feb0075"
-  integrity sha512-dc7jHcilMSBm9ELYKw3i6fP4mKjcDwe1a3LxCbap5NGvMcGl2V5d/K32zXGXzUzqDbhD5UH3QKqyrPZZ4vUIRw==
+use-minimal-state@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/use-minimal-state/-/use-minimal-state-3.0.2.tgz#243e28a931fc5bb04ba184795ff6fce8148769e6"
+  integrity sha512-KcGnrhR3xl3rCiGjAXVyxbusyN+GKehvh6KpLpBPnykEiYx0y9AkFH/EZg/a+utcClbp2OjQkyn9iI2aop/L2w==
   dependencies:
     minimal-state "^5.0.0"
 
