@@ -2,16 +2,6 @@ import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import gfm from 'remark-gfm';
 
-function customUriTransformer(uri) {
-  const schemes = ['bitcoin:', 'ethereum:'];
-  for (const scheme of schemes) {
-    if (uri.startsWith(scheme)) {
-      return uri;
-    }
-  }
-  return ReactMarkdown.uriTransformer(uri);
-}
-
 export default function RoomHeader({
   name,
   description,
@@ -37,8 +27,8 @@ export default function RoomHeader({
           <ReactMarkdown
             className="markdown"
             plugins={[gfm]}
-            linkTarget="_blank"
             transformLinkUri={customUriTransformer}
+            renderers={customRenderers}
           >
             {description || 'This is a Room on Jam'}
           </ReactMarkdown>
@@ -64,6 +54,26 @@ export default function RoomHeader({
     </div>
   );
 }
+
+function customUriTransformer(uri) {
+  const schemes = ['bitcoin:', 'ethereum:'];
+  for (const scheme of schemes) {
+    if (uri.startsWith(scheme)) {
+      return uri;
+    }
+  }
+  return ReactMarkdown.uriTransformer(uri);
+}
+
+const customRenderers = {
+  link({href, children}) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer">
+        {children}
+      </a>
+    );
+  },
+};
 
 function EditSvg() {
   return (
