@@ -65,6 +65,7 @@ export default function Start({urlRoomId, roomFromURIError}) {
           <a
             href="https://gitlab.com/jam-systems/jam"
             target="_blank"
+            rel="noreferrer"
             className="underline text-blue-800 active:text-blue-600"
           >
             Learn more about Room IDs
@@ -117,6 +118,7 @@ export default function Start({urlRoomId, roomFromURIError}) {
                   className="underline"
                   href="https://guides.github.com/pdfs/markdown-cheatsheet-online.pdf"
                   target="_blank"
+                  rel="noreferrer"
                 >
                   Markdown
                 </a>
@@ -191,7 +193,7 @@ export default function Start({urlRoomId, roomFromURIError}) {
               }}
             ></input>
             <div className="p-2 text-gray-500 italic">
-              Set the link for the 'call to action' button.{' '}
+              Set the link for the {`'call to action'`} button.{' '}
               <span className="text-gray-400">(optional)</span>
             </div>
 
@@ -208,7 +210,7 @@ export default function Start({urlRoomId, roomFromURIError}) {
               }}
             ></input>
             <div className="p-2 text-gray-500 italic">
-              Set the text for the 'call to action' button.{' '}
+              Set the text for the {`'call to action'`} button.{' '}
               <span className="text-gray-400">(optional)</span>
             </div>
           </div>
@@ -238,6 +240,7 @@ export default function Start({urlRoomId, roomFromURIError}) {
               href="https://gitlab.com/jam-systems/jam"
               className="underline text-blue-800 active:text-blue-600"
               target="_blank"
+              rel="noreferrer"
             >
               Learn&nbsp;more&nbsp;about&nbsp;Jam.
             </a>
@@ -254,6 +257,7 @@ export default function Start({urlRoomId, roomFromURIError}) {
               href="https://forms.ops.jam.systems/pro/"
               className="underline text-blue-800 active:text-blue-600"
               target="_blank"
+              rel="noreferrer"
             >
               Apply to the Jam Pro Early Access Program.
             </a>
@@ -270,20 +274,32 @@ export default function Start({urlRoomId, roomFromURIError}) {
         </div>
 
         <div className="pt-32 text-xs text-gray-400 text-center">
-          <a href="https://gitlab.com/jam-systems/jam" target="_blank">
+          <a
+            href="https://gitlab.com/jam-systems/jam"
+            target="_blank"
+            rel="noreferrer"
+          >
             built
           </a>{' '}
           w/ ♥ by{' '}
           {humins.map((humin, idx) => (
             <span key={idx}>
               {' '}
-              <a href={'https://twitter.com/' + humin} target="_blank">
+              <a
+                href={'https://twitter.com/' + humin}
+                target="_blank"
+                rel="noreferrer"
+              >
                 @{humin}
               </a>
             </span>
           ))}{' '}
           in Berlin &amp; Vienna,{' '}
-          <a href="https://www.digitalocean.com" target="_blank">
+          <a
+            href="https://www.digitalocean.com"
+            target="_blank"
+            rel="noreferrer"
+          >
             hosted in Frankfurt
           </a>
         </div>
