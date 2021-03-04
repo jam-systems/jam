@@ -8,7 +8,7 @@ const metricsRouter = require('./routes/metrics');
 
 const {verify, isModerator} = require('./auth');
 const {controller, permitAllAuthenticator} = require('./routes/controller');
-const modMessageRouter = require('./routes/raiseHand');
+const modMessageRouter = require('./routes/modMessage');
 const app = express();
 
 app.use(logger('dev'));
