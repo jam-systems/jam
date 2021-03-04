@@ -170,6 +170,8 @@ on(state, 'iAmModerator', async iAmModerator => {
   if (iAmModerator) {
     let [msgs, ok] = await authedGet(`/rooms/${state.roomId}/modMessage`);
     if (ok) set(state, 'modMessages', msgs);
+  } else {
+    set(state, 'modMessages', {}); // delete when we stop being moderator
   }
 });
 // listen for mod message pings and fetch if we are moderator
