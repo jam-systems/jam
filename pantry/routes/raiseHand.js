@@ -42,7 +42,7 @@ const verifyModerator = (req, res, next) => {
 router.post('/:identityKey', verifyPost, async function (req, res) {
   const roomId = req.params.id;
   const identityKey = req.params.identityKey;
-  await set(`/rooms/${roomId}/raisedHands/${identityKey}`, true);
+  await set(`rooms/${roomId}/raisedHands/${identityKey}`, true);
   hub(roomId).broadcast('raised-hands-changed', 'ping');
   res.json({success: true});
 });
@@ -50,14 +50,14 @@ router.post('/:identityKey', verifyPost, async function (req, res) {
 router.delete('/:identityKey', verifyPost, async function (req, res) {
   const roomId = req.params.id;
   const identityKey = req.params.identityKey;
-  await del(`/rooms/${roomId}/raisedHands/${identityKey}`);
+  await del(`rooms/${roomId}/raisedHands/${identityKey}`);
   hub(roomId).broadcast('raised-hands-changed', 'ping');
   res.json({success: true});
 });
 
 router.get('', verifyModerator, async (req, res) => {
   const roomId = req.params.id;
-  const prefix = `/rooms/${roomId}/raisedHands/`;
+  const prefix = `rooms/${roomId}/raisedHands/`;
   const raisedHands = (await list(prefix)).map(key => key.replace(prefix, ''));
   res.json(raisedHands);
 });
