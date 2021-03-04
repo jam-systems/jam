@@ -19,6 +19,7 @@ const state = State(
     audioContext: null,
 
     queries: {},
+    modMessages: {},
     userInteracted: false,
     modals: new Set(),
   },

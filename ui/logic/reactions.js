@@ -30,60 +30,57 @@ function showReaction(reaction, peerId) {
 }
 
 async function raiseHand(raise) {
-  let {iAmSpeaker, roomId, raisedHands} = state;
-  if (iAmSpeaker) return;
   if (raise) {
-    raisedHands.add(identity.publicKey);
+    state.raisedHands.add(identity.publicKey);
     update(state, 'raisedHands');
-    await post(
-      signedToken(),
-      `/rooms/${roomId}/modMessage/${identity.publicKey}`,
-      {raiseHand: true}
-    );
+    sendModMessage({raiseHand: true});
   } else {
-    raisedHands.delete(identity.publicKey);
+    state.raisedHands.delete(identity.publicKey);
     update(state, 'raisedHands');
-    await post(
-      signedToken(),
-      `/rooms/${roomId}/modMessage/${identity.publicKey}`,
-      {raiseHand: false}
-    );
+    sendModMessage({raiseHand: false});
   }
 }
 // post initial raised hand status on entering room
 on(state, 'inRoom', id => {
   if (id) raiseHand(false);
 });
-// fetch raised hands when we become moderator
+// listen for raised hands
+on(state, 'modMessages', modMessages => {
+  let hands = new Set();
+  for (let peerId in modMessages) {
+    if (modMessages[peerId].raiseHand) hands.add(peerId);
+  }
+  set(state, 'raisedHands', hands);
+});
+
+async function sendModMessage(msg) {
+  let {inRoom} = state;
+  if (inRoom) {
+    await post(
+      signedToken(),
+      `/rooms/${inRoom}/modMessage/${identity.publicKey}`,
+      msg
+    );
+  }
+}
+// fetch mod messages when we become moderator
 on(state, 'iAmModerator', async iAmModerator => {
   if (iAmModerator) {
     let [msgs, ok] = await authedGet(
       signedToken(),
       `/rooms/${state.roomId}/modMessage`
     );
-    if (ok) {
-      let hands = new Set();
-      for (let peerId in msgs) {
-        if (msgs[peerId].raiseHand) hands.add(peerId);
-      }
-      set(state, 'raisedHands', hands);
-    }
+    if (ok) set(state, 'modMessages', msgs);
   }
 });
-// listen for raised hands
-swarm.on('anonymous', async ({modMessage}) => {
+// listen for mod message pings and fetch if we are moderator
+on(swarm, 'anonymous', async ({modMessage}) => {
   let {iAmModerator, roomId} = state;
   if (modMessage && iAmModerator && roomId) {
     let [msgs, ok] = await authedGet(
       signedToken(),
       `/rooms/${state.roomId}/modMessage`
     );
-    if (ok) {
-      let hands = new Set();
-      for (let peerId in msgs) {
-        if (msgs[peerId].raiseHand) hands.add(peerId);
-      }
-      set(state, 'raisedHands', hands);
-    }
+    if (ok) set(state, 'modMessages', msgs);
   }
 });
