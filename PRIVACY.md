@@ -4,7 +4,7 @@ Privacy Considerations for Jam
 No Analytics
 ------------
 
-Jam does not use any analytics provider and we does not store IP addresses in the logs.
+Jam does not use any analytics provider and we do not store IP addresses in the logs.
 
 What is stored on the backend and why
 -------------------------------------
