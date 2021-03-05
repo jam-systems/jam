@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const fetch = require('node-fetch');
+const qs = require('qs');
 
 let ejs = require('ejs');
 
@@ -67,6 +68,29 @@ app.use(async (req, res) => {
         "response_type": "in_channel",
         "text": `https://${jamHost}/${Math.random().toString(36).substr(2, 6)}`
       });
+    }
+
+    if (req.path === '/_/integrations/slack/oauth') {
+      if (!req.query.code) {
+        console.log("invalid code from Slack");
+        return res.send('invalid code parameter');
+      }
+
+      let params = {
+        client_id:     process.env.SLACK_CLIENT_ID,
+        client_secret: process.env.SLACK_CLIENT_SECRET,
+        code: req.query.code
+      };
+
+      const result = await fetch(`${process.env.SLACK_API_URL}/oauth.v2.access`, {
+        method: 'POST',
+        body: qs.stringify(params),
+        headers: {
+            'Content-type': 'application/x-www-form-urlencoded;charset=utf-8'
+        }
+      });
+      console.log(await result.json());
+      return res.send("success");
     }
 
     const metaInfo = req.path === '/' ? defaultMetaInfo : {
