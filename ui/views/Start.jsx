@@ -1,7 +1,7 @@
 import React, {useState, useMemo} from 'react';
 import slugify from 'slugify';
 
-import {createRoom} from '../logic/backend';
+import {createRoom, updateApiQuery} from '../logic/backend';
 import swarm from '../lib/swarm';
 import {navigate} from '../lib/use-location';
 import {enterRoom, state} from '../logic/main';
@@ -28,7 +28,7 @@ export default function Start({urlRoomId, roomFromURIError}) {
     }
 
     (async () => {
-      let ok = await createRoom(
+      let roomCreated = await createRoom(
         roomId,
         name,
         description,
@@ -36,8 +36,11 @@ export default function Start({urlRoomId, roomFromURIError}) {
         color,
         swarm.myPeerId
       );
-      if (ok && urlRoomId !== roomId) navigate('/' + roomId);
-      enterRoom(roomId);
+      if (roomCreated) {
+        updateApiQuery(`/rooms/${roomId}`, roomCreated, 200);
+        if (urlRoomId !== roomId) navigate('/' + roomId);
+        enterRoom(roomId);
+      }
     })();
   };
 

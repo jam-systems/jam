@@ -11,7 +11,7 @@ import {
   initializeIdentity,
 } from './logic/backend';
 import {usePath, navigate} from './lib/use-location';
-import {connectRoom} from './logic/room';
+import {maybeConnectRoom, disconnectRoom} from './logic/room';
 import swarm from './lib/swarm';
 import Modals from './views/Modal';
 
@@ -35,13 +35,10 @@ function App() {
   const [roomId] = usePath();
   let [room, isLoading] = useApiQuery(`/rooms/${roomId}`, !!roomId);
 
-  // connect to signalhub if room exists
+  // connect to signalhub if room exists (and not already connected)
   useEffect(() => {
-    if (room) {
-      console.log('connecting', roomId);
-      connectRoom(roomId);
-      return () => swarm.disconnect();
-    }
+    if (room) maybeConnectRoom(roomId);
+    if (!room) disconnectRoom();
   }, [room, roomId]);
 
   let [roomFromURIError, setRoomFromURIError] = useState(false);
