@@ -4,14 +4,9 @@ import {enterRoom} from './logic/main';
 import Start from './views/Start';
 import Room from './views/Room';
 import identity from './logic/identity';
-import {
-  createRoom,
-  updateApiQuery,
-  useApiQuery,
-  initializeIdentity,
-} from './logic/backend';
+import {createRoom, updateApiQuery, initializeIdentity} from './logic/backend';
 import {usePath, navigate} from './lib/use-location';
-import {maybeConnectRoom, disconnectRoom} from './logic/room';
+import {useRoom, maybeConnectRoom, disconnectRoom} from './logic/room';
 import swarm from './lib/swarm';
 import Modals from './views/Modal';
 
@@ -33,7 +28,7 @@ function App() {
 
   // detect roomId & fetch room if we are in one
   const [roomId] = usePath();
-  let [room, isLoading] = useApiQuery(`/rooms/${roomId}`, !!roomId);
+  let [room, isLoading] = useRoom(roomId);
 
   // connect to signalhub if room exists (and not already connected)
   useEffect(() => {
@@ -63,7 +58,7 @@ function App() {
         );
         setPostLoading(false);
         if (roomCreated) {
-          updateApiQuery(`/rooms/${roomId}`, roomCreated, 200);
+          updateApiQuery(`/rooms/${roomId}`, roomCreated);
           navigate('/' + roomId);
           enterRoom(roomId);
         } else {

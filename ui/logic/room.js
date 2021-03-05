@@ -1,18 +1,31 @@
 import swarm from '../lib/swarm';
 import state from './state';
-import {get, updateApiQuery, forwardApiQuery, put} from './backend';
-import {on, set} from 'use-minimal-state';
+import {get, updateApiQuery, put, useApiQuery} from './backend';
+import {on, set, update} from 'use-minimal-state';
 import identity from './identity';
+import {arrayRemove} from './util';
 
-export {maybeConnectRoom, disconnectRoom, addRole, removeRole};
+export {
+  useRoom,
+  maybeConnectRoom,
+  disconnectRoom,
+  addRole,
+  removeRole,
+  leaveStage,
+  emptyRoom,
+};
 
 let _disconnectRoom = null;
+
+function useRoom(roomId) {
+  return useApiQuery(`/rooms/${roomId}`, !!roomId, 'room', emptyRoom);
+}
 
 function maybeConnectRoom(roomId) {
   if (swarm.room === roomId && swarm.hub) return;
   console.log('connecting room', roomId);
-  if (swarm.hub) swarm.disconnect();
   set(state, 'roomId', roomId);
+  if (swarm.hub) swarm.disconnect();
   swarm.connect(roomId);
   swarm.hub.subscribe('identity-updates', async ({peerId}) => {
     let [data, ok] = await get(`/identities/${peerId}`);
@@ -23,12 +36,10 @@ function maybeConnectRoom(roomId) {
   });
   swarm.hub.subscribeAnonymous('room-info', data => {
     console.log('new room info', data);
-    updateApiQuery(`/rooms/${state.roomId}`, data, 200);
+    updateApiQuery(`/rooms/${state.roomId}`, data);
   });
-  let off = forwardApiQuery(`/rooms/${roomId}`, 'room', emptyRoom);
   _disconnectRoom = () => {
     if (swarm.connected && swarm.room === roomId) swarm.disconnect();
-    off?.();
   };
   return _disconnectRoom;
 }
@@ -46,6 +57,7 @@ on(state, 'room', (room, oldRoom) => {
   let myId = identity.publicKey;
   if (!oldSpeakers.includes(myId) && speakers.includes(myId)) {
     set(state, 'iAmSpeaker', true);
+    joinStage();
   }
   if (oldSpeakers.includes(myId) && !speakers.includes(myId)) {
     set(state, 'iAmSpeaker', false);
@@ -79,6 +91,32 @@ async function removeRole(id, role) {
   let newRoom = {...state.room, [role]: existing.filter(id_ => id_ !== id)};
   await put(`/rooms/${state.roomId}`, newRoom);
 }
+
+function leaveStage(roomId) {
+  if (!state.iAmSpeaker || swarm.room !== roomId) return;
+  swarm.sharedState.leftStage = true;
+  update(swarm, 'sharedState');
+}
+function joinStage() {
+  swarm.sharedState.leftStage = false;
+  update(swarm, 'sharedState');
+}
+// if somebody left stage, update speakers
+on(swarm, 'peerState', peerState => {
+  let {speakers} = state.room;
+  if (!state.roomId || !speakers.length) return;
+  for (let peerId in peerState) {
+    let leftStage = peerState[peerId]?.leftStage;
+    if (leftStage && speakers.includes(peerId)) {
+      if (state.iAmModerator) {
+        removeRole(peerId, 'speakers');
+      } else {
+        arrayRemove(speakers, peerId);
+        updateApiQuery(`/rooms/${state.roomId}`, {...state.room, speakers});
+      }
+    }
+  }
+});
 
 const emptyRoom = {
   name: '',
