@@ -143,11 +143,11 @@ function TwitterHandle({info, divClass, fontClass}) {
           <a
             className="text-gray-500 font-medium ml-1"
             style={{textDecoration: 'none', fontWeight: 'normal'}}
-            href={'https://twitter.com/' + twitterIdentity.id.substring(1)}
+            href={'https://twitter.com/' + twitterIdentity?.id.replace("@", "")}
             target="_blank"
             rel="noreferrer"
           >
-            {twitterIdentity.id}
+            @{twitterIdentity?.id.replace("@", "")}
           </a>
         </span>
       </div>
