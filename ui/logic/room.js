@@ -4,10 +4,14 @@ import {get, updateApiQuery, forwardApiQuery, put} from './backend';
 import {on, set} from 'use-minimal-state';
 import identity from './identity';
 
-export {connectRoom, addRole, removeRole};
+export {maybeConnectRoom, disconnectRoom, addRole, removeRole};
 
-function connectRoom(roomId) {
-  if (swarm.connected) swarm.disconnect();
+let _disconnectRoom = null;
+
+function maybeConnectRoom(roomId) {
+  if (swarm.room === roomId && swarm.hub) return;
+  console.log('connecting room', roomId);
+  if (swarm.hub) swarm.disconnect();
   set(state, 'roomId', roomId);
   swarm.connect(roomId);
   swarm.hub.subscribe('identity-updates', async ({peerId}) => {
@@ -21,7 +25,17 @@ function connectRoom(roomId) {
     console.log('new room info', data);
     updateApiQuery(`/rooms/${state.roomId}`, data, 200);
   });
-  forwardApiQuery(`/rooms/${roomId}`, 'room', emptyRoom);
+  let off = forwardApiQuery(`/rooms/${roomId}`, 'room', emptyRoom);
+  _disconnectRoom = () => {
+    if (swarm.connected && swarm.room === roomId) swarm.disconnect();
+    off?.();
+  };
+  return _disconnectRoom;
+}
+
+function disconnectRoom() {
+  _disconnectRoom?.();
+  _disconnectRoom = null;
 }
 
 // watch changes in room

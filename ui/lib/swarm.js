@@ -253,8 +253,6 @@ function handlePeerFail(peerId) {
   log('handle peer fail! time failing:', failTime);
 
   if (failTime > MAX_FAIL_TIME) {
-    delete stickyPeers[peerId];
-    swarm.update('stickyPeers');
     removePeer(peerId);
   } else {
     connectPeer(hub, peerId, peer.connId);
@@ -262,8 +260,10 @@ function handlePeerFail(peerId) {
 }
 
 function removePeer(peerId) {
-  let {peers} = swarm;
+  let {peers, stickyPeers} = swarm;
   log('removing peer', s(peerId));
+  delete stickyPeers[peerId];
+  swarm.update('stickyPeers');
   delete peers[peerId];
   let {remoteStreams} = swarm;
   if (remoteStreams.find(streamObj => streamObj.peerId === peerId)) {

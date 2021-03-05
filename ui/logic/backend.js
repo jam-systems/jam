@@ -49,7 +49,7 @@ export function updateApiQuery(path, data, status) {
 
 export function forwardApiQuery(path, key, defaultQuery) {
   state.set(key, state.queries[path]?.data || defaultQuery);
-  state.on('queries', (queries, oldQueries) => {
+  return state.on('queries', (queries, oldQueries) => {
     let data = queries[path]?.data || defaultQuery;
     let oldData = oldQueries[path]?.data || defaultQuery;
     if (data !== oldData) state.set(key, data);
