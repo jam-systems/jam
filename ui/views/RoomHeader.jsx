@@ -30,7 +30,7 @@ export default function RoomHeader({
             transformLinkUri={customUriTransformer}
             renderers={customRenderers}
           >
-            {description || 'This is a Room on Jam'}
+            {description || 'This is a room on Jam'}
           </ReactMarkdown>
           <div
             className={buttonURI && buttonText ? 'call-to-action' : 'hidden'}
