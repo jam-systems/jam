@@ -3,13 +3,14 @@ import state from './state';
 import {get} from './backend';
 import {signData, verifyData} from './identity';
 import {DEV, config} from './config';
-import {requestAudio, stopAudio} from './audio';
+import {requestAudio, stopAudio, requestMicPermissionOnly} from './audio';
 import './reactions';
 import './room';
 
-window.state = state; // for debugging
-window.swarm = swarm;
-
+if (DEV) {
+  window.state = state; // for debugging
+  window.swarm = swarm;
+}
 export {state};
 
 swarm.config({
@@ -35,7 +36,11 @@ export function enterRoom(roomId) {
   state.set('userInteracted', true);
   state.set('inRoom', roomId);
   swarm.set('sharedState', state => ({...state, inRoom: true}));
-  requestAudio().then(() => state.set('soundMuted', false));
+  if (state.iAmSpeaker) {
+    requestAudio().then(() => state.set('soundMuted', false));
+  } else {
+    requestMicPermissionOnly().then(() => state.set('soundMuted', false));
+  }
 }
 
 export function leaveRoom() {
