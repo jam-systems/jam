@@ -98,6 +98,7 @@ function leaveStage(roomId) {
   update(swarm, 'sharedState');
 }
 function joinStage() {
+  if (!swarm.sharedState.leftStage) return;
   swarm.sharedState.leftStage = false;
   update(swarm, 'sharedState');
 }
