@@ -7,7 +7,7 @@ const verify = async (identity, publicKey) => {
     const tweet = identity.verificationInfo;
 
     // only store tweet if it is verifiable
-    if (!tweet.startsWith("https://twitter.com/" + twitter.substring(1) + "/status/")) {
+    if (!tweet.startsWith("https://twitter.com/" + twitter + "/status/")) {
         throw new Error(`Tweet address ${tweet} cannot be used to verify identity ${twitter}`)
     }
     let tweetResponse = await promisify(nets)({
