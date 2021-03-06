@@ -16,7 +16,7 @@ import swarm from '../lib/swarm';
 
 const API = `${config.pantryUrl}/api/v1`;
 
-export function useApiQuery(path, doFetch = true) {
+export function useApiQuery(path, doFetch = true, key, defaultQuery) {
   let cached = use(state, 'queries')[path];
   let shouldFetch = path && doFetch && !cached;
   let [isLoading, setLoading] = useState(shouldFetch);
@@ -39,11 +39,18 @@ export function useApiQuery(path, doFetch = true) {
     else setLoading(false);
   }, [shouldFetch, refetch]);
 
+  useEffect(() => {
+    if (key) {
+      let off = forwardApiQuery(path, key, defaultQuery);
+      return off;
+    }
+  }, [path, key, defaultQuery]);
+
   let {data, status} = cached || {};
   return [data, isLoading, status, refetch];
 }
 
-export function updateApiQuery(path, data, status) {
+export function updateApiQuery(path, data, status = 200) {
   state.set('queries', {...state.queries, [path]: data && {data, status}});
 }
 

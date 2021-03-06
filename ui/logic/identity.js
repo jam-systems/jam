@@ -124,7 +124,7 @@ const timeCodeToBytes = timeCode =>
   );
 
 const currentTimeCode = () => Math.round(Date.now() / 30000);
-const timeCodeValid = code => Math.abs(code - currentTimeCode()) <= 1;
+const timeCodeValid = code => Math.abs(code - currentTimeCode()) <= 10;
 
 function randomName() {
   let adj = adjectives[Math.floor(Math.random() * adjectives.length)];

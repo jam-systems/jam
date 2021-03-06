@@ -2,6 +2,9 @@ import React from 'react';
 import {enterRoom} from '../logic/main';
 import RoomHeader from './RoomHeader';
 
+const iOS = /^iP/.test(navigator.platform) ||
+            /^Mac/.test(navigator.platform) && navigator.maxTouchPoints > 4;
+
 export default function EnterRoom({roomId, name, description, logoURI}) {
   return (
     <div className="container md:min-h-full">
@@ -60,10 +63,15 @@ export default function EnterRoom({roomId, name, description, logoURI}) {
         */}
         <button
           onClick={() => enterRoom(roomId)}
-          className="mt-5 mb-10 select-none w-full md:w-60 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
+          className="mt-5 mb-10 select-none w-full h-12 px-6 text-lg text-white bg-gray-600 rounded-lg focus:shadow-outline active:bg-gray-600"
         >
-          🐾 &nbsp;Join this Jam
+          Join this Jam
         </button>
+
+        <div className={iOS ? "mt-10 text-gray-500 text-center" : "hidden"}>
+          🎧 Use headphones or earbuds<br />
+          for the best audio experience on iOS
+        </div>
         {/*
             if it is a future/scheduled room this button could be replaced with
         */}

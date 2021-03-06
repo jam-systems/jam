@@ -9,13 +9,15 @@ import {updateInfoServer} from '../logic/backend';
 let updateInfo = async info => {
   if (info.identities) {
     let twitterIdentity = info?.identities?.find(i => i.type === 'twitter');
-    console.log(twitterIdentity)
-    let twitterHandle = twitterIdentity.id;
-    if (twitterHandle.includes("/")) {
-      twitterHandle = twitterHandle.split("/").pop();
+    if (twitterIdentity && twitterIdentity.id) {
+      console.log(twitterIdentity)
+      let twitterHandle = twitterIdentity.id;
+      if (twitterHandle.includes("/")) {
+        twitterHandle = twitterHandle.split("/").pop();
+      }
+      twitterHandle = twitterHandle.replace(/[^0-9a-z-A-Z_]/g, "");
+      twitterIdentity.id = twitterHandle;
     }
-    twitterHandle = twitterHandle.replace(/[^0-9a-z-A-Z_]/g, "");
-    twitterIdentity.id = twitterHandle;
   }
   let newInfo = {...identity.info, ...info};
   let ok = await updateInfoServer(newInfo);

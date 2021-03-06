@@ -14,6 +14,7 @@ import EditIdentity from './EditIdentity';
 import {sendReaction, raiseHand} from '../logic/reactions';
 import EditRole from './EditRole';
 import {AudienceAvatar, StageAvatar} from './Avatar';
+import {leaveStage} from '../logic/room';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
@@ -100,7 +101,7 @@ export default function Room({room, roomId}) {
       }}
     >
       <div
-        className="child flex flex-col pt-8 md:p-10"
+        className="child flex flex-col pt-2 md:p-10"
         style={{flex: '1', overflowY: 'auto', minHeight: '0'}}
       >
         <RoomHeader
@@ -114,7 +115,7 @@ export default function Room({room, roomId}) {
         <div className="">
           {/* Stage */}
           <div className="">
-            <ol className="flex flex-wrap pt-6">
+            <ol className="flex flex-wrap">
               {iSpeak && (
                 <StageAvatar
                   key={myPeerId}
@@ -140,8 +141,8 @@ export default function Room({room, roomId}) {
 
           <br />
           {/* Audience */}
-          <h3 className="text-gray-400">Audience</h3>
-          <ol className="flex flex-wrap pt-6">
+          <h3 className="text-gray-400 pl-4 pb-4">Audience</h3>
+          <ol className="flex flex-wrap">
             {!iSpeak && (
               <AudienceAvatar
                 {...{reactions}}
@@ -300,6 +301,16 @@ export default function Room({room, roomId}) {
               <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
             </svg>
           </button>
+
+          {/* TODO: better place for button */}
+          {/* {iSpeak && (
+            <button
+              className="flex-shrink ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
+              onClick={() => leaveStage(roomId)}
+            >
+              🖖🏽&nbsp;Leave Stage
+            </button>
+          )} */}
 
           {/* Leave */}
           <button

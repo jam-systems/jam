@@ -4,7 +4,7 @@ import state from './state';
 import {once} from 'use-minimal-state';
 import identity from './identity';
 
-export {requestAudio, stopAudio};
+export {requestAudio, stopAudio, requestMicPermissionOnly};
 
 state.on('myAudio', myAudio => {
   // if i am speaker, send audio to peers
@@ -25,11 +25,15 @@ state.on('iAmSpeaker', iAmSpeaker => {
       swarm.addLocalStream(myAudio, 'audio', myAudio =>
         state.set('myAudio', myAudio)
       );
+    } else {
+      // or request audio if not on yet
+      requestAudio();
     }
   } else {
     // stop sending stream when I become audience member
     disconnectVolumeMeter(identity.publicKey);
     swarm.addLocalStream(null, 'audio');
+    // stopAudio();
   }
 });
 
@@ -87,11 +91,33 @@ async function requestAudio() {
       console.error('error getting mic');
       console.error(err);
       state.set('micMuted', true);
+      state.set('micAllowed', false);
     });
   if (!stream) return;
   state.set('myAudio', stream);
+  state.set('micAllowed', true);
   state.set('micMuted', false);
   return stream;
+}
+
+async function requestMicPermissionOnly() {
+  if (state.micAllowed) {
+    return true;
+  }
+  let stream = await navigator.mediaDevices
+    .getUserMedia({
+      video: false,
+      audio: true,
+    })
+    .catch(err => {
+      console.error('error getting mic');
+      console.error(err);
+    });
+  state.set('micAllowed', !!stream);
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+  }
+  return !!stream;
 }
 
 async function stopAudio() {
