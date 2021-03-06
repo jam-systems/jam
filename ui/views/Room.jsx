@@ -101,7 +101,7 @@ export default function Room({room, roomId}) {
       }}
     >
       <div
-        className="child flex flex-col pt-8 md:p-10"
+        className="child flex flex-col pt-2 md:p-10"
         style={{flex: '1', overflowY: 'auto', minHeight: '0'}}
       >
         <RoomHeader
@@ -115,7 +115,7 @@ export default function Room({room, roomId}) {
         <div className="">
           {/* Stage */}
           <div className="">
-            <ol className="flex flex-wrap pt-6">
+            <ol className="flex flex-wrap">
               {iSpeak && (
                 <StageAvatar
                   key={myPeerId}
@@ -141,8 +141,8 @@ export default function Room({room, roomId}) {
 
           <br />
           {/* Audience */}
-          <h3 className="text-gray-400">Audience</h3>
-          <ol className="flex flex-wrap pt-6">
+          <h3 className="text-gray-400 pl-4 pb-4">Audience</h3>
+          <ol className="flex flex-wrap">
             {!iSpeak && (
               <AudienceAvatar
                 {...{reactions}}
