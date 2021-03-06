@@ -36,11 +36,12 @@ export function enterRoom(roomId) {
   state.set('userInteracted', true);
   state.set('inRoom', roomId);
   swarm.set('sharedState', state => ({...state, inRoom: true}));
-  if (state.iAmSpeaker) {
-    requestAudio().then(() => state.set('soundMuted', false));
-  } else {
-    requestMicPermissionOnly().then(() => state.set('soundMuted', false));
-  }
+  requestAudio().then(() => state.set('soundMuted', false));
+  // if (state.iAmSpeaker) {
+  //   requestAudio().then(() => state.set('soundMuted', false));
+  // } else {
+  //   requestMicPermissionOnly().then(() => state.set('soundMuted', false));
+  // }
 }
 
 export function leaveRoom() {

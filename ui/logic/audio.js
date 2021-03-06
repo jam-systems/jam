@@ -31,9 +31,9 @@ state.on('iAmSpeaker', iAmSpeaker => {
     }
   } else {
     // stop sending stream when I become audience member
-    // disconnectVolumeMeter(identity.publicKey);
-    // swarm.addLocalStream(null, 'audio');
-    stopAudio();
+    disconnectVolumeMeter(identity.publicKey);
+    swarm.addLocalStream(null, 'audio');
+    // stopAudio();
   }
 });
 
