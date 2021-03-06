@@ -9,7 +9,7 @@ import {updateInfoServer} from '../logic/backend';
 let updateInfo = async info => {
   if (info.identities) {
     let twitterIdentity = info?.identities?.find(i => i.type === 'twitter');
-    if (twitterIdentity) {
+    if (twitterIdentity && twitterIdentity.id) {
       console.log(twitterIdentity)
       let twitterHandle = twitterIdentity.id;
       if (twitterHandle.includes("/")) {
