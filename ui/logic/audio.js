@@ -1,8 +1,11 @@
 import swarm from '../lib/swarm';
 import hark from 'hark';
+import UAParser from 'ua-parser-js';
 import state from './state';
 import {once} from 'use-minimal-state';
 import identity from './identity';
+
+var userAgent = UAParser();
 
 export {requestAudio, stopAudio, requestMicPermissionOnly};
 
@@ -71,11 +74,14 @@ swarm.on('stream', (stream, name, peer) => {
   connectVolumeMeter(id, stream);
 });
 
-// TODO: this did not fix iOS speaker consistency
 async function play(audio) {
   await audio.play();
-  // audio.pause();
-  // await audio.play();
+  // HACK for Safari audio output bug
+  console.log('engine', userAgent.engine.name);
+  if (userAgent.engine.name === 'WebKit') {
+    audio.pause();
+    await audio.play();
+  }
 }
 
 async function requestAudio() {
