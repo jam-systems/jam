@@ -1,5 +1,10 @@
 import React from 'react';
-import {addRole, removeRole} from '../logic/room';
+import {addRole, removeRole, leaveStage} from '../logic/room';
+import identity from '../logic/identity';
+import {state} from '../logic/main';
+import {use} from 'use-minimal-state';
+import {openModal} from './Modal';
+import EditIdentity from './EditIdentity';
 
 export default function EditRole({peerId, speakers, moderators, onCancel}) {
   return (
@@ -46,6 +51,70 @@ export default function EditRole({peerId, speakers, moderators, onCancel}) {
       >
         ❎ Demote Moderator
       </button>
+      <button
+        onClick={onCancel}
+        className="mb-2 h-12 px-6 text-lg text-black bg-gray-100 rounded-lg focus:shadow-outline active:bg-gray-300"
+      >
+        Cancel
+      </button>
+      <br />
+      <br />
+      <hr />
+    </div>
+  );
+}
+
+export function EditSelf({onCancel}) {
+  let myPeerId = identity.publicKey;
+  let [iSpeak, iModerate] = use(state, ['iAmSpeaker', 'iAmModerator']);
+  return (
+    <div className="child md:p-10">
+      <h3 className="font-medium">Actions</h3>
+      <br />
+      <button
+        onClick={() => {
+          openModal(EditIdentity);
+          onCancel();
+        }}
+        className={
+          'mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2'
+        }
+      >
+        Edit Profile
+      </button>
+      {iModerate && !iSpeak && (
+        <button
+          onClick={() => addRole(myPeerId, 'speakers').then(onCancel)}
+          className={
+            'mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2'
+          }
+        >
+          ↑ Move to Stage
+        </button>
+      )}
+      {iModerate && iSpeak && (
+        <button
+          onClick={() => removeRole(myPeerId, 'speakers').then(onCancel)}
+          className={
+            'mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2'
+          }
+        >
+          ↓ Leave Stage
+        </button>
+      )}
+      {!iModerate && iSpeak && (
+        <button
+          onClick={() => {
+            leaveStage();
+            onCancel();
+          }}
+          className={
+            'mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2'
+          }
+        >
+          ↓ Leave Stage
+        </button>
+      )}
       <button
         onClick={onCancel}
         className="mb-2 h-12 px-6 text-lg text-black bg-gray-100 rounded-lg focus:shadow-outline active:bg-gray-300"

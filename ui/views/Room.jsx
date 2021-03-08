@@ -10,9 +10,8 @@ import identity from '../logic/identity';
 import {openModal} from './Modal';
 import {EditRoomModal} from './EditRoom';
 import useWakeLock from '../lib/use-wake-lock';
-import EditIdentity from './EditIdentity';
 import {sendReaction, raiseHand} from '../logic/reactions';
-import EditRole from './EditRole';
+import EditRole, {EditSelf} from './EditRole';
 import {AudienceAvatar, StageAvatar} from './Avatar';
 import {leaveStage} from '../logic/room';
 
@@ -51,6 +50,7 @@ export default function Room({room, roomId}) {
   let hasEnteredRoom = sharedState?.inRoom;
 
   let [editRole, setEditRole] = useState(null);
+  let [editSelf, setEditSelf] = useState(false);
   let [showReactions, setShowReactions] = useState(false);
 
   let [showShareInfo, setShowShareInfo] = useState(false);
@@ -123,7 +123,8 @@ export default function Room({room, roomId}) {
                   {...{speaking, moderators, reactions}}
                   peerState={sharedState}
                   info={myInfo}
-                  onClick={() => openModal(EditIdentity)}
+                  // onClick={() => openModal(EditIdentity)}
+                  onClick={() => setEditSelf(true)}
                 />
               )}
               {stagePeers.map(peerId => (
@@ -150,7 +151,8 @@ export default function Room({room, roomId}) {
                 peerState={sharedState}
                 info={myInfo}
                 handRaised={myHandRaised}
-                onClick={() => openModal(EditIdentity)}
+                // onClick={() => openModal(EditIdentity)}
+                onClick={() => setEditSelf(true)}
               />
             )}
             {audiencePeers.map(peerId => (
@@ -179,6 +181,7 @@ export default function Room({room, roomId}) {
             onCancel={() => setEditRole(null)}
           />
         )}
+        {editSelf && <EditSelf onCancel={() => setEditSelf(false)} />}
         {/* microphone mute/unmute button */}
         {iSpeak && (
           <div className="flex">
@@ -203,7 +206,7 @@ export default function Room({room, roomId}) {
             >
               ↓ Leave Stage
             </button>
-
+            
           </div>
         )}
         {!iSpeak && (
