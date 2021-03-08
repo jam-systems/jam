@@ -3,7 +3,6 @@ import state from './state';
 import {get, updateApiQuery, put, useApiQuery} from './backend';
 import {on, set, update} from 'use-minimal-state';
 import identity from './identity';
-import {arrayRemove} from './util';
 
 export {
   useRoom,
@@ -93,6 +92,7 @@ async function removeRole(id, role) {
 }
 
 function leaveStage(roomId) {
+  roomId = roomId || state.roomId;
   if (!state.iAmSpeaker || swarm.room !== roomId) return;
   swarm.sharedState.leftStage = true;
   update(swarm, 'sharedState');
@@ -112,7 +112,7 @@ on(swarm, 'peerState', peerState => {
       if (state.iAmModerator) {
         removeRole(peerId, 'speakers');
       } else {
-        arrayRemove(speakers, peerId);
+        speakers = speakers.filter(id => id !== peerId);
         updateApiQuery(`/rooms/${state.roomId}`, {...state.room, speakers});
       }
     }

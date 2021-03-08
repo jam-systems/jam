@@ -100,6 +100,6 @@ Directory overview:
 
 ## Buy Us ☕
 
-[BTC](bitcoin:3HM1zPtLuwCGarbihNYVjFVwbFrFe9keqh)
+**BTC:** 3HM1zPtLuwCGarbihNYVjFVwbFrFe9keqh
 
-[ETH](ethereum:0xe15265b2a309f0d20038e10b8df5a12fb5e916f8?gas=40000)
+**ETH:** 0xe15265b2a309f0d20038e10b8df5a12fb5e916f8

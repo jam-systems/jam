@@ -21,6 +21,7 @@
   "dependencies": {
     "compact-base64": "^2.1.2",
     "hark": "^1.2.3",
+    "qs": "^6.9.6",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-markdown": "^5.0.3",
@@ -29,7 +30,7 @@
     "slugify": "^1.4.6",
     "spark-md5": "^3.0.1",
     "tweetnacl": "^1.0.3",
-    "use-minimal-state": "^3.0.2",
-    "qs": "^6.9.6"
+    "ua-parser-js": "^0.7.24",
+    "use-minimal-state": "^3.0.2"
   }
 }

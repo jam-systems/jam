@@ -10,9 +10,8 @@ import identity from '../logic/identity';
 import {openModal} from './Modal';
 import {EditRoomModal} from './EditRoom';
 import useWakeLock from '../lib/use-wake-lock';
-import EditIdentity from './EditIdentity';
 import {sendReaction, raiseHand} from '../logic/reactions';
-import EditRole from './EditRole';
+import EditRole, {EditSelf} from './EditRole';
 import {AudienceAvatar, StageAvatar} from './Avatar';
 import {leaveStage} from '../logic/room';
 
@@ -51,6 +50,7 @@ export default function Room({room, roomId}) {
   let hasEnteredRoom = sharedState?.inRoom;
 
   let [editRole, setEditRole] = useState(null);
+  let [editSelf, setEditSelf] = useState(false);
   let [showReactions, setShowReactions] = useState(false);
 
   let [showShareInfo, setShowShareInfo] = useState(false);
@@ -123,7 +123,8 @@ export default function Room({room, roomId}) {
                   {...{speaking, moderators, reactions}}
                   peerState={sharedState}
                   info={myInfo}
-                  onClick={() => openModal(EditIdentity)}
+                  // onClick={() => openModal(EditIdentity)}
+                  onClick={() => setEditSelf(true)}
                 />
               )}
               {stagePeers.map(peerId => (
@@ -150,7 +151,8 @@ export default function Room({room, roomId}) {
                 peerState={sharedState}
                 info={myInfo}
                 handRaised={myHandRaised}
-                onClick={() => openModal(EditIdentity)}
+                // onClick={() => openModal(EditIdentity)}
+                onClick={() => setEditSelf(true)}
               />
             )}
             {audiencePeers.map(peerId => (
@@ -179,12 +181,13 @@ export default function Room({room, roomId}) {
             onCancel={() => setEditRole(null)}
           />
         )}
+        {editSelf && <EditSelf onCancel={() => setEditSelf(false)} />}
         {/* microphone mute/unmute button */}
         {iSpeak && (
           <div className="flex">
             <button
               onClick={() => state.set('micMuted', !micMuted)}
-              className="select-none h-12 mt-4 px-6 text-lg text-white bg-gray-600 rounded-lg focus:outline-none active:bg-gray-600 w-screen"
+              className="flex-grow select-none h-12 mt-4 px-6 text-lg text-white bg-gray-600 rounded-lg focus:outline-none active:bg-gray-600"
               style={{
                 backgroundColor: color || '#4B5563',
                 color: isColorDark ? 'white' : 'black',
@@ -196,6 +199,13 @@ export default function Room({room, roomId}) {
                   : "🐵 You're on"
                 : "🙊 You're off"}
             </button>
+
+            {/* <button
+              className="flex-shrink mt-4 ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
+              onClick={() => leaveStage(roomId)}
+            >
+              ↓ Leave Stage
+            </button> */}
           </div>
         )}
         {!iSpeak && (
@@ -301,16 +311,6 @@ export default function Room({room, roomId}) {
               <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
             </svg>
           </button>
-
-          {/* TODO: better place for button */}
-          {/* {iSpeak && (
-            <button
-              className="flex-shrink ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
-              onClick={() => leaveStage(roomId)}
-            >
-              🖖🏽&nbsp;Leave Stage
-            </button>
-          )} */}
 
           {/* Leave */}
           <button

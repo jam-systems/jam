@@ -5,6 +5,8 @@ import RoomHeader from './RoomHeader';
 const iOS = /^iP/.test(navigator.platform) ||
             /^Mac/.test(navigator.platform) && navigator.maxTouchPoints > 4;
 
+const macOS = /^Mac/.test(navigator.platform) && navigator.maxTouchPoints === 0;
+
 export default function EnterRoom({roomId, name, description, logoURI}) {
   return (
     <div className="container md:min-h-full">
@@ -71,6 +73,11 @@ export default function EnterRoom({roomId, name, description, logoURI}) {
         <div className={iOS ? "mt-10 text-gray-500 text-center" : "hidden"}>
           🎧 Use headphones or earbuds<br />
           for the best audio experience on iOS
+        </div>
+
+        <div className={macOS ? "mt-10 text-gray-500 text-center" : "hidden"}>
+          🎧 Use Chrome or Firefox instead of Safari<br />
+          for the best audio experience on macOS
         </div>
         {/*
             if it is a future/scheduled room this button could be replaced with
