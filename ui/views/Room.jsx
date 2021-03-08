@@ -200,13 +200,12 @@ export default function Room({room, roomId}) {
                 : "🙊 You're off"}
             </button>
 
-            <button
-              className="hidden flex-shrink mt-4 ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
+            {/* <button
+              className="flex-shrink mt-4 ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
               onClick={() => leaveStage(roomId)}
             >
               ↓ Leave Stage
-            </button>
-            
+            </button> */}
           </div>
         )}
         {!iSpeak && (
