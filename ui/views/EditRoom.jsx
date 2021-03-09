@@ -62,7 +62,7 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
       </div>
       <br />
       <textarea
-        className="rounded placeholder-gray-300 bg-gray-50 w-full md:w-full"
+        className="rounded -mb-1 placeholder-gray-300 bg-gray-50 w-full md:w-full"
         placeholder="Room description"
         value={description}
         name="jam-room-description"
@@ -72,6 +72,23 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
           setDescription(e.target.value);
         }}
       ></textarea>
+      <div className="p-2 text-gray-500 italic">
+        Describe what this room is about.{' '}
+        <span className="text-gray-400">
+          (optional) (supports{' '}
+          <a
+            className="underline"
+            href="https://www.markdownguide.org/cheat-sheet/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Markdown
+          </a>
+          )
+        </span>{' '}
+      </div>
+
+
       {!showAdvanced && (
         <div className="p-2 text-gray-500 italic">
           <span onClick={() => setShowAdvanced(!showAdvanced)}>
