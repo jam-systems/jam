@@ -82,7 +82,9 @@ app.use(async (req, res) => {
         code: req.query.code
       };
 
-      const result = await fetch(`${process.env.SLACK_API_URL}/oauth.v2.access`, {
+      let SLACK_API_URL = process.env.SLACK_API_URL || "https://slack.com/api";
+
+      const result = await fetch(`${SLACK_API_URL}/oauth.v2.access`, {
         method: 'POST',
         body: qs.stringify(params),
         headers: {
