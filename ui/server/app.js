@@ -71,8 +71,7 @@ app.use(async (req, res) => {
     }
 
     if (req.path === '/_/integrations/slack/install') {
-      let SLACK_API_URL = process.env.SLACK_API_URL || "https://slack.com/api";
-      let slackInstallURI = `${SLACK_API_URL}/https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_CLIENT_ID}&scope=chat:write,chat:write.public,commands&user_scope=`;
+      let slackInstallURI = `https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_CLIENT_ID}&scope=chat:write,chat:write.public,commands&user_scope=`;
       return res.redirect(302, slackInstallURI);
     }
 
