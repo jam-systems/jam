@@ -24,6 +24,7 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
   let [logoURI, setLogoURI] = useState(room.logoURI || '');
   let [buttonURI, setButtonURI] = useState(room.buttonURI || '');
   let [buttonText, setButtonText] = useState(room.buttonText || '');
+  let [closed, setClosed] = useState(room.closed || false);
 
   let submit = e => {
     e.preventDefault();
@@ -36,6 +37,7 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
         logoURI,
         buttonURI,
         buttonText,
+        closed,
       });
   };
 
@@ -181,20 +183,41 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
             Set the text for the {`'call to action'`} button.{' '}
             <span className="text-gray-400">(optional)</span>
           </div>
+
+          <br />
+          <hr/>
+          <br />
+          <input
+            className="ml-2"
+            type="checkbox"
+            name="jam-room-closed"
+            id="jam-room-closed"
+            onChange={e => {setClosed(!closed)}} defaultChecked={closed}/>
+
+          <label
+            className="pl-2"
+            for="jam-room-closed">Close the room {' '}</label>
+
+          <div className="p-2 text-gray-500 italic">
+            Closed rooms can only be joined by moderators.<br/>
+            Everyone else sees the description and the 'call to action' button.
+          </div>
         </div>
       )}
-      <button
-        onClick={submit}
-        className="mt-5 h-12 px-6 text-lg text-white bg-gray-600 rounded-lg focus:shadow-outline active:bg-gray-600 mr-2"
-      >
-        Update Room
-      </button>
-      <button
-        onClick={onCancel}
-        className="mt-5 h-12 px-6 text-lg text-black bg-gray-100 rounded-lg focus:shadow-outline active:bg-gray-300"
-      >
-        Cancel
-      </button>
+      <div className="flex">
+        <button
+          onClick={submit}
+          className="flex-grow mt-5 h-12 px-6 text-lg text-white bg-gray-600 rounded-lg focus:shadow-outline active:bg-gray-600 mr-2"
+        >
+          Update Room
+        </button>
+        <button
+          onClick={onCancel}
+          className="mt-5 h-12 px-6 text-lg text-black bg-gray-100 rounded-lg focus:shadow-outline active:bg-gray-300"
+        >
+          Cancel
+        </button>
+      </div>
     </form>
   );
 }
