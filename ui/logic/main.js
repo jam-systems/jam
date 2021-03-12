@@ -1,11 +1,12 @@
 import swarm from '../lib/swarm';
 import state from './state';
 import {get} from './backend';
-import {signData, verifyData} from './identity';
+import identity, {signData, verifyData} from './identity';
 import {DEV, config} from './config';
 import {requestAudio, stopAudio} from './audio';
 import './reactions';
 import './room';
+import {on} from 'minimal-state';
 
 if (DEV) {
   window.state = state; // for debugging
@@ -50,6 +51,14 @@ export function leaveRoom() {
   stopAudio();
   state.set('soundMuted', true);
 }
+
+// leave room when it gets closed
+on(state, 'room', room => {
+  let {moderators, closed} = room;
+  if (state.inRoom && closed && !moderators.includes(identity.publicKey)) {
+    leaveRoom();
+  }
+});
 
 swarm.on('newPeer', async id => {
   for (let i = 0; i < 5; i++) {
