@@ -30,7 +30,7 @@ state.on('iAmSpeaker', iAmSpeaker => {
       );
     } else {
       // or request audio if not on yet
-      requestAudio();
+      if (state.inRoom) requestAudio();
     }
   } else {
     // stop sending stream when I become audience member
@@ -130,7 +130,7 @@ async function stopAudio() {
   if (state.myAudio) {
     state.myAudio.getTracks().forEach(track => track.stop());
   }
-  state.set('myAudio', undefined);
+  state.set('myAudio', null);
 }
 
 state.on('micMuted', micMuted => {
