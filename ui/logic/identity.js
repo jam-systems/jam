@@ -12,7 +12,6 @@ const identity = StoredState(
     let publicKey = encode(keypair.publicKey);
     let secretKey = encode(keypair.secretKey);
     return {
-      synced: false,
       publicKey,
       secretKey,
       info: {

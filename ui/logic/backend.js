@@ -137,10 +137,10 @@ export async function createRoom(
 
 export async function initializeIdentity() {
   if (DEV) console.log('identity', identity);
-  const ok =
+  return (
     (await put(`/identities/${identity.publicKey}`, identity.info)) ||
-    (await post(`/identities/${identity.publicKey}`, identity.info));
-  if (ok) identity.set('synced', true);
+    (await post(`/identities/${identity.publicKey}`, identity.info))
+  );
 }
 
 // UNUSED
