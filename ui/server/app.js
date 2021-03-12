@@ -1,3 +1,4 @@
+/* eslint-env node */
 const express = require('express');
 const app = express();
 const fetch = require('node-fetch');
@@ -70,6 +71,11 @@ app.use(async (req, res) => {
       });
     }
 
+    if (req.path === '/_/integrations/slack/install') {
+      let slackInstallURI = `https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_CLIENT_ID}&scope=chat:write,chat:write.public,commands&user_scope=`;
+      return res.redirect(302, slackInstallURI);
+    }
+
     if (req.path === '/_/integrations/slack/oauth') {
       if (!req.query.code) {
         console.log("invalid code from Slack");
@@ -82,7 +88,9 @@ app.use(async (req, res) => {
         code: req.query.code
       };
 
-      const result = await fetch(`${process.env.SLACK_API_URL}/oauth.v2.access`, {
+      let SLACK_API_URL = process.env.SLACK_API_URL || "https://slack.com/api";
+
+      const result = await fetch(`${SLACK_API_URL}/oauth.v2.access`, {
         method: 'POST',
         body: qs.stringify(params),
         headers: {

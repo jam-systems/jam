@@ -10,12 +10,12 @@ let updateInfo = async info => {
   if (info.identities) {
     let twitterIdentity = info?.identities?.find(i => i.type === 'twitter');
     if (twitterIdentity && twitterIdentity.id) {
-      console.log(twitterIdentity)
+      // console.log(twitterIdentity)
       let twitterHandle = twitterIdentity.id;
-      if (twitterHandle.includes("/")) {
-        twitterHandle = twitterHandle.split("/").pop();
+      if (twitterHandle.includes('/')) {
+        twitterHandle = twitterHandle.split('/').pop();
       }
-      twitterHandle = twitterHandle.replace(/[^0-9a-z-A-Z_]/g, "");
+      twitterHandle = twitterHandle.replace(/[^0-9a-z-A-Z_]/g, '');
       twitterIdentity.id = twitterHandle;
     }
   }
@@ -42,12 +42,12 @@ export default function EditIdentity({close}) {
 
   const [showTwitterVerify, setShowTwitterVerify] = useState(false);
 
-  console.log(twitterIdentity);
+  // console.log(twitterIdentity);
 
   let submit = async e => {
     e.preventDefault();
     let tweet = tweetInput;
-    console.log('submitting tweet', tweet);
+    // console.log('submitting tweet', tweet);
 
     let identities = [
       {

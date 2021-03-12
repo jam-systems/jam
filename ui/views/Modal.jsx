@@ -1,11 +1,14 @@
 import React from 'react';
-import {use} from 'use-minimal-state';
-import state from '../logic/state';
+import {update, use} from 'use-minimal-state';
+
+const modals = [new Set()];
 
 export default function Modals() {
-  let modals = use(state, 'modals');
-  if (!modals) return null;
-  return [...modals].map(([id, Modal, props]) => <Modal key={id} {...props} />);
+  let modals_ = use(modals);
+  if (!modals_) return null;
+  return [...modals_].map(([id, Modal, props]) => (
+    <Modal key={id} {...props} />
+  ));
 }
 
 export function Modal({close, children}) {
@@ -67,24 +70,24 @@ export function openModal(Component, props, id) {
   id = id || Math.random();
   let modal = [id, Component];
   let close = () => {
-    state.modals.delete(modal);
-    state.update('modals');
+    modals[0].delete(modal);
+    update(modals);
   };
   props = {...(props || null), close};
   modal.push(props);
-  state.modals.add(modal);
-  state.update('modals');
+  modals[0].add(modal);
+  update(modals);
   return close;
 }
 
 export function closeModal(id) {
-  for (let modal of state.modals) {
+  for (let modal of modals[0]) {
     if (modal[0] === id) {
-      state.modals.delete(modal);
+      modals[0].delete(modal);
       break;
     }
   }
-  state.update('modals');
+  update(modals);
 }
 
 function CloseSvg() {

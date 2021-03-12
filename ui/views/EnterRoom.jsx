@@ -7,11 +7,11 @@ const iOS = /^iP/.test(navigator.platform) ||
 
 const macOS = /^Mac/.test(navigator.platform) && navigator.maxTouchPoints === 0;
 
-export default function EnterRoom({roomId, name, description, logoURI}) {
+export default function EnterRoom({roomId, name, description, closed, buttonURI, buttonText, logoURI}) {
   return (
     <div className="container md:min-h-full">
       <div className="child p-2 pt-60 md:p-10 md:pt-60">
-        <RoomHeader {...{name, description, logoURI}} />
+        <RoomHeader {...{name, description, logoURI, buttonURI, buttonText}} />
 
         {/*
             a snapshot of current or nticipated speakers
@@ -65,17 +65,21 @@ export default function EnterRoom({roomId, name, description, logoURI}) {
         */}
         <button
           onClick={() => enterRoom(roomId)}
-          className="mt-5 mb-10 select-none w-full h-12 px-6 text-lg text-white bg-gray-600 rounded-lg focus:shadow-outline active:bg-gray-600"
+          className={
+            closed
+            ? "hidden"
+            : "mt-5 mb-10 select-none w-full h-12 px-6 text-lg text-white bg-gray-600 rounded-lg focus:shadow-outline active:bg-gray-600"
+          }
         >
           Join this Jam
         </button>
 
-        <div className={iOS ? "mt-10 text-gray-500 text-center" : "hidden"}>
+        <div className={iOS ? "mt-40 text-gray-500 text-center" : "hidden"}>
           🎧 Use headphones or earbuds<br />
           for the best audio experience on iOS
         </div>
 
-        <div className={macOS ? "mt-10 text-gray-500 text-center" : "hidden"}>
+        <div className={macOS ? "mt-40 text-gray-500 text-center" : "hidden"}>
           🎧 Use Chrome or Firefox instead of Safari<br />
           for the best audio experience on macOS
         </div>

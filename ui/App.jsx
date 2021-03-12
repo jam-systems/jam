@@ -37,7 +37,7 @@ function App() {
   }, [room, roomId]);
 
   let [roomFromURIError, setRoomFromURIError] = useState(false);
-  let [isPostLoading, setPostLoading] = useState(true);
+  let [isCreateLoading, setCreateLoading] = useState(true);
 
   // if roomId is present but room does not exist, try to create new one
   useEffect(() => {
@@ -56,7 +56,7 @@ function App() {
           roomConfig?.color || '',
           swarm.myPeerId
         );
-        setPostLoading(false);
+        setCreateLoading(false);
         if (roomCreated) {
           updateApiQuery(`/rooms/${roomId}`, roomCreated);
           navigate('/' + roomId);
@@ -71,7 +71,7 @@ function App() {
   if (roomId) {
     if (isLoading) return null;
     if (room) return <Room room={room} roomId={roomId} />;
-    if (isPostLoading) return null;
+    if (isCreateLoading) return null;
   }
   return <Start urlRoomId={roomId} roomFromURIError={roomFromURIError} />;
 }

@@ -581,10 +581,10 @@ es-to-primitive@^1.2.1:
     is-date-object "^1.0.1"
     is-symbol "^1.0.2"
 
-esbuild@^0.8.41:
-  version "0.8.41"
-  resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.8.41.tgz#d177f35354cf2b5a3eeddd8c927066fff82771b3"
-  integrity sha512-xejVYquAHrYaHkn/7Itm0aTAALvY1ZJTWMQ14Ww8wEeeg6B/8BN3rjDJ4LMbLoEdVEAFS2b5OZ3jPRYm8Ikm0g==
+esbuild@^0.9.1:
+  version "0.9.1"
+  resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.9.1.tgz#539b4741d5da95e4dd9d27cd5b290104d7d62f9b"
+  integrity sha512-2A0lJxpkV9tvwz+tCD6Ww1bvbZKvH4zBz8G8Dx/MhLwmJ23p8XRIz44ObWt8dpDpZARzhiahacQ+b/V1GJbx0A==
 
 escape-html@~1.0.3:
   version "1.0.3"
@@ -1459,10 +1459,10 @@ mime@1.6.0:
   resolved "https://registry.yarnpkg.com/mime/-/mime-1.6.0.tgz#32cd9e5c64553bd58d19a568af452acff04981b1"
   integrity sha512-x0Vn8spI+wuJ1O6S7gnbaQg8Pxh4NNHb7KSINmEWKiPE4RKOplvijn+NkmYmmRgP68mc70j2EbeTFRsrswaQeg==
 
-minimal-state@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/minimal-state/-/minimal-state-5.0.0.tgz#a8e4cc81169b1ddccb31cc0465d84727b3eafa29"
-  integrity sha512-qldoMItGYgCMhI3r/JvnSEZ3yYRk2QWEXlx1cmzeAhU7+HPW0F904fV13SXVYf0phLOVbkU0P0VIVJmVE7CKPQ==
+minimal-state@^5.5.0:
+  version "5.5.0"
+  resolved "https://registry.yarnpkg.com/minimal-state/-/minimal-state-5.5.0.tgz#a13ecaa207a539762e5733c84796d7a1d93c8828"
+  integrity sha512-B2SaxC/WpUXtjYvWz83mBQzd1BdwTIujjAeEFPd3RVXL9dJz4qpiEm6F/6ktECXCFcPXLHZMkxHpJ7DWXppJDA==
 
 minimatch@3.0.4, minimatch@^3.0.4:
   version "3.0.4"
@@ -2243,12 +2243,12 @@ uri-js@^4.2.2:
   dependencies:
     punycode "^2.1.0"
 
-use-minimal-state@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/use-minimal-state/-/use-minimal-state-3.0.2.tgz#243e28a931fc5bb04ba184795ff6fce8148769e6"
-  integrity sha512-KcGnrhR3xl3rCiGjAXVyxbusyN+GKehvh6KpLpBPnykEiYx0y9AkFH/EZg/a+utcClbp2OjQkyn9iI2aop/L2w==
+use-minimal-state@^3.4.0:
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/use-minimal-state/-/use-minimal-state-3.4.0.tgz#febe6f4a29a58c779d54cc1f8b2b41a582aa6832"
+  integrity sha512-JWePKDJNL3QYuwFxYhqPYdV2c7ub7ROz4xiF5OBrA6tbxBZ03rxjST1cFGVAGXQk2ZSR4/aMgNEaJhq5S8ZWrg==
   dependencies:
-    minimal-state "^5.0.0"
+    minimal-state "^5.5.0"
 
 utils-merge@1.0.1:
   version "1.0.1"

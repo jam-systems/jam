@@ -4,6 +4,7 @@ import UAParser from 'ua-parser-js';
 import state from './state';
 import {once} from 'use-minimal-state';
 import identity from './identity';
+import log from '../lib/causal-log';
 
 var userAgent = UAParser();
 
@@ -30,7 +31,7 @@ state.on('iAmSpeaker', iAmSpeaker => {
       );
     } else {
       // or request audio if not on yet
-      requestAudio();
+      if (state.inRoom) requestAudio();
     }
   } else {
     // stop sending stream when I become audience member
@@ -48,7 +49,7 @@ state.on('soundMuted', muted => {
 });
 
 swarm.on('stream', (stream, name, peer) => {
-  console.log('remote stream', name, stream);
+  log('remote stream', name, stream);
   let id = peer.peerId;
   if (!stream) {
     delete speaker[id];
@@ -60,13 +61,13 @@ swarm.on('stream', (stream, name, peer) => {
   audio.muted = state.soundMuted;
   audio.addEventListener('canplay', () => {
     play(audio).catch(() => {
-      // console.log('deferring audio.play');
+      // log('deferring audio.play');
       state.set('soundMuted', true);
       state.on('userInteracted', interacted => {
         if (interacted)
           play(audio).then(() => {
             if (state.soundMuted) state.set('soundMuted', false);
-            // console.log('playing audio!!');
+            // log('playing audio!!');
           });
       });
     });
@@ -77,7 +78,7 @@ swarm.on('stream', (stream, name, peer) => {
 async function play(audio) {
   await audio.play();
   // HACK for Safari audio output bug
-  console.log('engine', userAgent.engine.name);
+  log('engine', userAgent.engine.name);
   if (userAgent.engine.name === 'WebKit') {
     audio.pause();
     await audio.play();
@@ -130,7 +131,7 @@ async function stopAudio() {
   if (state.myAudio) {
     state.myAudio.getTracks().forEach(track => track.stop());
   }
-  state.set('myAudio', undefined);
+  state.set('myAudio', null);
 }
 
 state.on('micMuted', micMuted => {
