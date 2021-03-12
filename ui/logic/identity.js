@@ -4,24 +4,24 @@ import {adjectives, nouns} from '../lib/names';
 import {StoredState} from '../lib/local-storage';
 import {DEV} from './config';
 import {set, update} from 'use-minimal-state';
+import {debug} from './util';
 
-const identity = StoredState(
-  'identity',
-  () => {
-    const keypair = nacl.sign.keyPair();
-    let publicKey = encode(keypair.publicKey);
-    let secretKey = encode(keypair.secretKey);
-    return {
-      publicKey,
-      secretKey,
-      info: {
-        id: publicKey,
-        displayName: randomName(),
-      },
-    };
-  },
-  {debug: DEV}
-);
+const identity = StoredState('identity', () => {
+  const keypair = nacl.sign.keyPair();
+  let publicKey = encode(keypair.publicKey);
+  let secretKey = encode(keypair.secretKey);
+  return {
+    publicKey,
+    secretKey,
+    info: {
+      id: publicKey,
+      displayName: randomName(),
+    },
+  };
+});
+
+if (DEV) debug(identity);
+
 // MIGRATIONS
 if (!identity.publicKey && identity.keyPair.publicKey) {
   set(identity, 'publicKey', identity.keyPair.publicKey);

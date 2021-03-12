@@ -5,6 +5,7 @@ import {config, DEV} from './config';
 import identity, {signedToken} from './identity';
 import {pure} from '../lib/local-storage';
 import swarm from '../lib/swarm';
+import log from '../lib/causal-log';
 // POST https://jam.systems/_/pantry/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
 // Creates room, returns 409 conflict if room exists
 
@@ -136,7 +137,7 @@ export async function createRoom(
 // identity
 
 export async function initializeIdentity() {
-  if (DEV) console.log('identity', identity);
+  if (DEV) log('identity', identity);
   return (
     (await put(`/identities/${identity.publicKey}`, identity.info)) ||
     (await post(`/identities/${identity.publicKey}`, identity.info))

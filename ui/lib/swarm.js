@@ -1,6 +1,7 @@
 import SimplePeer from 'simple-peer-light';
 import State from 'use-minimal-state';
 import {authenticatedHub} from './signalhub';
+import causalLog from './causal-log';
 
 const MAX_CONNECT_TIME = 6000;
 const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;
@@ -57,7 +58,7 @@ function addLocalStream(stream, name, onNewStream) {
   try {
     addStreamToPeers(stream, name);
   } catch (err) {
-    console.log('cloning tracks');
+    log('cloning tracks');
     // clone tracks to handle error on removing and readding the same stream
     let clonedTracks = stream.getTracks().map(t => t.clone());
     let clonedStream = new MediaStream(clonedTracks);
@@ -532,5 +533,5 @@ let log = (...a) => {
   let time = `[${d.toLocaleTimeString('de-DE')},${String(
     d.getMilliseconds()
   ).padStart(3, '0')}]`;
-  console.log(time, ...a);
+  causalLog(time, ...a);
 };

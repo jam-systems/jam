@@ -3,6 +3,7 @@ import state from './state';
 import {get, updateApiQuery, put, useApiQuery} from './backend';
 import {on, set, update} from 'use-minimal-state';
 import identity from './identity';
+import log from '../lib/causal-log';
 
 export {
   useRoom,
@@ -22,7 +23,7 @@ function useRoom(roomId) {
 
 function maybeConnectRoom(roomId) {
   if (swarm.room === roomId && swarm.hub) return;
-  console.log('connecting room', roomId);
+  log('connecting room', roomId);
   set(state, 'roomId', roomId);
   if (swarm.hub) swarm.disconnect();
   swarm.connect(roomId);
@@ -34,7 +35,7 @@ function maybeConnectRoom(roomId) {
     }
   });
   swarm.hub.subscribeAnonymous('room-info', data => {
-    console.log('new room info', data);
+    log('new room info', data);
     updateApiQuery(`/rooms/${state.roomId}`, data);
   });
   _disconnectRoom = () => {
@@ -75,7 +76,7 @@ async function addRole(id, role) {
   if (role !== 'speakers' && role !== 'moderators') return;
   let existing = role === 'speakers' ? speakers : moderators;
   if (existing.includes(id)) return;
-  console.log('adding to', role, id);
+  log('adding to', role, id);
   let newRoom = {...state.room, [role]: [...existing, id]};
   await put(`/rooms/${state.roomId}`, newRoom);
 }
@@ -86,7 +87,7 @@ async function removeRole(id, role) {
   if (role !== 'speakers' && role !== 'moderators') return;
   let existing = role === 'speakers' ? speakers : moderators;
   if (!existing.includes(id)) return;
-  console.log('removing from', role, id);
+  log('removing from', role, id);
   let newRoom = {...state.room, [role]: existing.filter(id_ => id_ !== id)};
   await put(`/rooms/${state.roomId}`, newRoom);
 }

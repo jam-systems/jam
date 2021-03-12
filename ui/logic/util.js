@@ -1,4 +1,5 @@
-import {on} from 'minimal-state';
+import {on} from 'use-minimal-state';
+import log from '../lib/causal-log';
 
 export {arrayRemove, debug};
 
@@ -8,16 +9,11 @@ function arrayRemove(arr, el) {
 }
 
 function debug(state) {
-  let timeout = null;
   on(state, (key, value, oldValue) => {
-    clearTimeout(timeout);
-    setTimeout(() => {
-      console.log('\n----------------\n\n');
-    }, 10);
     if (oldValue !== undefined) {
-      console.log(key, oldValue, '->', value);
+      log(key, oldValue, '->', value);
     } else {
-      console.log(key, value);
+      log(key, value);
     }
   });
 }
