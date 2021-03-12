@@ -1,7 +1,7 @@
 import {on} from 'use-minimal-state';
 import log from '../lib/causal-log';
 
-export {arrayRemove, debug};
+export {arrayRemove, debug, until, domEvent};
 
 function arrayRemove(arr, el) {
   let i = arr.indexOf(el);
@@ -15,5 +15,25 @@ function debug(state) {
     } else {
       log(key, value);
     }
+  });
+}
+
+async function until(state, key, condition) {
+  return new Promise(resolve => {
+    let off = on(state, key, value => {
+      if (condition(value)) {
+        off();
+        resolve(value);
+      }
+    });
+  });
+}
+
+function domEvent(el, event) {
+  return new Promise(resolve => {
+    el.addEventListener(event, function onEvent() {
+      el.removeEventListener(event, onEvent);
+      resolve();
+    });
   });
 }

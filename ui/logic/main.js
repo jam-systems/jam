@@ -6,7 +6,7 @@ import {DEV, config} from './config';
 import {requestAudio, stopAudio} from './audio';
 import './reactions';
 import './room';
-import {on} from 'minimal-state';
+import {is, on} from 'use-minimal-state';
 
 if (DEV) {
   window.state = state; // for debugging
@@ -37,7 +37,7 @@ export function enterRoom(roomId) {
   state.set('userInteracted', true);
   state.set('inRoom', roomId);
   swarm.set('sharedState', state => ({...state, inRoom: true}));
-  requestAudio().then(() => state.set('soundMuted', false));
+  requestAudio().then(() => is(state, 'soundMuted', false));
   // if (state.iAmSpeaker) {
   //   requestAudio().then(() => state.set('soundMuted', false));
   // } else {
