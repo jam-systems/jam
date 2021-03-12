@@ -307,7 +307,13 @@ function addStreamToPeers(stream, name) {
         peer.addStream(stream);
       } catch (err) {
         peer.streams[name] = null;
-        throw err;
+        if (err.code) {
+          throw err;
+        } else {
+          // TODO "this._senderMap is null", investigate if this happens in relevant cases
+          console.error('could not add stream to peer', peerId);
+          console.error(err);
+        }
       }
     }
   }

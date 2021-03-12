@@ -13,7 +13,6 @@ import useWakeLock from '../lib/use-wake-lock';
 import {sendReaction, raiseHand} from '../logic/reactions';
 import EditRole, {EditSelf} from './EditRole';
 import {AudienceAvatar, StageAvatar} from './Avatar';
-import {leaveStage} from '../logic/room';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
@@ -120,10 +119,27 @@ export default function Room({room, roomId}) {
         className="child flex flex-col pt-2 md:p-10"
         style={{flex: '1', overflowY: 'auto', minHeight: '0'}}
       >
-        <div className={closed ? "rounded bg-blue-50 border border-blue-150 text-gray-600 ml-2 p-3 mb-3 inline text-center" : "hidden"}>
+        <div
+          className={
+            closed
+              ? 'rounded bg-blue-50 border border-blue-150 text-gray-600 ml-2 p-3 mb-3 inline text-center'
+              : 'hidden'
+          }
+        >
           {/*  heroicons/exclamation-circle */}
-          <svg className="w-5 h-5 inline mr-2 -mt-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg
+            className="w-5 h-5 inline mr-2 -mt-1"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
           Room is closed
         </div>
