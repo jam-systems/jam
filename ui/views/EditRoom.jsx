@@ -196,7 +196,7 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
 
           <label
             className="pl-2"
-            for="jam-room-closed">Close the room {' '}</label>
+            for="jam-room-closed">Close the room (experimental){' '}</label>
 
           <div className="p-2 text-gray-500 italic">
             Closed rooms can only be joined by moderators.<br/>
