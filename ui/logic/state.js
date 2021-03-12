@@ -22,7 +22,6 @@ const state = State(
     queries: {},
     modMessages: {},
     userInteracted: false,
-    modals: new Set(),
   },
   {debug: DEV}
 );

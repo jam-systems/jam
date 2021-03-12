@@ -3,7 +3,7 @@ import state from './state';
 import {get} from './backend';
 import {signData, verifyData} from './identity';
 import {DEV, config} from './config';
-import {requestAudio, stopAudio, requestMicPermissionOnly} from './audio';
+import {requestAudio, stopAudio} from './audio';
 import './reactions';
 import './room';
 
