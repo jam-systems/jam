@@ -202,6 +202,26 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
             Closed rooms can only be joined by moderators.<br/>
             Everyone else sees the description and the 'call to action' button.
           </div>
+
+          <br />
+          <hr/>
+          <br />
+          <input
+            className="rounded bg-gray-50 text-gray-400 w-full"
+            value={`<iframe src="${window.location.href}" allow="microphone *;"></iframe>`} />
+
+          <div className="p-2 text-gray-500 italic">
+            Embed this room using an iFrame. (
+            <a
+              className="underline"
+              href="https://gitlab.com/jam-systems/jam"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Learn more
+            </a>)
+          </div>
+
         </div>
       )}
       <div className="flex">
