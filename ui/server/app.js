@@ -63,6 +63,9 @@ app.use("/config.json", (_, res) => {
 })
 
 app.use(async (req, res) => {
+    if (req.path === '/new') {
+      return res.redirect(302, `https://${jamHost}/${Math.random().toString(36).substr(2, 6)}`);
+    }
 
     if (req.path === '/_/integrations/slack') {
       return res.json({
