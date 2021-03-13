@@ -10,7 +10,7 @@ export function EditRoomModal({roomId, room, close}) {
   };
   return (
     <Modal close={close}>
-      <h1>Edit Room</h1>
+      <h1>Room Settings</h1>
       <br />
       <EditRoom room={room} onSubmit={updateRoom} onCancel={close} />
     </Modal>
