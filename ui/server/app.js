@@ -63,6 +63,9 @@ app.use("/config.json", (_, res) => {
 })
 
 app.use(async (req, res) => {
+    if (req.path === '/new') {
+      return res.redirect(302, `https://${jamHost}/${Math.random().toString(36).substr(2, 6)}`);
+    }
 
     if (req.path === '/_/integrations/slack') {
       return res.json({
@@ -105,6 +108,21 @@ app.use(async (req, res) => {
         ...defaultMetaInfo,
         ...(await getRoomMetaInfo(req.path))
     };
+
+    if (req.path.includes("/_/integrations/oembed")) {
+      if (!req.query.url?.startsWith(`https://${jamHost}/`)) return res.json();
+
+      let width = parseInt((req.query.width || "440"), 10);
+      let height = parseInt((req.query.height || "600"), 10);
+
+      return res.json({
+        type: "rich",
+        version: "1.0",
+        html: `<iframe src="${req.query.url}" allow="microphone *;"></iframe>`,
+        width: width,
+        height: height
+      });
+    }
 
     if (req.path.endsWith('manifest.json')) {
       return res.json({
@@ -162,6 +180,7 @@ app.use(async (req, res) => {
       rel="stylesheet"
     />
     <link rel="manifest" href="<%= metaInfo.ogUrl %>/manifest.json">
+    <link rel="alternate" type="application/json+oembed" href="https://${jamHost}/_/integrations/oembed?url=<%= metaInfo.ogUrl %>">
     <title><%= metaInfo.ogTitle %></title>
   </head>
   <body>

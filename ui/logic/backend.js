@@ -15,7 +15,10 @@ import log from '../lib/causal-log';
 // PUT https://jam.systems/_/pantry/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
 // updates room and broadcasts to roomId / channel room-info on signal hub
 
-const API = `${config.pantryUrl}/api/v1`;
+let API = `${config.pantryUrl}/api/v1`;
+on(config, () => {
+  API = `${config.pantryUrl}/api/v1`;
+});
 
 export function useApiQuery(path, doFetch = true, key, defaultQuery) {
   let cached = use(state, 'queries')[path];

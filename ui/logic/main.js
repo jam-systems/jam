@@ -6,7 +6,7 @@ import {DEV, config} from './config';
 import {requestAudio, stopAudio} from './audio';
 import './reactions';
 import './room';
-import {on} from 'minimal-state';
+import {is, on} from 'use-minimal-state';
 
 if (DEV) {
   window.state = state; // for debugging
@@ -14,30 +14,34 @@ if (DEV) {
 }
 export {state};
 
-swarm.config({
-  debug: DEV,
-  url: config.signalHubUrl + '/',
-  sign: signData,
-  verify: verifyData,
-  pcConfig: {
-    iceTransportPolicy: 'all',
-    iceServers: [
-      {urls: `stun:stun.jam.systems:3478`},
-      {urls: `stun:${config.stunServer}`},
-      {
-        urls: `turn:${config.turnServer}`,
-        username: 'test',
-        credential: 'yieChoi0PeoKo8ni',
-      },
-    ],
-  },
-});
+function configSignalhub() {
+  swarm.config({
+    debug: config.development,
+    url: config.signalHubUrl + '/',
+    sign: signData,
+    verify: verifyData,
+    pcConfig: {
+      iceTransportPolicy: 'all',
+      iceServers: [
+        {urls: `stun:stun.jam.systems:3478`},
+        {urls: `stun:${config.stunServer}`},
+        {
+          urls: `turn:${config.turnServer}`,
+          username: 'test',
+          credential: 'yieChoi0PeoKo8ni',
+        },
+      ],
+    },
+  });
+}
+configSignalhub();
+on(config, () => configSignalhub());
 
 export function enterRoom(roomId) {
   state.set('userInteracted', true);
   state.set('inRoom', roomId);
   swarm.set('sharedState', state => ({...state, inRoom: true}));
-  requestAudio().then(() => state.set('soundMuted', false));
+  requestAudio().then(() => is(state, 'soundMuted', false));
   // if (state.iAmSpeaker) {
   //   requestAudio().then(() => state.set('soundMuted', false));
   // } else {

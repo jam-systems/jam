@@ -2,9 +2,10 @@ import swarm from '../lib/swarm';
 import hark from 'hark';
 import UAParser from 'ua-parser-js';
 import state from './state';
-import {once} from 'use-minimal-state';
+import {is, next} from 'use-minimal-state';
 import identity from './identity';
 import log from '../lib/causal-log';
+import {domEvent} from './util';
 
 var userAgent = UAParser();
 
@@ -48,7 +49,7 @@ state.on('soundMuted', muted => {
   }
 });
 
-swarm.on('stream', (stream, name, peer) => {
+swarm.on('stream', async (stream, name, peer) => {
   log('remote stream', name, stream);
   let id = peer.peerId;
   if (!stream) {
@@ -59,30 +60,27 @@ swarm.on('stream', (stream, name, peer) => {
   speaker[id] = audio;
   audio.srcObject = stream;
   audio.muted = state.soundMuted;
-  audio.addEventListener('canplay', () => {
-    play(audio).catch(() => {
-      // log('deferring audio.play');
-      state.set('soundMuted', true);
-      state.on('userInteracted', interacted => {
-        if (interacted)
-          play(audio).then(() => {
-            if (state.soundMuted) state.set('soundMuted', false);
-            // log('playing audio!!');
-          });
-      });
-    });
-  });
-  connectVolumeMeter(id, stream);
+  try {
+    await play(audio);
+  } catch (err) {
+    await next(state, 'userInteracted');
+    await play(audio);
+  }
+  await connectVolumeMeter(id, stream);
 });
 
 async function play(audio) {
-  await audio.play();
   // HACK for Safari audio output bug
-  log('engine', userAgent.engine.name);
+  log('playing audio on engine', userAgent.engine.name);
   if (userAgent.engine.name === 'WebKit') {
-    audio.pause();
+    let onplay = domEvent(audio, 'play');
     await audio.play();
+    await onplay;
+    let onpause = domEvent(audio, 'pause');
+    audio.pause();
+    await onpause;
   }
+  return audio.play();
 }
 
 async function requestAudio() {
@@ -149,16 +147,14 @@ state.on('micMuted', micMuted => {
 });
 
 let volumeMeters = {};
-function connectVolumeMeter(peerId, stream) {
+async function connectVolumeMeter(peerId, stream) {
   if (!stream) {
     disconnectVolumeMeter(peerId);
     return;
   }
-  if (!state.audioContext) {
-    // if no audio context exists yet, retry as soon as it is available
-    once(state, 'audioContext', () => connectVolumeMeter(peerId, stream));
-    return;
-  }
+  // await audio context
+  if (!state.audioContext) await next(state, 'audioContext');
+
   let options = {audioContext: state.audioContext};
   let volumeMeter = hark(stream, options);
 
