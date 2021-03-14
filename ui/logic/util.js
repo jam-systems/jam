@@ -33,6 +33,8 @@ function domEvent(el, event) {
   return new Promise(resolve => {
     el.addEventListener(event, function onEvent() {
       el.removeEventListener(event, onEvent);
+      console.log("in promise");
+      console.log(event);
       resolve();
     });
   });
