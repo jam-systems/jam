@@ -109,6 +109,21 @@ app.use(async (req, res) => {
         ...(await getRoomMetaInfo(req.path))
     };
 
+    if (req.path.includes("/_/integrations/oembed")) {
+      if (!req.query.url?.startsWith(`https://${jamHost}/`)) return res.json();
+
+      let width = parseInt((req.query.width || "440"), 10);
+      let height = parseInt((req.query.height || "600"), 10);
+
+      return res.json({
+        type: "rich",
+        version: "1.0",
+        html: `<iframe src="${req.query.url}" allow="microphone *;"></iframe>`,
+        width: width,
+        height: height
+      });
+    }
+
     if (req.path.endsWith('manifest.json')) {
       return res.json({
         "short_name": metaInfo.ogTitle,
@@ -165,6 +180,7 @@ app.use(async (req, res) => {
       rel="stylesheet"
     />
     <link rel="manifest" href="<%= metaInfo.ogUrl %>/manifest.json">
+    <link rel="alternate" type="application/json+oembed" href="https://${jamHost}/_/integrations/oembed?url=<%= metaInfo.ogUrl %>">
     <title><%= metaInfo.ogTitle %></title>
   </head>
   <body>
