@@ -63,10 +63,8 @@ swarm.on('stream', async (stream, name, peer) => {
   try {
     await play(audio);
   } catch (err) {
-    is(state, 'soundMuted', true);
     await next(state, 'userInteracted');
     await play(audio);
-    is(state, 'soundMuted', false);
   }
   await connectVolumeMeter(id, stream);
 });
