@@ -208,7 +208,7 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
           <br />
           <input
             className="rounded bg-gray-50 text-gray-400 w-full"
-            value={`<iframe src="${window.location.href}" allow="microphone *;"></iframe>`} />
+            value={`<iframe src="${window.location.href}" allow="microphone *;" width="420" height="600"></iframe>`} />
 
           <div className="p-2 text-gray-500 italic">
             Embed this room using an iFrame. (
