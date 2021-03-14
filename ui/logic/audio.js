@@ -72,19 +72,15 @@ swarm.on('stream', async (stream, name, peer) => {
 async function play(audio) {
   // HACK for Safari audio output bug
   log('playing audio on engine', userAgent.engine.name);
-  if (userAgent.engine.name === 'WebKit' || 1 + 1 === 2) {
-    audio.addEventListener('play', () => {
-      console.log('PLAAAAAAAAAAAAYYYYYYYYYYYYY');
-    });
+  if (userAgent.engine.name === 'WebKit') {
+    let onplay = domEvent(audio, 'play');
     await audio.play();
-    await audio.pause();
-    return audio.play();
-    // await domEvent(audio, 'play');
-    // await domEvent(audio, 'pause');
-    // return domEvent(audio, 'play');
-  } else {
-    return audio.play();
+    await onplay;
+    let onpause = domEvent(audio, 'pause');
+    audio.pause();
+    await onpause;
   }
+  return audio.play();
 }
 
 async function requestAudio() {
