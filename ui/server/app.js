@@ -118,7 +118,7 @@ app.use(async (req, res) => {
       return res.json({
         type: "rich",
         version: "1.0",
-        html: `<iframe src="${req.query.url}" allow="microphone *;"></iframe>`,
+        html: `<iframe src="${req.query.url}" allow="microphone *;" width="${width}" height="${height}"></iframe>`,
         width: width,
         height: height
       });
