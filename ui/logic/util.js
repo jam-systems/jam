@@ -29,13 +29,33 @@ async function until(state, key, condition) {
   });
 }
 
-function domEvent(el, event) {
-  return new Promise(resolve => {
-    el.addEventListener(event, function onEvent() {
-      el.removeEventListener(event, onEvent);
+// function domEvent(el, event) {
+//   return new Promise(resolve => {
+//     el.addEventListener(event, function onEvent() {
+//       el.removeEventListener(event, onEvent);
+//       console.log("in promise");
+//       console.log(event);
+//       resolve();
+//     });
+//   });
+// }
+
+function domEvent(el, e, timeout) {
+  return new Promise((resolve, reject) => {
+    let timer;
+
+    function listener(data) {
+      clearTimeout(timer);
+      el.removeEventListener(e, listener);
       console.log("in promise");
-      console.log(event);
-      resolve();
-    });
+      console.log(e);
+      resolve(data);
+    }
+
+    el.addEventListener(e, listener);
+    timer = setTimeout(() => {
+      el.removeEventListener(e, listener);
+      reject(new Error("timeout waiting for " + e));
+    }, timeout);
   });
 }
