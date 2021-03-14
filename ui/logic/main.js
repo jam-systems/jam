@@ -14,24 +14,28 @@ if (DEV) {
 }
 export {state};
 
-swarm.config({
-  debug: DEV,
-  url: config.signalHubUrl + '/',
-  sign: signData,
-  verify: verifyData,
-  pcConfig: {
-    iceTransportPolicy: 'all',
-    iceServers: [
-      {urls: `stun:stun.jam.systems:3478`},
-      {urls: `stun:${config.stunServer}`},
-      {
-        urls: `turn:${config.turnServer}`,
-        username: 'test',
-        credential: 'yieChoi0PeoKo8ni',
-      },
-    ],
-  },
-});
+function configSignalhub() {
+  swarm.config({
+    debug: config.development,
+    url: config.signalHubUrl + '/',
+    sign: signData,
+    verify: verifyData,
+    pcConfig: {
+      iceTransportPolicy: 'all',
+      iceServers: [
+        {urls: `stun:stun.jam.systems:3478`},
+        {urls: `stun:${config.stunServer}`},
+        {
+          urls: `turn:${config.turnServer}`,
+          username: 'test',
+          credential: 'yieChoi0PeoKo8ni',
+        },
+      ],
+    },
+  });
+}
+configSignalhub();
+on(config, () => configSignalhub());
 
 export function enterRoom(roomId) {
   state.set('userInteracted', true);

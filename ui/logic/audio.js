@@ -63,10 +63,8 @@ swarm.on('stream', async (stream, name, peer) => {
   try {
     await play(audio);
   } catch (err) {
-    is(state, 'soundMuted', true);
     await next(state, 'userInteracted');
     await play(audio);
-    is(state, 'soundMuted', false);
   }
   await connectVolumeMeter(id, stream);
 });
@@ -74,10 +72,16 @@ swarm.on('stream', async (stream, name, peer) => {
 async function play(audio) {
   // HACK for Safari audio output bug
   log('playing audio on engine', userAgent.engine.name);
-  if (userAgent.engine.name === 'WebKit') {
-    await domEvent(audio, 'play');
-    await domEvent(audio, 'pause');
-    return domEvent(audio, 'play');
+  if (userAgent.engine.name === 'WebKit' || 1 + 1 === 2) {
+    audio.addEventListener('play', () => {
+      console.log('PLAAAAAAAAAAAAYYYYYYYYYYYYY');
+    });
+    await audio.play();
+    await audio.pause();
+    return audio.play();
+    // await domEvent(audio, 'play');
+    // await domEvent(audio, 'pause');
+    // return domEvent(audio, 'play');
   } else {
     return audio.play();
   }

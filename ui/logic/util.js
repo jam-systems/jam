@@ -32,6 +32,7 @@ async function until(state, key, condition) {
 function domEvent(el, event) {
   return new Promise(resolve => {
     el.addEventListener(event, function onEvent() {
+      console.log(event);
       el.removeEventListener(event, onEvent);
       resolve();
     });
