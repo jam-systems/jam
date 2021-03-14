@@ -56,9 +56,9 @@ An overview for how 🍞 Jam compares to similar services like Clubhouse or Twit
 
 Workaround: use bluetooth or cable headphones, this way audio will always go through the headphones.
 
-**📱 Android: when Android phone goes to sleep/lockscreen because of inactivity the microphone or sound output might stop working until you unlock the screen**
+**📱 iPhone & Android: when phone goes to sleep/lockscreen because of inactivity the microphone or sound output might stop working until you unlock the screen again**
 
-Workaround: make sure the phone does not go to sleep
+Workaround: make sure you are using Jam in the standalone browser instead of within a webview
 
 **Participants can hear me but I can not hear them**
 
@@ -67,6 +67,12 @@ When participants join a room on 🍞 Jam they start in the _audience_, you can 
 ## Host Your Own Server
 
 Hosting your own Jam server is easy.
+
+### Minimum Requirements
+
+To run your own Jam instance we recommend a minimum of 512 MB RAM and a 1GHz CPU.
+
+e.g.: a Raspberry Pi Zero (512 MB RAM) or the smallest [Digital Ocean Basic Droplet (1 GB RAM)](https://www.digitalocean.com/pricing/) or the smallest [Linode shared plan (1 GB RAM)](https://www.linode.com/pricing/) should be enough to get started.
 
 ### Install
 
