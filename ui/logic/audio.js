@@ -74,9 +74,9 @@ async function play(audio) {
   log('playing audio on engine', userAgent.engine.name);
   console.log('ppplay')
   if (true) {
-    await domEvent(audio, 'play', 0);
-    await domEvent(audio, 'pause', 0);
-    return domEvent(audio, 'play', 0);
+    await domEvent(audio, 'play', 1000000);
+    await domEvent(audio, 'pause', 1000000);
+    return domEvent(audio, 'play', 1000000);
   } else {
     return audio.play();
   }
