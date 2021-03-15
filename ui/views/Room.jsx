@@ -13,6 +13,8 @@ import useWakeLock from '../lib/use-wake-lock';
 import {sendReaction, raiseHand} from '../logic/reactions';
 import EditRole, {EditSelf} from './EditRole';
 import {AudienceAvatar, StageAvatar} from './Avatar';
+import {useMqParser} from '../logic/tailwind-mqp';
+import Container from './Container';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
@@ -77,6 +79,8 @@ export default function Room({room, roomId}) {
     }
   }, [color]);
 
+  let mqp = useMqParser();
+
   if (!iModerate && closed) {
     return (
       <EnterRoom
@@ -111,15 +115,9 @@ export default function Room({room, roomId}) {
   let myHandRaised = raisedHands.has(myPeerId);
 
   return (
-    <div
-      className="container"
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
+    <Container style={{display: 'flex', flexDirection: 'column'}}>
       <div
-        className="child flex flex-col pt-2 md:p-10"
+        className={mqp('flex flex-col pt-2 md:pt-10 md:p-10')}
         style={{flex: '1', overflowY: 'auto', minHeight: '0'}}
       >
         <div
@@ -363,7 +361,7 @@ export default function Room({room, roomId}) {
           </button>
         </div>
       </div>
-    </div>
+    </Container>
   );
 }
 

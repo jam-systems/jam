@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {put} from '../logic/backend';
+import {useMqParser} from '../logic/tailwind-mqp';
 import {Modal} from './Modal';
 
 export function EditRoomModal({roomId, room, close}) {
@@ -44,10 +45,13 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
   const [showAdvanced, setShowAdvanced] = useState(
     !!(room.logoURI || room.color)
   );
+  let mqp = useMqParser();
   return (
     <form onSubmit={submit}>
       <input
-        className="rounded placeholder-gray-300 bg-gray-50 w-full md:w-96"
+        className={mqp(
+          'rounded placeholder-gray-300 bg-gray-50 w-full md:w-96'
+        )}
         type="text"
         placeholder="Room topic"
         value={name}
@@ -64,7 +68,9 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
       </div>
       <br />
       <textarea
-        className="rounded -mb-1 placeholder-gray-300 bg-gray-50 w-full md:w-full"
+        className={mqp(
+          'rounded -mb-1 placeholder-gray-300 bg-gray-50 w-full md:w-full'
+        )}
         placeholder="Room description"
         value={description}
         name="jam-room-description"
@@ -89,7 +95,6 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
           )
         </span>{' '}
       </div>
-
 
       {!showAdvanced && (
         <div className="p-2 text-gray-500 italic">
@@ -119,7 +124,9 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
         <div>
           <br />
           <input
-            className="rounded placeholder-gray-300 bg-gray-50 w-full md:w-full"
+            className={mqp(
+              'rounded placeholder-gray-300 bg-gray-50 w-full md:w-full'
+            )}
             type="text"
             placeholder="Logo URI"
             value={logoURI}
@@ -152,7 +159,9 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
 
           <br />
           <input
-            className="rounded placeholder-gray-400 bg-gray-50 w-full md:w-full"
+            className={mqp(
+              'rounded placeholder-gray-400 bg-gray-50 w-full md:w-full'
+            )}
             type="text"
             placeholder="Button URI"
             value={buttonURI}
@@ -169,7 +178,9 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
 
           <br />
           <input
-            className="rounded placeholder-gray-400 bg-gray-50 w-full md:w-96"
+            className={mqp(
+              'rounded placeholder-gray-400 bg-gray-50 w-full md:w-96'
+            )}
             type="text"
             placeholder="Button Text"
             value={buttonText}
@@ -185,30 +196,37 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
           </div>
 
           <br />
-          <hr/>
+          <hr />
           <br />
           <input
             className="ml-2"
             type="checkbox"
             name="jam-room-closed"
             id="jam-room-closed"
-            onChange={e => {setClosed(!closed)}} defaultChecked={closed}/>
+            onChange={() => {
+              setClosed(!closed);
+            }}
+            defaultChecked={closed}
+          />
 
-          <label
-            className="pl-2"
-            for="jam-room-closed">Close the room (experimental){' '}</label>
+          <label className="pl-2" htmlFor="jam-room-closed">
+            Close the room (experimental){' '}
+          </label>
 
           <div className="p-2 text-gray-500 italic">
-            Closed rooms can only be joined by moderators.<br/>
-            Everyone else sees the description and the 'call to action' button.
+            Closed rooms can only be joined by moderators.
+            <br />
+            Everyone else sees the description and the
+            {`'call to action'`} button.
           </div>
 
           <br />
-          <hr/>
+          <hr />
           <br />
           <input
             className="rounded bg-gray-50 text-gray-400 w-full"
-            value={`<iframe src="${window.location.href}" allow="microphone *;" width="420" height="600"></iframe>`} />
+            value={`<iframe src="${window.location.href}" allow="microphone *;" width="420" height="600"></iframe>`}
+          />
 
           <div className="p-2 text-gray-500 italic">
             Embed this room using an iFrame. (
@@ -219,9 +237,9 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
               rel="noreferrer"
             >
               Learn more
-            </a>)
+            </a>
+            )
           </div>
-
         </div>
       )}
       <div className="flex">

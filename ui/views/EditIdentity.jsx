@@ -5,6 +5,7 @@ import {Modal} from './Modal';
 import identity from '../logic/identity';
 import {use} from 'use-minimal-state';
 import {updateInfoServer} from '../logic/backend';
+import {useMqParser} from '../logic/tailwind-mqp';
 
 let updateInfo = async info => {
   if (info.identities) {
@@ -29,6 +30,7 @@ let updateInfo = async info => {
 };
 
 export default function EditIdentity({close}) {
+  let mqp = useMqParser();
   let [info, id] = use(identity, ['info', 'publicKey']);
   let [displayName, setDisplayName] = useState(info?.displayName);
   let [email, setEmail] = useState(info?.email);
@@ -188,7 +190,9 @@ export default function EditIdentity({close}) {
           </p>
           <pre
             style={{fontSize: '0.7rem'}}
-            className="rounded-md bg-yellow-50 not-italic text-xs text-center py-2 -ml-2 mt-2 md:text-base"
+            className={mqp(
+              'rounded-md bg-yellow-50 not-italic text-xs text-center py-2 -ml-2 mt-2 md:text-base'
+            )}
           >
             {id}
           </pre>

@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {avatarUrl} from '../lib/avatar';
 import animateEmoji from '../lib/animate-emoji';
+import {useMqParser} from '../logic/tailwind-mqp';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
@@ -13,6 +14,7 @@ export function StageAvatar({
   info,
   onClick,
 }) {
+  let mqp = useMqParser();
   let {micMuted, inRoom = null} = peerState || {};
   let reactions_ = reactions[peerId];
   info = info || {id: peerId};
@@ -35,27 +37,39 @@ export function StageAvatar({
         >
           <div className="human-radius p-1 bg-white relative flex justify-center">
             <img
-              className="human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28 object-cover"
+              className={mqp(
+                'human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28 object-cover'
+              )}
               alt={info.displayName}
               src={avatarUrl(info)}
               onClick={onClick}
             />
             <Reactions
               reactions={reactions_}
-              className="absolute bg-white text-5xl md:text-7xl pt-4 md:pt-5 human-radius w-20 h-20 md:w-28 md:h-28 border text-center"
+              className={mqp(
+                'absolute bg-white text-5xl md:text-7xl pt-4 md:pt-5 human-radius w-20 h-20 md:w-28 md:h-28 border text-center'
+              )}
             />
           </div>
         </div>
         {/* div for showing mute/unmute status */}
         <div className={micMuted ? '' : 'hidden'}>
-          <div className="absolute w-10 h-10 right-0 top-12 md:top-20 rounded-full bg-white border-2 text-2xl border-gray-400 flex items-center justify-center">
+          <div
+            className={mqp(
+              'absolute w-10 h-10 right-0 top-12 md:top-20 rounded-full bg-white border-2 text-2xl border-gray-400 flex items-center justify-center'
+            )}
+          >
             🙊
           </div>
         </div>
-        <div className="w-20 md:w-28 m-2">
+        <div className={mqp('w-20 md:w-28 m-2')}>
           <div className="flex">
-            <div className="flex-none text-center pl-1 w-20 md:w-28">
-              <span className="text-sm md:text-base whitespace-nowrap w-22 md:w-30 text-black font-medium">
+            <div className={mqp('flex-none text-center pl-1 w-20 md:w-28')}>
+              <span
+                className={mqp(
+                  'text-sm md:text-base whitespace-nowrap w-22 md:w-30 text-black font-medium'
+                )}
+              >
                 <span
                   style={{margin: '0 3px 0 -4px'}}
                   className={
@@ -92,7 +106,15 @@ export function StageAvatar({
   );
 }
 
-export function AudienceAvatar({peerId, peerState, reactions, info, handRaised, onClick}) {
+export function AudienceAvatar({
+  peerId,
+  peerState,
+  reactions,
+  info,
+  handRaised,
+  onClick,
+}) {
+  let mqp = useMqParser();
   let {inRoom = null} = peerState || {};
   let reactions_ = reactions[peerId];
   info = info || {id: peerId};
@@ -100,22 +122,30 @@ export function AudienceAvatar({peerId, peerState, reactions, info, handRaised, 
     inRoom && (
       <li
         title={info.displayName}
-        className="flex-none m-2 w-16 h-32 md:w-24 md:h-36 text-xs"
+        className={mqp('flex-none m-2 w-16 h-32 md:w-24 md:h-36 text-xs')}
         style={onClick ? {cursor: 'pointer'} : undefined}
       >
         <div className="relative flex justify-center">
           <img
-            className="human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50 object-cover"
+            className={mqp(
+              'human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50 object-cover'
+            )}
             alt={info.displayName}
             src={avatarUrl(info)}
             onClick={onClick}
           />
           <Reactions
             reactions={reactions_}
-            className="absolute bg-white text-4xl md:text-6xl pt-3 md:pt-4 human-radius w-16 h-16 md:w-24 md:h-24 border text-center"
+            className={mqp(
+              'absolute bg-white text-4xl md:text-6xl pt-3 md:pt-4 human-radius w-16 h-16 md:w-24 md:h-24 border text-center'
+            )}
           />
           <div className={handRaised ? '' : 'hidden'}>
-            <div className="absolute w-9 h-9 top-0 left-0 md:top-0 md:left-0 rounded-full bg-white text-lg border-2 border-gray-400 flex items-center justify-center">
+            <div
+              className={mqp(
+                'absolute w-9 h-9 top-0 left-0 md:top-0 md:left-0 rounded-full bg-white text-lg border-2 border-gray-400 flex items-center justify-center'
+              )}
+            >
               ✋🏽
             </div>
           </div>
@@ -143,11 +173,11 @@ function TwitterHandle({info, divClass, fontClass}) {
           <a
             className="text-gray-500 font-medium ml-1"
             style={{textDecoration: 'none', fontWeight: 'normal'}}
-            href={'https://twitter.com/' + twitterIdentity?.id.replace("@", "")}
+            href={'https://twitter.com/' + twitterIdentity?.id.replace('@', '')}
             target="_blank"
             rel="noreferrer"
           >
-            @{twitterIdentity?.id.replace("@", "")}
+            @{twitterIdentity?.id.replace('@', '')}
           </a>
         </span>
       </div>

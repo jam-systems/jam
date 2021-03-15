@@ -6,7 +6,14 @@ import {
   useState,
 } from 'react';
 
-export {WidthContext, useProvideWidth, useMqParser, useMq, mqpTailwind};
+export {
+  WidthContext,
+  useProvideWidth,
+  useWidth,
+  useMqParser,
+  useMq,
+  breakpoints,
+};
 
 const breakpoints = {
   sm: 640,
@@ -16,16 +23,16 @@ const breakpoints = {
 };
 const allBreakpoints = new Set(Object.keys(breakpoints));
 
-const WidthContext = createContext(document.body.scrollWidth);
+const WidthContext = createContext(document.body.offsetWidth);
 
 function useProvideWidth() {
   let [container, setContainer] = useState(document.body);
-  let [width, setWidth] = useState(document.body.scrollWidth);
+  let [width, setWidth] = useState(document.body.offsetWidth);
 
   useEffect(() => {
-    setWidth(container.scrollWidth);
+    setWidth(container.offsetWidth);
     let observer = new ResizeObserver(() => {
-      setWidth(container.scrollWidth);
+      setWidth(container.offsetWidth);
     });
     observer.observe(container);
     return () => observer.disconnect();

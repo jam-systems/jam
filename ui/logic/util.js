@@ -2,7 +2,7 @@ import {useEffect} from 'react';
 import {is, on} from 'use-minimal-state';
 import log from '../lib/causal-log';
 
-export {arrayRemove, debug, until, domEvent, useSync};
+export {arrayRemove, debug, until, domEvent, useSync, mergeClasses};
 
 function arrayRemove(arr, el) {
   let i = arr.indexOf(el);
@@ -44,4 +44,8 @@ async function useSync(...args) {
   useEffect(() => {
     is(...args);
   }, deps);
+}
+
+function mergeClasses(...classes) {
+  return classes.filter(x => x).join(' ');
 }

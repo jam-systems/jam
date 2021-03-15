@@ -6,7 +6,7 @@ import {useRoom, maybeConnectRoom, disconnectRoom} from './logic/room';
 import swarm from './lib/swarm';
 import Modals from './views/Modal';
 import state from './logic/state';
-import {useSync} from './logic/util';
+import {mergeClasses, useSync} from './logic/util';
 import {stopAudio} from './logic/audio';
 import {config} from './logic/config';
 import {set} from 'minimal-state';
@@ -26,7 +26,7 @@ export default function Jam({
     <div
       id="outer-container"
       ref={el => setContainer(el)}
-      className={mqp('sm:pt-12' + (className ? ' ' + className : ''), width)}
+      className={mqp(mergeClasses('sm:pt-12', className), width)}
       style={{
         // position: 'relative',
         height: '100vh',

@@ -5,10 +5,12 @@ import {state} from '../logic/main';
 import {use} from 'use-minimal-state';
 import {openModal} from './Modal';
 import EditIdentity from './EditIdentity';
+import {useMqParser} from '../logic/tailwind-mqp';
 
 export default function EditRole({peerId, speakers, moderators, onCancel}) {
+  let mqp = useMqParser();
   return (
-    <div className="child md:p-10">
+    <div className={mqp('md:p-10')}>
       <h3 className="font-medium">Moderator Actions</h3>
       <br />
       <button
@@ -65,10 +67,11 @@ export default function EditRole({peerId, speakers, moderators, onCancel}) {
 }
 
 export function EditSelf({onCancel}) {
+  let mqp = useMqParser();
   let myPeerId = identity.publicKey;
   let [iSpeak, iModerate] = use(state, ['iAmSpeaker', 'iAmModerator']);
   return (
-    <div className="child md:p-10">
+    <div className={mqp('md:p-10')}>
       <h3 className="font-medium">Actions</h3>
       <br />
       <button
