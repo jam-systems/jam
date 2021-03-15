@@ -5,11 +5,6 @@ body {
     'Helvetica Neue', sans-serif;
   background-color: rgb(250, 245, 239);
 }
-.outer-container {
-  height: 100vh;
-  min-height: -webkit-fill-available;
-  padding-top: 50px;
-}
 .container {
   width: 700px;
   margin: 0 auto;
@@ -47,7 +42,8 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href^="https://paypal.me"] {
+.room-header a[href^="https://paypal.me"]
+{
   background-image: url('/img/bazaar/paypal-logo.svg');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -63,7 +59,8 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href^='https://github.com'] {
+.room-header a[href^='https://github.com']
+{
   background-image: url('/img/bazaar/github-logo.svg');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -71,7 +68,8 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href^='https://beondeck.com'] {
+.room-header a[href^='https://beondeck.com']
+{
   background-image: url('/img/bazaar/ondeck-logo.png');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -79,7 +77,8 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href^='https://ycombinator.com'] {
+.room-header a[href^='https://ycombinator.com']
+{
   background-image: url('/img/bazaar/ycombinator-logo.svg');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -87,7 +86,8 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href^='https://tiktok.com'] {
+.room-header a[href^='https://tiktok.com']
+{
   background-image: url('/img/bazaar/tiktok-logo.svg');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -95,7 +95,8 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href^='https://twitter.com'] {
+.room-header a[href^='https://twitter.com']
+{
   background-image: url('/img/bazaar/twitter-logo.svg');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -103,7 +104,8 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href^='https://patreon.com'] {
+.room-header a[href^='https://patreon.com']
+{
   background-image: url('/img/bazaar/patreon-logo.png');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -111,7 +113,8 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href^='https://ko-fi.com'] {
+.room-header a[href^='https://ko-fi.com']
+{
   background-image: url('/img/bazaar/kofi-logo.png');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -119,7 +122,8 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href^='https://youtube.com'] {
+.room-header a[href^='https://youtube.com']
+{
   background-image: url('/img/bazaar/youtube-logo.svg');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -127,7 +131,8 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href^='https://instagram.com'] {
+.room-header a[href^='https://instagram.com']
+{
   background-image: url('/img/bazaar/instagram-logo.svg');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -135,7 +140,8 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href^='https://twitch.com'] {
+.room-header a[href^='https://twitch.com']
+{
   background-image: url('/img/bazaar/twitch-logo.png');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -151,7 +157,8 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href$='transistor.fm'], .room-header a[href^='https://share.transistor.fm'], a[href^='https://transistor.fm'] {
+.room-header a[href$='transistor.fm'], .room-header a[href^='https://share.transistor.fm'], a[href^='https://transistor.fm']
+{
   background-image: url('/img/bazaar/transistorfm-logo.png');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -187,8 +194,7 @@ body {
   padding-left: 48px;
 }
 
-.room-header .call-to-action a[href^='bitcoin:']
-{
+.room-header .call-to-action a[href^='bitcoin:'] {
   background-image: url('/img/bazaar/bitcoin-logo.svg');
   background-position: 20px 50%;
   padding-left: 48px;
@@ -264,8 +270,7 @@ body {
   padding-left: 48px;
 }
 
-.room-header .call-to-action a[href$='substack.com']
-{
+.room-header .call-to-action a[href$='substack.com'] {
   background-image: url('/img/bazaar/substack-logo.png');
   background-position: 20px 50%;
   padding-left: 48px;
@@ -278,8 +283,7 @@ body {
   padding-left: 48px;
 }
 
-.room-header .call-to-action a[href^='ethereum:']
-{
+.room-header .call-to-action a[href^='ethereum:'] {
   background-image: url('/img/bazaar/ethereum-logo.svg');
   background-position: 20px 50%;
   background-size: 16px;
@@ -322,20 +326,12 @@ table td {
   border-radius: 42%;
 }
 
-.w-sm {
-  width: 640px;
-}
-
 @media (max-width: 640px) {
   .container {
     width: 100%;
     border: 0px;
     border-radius: 0;
     box-sizing: border-box;
-  }
-
-  .outer-container {
-    padding-top: 0;
   }
 
   .navigation {
@@ -348,9 +344,5 @@ table td {
     margin-left: -12px; /* adapt negative margin left from desktop view? */
 
     box-sizing: border-box;
-  }
-
-  .w-sm {
-    width: 100%;
   }
 }

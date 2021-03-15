@@ -10,19 +10,35 @@ import {useSync} from './logic/util';
 import {stopAudio} from './logic/audio';
 import {config} from './logic/config';
 import {set} from 'minimal-state';
+import {useProvideWidth, WidthContext} from './logic/tailwind-mqp';
 
 export default function Jam({
   style,
+  className,
   roomId,
   newRoom,
   config,
   onError,
   ...props
 }) {
+  let [width, setContainer, mqp] = useProvideWidth();
   return (
-    <div style={{position: 'relative', ...(style || null)}} {...props}>
-      <Main {...{roomId, newRoom, config, onError}} />
-      <Modals />
+    <div
+      id="outer-container"
+      ref={el => setContainer(el)}
+      className={mqp('sm:pt-12' + (className ? ' ' + className : ''), width)}
+      style={{
+        // position: 'relative',
+        height: '100vh',
+        minHeight: '-webkit-fill-available',
+        ...(style || null),
+      }}
+      {...props}
+    >
+      <WidthContext.Provider value={width}>
+        <Main {...{roomId, newRoom, config, onError}} />
+        <Modals />
+      </WidthContext.Provider>
     </div>
   );
 }

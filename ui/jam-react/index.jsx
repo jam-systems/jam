@@ -9,6 +9,7 @@ debug(config);
 set(config, {
   pantryUrl: 'https://beta.jam.systems/_/pantry',
   signalHubUrl: 'https://beta.jam.systems/_/signalhub',
+  isEmbedded: true,
 });
 
 // UGLY HACK: inject css

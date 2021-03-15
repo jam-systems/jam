@@ -1,5 +1,6 @@
 import React from 'react';
 import {update, use} from 'use-minimal-state';
+import {useMq, useMqParser} from '../logic/tailwind-mqp';
 
 const modals = [new Set()];
 
@@ -12,9 +13,10 @@ export default function Modals() {
 }
 
 export function Modal({close, children}) {
+  let mqp = useMqParser();
   return (
     <div
-      className="p-0 md:p-5 items-stretch sm:items-center"
+      className={mqp('p-0 sm:p-5 items-stretch sm:items-center')}
       style={{
         position: 'absolute',
         zIndex: '10',
@@ -28,12 +30,13 @@ export function Modal({close, children}) {
       onClick={close}
     >
       <div
-        className="relative p-1 pt-10 pb-10 sm:rounded-xl w-sm"
+        className={mqp('relative p-1 pt-10 pb-10 sm:rounded-xl')}
         style={{
           flex: 'none',
           display: 'flex',
           flexDirection: 'column',
           margin: '0 auto',
+          width: useMq('sm', '100%', '640px'),
           maxWidth: '100%',
           maxHeight: '100%',
           overflowY: 'hidden',
@@ -52,7 +55,7 @@ export function Modal({close, children}) {
           </div>
         </div>
         <div
-          className="px-5 sm:px-8"
+          className={mqp('px-5 sm:px-8')}
           style={{
             flex: '0 1 auto',
             overflowY: 'auto',

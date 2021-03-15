@@ -70,7 +70,10 @@ export default function Room({room, roomId}) {
 
   useLayoutEffect(() => {
     if (color && color !== '#4B5563') {
-      document.body.style.backgroundColor = hexToRGB(color, '0.123');
+      let outer = document.getElementById('outer-container');
+      if (outer) {
+        outer.style.backgroundColor = hexToRGB(color, '0.123');
+      }
     }
   }, [color]);
 

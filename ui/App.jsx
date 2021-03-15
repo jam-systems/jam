@@ -18,7 +18,6 @@ function App() {
 
   return (
     <Jam
-      className="outer-container"
       roomId={roomId}
       newRoom={newRoom}
       onError={({error}) => {
