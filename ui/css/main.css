@@ -6,17 +6,6 @@ body {
   background-color: rgb(250, 245, 239);
 }
 
-.navigation {
-  position: fixed;
-  bottom: 0;
-  margin-left: -15px; /* compensate for padding from outer div (?) */
-  width: 700px;
-  border: 2px solid lightgrey;
-  border-top: 0;
-  border-bottom: 0;
-  flex: none;
-}
-
 /* markdown styling */
 .markdown a {
   text-decoration: underline;
@@ -314,18 +303,4 @@ table td {
 
 .human-radius {
   border-radius: 42%;
-}
-
-@media (max-width: 640px) {
-  .navigation {
-    width: 100%;
-    border-top: 2px;
-    border-right: 0;
-    border-bottom: 0;
-    border-left: 0;
-    padding: 0 22px 22px 22px;
-    margin-left: -12px; /* adapt negative margin left from desktop view? */
-
-    box-sizing: border-box;
-  }
 }

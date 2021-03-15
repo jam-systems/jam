@@ -10,7 +10,7 @@ export default function Container({className, style, ...props}) {
     <div
       className={mergeClasses('b-0', className)}
       style={{
-        width: belowSm ? '100%' : '700px',
+        width: width < 720 ? '100%' : '700px',
         margin: '0 auto',
         padding: '13px',
         height: '100%',

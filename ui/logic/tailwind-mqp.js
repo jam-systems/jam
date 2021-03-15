@@ -52,7 +52,7 @@ function useMqParser() {
   return useCallback(cls => mqpTailwind(cls, width), [width]);
 }
 
-function useMq(mq, smallCase, largeCase) {
+function useMq(mq, smallCase = true, largeCase = false) {
   let width = useWidth();
   return width < breakpoints[mq] ? smallCase : largeCase;
 }

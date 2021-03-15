@@ -6,8 +6,22 @@ import copyToClipboard from '../lib/copy-to-clipboard';
 import identity from '../logic/identity';
 import {sendReaction, raiseHand} from '../logic/reactions';
 import EditRole, {EditSelf} from './EditRole';
+import {breakpoints, useWidth} from '../logic/tailwind-mqp';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
+
+let navigationStyle = {
+  position: 'fixed',
+  bottom: '0',
+  marginLeft: '-15px',
+  flex: 'none',
+};
+
+let navigationStyleSmall = {
+  padding: '0 22px 22px 22px',
+  marginLeft: '-12px',
+  boxSizing: 'border-box',
+};
 
 export default function Navigation({
   roomId,
@@ -36,8 +50,17 @@ export default function Navigation({
   let myPeerId = identity.publicKey;
   let myHandRaised = raisedHands.has(myPeerId);
 
+  let width = useWidth();
+
   return (
-    <div className="z-10 navigation bg-white p-4">
+    <div
+      className="z-10 bg-white p-4"
+      style={{
+        ...navigationStyle,
+        ...(width < breakpoints.sm ? navigationStyleSmall : null),
+        width: width < 720 ? '100%' : '700px',
+      }}
+    >
       {editRole && (
         <EditRole
           peerId={editRole}
