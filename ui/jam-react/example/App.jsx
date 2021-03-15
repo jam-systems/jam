@@ -14,6 +14,7 @@ function App() {
           name: 'A new Klubhaus Room',
           color: '#000000',
         }}
+        style={{width: '500px', height: '600px'}}
       />
     </div>
   );

@@ -17,17 +17,16 @@ function App() {
   );
 
   return (
-    <div className="outer-container">
-      <Jam
-        roomId={roomId}
-        newRoom={newRoom}
-        onError={({error}) => {
-          return (
-            <Start urlRoomId={roomId} roomFromURIError={!!error.createRoom} />
-          );
-        }}
-      />
-    </div>
+    <Jam
+      className="outer-container"
+      roomId={roomId}
+      newRoom={newRoom}
+      onError={({error}) => {
+        return (
+          <Start urlRoomId={roomId} roomFromURIError={!!error.createRoom} />
+        );
+      }}
+    />
   );
 }
 

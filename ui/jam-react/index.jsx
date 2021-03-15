@@ -3,6 +3,8 @@ import {config} from '../logic/config';
 import {debug} from '../logic/util';
 import Jam from '../Jam';
 
+import css from '../css/main.css';
+
 debug(config);
 set(config, {
   pantryUrl: 'https://beta.jam.systems/_/pantry',
@@ -17,10 +19,8 @@ twLink.rel = 'stylesheet';
 twLink.href = 'https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css';
 document.head.appendChild(twLink);
 
-// TODO bundle css properly
-let customCssLink = document.createElement('link');
-customCssLink.rel = 'stylesheet';
-customCssLink.href = 'https://jam.systems/css/main.css';
-document.head.appendChild(customCssLink);
+let customCssStyle = document.createElement('style');
+customCssStyle.appendChild(document.createTextNode(css));
+document.head.appendChild(customCssStyle);
 
 export default Jam;

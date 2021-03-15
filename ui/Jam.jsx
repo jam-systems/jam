@@ -11,12 +11,19 @@ import {stopAudio} from './logic/audio';
 import {config} from './logic/config';
 import {set} from 'minimal-state';
 
-export default function Jam(props) {
+export default function Jam({
+  style,
+  roomId,
+  newRoom,
+  config,
+  onError,
+  ...props
+}) {
   return (
-    <>
-      <Main {...props} />
+    <div style={{position: 'relative', ...(style || null)}} {...props}>
+      <Main {...{roomId, newRoom, config, onError}} />
       <Modals />
-    </>
+    </div>
   );
 }
 
