@@ -34,6 +34,7 @@ An overview for how 🍞 Jam compares to similar services like Clubhouse or Twit
 |                                 | 🍞 Jam                 | 👋 Clubhouse      | 🐣 Twitter Spaces          |
 |---------------------------------|------------------------|--------------------|----------------------------|
 | 🎨 Branded Rooms                | ✅ set your own logo, color   | ❌                | ❌                  |
+| 🧩 Embed in your app or website | ✅ iFrame, WebView, JS SDK    | ❌                | ❌                  |
 | 💯 Animated Reactions           | ✅ (❤️ 💯 😂 😅 😳 🤔)| ❌                | ✅ (💯 ✋ ✊ ✌️ 👋)       |
 | 📎 Description w/ Links         | ✅ w/ Markdown support | ❌                | ☑️ show tweets              |
 | 💵 Earn Money                   | ✅ dedicated support for<br/>PayPal.me, Bitcoin:, Gumroad | ❌ no built in support<br/><br/>currently not allowed<br/>unless specifically authorized<br/> see Terms of Service<br/>[(Conditions of Use #9)](https://www.notion.so/Terms-of-Service-cfbd1824d4704e1fa4a83f0312b8cf88) | ❌  no built in support |
