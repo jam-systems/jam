@@ -15,7 +15,7 @@ export {
   emptyRoom,
 };
 
-let _disconnectRoom = null;
+let _disconnectRoom = {};
 
 function useRoom(roomId) {
   return useApiQuery(`/rooms/${roomId}`, !!roomId, 'room', emptyRoom);
@@ -24,7 +24,7 @@ function useRoom(roomId) {
 function maybeConnectRoom(roomId) {
   if (swarm.room === roomId && swarm.hub) return;
   log('connecting room', roomId);
-  set(state, 'roomId', roomId);
+  // set(state, 'roomId', roomId);
   if (swarm.hub) swarm.disconnect();
   swarm.connect(roomId);
   swarm.hub.subscribe('identity-updates', async ({peerId}) => {
@@ -38,15 +38,16 @@ function maybeConnectRoom(roomId) {
     log('new room info', data);
     updateApiQuery(`/rooms/${state.roomId}`, data);
   });
-  _disconnectRoom = () => {
+  _disconnectRoom[roomId] = () => {
+    log('disconnecting', roomId);
     if (swarm.connected && swarm.room === roomId) swarm.disconnect();
   };
-  return _disconnectRoom;
 }
 
-function disconnectRoom() {
-  _disconnectRoom?.();
-  _disconnectRoom = null;
+function disconnectRoom(roomId) {
+  if (!roomId) return;
+  _disconnectRoom[roomId]?.();
+  _disconnectRoom[roomId] = undefined;
 }
 
 // watch changes in room

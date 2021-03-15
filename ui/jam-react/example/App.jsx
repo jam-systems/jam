@@ -8,7 +8,13 @@ function App() {
   return (
     <div>
       <h1>My own Clubhouse!!!!</h1>
-      <Jam roomId="klubhaus" />
+      <Jam
+        roomId="klubhaus-123"
+        newRoom={{
+          name: 'A new Klubhaus Room',
+          color: '#000000',
+        }}
+      />
     </div>
   );
 }

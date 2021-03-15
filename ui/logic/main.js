@@ -1,5 +1,5 @@
 import swarm from '../lib/swarm';
-import state from './state';
+import state, {actions} from './state';
 import {get} from './backend';
 import identity, {signData, verifyData} from './identity';
 import {DEV, config} from './config';
@@ -48,6 +48,7 @@ export function enterRoom(roomId) {
   //   requestMicPermissionOnly().then(() => state.set('soundMuted', false));
   // }
 }
+on(actions.ENTER, roomId => enterRoom(roomId));
 
 export function leaveRoom() {
   state.set('inRoom', null);

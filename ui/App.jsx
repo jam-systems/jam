@@ -1,82 +1,38 @@
-import React, {useEffect, useState} from 'react';
+import React, {useMemo} from 'react';
 import {render} from 'react-dom';
-import {enterRoom} from './logic/main';
+import {usePath} from './lib/use-location';
+import Jam from './Jam';
 import Start from './views/Start';
-import Room from './views/Room';
-import identity from './logic/identity';
-import {createRoom, updateApiQuery, initializeIdentity} from './logic/backend';
-import {usePath, navigate} from './lib/use-location';
-import {useRoom, maybeConnectRoom, disconnectRoom} from './logic/room';
-import swarm from './lib/swarm';
-import Modals from './views/Modal';
 
-render(
-  <>
-    <App />
-    <Modals />
-  </>,
-  document.querySelector('#root')
-);
+render(<App />, document.querySelector('#root'));
 
 function App() {
-  // initialize identity
-  useEffect(() => {
-    initializeIdentity();
-    swarm.config({myPeerId: identity.publicKey});
-    swarm.set('sharedState', {inRoom: false});
-  }, []);
+  // detect roomId from URL
+  const [roomId = null] = usePath();
 
-  // detect roomId & fetch room if we are in one
-  const [roomId] = usePath();
-  let [room, isLoading] = useRoom(roomId);
+  // detect new room config from URL
+  let newRoom = useMemo(
+    () => (location.hash ? parseParams(location.hash.slice(1)) : undefined),
+    [roomId] // don't worry, this is fine
+  );
 
-  // connect to signalhub if room exists (and not already connected)
-  useEffect(() => {
-    if (room) maybeConnectRoom(roomId);
-    if (!room) disconnectRoom();
-  }, [room, roomId]);
-
-  let [roomFromURIError, setRoomFromURIError] = useState(false);
-  let [isCreateLoading, setCreateLoading] = useState(true);
-
-  // if roomId is present but room does not exist, try to create new one
-  useEffect(() => {
-    if (roomId && !room && !isLoading) {
-      let roomConfigHash = location.hash;
-      let roomConfig;
-      if (roomConfigHash) {
-        roomConfig = parseParams(decodeURI(roomConfigHash.slice(1)));
-      }
-      (async () => {
-        let roomCreated = await createRoom(
-          roomId,
-          roomConfig?.name || '',
-          roomConfig?.description || '',
-          roomConfig?.logoURI || '',
-          roomConfig?.color || '',
-          swarm.myPeerId
-        );
-        setCreateLoading(false);
-        if (roomCreated) {
-          updateApiQuery(`/rooms/${roomId}`, roomCreated);
-          navigate('/' + roomId);
-          enterRoom(roomId);
-        } else {
-          setRoomFromURIError(true);
-        }
-      })();
-    }
-  }, [room, roomId, isLoading]);
-
-  if (roomId) {
-    if (isLoading) return null;
-    if (room) return <Room room={room} roomId={roomId} />;
-    if (isCreateLoading) return null;
-  }
-  return <Start urlRoomId={roomId} roomFromURIError={roomFromURIError} />;
+  return (
+    <div className="outer-container">
+      <Jam
+        roomId={roomId}
+        newRoom={newRoom}
+        onError={({error}) => {
+          return (
+            <Start urlRoomId={roomId} roomFromURIError={!!error.createRoom} />
+          );
+        }}
+      />
+    </div>
+  );
 }
 
 function parseParams(params) {
+  params = decodeURI(params);
   let res = params.split('&').reduce(function (res, item) {
     var parts = item.split('=');
     res[parts[0]] = parts[1];

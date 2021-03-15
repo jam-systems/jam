@@ -184,7 +184,7 @@ app.use(async (req, res) => {
     <title><%= metaInfo.ogTitle %></title>
   </head>
   <body>
-    <div id="root" class="outer-container"></div>
+    <div id="root"></div>
     <script>
         window.jamConfig = ${JSON.stringify(jamConfig)};
     </script>

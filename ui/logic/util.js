@@ -1,7 +1,8 @@
-import {on} from 'use-minimal-state';
+import {useEffect} from 'react';
+import {is, on} from 'use-minimal-state';
 import log from '../lib/causal-log';
 
-export {arrayRemove, debug, until, domEvent};
+export {arrayRemove, debug, until, domEvent, useSync};
 
 function arrayRemove(arr, el) {
   let i = arr.indexOf(el);
@@ -36,4 +37,11 @@ function domEvent(el, event) {
       resolve();
     });
   });
+}
+
+async function useSync(...args) {
+  let deps = args.pop();
+  useEffect(() => {
+    is(...args);
+  }, deps);
 }
