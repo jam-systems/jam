@@ -1,24 +1,55 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useMemo} from 'react';
 import {enterRoom} from '../logic/main';
-import Start from '../views/Start';
 import Room from '../views/Room';
 import identity from '../logic/identity';
 import {createRoom, updateApiQuery, initializeIdentity} from '../logic/backend';
-import {usePath, navigate} from '../lib/use-location';
 import {useRoom, maybeConnectRoom, disconnectRoom} from '../logic/room';
 import swarm from '../lib/swarm';
 import Modals from '../views/Modal';
+import {set} from 'use-minimal-state';
+import {config} from '../logic/config';
+import {debug} from '../logic/util';
 
-export default function Jam() {
+debug(config);
+set(config, {
+  pantryUrl: 'https://beta.jam.systems/_/pantry',
+  signalHubUrl: 'https://beta.jam.systems/_/signalhub',
+});
+
+// UGLY HACK: inject css
+
+// TODO properly include tailwind in build pipeline
+let twLink = document.createElement('link');
+twLink.rel = 'stylesheet';
+twLink.href = 'https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css';
+document.head.appendChild(twLink);
+// TODO bundle css properly
+let customCssLink = document.createElement('link');
+customCssLink.rel = 'stylesheet';
+customCssLink.href = 'https://jam.systems/css/main.css';
+document.head.appendChild(customCssLink);
+
+export default function Jam(props) {
   return (
     <>
-      <App />
+      <App {...props} />
       <Modals />
     </>
   );
 }
 
-function App({roomId}) {
+function App({
+  roomId,
+  config: customConfig,
+  name,
+  description,
+  color,
+  logoURI,
+}) {
+  useMemo(() => {
+    if (customConfig) set(config, customConfig);
+  }, []);
+
   // initialize identity
   useEffect(() => {
     initializeIdentity();
@@ -41,24 +72,18 @@ function App({roomId}) {
   // if roomId is present but room does not exist, try to create new one
   useEffect(() => {
     if (roomId && !room && !isLoading) {
-      let roomConfigHash = location.hash;
-      let roomConfig;
-      if (roomConfigHash) {
-        roomConfig = parseParams(decodeURI(roomConfigHash.slice(1)));
-      }
       (async () => {
         let roomCreated = await createRoom(
           roomId,
-          roomConfig?.name || '',
-          roomConfig?.description || '',
-          roomConfig?.logoURI || '',
-          roomConfig?.color || '',
+          name || '',
+          description || '',
+          logoURI || '',
+          color || '',
           swarm.myPeerId
         );
         setCreateLoading(false);
         if (roomCreated) {
           updateApiQuery(`/rooms/${roomId}`, roomCreated);
-          navigate('/' + roomId);
           enterRoom(roomId);
         } else {
           setRoomFromURIError(true);
@@ -72,14 +97,10 @@ function App({roomId}) {
     if (room) return <Room room={room} roomId={roomId} />;
     if (isCreateLoading) return null;
   }
-  return <Start urlRoomId={roomId} roomFromURIError={roomFromURIError} />;
+  return <Error />;
 }
 
-function parseParams(params) {
-  let res = params.split('&').reduce(function (res, item) {
-    var parts = item.split('=');
-    res[parts[0]] = parts[1];
-    return res;
-  }, {});
-  return res;
+// TODO
+function Error() {
+  return <div>An error ocurred</div>;
 }
