@@ -1,13 +1,20 @@
 {
   "name": "jam-react",
-  "version": "0.1.1",
-  "description": "Audio space for everyone",
+  "version": "0.1.2",
+  "description": "Audio space like Clubhouse / Twitter Spaces as a React component, made with WebRTC",
+  "keywords": [
+    "audio",
+    "webrtc",
+    "react",
+    "clubhouse",
+    "p2p"
+  ],
   "main": "dist/index.js",
   "browser": "dist/index.js",
   "module": "dist/index.js",
   "repository": "https://gitlab.com/jam-systems/jam/-/tree/master/ui/jam-react",
   "author": "Thomas Schranz, Christoph Witzany, Gregor Mitscha-Baude",
-  "license": "AGPL",
+  "license": "Apache-2.0",
   "files": [
     "dist"
   ],
