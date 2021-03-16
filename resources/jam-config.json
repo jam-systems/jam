@@ -1,0 +1,55 @@
+{
+    "jamHost":  "jam.systems",
+    "jamUrl":  "https://jam.systems",
+    "pantryUrl": "https://pantry.jam.systems",
+    "signalHubUrl": "https://signalhub.jam.systems",
+    "stunServer": "https://stun.jam.systems",
+    "turnServer": "https://turn.jam.systems",
+    "development": false,
+    "defaultRoom": {
+      "name": null,
+      "description": null,
+      "calendar": {
+        "start": null,
+        "end": null,
+        "recurrenceRule": null,
+        "descriptionBefore": null,
+        "descriptionAfter": null,
+        "descriptionBetween": null
+      },
+      "moderators": [],
+      "speakers": [],
+      "logoURI": null,
+      "color": null,
+      "access": {
+        "roomKey": null,
+        "inviteOnly": false,
+        "descriptionNoAccess": null,
+        "lockedIdentities": false,
+        "inviteKeys": [
+          {
+            "inviteKey": null,
+            "inviteRoles": [],
+            "inviteIdentity": {
+              "displayName": null,
+              "emailHash": null,
+              "avatar": null
+            }
+          }
+        ]
+      },
+      "userDisplay": {
+        "randomNames": [],
+        "randomAvatars": []
+      },
+      "styles": {
+        "customCSS": null,
+        "customStyles": {
+          "speakerRing": {
+            "color": null
+          }
+        }
+      }
+
+    }
+}
