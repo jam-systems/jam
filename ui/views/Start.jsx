@@ -258,7 +258,7 @@ export default function Start({urlRoomId, roomFromURIError}) {
             <br />
             <br />
             <a
-              href="https://forms.ops.jam.systems/pro/"
+              href="https://pro.jam.systems"
               className="underline text-blue-800 active:text-blue-600"
               target="_blank"
               rel="noreferrer"
