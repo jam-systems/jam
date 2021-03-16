@@ -18,6 +18,7 @@ function App() {
 
   return (
     <Jam
+      style={{height: '100vh'}}
       roomId={roomId}
       newRoom={newRoom}
       onError={({error}) => {
@@ -30,10 +31,9 @@ function App() {
 }
 
 function parseParams(params) {
-  params = decodeURI(params);
   let res = params.split('&').reduce(function (res, item) {
     var parts = item.split('=');
-    res[parts[0]] = parts[1];
+    res[decodeURIComponent(parts[0])] = decodeURIComponent(parts[1]);
     return res;
   }, {});
   return res;

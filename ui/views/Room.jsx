@@ -1,4 +1,4 @@
-import React, {useLayoutEffect, useState} from 'react';
+import React, {useState} from 'react';
 import state from '../logic/state';
 import {use} from 'use-minimal-state';
 import swarm from '../lib/swarm';
@@ -49,20 +49,10 @@ export default function Room({room, roomId}) {
     logoURI,
     buttonURI,
     buttonText,
-    color,
     speakers,
     moderators,
     closed,
   } = room || {};
-
-  useLayoutEffect(() => {
-    if (color && color !== '#4B5563') {
-      let outer = document.getElementById('outer-container');
-      if (outer) {
-        outer.style.backgroundColor = hexToRGB(color, '0.123');
-      }
-    }
-  }, [color]);
 
   let mqp = useMqParser();
 
@@ -201,16 +191,4 @@ export default function Room({room, roomId}) {
       />
     </Container>
   );
-}
-
-function hexToRGB(hex, alpha) {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-
-  if (alpha) {
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  } else {
-    return `rgb(${r}, ${g}, ${b})`;
-  }
 }

@@ -1,4 +1,4 @@
-import React, {createElement, useEffect, useMemo} from 'react';
+import React, {createElement, useEffect, useLayoutEffect, useMemo} from 'react';
 import Room from './views/Room';
 import identity from './logic/identity';
 import {useCreateRoom, initializeIdentity} from './logic/backend';
@@ -11,6 +11,7 @@ import {stopAudio} from './logic/audio';
 import {config} from './logic/config';
 import {set} from 'minimal-state';
 import {useProvideWidth, WidthContext} from './logic/tailwind-mqp';
+import {use} from 'use-minimal-state';
 
 export default function Jam({
   style,
@@ -21,15 +22,23 @@ export default function Jam({
   onError,
   ...props
 }) {
-  let [width, setContainer, mqp] = useProvideWidth();
+  useSync(state, {roomId}, [roomId]);
+  let {color} = use(state, 'room');
+  let [width, container, setContainer, mqp] = useProvideWidth();
+
+  useLayoutEffect(() => {
+    if (container && color && color !== '#4B5563') {
+      container.style.backgroundColor = hexToRGB(color, '0.123');
+    }
+  }, [color, container]);
+
   return (
     <div
-      id="outer-container"
       ref={el => setContainer(el)}
-      className={mqp(mergeClasses('sm:pt-12', className), width)}
+      className={mqp(mergeClasses('jam sm:pt-12', className), width)}
       style={{
-        // position: 'relative',
-        height: '100vh',
+        position: 'relative',
+        height: '100%',
         minHeight: '-webkit-fill-available',
         ...(style || null),
       }}
@@ -56,7 +65,6 @@ function Main({roomId, newRoom, config: customConfig, onError}) {
   }, []);
 
   // fetch room if we are in one
-  useSync(state, {roomId}, [roomId]);
   let [room, isLoading] = useRoom(roomId);
 
   // connect to signalhub if room exists (and not already connected)
@@ -101,4 +109,16 @@ function Main({roomId, newRoom, config: customConfig, onError}) {
 // TODO
 function Error() {
   return <div>An error ocurred</div>;
+}
+
+function hexToRGB(hex, alpha) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+
+  if (alpha) {
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  } else {
+    return `rgb(${r}, ${g}, ${b})`;
+  }
 }

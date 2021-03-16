@@ -1,6 +1,6 @@
 import React from 'react';
 import {update, use} from 'use-minimal-state';
-import {useMq, useMqParser} from '../logic/tailwind-mqp';
+import {useMediaQuery, useMqParser} from '../logic/tailwind-mqp';
 
 const modals = [new Set()];
 
@@ -22,8 +22,8 @@ export function Modal({close, children}) {
         zIndex: '10',
         top: '0',
         left: '0',
-        height: '100vh',
-        width: '100vw',
+        height: '100%',
+        width: '100%',
         backgroundColor: '#00000033',
         display: 'flex',
       }}
@@ -36,7 +36,7 @@ export function Modal({close, children}) {
           display: 'flex',
           flexDirection: 'column',
           margin: '0 auto',
-          width: useMq('sm', '100%', '640px'),
+          width: useMediaQuery('sm', '100%', '640px'),
           maxWidth: '100%',
           maxHeight: '100%',
           overflowY: 'hidden',

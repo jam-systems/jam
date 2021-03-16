@@ -11,7 +11,7 @@ export {
   useProvideWidth,
   useWidth,
   useMqParser,
-  useMq,
+  useMediaQuery,
   breakpoints,
 };
 
@@ -26,21 +26,23 @@ const allBreakpoints = new Set(Object.keys(breakpoints));
 const WidthContext = createContext(document.body.offsetWidth);
 
 function useProvideWidth() {
-  let [container, setContainer] = useState(document.body);
+  let [container, setContainer] = useState();
   let [width, setWidth] = useState(document.body.offsetWidth);
 
   useEffect(() => {
-    setWidth(container.offsetWidth);
-    let observer = new ResizeObserver(() => {
+    if (container) {
       setWidth(container.offsetWidth);
-    });
-    observer.observe(container);
-    return () => observer.disconnect();
+      let observer = new ResizeObserver(() => {
+        setWidth(container.offsetWidth);
+      });
+      observer.observe(container);
+      return () => observer.disconnect();
+    }
   }, [container]);
 
   let mqp = useCallback(cls => mqpTailwind(cls, width), [width]);
 
-  return [width, setContainer, mqp];
+  return [width, container, setContainer, mqp];
 }
 
 function useWidth() {
@@ -52,7 +54,7 @@ function useMqParser() {
   return useCallback(cls => mqpTailwind(cls, width), [width]);
 }
 
-function useMq(mq, smallCase = true, largeCase = false) {
+function useMediaQuery(mq, smallCase = true, largeCase = false) {
   let width = useWidth();
   return width < breakpoints[mq] ? smallCase : largeCase;
 }
