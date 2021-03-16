@@ -1,14 +1,24 @@
 {
-    "jamHost":  "jam.systems",
-    "jamUrl":  "https://jam.systems",
-    "pantryUrl": "https://pantry.jam.systems",
-    "signalHubUrl": "https://signalhub.jam.systems",
-    "stunServer": "https://stun.jam.systems",
-    "turnServer": "https://turn.jam.systems",
+    "jamUrls": {
+      "jamHost": "jam.systems",
+      "jamUrl": "https://jam.systems",
+      "pantryUrl": "https://pantry.jam.systems",
+      "signalHubUrl": "https://signalhub.jam.systems",
+      "stunServer": "https://stun.jam.systems",
+      "turnServer": "https://turn.jam.systems"
+    },
+    "turnServerCredentials": {
+      "user": null,
+      "password": null
+    },
     "development": false,
     "defaultRoom": {
       "name": null,
       "description": null,
+      "button": {
+        "text": null,
+        "url": null
+      },
       "calendar": {
         "start": null,
         "end": null,
@@ -33,14 +43,28 @@
             "inviteIdentity": {
               "displayName": null,
               "emailHash": null,
-              "avatar": null
+              "avatar": null,
+              "identities": [
+                {
+                  "type": null,
+                  "id": null,
+                  "verificationInfo": null
+                }
+              ]
             }
           }
         ]
       },
+      "reactions": [],
       "userDisplay": {
         "randomNames": [],
-        "randomAvatars": []
+        "randomAvatars": [],
+        "randomIdentities": [
+          {
+            "name": null,
+            "avatar": null
+          }
+        ]
       },
       "styles": {
         "customCSS": null,
