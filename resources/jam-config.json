@@ -3,8 +3,8 @@
       "jam": "https://jam.systems",
       "pantry": "https://jam.systems/_/pantry",
       "signalHub": "https://jam.systems/_/signalhub",
-      "stun": "stun.jam.systems:3478",
-      "turn": "turn.jam.systems:3478",
+      "stun": "stun:stun.jam.systems:3478",
+      "turn": "turn:turn.jam.systems:3478",
       "turnCredentials": {
         "username": null,
         "credential": null
@@ -14,25 +14,33 @@
     "defaultRoom": {
       "name": null,
       "description": null,
+      "logo": null,
+      "alternateDescriptions": [
+        {
+          "text": null,
+          "tags": []
+        }
+      ],
       "button": {
         "text": null,
         "url": null
       },
+      "alternateButtons": [
+        {
+          "text": null,
+          "url": null,
+          "tags": []
+        }
+      ],
       "calendar": {
-        "start": null,
-        "end": null,
-        "recurrenceRule": null,
-        "descriptionBefore": null,
-        "descriptionAfter": null,
-        "descriptionBetween": null
+        "ics": null
       },
+      "roomClosed": false,
       "moderators": [],
       "speakers": [],
-      "logoURI": null,
-      "color": null,
+      "hideAudience": null,
       "access": {
         "roomKey": null,
-        "inviteOnly": false,
         "descriptionNoAccess": null,
         "lockedIdentities": false,
         "inviteKeys": [
@@ -41,7 +49,6 @@
             "inviteRoles": [],
             "inviteIdentity": {
               "displayName": null,
-              "emailHash": null,
               "avatar": null,
               "identities": [
                 {
@@ -66,12 +73,10 @@
         ]
       },
       "styles": {
-        "customCSS": null,
-        "customStyles": {
-          "speakerRing": {
-            "color": null
-          }
-        }
+        "primaryColor": null
+      },
+      "texts": {
+
       }
 
     }
