@@ -23,7 +23,7 @@ import Jam from 'jam-react';
 
 `<Jam>` supports three props:
 
-* `roomId` - **required**, string, your room ID which also make the room accessible by navigating it
+* `roomId` - **required**, string, your room ID which also make the room accessible by navigating to `https://jam.systems/<roomId>`.
 * `jamUrl` - optional, string, URL of the jam instance. The default is `https://jam.systems` which you may use freely.
 * `newRoom` - optional, `{name: string, description: string}`, to customize the room at the moment it is created. (Advanced options that will add way more customizations than the current UI are coming soon.)
 
