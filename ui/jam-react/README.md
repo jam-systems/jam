@@ -64,7 +64,7 @@ Result:
 <p align="center">
   <img title='Jam mascot by @eejitlikeme'
        src="https://i.imgur.com/nmYENw9.png"
-       width="500"/>
+       width="900"/>
 </p>
 
 ## About Jam
@@ -74,6 +74,8 @@ Result:
 With Jam you can create audio rooms that can be used for panel discussions, jam sessions, free flowing conversations, debates, theatre plays, musicals and more. The only limit is your imagination.
 
 Try Jam on [https://jam.systems/](https://jam.systems/)
+
+Find out more about Jam at our [Gitlab repository](https://gitlab.com/jam-systems/jam/).
 
 
 ## Buy Us ☕
