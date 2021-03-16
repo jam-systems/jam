@@ -11,12 +11,18 @@ app.use(express.static(process.env.STATIC_FILES_DIR || '.'))
 
 const jamHost = process.env.JAM_HOST || 'beta.jam.systems';
 const jamSchema = process.env.JAM_SCHEMA || 'https://';
-const jamUrl = process.env.JAM_URL || `${jamSchema}${jamHost}`;
-const pantryUrl = process.env.JAM_PANTRY_URL || `${jamUrl}/_/pantry`
-const signalHubUrl = process.env.JAM_SIGNALHUB_URL || `${jamUrl}/_/signalhub`
-const stunServer = process.env.JAM_STUN_SERVER || `stun.${jamHost}:3478`;
-const turnServer = process.env.JAM_TURN_SERVER || `turn.${jamHost}:3478`;
 
+const urls = {
+    jam: process.env.JAM_URL || `${jamSchema}${jamHost}`,
+    pantry: process.env.JAM_PANTRY_URL || `${jamSchema}${jamHost}/_/pantry`,
+    signalHub: process.env.JAM_SIGNALHUB_URL || `${jamSchema}${jamHost}/_/signalhub`,
+    stun: process.env.JAM_STUN_SERVER || `stun.${jamHost}:3478`,
+    turn: process.env.JAM_TURN_SERVER || `turn.${jamHost}:3478`,
+    turnCredentials: {
+        username: 'test',
+        credential: 'yieChoi0PeoKo8ni'
+    }
+}
 
 
 
@@ -25,8 +31,8 @@ const pantryApiPrefix = `${pantryUrl}/api/v1/rooms`;
 const defaultMetaInfo = {
     ogTitle: "Jam",
     ogDescription: "Join this Jam audio space",
-    ogUrl: jamUrl,
-    ogImage: `${jamUrl}/img/jam-app-icon.jpg`,
+    ogUrl: urls.jam,
+    ogImage: `${urls.jam}/img/jam-app-icon.jpg`,
     favIcon: '/img/jam-app-icon.jpg',
 }
 
@@ -37,8 +43,8 @@ const getRoomMetaInfo = async (roomPath) => {
     return {
         ogTitle: roomInfo['name'],
         ogDescription: roomInfo['description'],
-        ogUrl: `${jamUrl}${roomPath}`,
-        ogImage: roomInfo['logoURI'] || `${jamUrl}/img/jam-app-icon.jpg`,
+        ogUrl: `${urls.jam}${roomPath}`,
+        ogImage: roomInfo['logoURI'] || `${urls.jam}/img/jam-app-icon.jpg`,
         color: roomInfo['color'] || '',
         id: roomInfo['id'] || '',
         favIcon: roomInfo['logoURI'] || '/img/jam-app-icon.jpg',
@@ -50,12 +56,7 @@ const getRoomMetaInfo = async (roomPath) => {
 }
 
 const jamConfig = {
-    jamHost,
-    jamUrl,
-    pantryUrl,
-    signalHubUrl,
-    stunServer,
-    turnServer,
+    urls,
     development: !!process.env.DEVELOPMENT
 };
 app.use("/config.json", (_, res) => {
@@ -64,13 +65,13 @@ app.use("/config.json", (_, res) => {
 
 app.use(async (req, res) => {
     if (req.path === '/new') {
-      return res.redirect(302, `https://${jamHost}/${Math.random().toString(36).substr(2, 6)}`);
+      return res.redirect(302, `${urls.jam}/${Math.random().toString(36).substr(2, 6)}`);
     }
 
     if (req.path === '/_/integrations/slack') {
       return res.json({
         "response_type": "in_channel",
-        "text": `https://${jamHost}/${Math.random().toString(36).substr(2, 6)}`
+        "text": `${urls.jam}/${Math.random().toString(36).substr(2, 6)}`
       });
     }
 
@@ -110,7 +111,7 @@ app.use(async (req, res) => {
     };
 
     if (req.path.includes("/_/integrations/oembed")) {
-      if (!req.query.url?.startsWith(`https://${jamHost}/`)) return res.json();
+      if (!req.query.url?.startsWith(`${urls.jam}/`)) return res.json();
 
       let width = parseInt((req.query.width || "440"), 10);
       let height = parseInt((req.query.height || "600"), 10);
@@ -130,13 +131,13 @@ app.use(async (req, res) => {
         "name": metaInfo.ogTitle,
         "icons": [
           {
-            "src": `https://${jamHost}/img/jam-app-icon-512.png`,
+            "src": `${urls.jam}/img/jam-app-icon-512.png`,
             "type": "image/png",
             "sizes": "512x512",
             "purpose": "any"
           },
           {
-            "src": `https://${jamHost}/img/jam-app-icon-192.png`,
+            "src": `${urls.jam}/img/jam-app-icon-192.png`,
             "type": "image/png",
             "sizes": "192x192",
             "purpose": "any"
@@ -180,7 +181,7 @@ app.use(async (req, res) => {
       rel="stylesheet"
     />
     <link rel="manifest" href="<%= metaInfo.ogUrl %>/manifest.json">
-    <link rel="alternate" type="application/json+oembed" href="https://${jamHost}/_/integrations/oembed?url=<%= metaInfo.ogUrl %>">
+    <link rel="alternate" type="application/json+oembed" href="${urls.jam}/_/integrations/oembed?url=<%= metaInfo.ogUrl %>">
     <title><%= metaInfo.ogTitle %></title>
   </head>
   <body>

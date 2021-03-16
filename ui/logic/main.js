@@ -17,18 +17,17 @@ export {state};
 function configSignalhub() {
   swarm.config({
     debug: config.development,
-    url: config.signalHubUrl + '/',
+    url: config.urls.signalHub + '/',
     sign: signData,
     verify: verifyData,
     pcConfig: {
       iceTransportPolicy: 'all',
       iceServers: [
         {urls: `stun:stun.jam.systems:3478`},
-        {urls: `stun:${config.stunServer}`},
+        {urls: `${config.urls.stun}`},
         {
-          urls: `turn:${config.turnServer}`,
-          username: 'test',
-          credential: 'yieChoi0PeoKo8ni',
+          ...config.urls.turnCredentials,
+          urls: `${config.urls.turn}`,
         },
       ],
     },

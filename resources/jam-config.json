@@ -1,15 +1,14 @@
 {
-    "jamUrls": {
-      "jamHost": "jam.systems",
-      "jamUrl": "https://jam.systems",
-      "pantryUrl": "https://pantry.jam.systems",
-      "signalHubUrl": "https://signalhub.jam.systems",
-      "stunServer": "https://stun.jam.systems",
-      "turnServer": "https://turn.jam.systems"
-    },
-    "turnServerCredentials": {
-      "user": null,
-      "password": null
+    "urls": {
+      "jam": "https://jam.systems",
+      "pantry": "https://jam.systems/_/pantry",
+      "signalHub": "https://jam.systems/_/signalhub",
+      "stun": "stun.jam.systems:3478",
+      "turn": "turn.jam.systems:3478",
+      "turnCredentials": {
+        "username": null,
+        "credential": null
+      }
     },
     "development": false,
     "defaultRoom": {
