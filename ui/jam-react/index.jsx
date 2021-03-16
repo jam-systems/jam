@@ -1,13 +1,14 @@
 import React from 'react';
 
-export default function Jam({jamUrl, roomId, newRoom, style}) {
+export default function Jam({jamUrl, roomId, newRoom, ...props}) {
   jamUrl = jamUrl || 'https://jam.systems';
+  if (!jamUrl.endsWith('/')) jamUrl = jamUrl + '/';
   let hash = !newRoom ? '' : '#' + encodeParams(newRoom);
   return (
     <iframe
-      style={style}
-      src={`${jamUrl}/${roomId || ''}${hash}`}
+      src={`${jamUrl}${roomId || ''}${hash}`}
       allow="microphone;*"
+      {...props}
     />
   );
 }

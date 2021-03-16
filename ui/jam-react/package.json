@@ -1,0 +1,24 @@
+{
+  "name": "jam-react",
+  "version": "0.1.0",
+  "description": "Audio space for everyone",
+  "main": "dist/index.js",
+  "browser": "dist/index.js",
+  "module": "dist/index.js",
+  "repository": "https://gitlab.com/jam-systems/jam/-/tree/master/ui/jam-react",
+  "author": "Thomas Schranz, Christoph Witzany, Gregor Mitscha-Baude",
+  "license": "AGPL",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "esbuild index.jsx --bundle --outfile=dist/index.js --external:react --format=esm --target=es2018",
+    "size": "cat dist/index.js | esbuild --minify | gzip | wc -c"
+  },
+  "devDependencies": {
+    "esbuild": "^0.9.2"
+  },
+  "peerDependencies": {
+    "react": "^17.0.1"
+  }
+}
