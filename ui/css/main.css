@@ -153,6 +153,14 @@
   text-decoration: underline;
 }
 
+.jam .room-header a[href^='https://cash.app'] {
+  background-image: url('/img/bazaar/cashapp-logo.svg');
+  background-repeat: no-repeat;
+  background-size: 16px;
+  padding-left: 23px;
+  text-decoration: underline;
+}
+
 .jam .room-header .call-to-action a {
   background-repeat: no-repeat;
   background-size: 18px;
@@ -264,6 +272,13 @@
 
 .jam .room-header .call-to-action a[href^='ethereum:'] {
   background-image: url('/img/bazaar/ethereum-logo.svg');
+  background-position: 20px 50%;
+  background-size: 16px;
+  padding-left: 48px;
+}
+
+.jam .room-header .call-to-action a[href^='https://cash.app'] {
+  background-image: url('/img/bazaar/cashapp-logo.svg');
   background-position: 20px 50%;
   background-size: 16px;
   padding-left: 48px;
