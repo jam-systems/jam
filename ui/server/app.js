@@ -121,7 +121,9 @@ app.use(async (req, res) => {
         version: "1.0",
         html: `<iframe src="${req.query.url}" allow="microphone *;" width="${width}" height="${height}"></iframe>`,
         width: width,
-        height: height
+        height: height,
+        provider_name: "Jam",
+        provider_url: urls.jam
       });
     }
 
