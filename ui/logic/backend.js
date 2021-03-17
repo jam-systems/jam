@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useState} from 'react';
-import {on, set, use} from 'use-minimal-state';
-import state, {modState} from './state';
+import {emit, on, set, use} from 'use-minimal-state';
+import state, {actions, modState} from './state';
 import {config, DEV} from './config';
 import identity, {signedToken} from './identity';
 import {pure} from '../lib/local-storage';
@@ -15,9 +15,9 @@ import log from '../lib/causal-log';
 // PUT https://jam.systems/_/pantry/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
 // updates room and broadcasts to roomId / channel room-info on signal hub
 
-let API = `${config.pantryUrl}/api/v1`;
+let API = `${config.urls.pantry}/api/v1`;
 on(config, () => {
-  API = `${config.pantryUrl}/api/v1`;
+  API = `${config.urls.pantry}/api/v1`;
 });
 
 export function useApiQuery(path, doFetch = true, key, defaultQuery) {
@@ -135,6 +135,33 @@ export async function createRoom(
   };
   let ok = await post(`/rooms/${roomId}`, room);
   if (ok) return room;
+}
+
+export function useCreateRoom({roomId, room, isLoading, newRoom}) {
+  let [roomFromURIError, setRoomFromURIError] = useState(false);
+  let [isCreateLoading, setCreateLoading] = useState(true);
+  useEffect(() => {
+    if (roomId && !room && !isLoading) {
+      (async () => {
+        let roomCreated = await createRoom(
+          roomId,
+          newRoom?.name || '',
+          newRoom?.description || '',
+          newRoom?.logoURI || '',
+          newRoom?.color || '',
+          swarm.myPeerId
+        );
+        setCreateLoading(false);
+        if (roomCreated) {
+          updateApiQuery(`/rooms/${roomId}`, roomCreated);
+          emit(actions.ENTER, roomId);
+        } else {
+          setRoomFromURIError(true);
+        }
+      })();
+    }
+  }, [room, roomId, isLoading]);
+  return [isCreateLoading, roomFromURIError];
 }
 
 // identity

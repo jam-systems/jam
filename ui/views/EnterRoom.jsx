@@ -1,16 +1,28 @@
 import React from 'react';
 import {enterRoom} from '../logic/main';
+import {useMqParser} from '../logic/tailwind-mqp';
+import Container from './Container';
 import RoomHeader from './RoomHeader';
 
-const iOS = /^iP/.test(navigator.platform) ||
-            /^Mac/.test(navigator.platform) && navigator.maxTouchPoints > 4;
+const iOS =
+  /^iP/.test(navigator.platform) ||
+  (/^Mac/.test(navigator.platform) && navigator.maxTouchPoints > 4);
 
 const macOS = /^Mac/.test(navigator.platform) && navigator.maxTouchPoints === 0;
 
-export default function EnterRoom({roomId, name, description, closed, buttonURI, buttonText, logoURI}) {
+export default function EnterRoom({
+  roomId,
+  name,
+  description,
+  closed,
+  buttonURI,
+  buttonText,
+  logoURI,
+}) {
+  let mqp = useMqParser();
   return (
-    <div className="container md:min-h-full">
-      <div className="child p-2 pt-60 md:p-10 md:pt-60">
+    <Container>
+      <div className={mqp('p-2 pt-60 md:p-10 md:pt-60')}>
         <RoomHeader {...{name, description, logoURI, buttonURI, buttonText}} />
 
         {/*
@@ -67,20 +79,22 @@ export default function EnterRoom({roomId, name, description, closed, buttonURI,
           onClick={() => enterRoom(roomId)}
           className={
             closed
-            ? "hidden"
-            : "mt-5 mb-10 select-none w-full h-12 px-6 text-lg text-white bg-gray-600 rounded-lg focus:shadow-outline active:bg-gray-600"
+              ? 'hidden'
+              : 'mt-5 mb-10 select-none w-full h-12 px-6 text-lg text-white bg-gray-600 rounded-lg focus:shadow-outline active:bg-gray-600'
           }
         >
           Join this Jam
         </button>
 
-        <div className={iOS ? "mt-40 text-gray-500 text-center" : "hidden"}>
-          🎧 Use headphones or earbuds<br />
+        <div className={iOS ? 'mt-40 text-gray-500 text-center' : 'hidden'}>
+          🎧 Use headphones or earbuds
+          <br />
           for the best audio experience on iOS
         </div>
 
-        <div className={macOS ? "mt-40 text-gray-500 text-center" : "hidden"}>
-          🎧 Use Chrome or Firefox instead of Safari<br />
+        <div className={macOS ? 'mt-40 text-gray-500 text-center' : 'hidden'}>
+          🎧 Use Chrome or Firefox instead of Safari
+          <br />
           for the best audio experience on macOS
         </div>
         {/*
@@ -94,6 +108,6 @@ export default function EnterRoom({roomId, name, description, closed, buttonURI,
           🗓 Add this to my calendar
         </button>
       </div>
-    </div>
+    </Container>
   );
 }

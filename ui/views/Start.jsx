@@ -5,6 +5,7 @@ import {createRoom, updateApiQuery} from '../logic/backend';
 import swarm from '../lib/swarm';
 import {navigate} from '../lib/use-location';
 import {enterRoom, state} from '../logic/main';
+import Container from './Container';
 
 export default function Start({urlRoomId, roomFromURIError}) {
   let [name, setName] = useState('');
@@ -50,8 +51,8 @@ export default function Start({urlRoomId, roomFromURIError}) {
   }, []);
 
   return (
-    <div className="container md:min-h-full" style={{height: 'initial'}}>
-      <div className="child p-6 md:p-10">
+    <Container style={{height: 'initial', minHeight: '100%'}}>
+      <div className="p-6 md:p-10">
         <div
           className={
             roomFromURIError
@@ -257,12 +258,12 @@ export default function Start({urlRoomId, roomFromURIError}) {
             <br />
             <br />
             <a
-              href="https://forms.ops.jam.systems/pro/"
+              href="https://pro.jam.systems"
               className="underline text-blue-800 active:text-blue-600"
               target="_blank"
               rel="noreferrer"
             >
-              Apply to the Jam Pro Early Access Program.
+              Sign up for the Jam Pro Early Access Program.
             </a>
           </div>
           <div className="flex-initial">
@@ -307,6 +308,6 @@ export default function Start({urlRoomId, roomFromURIError}) {
           </a>
         </div>
       </div>
-    </div>
+    </Container>
   );
 }

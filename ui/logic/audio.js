@@ -83,10 +83,13 @@ async function play(audio) {
   return audio.play();
 }
 
+let isRequestingAudio = false;
 async function requestAudio() {
   if (state.myAudio && state.myAudio.active) {
     return state.myAudio;
   }
+  if (isRequestingAudio) return;
+  isRequestingAudio = true;
   let stream = await navigator.mediaDevices
     .getUserMedia({
       video: false,
@@ -99,10 +102,10 @@ async function requestAudio() {
       state.set('micAllowed', false);
     });
   if (!stream) return;
+  isRequestingAudio = false;
   state.set('myAudio', stream);
   state.set('micAllowed', true);
   state.set('micMuted', false);
-  return stream;
 }
 
 async function requestMicPermissionOnly() {
@@ -129,7 +132,7 @@ async function stopAudio() {
   if (state.myAudio) {
     state.myAudio.getTracks().forEach(track => track.stop());
   }
-  state.set('myAudio', null);
+  is(state, 'myAudio', null);
 }
 
 state.on('micMuted', micMuted => {

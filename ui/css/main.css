@@ -1,45 +1,19 @@
-body {
-  width: 100%;
+.jam {
+  /* width: 100%; */
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
     'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
     'Helvetica Neue', sans-serif;
   background-color: rgb(250, 245, 239);
 }
-.outer-container {
-  height: 100vh;
-  min-height: -webkit-fill-available;
-  padding-top: 50px;
-}
-.container {
-  width: 700px;
-  margin: 0 auto;
-  padding: 13px;
-  height: 100%;
-  border-radius: 30px 30px 0 0;
-  border: 2px solid lightgrey;
-  border-bottom: 0;
-  background: white;
-}
-
-.navigation {
-  position: fixed;
-  bottom: 0;
-  margin-left: -15px; /* compensate for padding from outer div (?) */
-  width: 700px;
-  border: 2px solid lightgrey;
-  border-top: 0;
-  border-bottom: 0;
-  flex: none;
-}
 
 /* markdown styling */
-.markdown a {
+.jam .markdown a {
   text-decoration: underline;
   color: rgba(30, 64, 175); /* blue-800 */
 }
 
 /* bazaar */
-.room-header a[href^="https://gumroad.com"]
+.jam .room-header a[href^="https://gumroad.com"]
 {
   background-image: url('/img/bazaar/gumroad-logo.svg');
   background-repeat: no-repeat;
@@ -47,7 +21,8 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href^="https://paypal.me"] {
+.jam .room-header a[href^="https://paypal.me"]
+{
   background-image: url('/img/bazaar/paypal-logo.svg');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -55,7 +30,7 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href^='bitcoin:'] {
+.jam .room-header a[href^='bitcoin:'] {
   background-image: url('/img/bazaar/bitcoin-logo.svg');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -63,7 +38,8 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href^='https://github.com'] {
+.jam .room-header a[href^='https://github.com']
+{
   background-image: url('/img/bazaar/github-logo.svg');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -71,7 +47,8 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href^='https://beondeck.com'] {
+.jam .room-header a[href^='https://beondeck.com']
+{
   background-image: url('/img/bazaar/ondeck-logo.png');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -79,7 +56,8 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href^='https://ycombinator.com'] {
+.jam .room-header a[href^='https://ycombinator.com']
+{
   background-image: url('/img/bazaar/ycombinator-logo.svg');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -87,7 +65,8 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href^='https://tiktok.com'] {
+.jam .room-header a[href^='https://tiktok.com']
+{
   background-image: url('/img/bazaar/tiktok-logo.svg');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -95,7 +74,8 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href^='https://twitter.com'] {
+.jam .room-header a[href^='https://twitter.com']
+{
   background-image: url('/img/bazaar/twitter-logo.svg');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -103,7 +83,8 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href^='https://patreon.com'] {
+.jam .room-header a[href^='https://patreon.com']
+{
   background-image: url('/img/bazaar/patreon-logo.png');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -111,7 +92,8 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href^='https://ko-fi.com'] {
+.jam .room-header a[href^='https://ko-fi.com']
+{
   background-image: url('/img/bazaar/kofi-logo.png');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -119,7 +101,8 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href^='https://youtube.com'] {
+.jam .room-header a[href^='https://youtube.com']
+{
   background-image: url('/img/bazaar/youtube-logo.svg');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -127,7 +110,8 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href^='https://instagram.com'] {
+.jam .room-header a[href^='https://instagram.com']
+{
   background-image: url('/img/bazaar/instagram-logo.svg');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -135,7 +119,8 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href^='https://twitch.com'] {
+.jam .room-header a[href^='https://twitch.com']
+{
   background-image: url('/img/bazaar/twitch-logo.png');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -143,7 +128,7 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href$='substack.com'] {
+.jam .room-header a[href$='substack.com'] {
   background-image: url('/img/bazaar/substack-logo.png');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -151,7 +136,8 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href$='transistor.fm'], .room-header a[href^='https://share.transistor.fm'], a[href^='https://transistor.fm'] {
+.jam .room-header a[href$='transistor.fm'], .room-header a[href^='https://share.transistor.fm'], a[href^='https://transistor.fm']
+{
   background-image: url('/img/bazaar/transistorfm-logo.png');
   background-repeat: no-repeat;
   background-size: 18px;
@@ -159,198 +145,177 @@ body {
   text-decoration: underline;
 }
 
-.room-header a[href^='ethereum:'] {
+.jam .room-header a[href^='ethereum:'] {
   background-image: url('/img/bazaar/ethereum-logo.svg');
   background-repeat: no-repeat;
-  background-size: 16px;
-  padding-left: 23px;
+  background-size: 10px;
+  padding-left: 16px;
   text-decoration: underline;
 }
 
-.room-header .call-to-action a {
+.jam .room-header a[href^='https://cash.app'] {
+  background-image: url('/img/bazaar/cashapp-logo.svg');
+  background-repeat: no-repeat;
+  background-size: 16px;
+  padding-left: 20px;
+  text-decoration: underline;
+}
+
+.jam .room-header .call-to-action a {
   background-repeat: no-repeat;
   background-size: 18px;
   text-decoration: none;
 }
 
-.room-header .call-to-action a[href^="https://paypal.me"]
+.jam .room-header .call-to-action a[href^="https://paypal.me"]
 {
   background-image: url('/img/bazaar/paypal-logo.svg');
   background-position: 20px 50%;
   padding-left: 48px;
 }
 
-.room-header .call-to-action a[href^="https://gumroad.com"]
+.jam .room-header .call-to-action a[href^="https://gumroad.com"]
 {
   background-image: url('/img/bazaar/gumroad-logo.svg');
   background-position: 20px 50%;
   padding-left: 48px;
 }
 
-.room-header .call-to-action a[href^='bitcoin:']
-{
+.jam .room-header .call-to-action a[href^='bitcoin:'] {
   background-image: url('/img/bazaar/bitcoin-logo.svg');
   background-position: 20px 50%;
   padding-left: 48px;
 }
 
-.room-header .call-to-action a[href^='https://github.com']
+.jam .room-header .call-to-action a[href^='https://github.com']
 {
   background-image: url('/img/bazaar/github-logo.svg');
   background-position: 20px 50%;
   padding-left: 48px;
 }
 
-.room-header .call-to-action a[href^='https://beondeck.com']
+.jam .room-header .call-to-action a[href^='https://beondeck.com']
 {
   background-image: url('/img/bazaar/ondeck-logo.png');
   background-position: 20px 50%;
   padding-left: 48px;
 }
 
-.room-header .call-to-action a[href^='https://ycombinator.com']
+.jam .room-header .call-to-action a[href^='https://ycombinator.com']
 {
   background-image: url('/img/bazaar/ycombinator-logo.svg');
   background-position: 20px 50%;
   padding-left: 48px;
 }
 
-.room-header .call-to-action a[href^='https://tiktok.com']
+.jam .room-header .call-to-action a[href^='https://tiktok.com']
 {
   background-image: url('/img/bazaar/tiktok-logo.svg');
   background-position: 20px 50%;
   padding-left: 48px;
 }
 
-.room-header .call-to-action a[href^='https://twitter.com']
+.jam .room-header .call-to-action a[href^='https://twitter.com']
 {
   background-image: url('/img/bazaar/twitter-logo.svg');
   background-position: 20px 50%;
   padding-left: 48px;
 }
 
-.room-header .call-to-action a[href^='https://patreon.com']
+.jam .room-header .call-to-action a[href^='https://patreon.com']
 {
   background-image: url('/img/bazaar/patreon-logo.png');
   background-position: 20px 50%;
   padding-left: 48px;
 }
 
-.room-header .call-to-action a[href^='https://ko-fi.com']
+.jam .room-header .call-to-action a[href^='https://ko-fi.com']
 {
   background-image: url('/img/bazaar/kofi-logo.png');
   background-position: 20px 50%;
   padding-left: 48px;
 }
 
-.room-header .call-to-action a[href^='https://youtube.com']
+.jam .room-header .call-to-action a[href^='https://youtube.com']
 {
   background-image: url('/img/bazaar/youtube-logo.svg');
   background-position: 20px 50%;
   padding-left: 48px;
 }
 
-.room-header .call-to-action a[href^='https://instagram.com']
+.jam .room-header .call-to-action a[href^='https://instagram.com']
 {
   background-image: url('/img/bazaar/instagram-logo.svg');
   background-position: 20px 50%;
   padding-left: 48px;
 }
 
-.room-header .call-to-action a[href^='https://twitch.com']
+.jam .room-header .call-to-action a[href^='https://twitch.com']
 {
   background-image: url('/img/bazaar/twitch-logo.png');
   background-position: 20px 50%;
   padding-left: 48px;
 }
 
-.room-header .call-to-action a[href$='substack.com']
-{
+.jam .room-header .call-to-action a[href$='substack.com'] {
   background-image: url('/img/bazaar/substack-logo.png');
   background-position: 20px 50%;
   padding-left: 48px;
 }
 
-.room-header .call-to-action a[href$='transistor.fm'], .room-header .call-to-action a[href^='https://share.transistor.fm'], .room-header .call-to-action a[href^='https://transistor.fm']
+.jam .room-header .call-to-action a[href$='transistor.fm'], .room-header .call-to-action a[href^='https://share.transistor.fm'], .room-header .call-to-action a[href^='https://transistor.fm']
 {
   background-image: url('/img/bazaar/transistorfm-logo.png');
   background-position: 20px 50%;
   padding-left: 48px;
 }
 
-.room-header .call-to-action a[href^='ethereum:']
-{
+.jam .room-header .call-to-action a[href^='ethereum:'] {
   background-image: url('/img/bazaar/ethereum-logo.svg');
-  background-position: 20px 50%;
+  background-position: 22px 50%;
+  background-size: 12px;
+  padding-left: 48px;
+}
+
+.jam .room-header .call-to-action a[href^='https://cash.app'] {
+  background-image: url('/img/bazaar/cashapp-logo.svg');
+  background-position: 16px 50%;
   background-size: 16px;
   padding-left: 48px;
 }
 
-h1,
-h2,
-h3 {
+.jam h1,
+.jam h2,
+.jam h3 {
   color: black;
   width: 100%;
   font-weight: normal;
 }
-h1 {
+.jam h1 {
   font-size: 24px;
 }
-h2 {
+.jam h2 {
   color: #9c9c9c;
   font-size: 20px;
   margin: -4% 0 6% 0;
 }
-input,
-textarea {
+.jam input,
+.jam textarea {
   padding: 10px;
   font-size: 18px;
   border: 0;
   border-radius: 3px;
   border: 1px solid rgb(213, 213, 213);
 }
-input[type='color'] {
+.jam input[type='color'] {
   padding: 0;
 }
-table td {
+.jam table td {
   padding: 0;
   border: 5px solid transparent;
   vertical-align: top;
 }
 
-.human-radius {
+.jam .human-radius {
   border-radius: 42%;
-}
-
-.w-sm {
-  width: 640px;
-}
-
-@media (max-width: 640px) {
-  .container {
-    width: 100%;
-    border: 0px;
-    border-radius: 0;
-    box-sizing: border-box;
-  }
-
-  .outer-container {
-    padding-top: 0;
-  }
-
-  .navigation {
-    width: 100%;
-    border-top: 2px;
-    border-right: 0;
-    border-bottom: 0;
-    border-left: 0;
-    padding: 0 22px 22px 22px;
-    margin-left: -12px; /* adapt negative margin left from desktop view? */
-
-    box-sizing: border-box;
-  }
-
-  .w-sm {
-    width: 100%;
-  }
 }

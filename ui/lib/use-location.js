@@ -1,13 +1,14 @@
 import {useEffect} from 'react';
-import State, {use} from 'use-minimal-state';
+import {update, use} from 'use-minimal-state';
 
-let state = State({});
+let atom = [];
+let updater = () => update(atom);
 
 export function useLocation() {
-  use(state);
+  use(atom);
   useEffect(() => {
-    window.addEventListener('popstate', state.update);
-    return () => window.removeEventListener('popstate', state.update);
+    window.addEventListener('popstate', updater);
+    return () => window.removeEventListener('popstate', updater);
   }, []);
   return location;
 }
@@ -20,5 +21,5 @@ export function usePath() {
 
 export function navigate(route) {
   history.pushState(null, '', route);
-  state.update();
+  update(atom);
 }

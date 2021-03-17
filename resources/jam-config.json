@@ -1,0 +1,83 @@
+{
+    "urls": {
+      "jam": "https://jam.systems",
+      "pantry": "https://jam.systems/_/pantry",
+      "signalHub": "https://jam.systems/_/signalhub",
+      "stun": "stun:stun.jam.systems:3478",
+      "turn": "turn:turn.jam.systems:3478",
+      "turnCredentials": {
+        "username": null,
+        "credential": null
+      }
+    },
+    "development": false,
+    "defaultRoom": {
+      "name": null,
+      "description": null,
+      "logo": null,
+      "alternateDescriptions": [
+        {
+          "text": null,
+          "tags": []
+        }
+      ],
+      "button": {
+        "text": null,
+        "url": null
+      },
+      "alternateButtons": [
+        {
+          "text": null,
+          "url": null,
+          "tags": []
+        }
+      ],
+      "calendar": {
+        "ics": null
+      },
+      "roomClosed": false,
+      "moderators": [],
+      "speakers": [],
+      "hideAudience": null,
+      "access": {
+        "roomKey": null,
+        "descriptionNoAccess": null,
+        "lockedIdentities": false,
+        "inviteKeys": [
+          {
+            "inviteKey": null,
+            "inviteRoles": [],
+            "inviteIdentity": {
+              "displayName": null,
+              "avatar": null,
+              "identities": [
+                {
+                  "type": null,
+                  "id": null,
+                  "verificationInfo": null
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "reactions": [],
+      "userDisplay": {
+        "randomNames": [],
+        "randomAvatars": [],
+        "randomIdentities": [
+          {
+            "name": null,
+            "avatar": null
+          }
+        ]
+      },
+      "styles": {
+        "primaryColor": null
+      },
+      "texts": {
+
+      }
+
+    }
+}

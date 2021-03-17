@@ -13,7 +13,7 @@ With Jam you can create audio rooms that can be used for panel discussions, jam 
 
 try Jam on [https://jam.systems/](https://jam.systems/)
 
-apply to **[Jam Pro _Early Access_ here](https://forms.ops.jam.systems/pro/)** (Get your own branded version of Jam and use your own custom domain)
+sign up to the **[Jam Pro _Early Access_ Program here](https://pro.jam.systems)** (Get your own branded version of Jam and use your own custom domain)
 
 join the [Jam community on 🎧 Discord](https://discord.gg/BfakmCuXSX)
 
@@ -23,9 +23,13 @@ find [Jam on 😽 Product Hunt](https://www.producthunt.com/posts/jam-d17ff3cc-5
 
 🗓 join our weekly Jam Jam (a Jam where we jam about Jam) every [Wed @ 7pm UTC / 2pm EST](http://jam.systems/jam-jam-ns4a)
 
-add the `/jam` shortcut to your Slack workspace
+add the `/jam` shortcut to your Slack workspace:
 
 <a href="https://slack.com/oauth/v2/authorize?client_id=1827991458162.1827997742338&scope=chat:write,chat:write.public,commands&user_scope="><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack@2x.png" /></a>
+
+add Jam to your [Wordpress](https://medium.com/jam/add-jam-to-wordpress-ca1932cd8ff3) or [Webflow](https://medium.com/jam/add-jam-to-webflow-d8a680959007) website:
+
+<a href="https://medium.com/jam/add-jam-to-wordpress-ca1932cd8ff3"><img alt="Add Jam to Wordpress" src="https://s.w.org/style/images/about/WordPress-logotype-standard.png" height="40" /></a> &nbsp; <a href="https://medium.com/jam/add-jam-to-webflow-d8a680959007"><img alt="Add Jam to Webflow" src="https://upload.wikimedia.org/wikipedia/commons/9/92/Webflow_logo.svg" height="22" /></a>
 
 ## Feature Comparison
 
@@ -34,6 +38,7 @@ An overview for how 🍞 Jam compares to similar services like Clubhouse or Twit
 |                                 | 🍞 Jam                 | 👋 Clubhouse      | 🐣 Twitter Spaces          |
 |---------------------------------|------------------------|--------------------|----------------------------|
 | 🎨 Branded Rooms                | ✅ set your own logo, color   | ❌                | ❌                  |
+| 🧩 Embed in your app or website | ✅ iFrame, WebView, JS SDK    | ❌                | ❌                  |
 | 💯 Animated Reactions           | ✅ (❤️ 💯 😂 😅 😳 🤔)| ❌                | ✅ (💯 ✋ ✊ ✌️ 👋)       |
 | 📎 Description w/ Links         | ✅ w/ Markdown support | ❌                | ☑️ show tweets              |
 | 💵 Earn Money                   | ✅ dedicated support for<br/>PayPal.me, Bitcoin:, Gumroad | ❌ no built in support<br/><br/>currently not allowed<br/>unless specifically authorized<br/> see Terms of Service<br/>[(Conditions of Use #9)](https://www.notion.so/Terms-of-Service-cfbd1824d4704e1fa4a83f0312b8cf88) | ❌  no built in support |

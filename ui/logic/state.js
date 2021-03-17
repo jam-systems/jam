@@ -25,6 +25,13 @@ const state = State({
 });
 export default state;
 
+// actions that can be emitted to trigger events
+// emit(action.NAME, payload)
+// on(action.NAME, payload => {})
+export const actions = {
+  ENTER: [],
+};
+
 if (DEV) debug(state);
 
 // mod visible state

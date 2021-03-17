@@ -1,5 +1,5 @@
 import swarm from '../lib/swarm';
-import state from './state';
+import state, {actions} from './state';
 import {get} from './backend';
 import identity, {signData, verifyData} from './identity';
 import {DEV, config} from './config';
@@ -17,18 +17,17 @@ export {state};
 function configSignalhub() {
   swarm.config({
     debug: config.development,
-    url: config.signalHubUrl + '/',
+    url: config.urls.signalHub + '/',
     sign: signData,
     verify: verifyData,
     pcConfig: {
       iceTransportPolicy: 'all',
       iceServers: [
         {urls: `stun:stun.jam.systems:3478`},
-        {urls: `stun:${config.stunServer}`},
+        {urls: `${config.urls.stun}`},
         {
-          urls: `turn:${config.turnServer}`,
-          username: 'test',
-          credential: 'yieChoi0PeoKo8ni',
+          ...config.urls.turnCredentials,
+          urls: `${config.urls.turn}`,
         },
       ],
     },
@@ -48,6 +47,7 @@ export function enterRoom(roomId) {
   //   requestMicPermissionOnly().then(() => state.set('soundMuted', false));
   // }
 }
+on(actions.ENTER, roomId => enterRoom(roomId));
 
 export function leaveRoom() {
   state.set('inRoom', null);
