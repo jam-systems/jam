@@ -12,8 +12,16 @@
   "main": "dist/index.js",
   "browser": "dist/index.js",
   "module": "dist/index.js",
-  "repository": "https://gitlab.com/jam-systems/jam/-/tree/master/ui/jam-react",
-  "author": "Thomas Schranz, Christoph Witzany, Gregor Mitscha-Baude",
+  "repository": {
+    "type" : "git",
+    "url" : "https://gitlab.com/jam-systems/jam.git",
+    "directory": "ui/jam-react"
+  },
+  "author": "Gregor Mitscha-Baude",
+  "contributors": [
+    "Christoph Witzany",
+    "Thomas Schranz"
+  ],
   "license": "Apache-2.0",
   "files": [
     "dist"
