@@ -15,12 +15,16 @@ let navigationStyle = {
   bottom: '0',
   marginLeft: '-15px',
   flex: 'none',
+  borderLeft: '2px solid lightgrey',
+  borderRight: '2px solid lightgrey',
 };
 
 let navigationStyleSmall = {
   padding: '0 22px 22px 22px',
   marginLeft: '-12px',
   boxSizing: 'border-box',
+  borderLeft: '0px',
+  borderRight: '0px',
 };
 
 export default function Navigation({
