@@ -26,7 +26,7 @@ const urls = {
 
 
 
-const pantryApiPrefix = `${pantry}/api/v1/rooms`;
+const pantryApiPrefix = `${urls.pantry}/api/v1/rooms`;
 
 const defaultMetaInfo = {
     ogTitle: "Jam",
