@@ -16,11 +16,11 @@ const urls = {
     jam: process.env.JAM_URL || `${jamSchema}${jamHost}`,
     pantry: process.env.JAM_PANTRY_URL || `${jamSchema}${jamHost}/_/pantry`,
     signalHub: process.env.JAM_SIGNALHUB_URL || `${jamSchema}${jamHost}/_/signalhub`,
-    stun: process.env.JAM_STUN_SERVER || `stun.${jamHost}:3478`,
-    turn: process.env.JAM_TURN_SERVER || `turn.${jamHost}:3478`,
+    stun: process.env.JAM_STUN_SERVER || `stun:stun.${jamHost}:3478`,
+    turn: process.env.JAM_TURN_SERVER || `turn:turn.${jamHost}:3478`,
     turnCredentials: {
-        username: 'test',
-        credential: 'yieChoi0PeoKo8ni'
+        username: process.env.JAM_TURN_SERVER_USERNAME || 'test',
+        credential: process.env.JAM_TURN_SERVER_CREDENTIAL || 'yieChoi0PeoKo8ni'
     }
 }
 
