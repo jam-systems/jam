@@ -263,7 +263,7 @@ export default function Start({urlRoomId, roomFromURIError}) {
               target="_blank"
               rel="noreferrer"
             >
-              Apply to the Jam Pro Early Access Program.
+              Sign up for the Jam Pro Early Access Program.
             </a>
           </div>
           <div className="flex-initial">
