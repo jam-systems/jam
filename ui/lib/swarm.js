@@ -1,4 +1,4 @@
-import SimplePeer from 'simple-peer-light';
+import SimplePeer from './simple-peer-light';
 import State from 'use-minimal-state';
 import {authenticatedHub} from './signalhub';
 import causalLog from './causal-log';
