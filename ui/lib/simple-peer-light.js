@@ -341,18 +341,15 @@ class Peer {
 
     const submap = this._senderMap.get(track) || new Map(); // nested Maps map [track, stream] to sender
     let sender = submap.get(stream);
-    if (!sender) {
+    if (!sender || sender.removed) {
+      if (sender?.removed)
+        console.warn(
+          'Track has been removed. You should enable/disable tracks that you want to re-add.'
+        );
       sender = this._pc.addTrack(track, stream);
       submap.set(stream, sender);
       this._senderMap.set(track, submap);
       this._needsNegotiation();
-    } else if (sender.removed) {
-      throw errCode(
-        new Error(
-          'Track has been removed. You should enable/disable tracks that you want to re-add.'
-        ),
-        'ERR_SENDER_REMOVED'
-      );
     } else {
       throw errCode(
         new Error('Track has already been added to that stream.'),
