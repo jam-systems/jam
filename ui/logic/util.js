@@ -20,14 +20,19 @@ function debug(state) {
 }
 
 async function until(state, key, condition) {
-  return new Promise(resolve => {
-    let off = on(state, key, value => {
-      if (condition(value)) {
-        off();
-        resolve(value);
-      }
+  let value = state[key];
+  if (condition ? condition(value) : value) {
+    return value;
+  } else {
+    return new Promise(resolve => {
+      let off = on(state, key, value => {
+        if (condition ? condition(value) : value) {
+          off();
+          resolve(value);
+        }
+      });
     });
-  });
+  }
 }
 
 function domEvent(el, event) {
