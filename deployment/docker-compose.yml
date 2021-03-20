@@ -1,10 +1,12 @@
-version: '3'
+version: '3.9'
 services:
   coturn:
     image: woahbase/alpine-coturn
     volumes:
       - "./turnserver.conf:/var/lib/coturn/turnserver.conf"
     network_mode: host
+    restart: always
+    profiles: ["coturn"]
   prometheus:
     image: prom/prometheus:latest
     volumes:
@@ -17,6 +19,7 @@ services:
       - '--web.console.templates=/usr/share/prometheus/consoles'
       - '--storage.tsdb.retention.time=1y'
     restart: always
+    profiles: [ "metrics" ]
   grafana:
     image: grafana/grafana
     user: "472"
@@ -36,6 +39,7 @@ services:
       - traefik.http.routers.grafana.tls=true
       - traefik.http.routers.grafana.tls.certresolver=letsencrypt
       - traefik.enable=true
+    profiles: [ "metrics" ]
   postgres:
     image: postgres:12
     restart: always
@@ -110,6 +114,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ../data/traefik/acme:/acme
+    profiles: [ "web" ]
 volumes:
   prometheus_data: {}
   grafana_data: {}
