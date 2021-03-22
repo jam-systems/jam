@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "scripts": {
     "start": "DEVELOPMENT=1 server/bin/www & esbuild --bundle ./App.jsx --outfile=./bundle.js --format=esm --target=es6 --define:process.env.NODE_ENV='\"development\"' --watch",
-    "build": "esbuild --bundle ./App.jsx --outfile=./bundle.js --format=esm --target=es6 --define:process.env.NODE_ENV='\"development\"'",
+    "build": "esbuild --bundle ./App.jsx --outfile=./bundle.js --minify --format=esm --target=es6 --define:process.env.NODE_ENV='\"production\"'",
     "pantry": "LOCAL=1 PORT=3001 node ../pantry/bin/www",
     "debug": "JAM_PANTRY_URL=http://localhost:3001 yarn start",
     "start-example": "serve -s ./jam-react/example & esbuild --bundle ./jam-react/example/App.jsx --outfile=./jam-react/example/bundle.js --format=esm --define:process.env.NODE_ENV='\"development\"' --watch --loader:.css=text"
