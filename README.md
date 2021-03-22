@@ -27,9 +27,9 @@ add the `/jam` shortcut to your Slack workspace:
 
 <a href="https://slack.com/oauth/v2/authorize?client_id=1827991458162.1827997742338&scope=chat:write,chat:write.public,commands&user_scope="><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack@2x.png" /></a>
 
-add Jam to your [Wordpress](https://medium.com/jam/add-jam-to-wordpress-ca1932cd8ff3) or [Webflow](https://medium.com/jam/add-jam-to-webflow-d8a680959007) website:
+add Jam to your [Wordpress](https://medium.com/jam/add-jam-to-wordpress-ca1932cd8ff3), [Webflow](https://medium.com/jam/add-jam-to-webflow-d8a680959007) or [Shopify](https://medium.com/jam/add-jam-to-shopify-a77865cd7b6f):
 
-<a href="https://medium.com/jam/add-jam-to-wordpress-ca1932cd8ff3"><img alt="Add Jam to Wordpress" src="https://s.w.org/style/images/about/WordPress-logotype-standard.png" height="40" /></a> &nbsp; <a href="https://medium.com/jam/add-jam-to-webflow-d8a680959007"><img alt="Add Jam to Webflow" src="https://upload.wikimedia.org/wikipedia/commons/9/92/Webflow_logo.svg" height="22" /></a>
+<a href="https://medium.com/jam/add-jam-to-wordpress-ca1932cd8ff3"><img alt="Add Jam to Wordpress" src="https://s.w.org/style/images/about/WordPress-logotype-standard.png" height="40" /></a> &nbsp;&nbsp;&nbsp; <a href="https://medium.com/jam/add-jam-to-webflow-d8a680959007"><img alt="Add Jam to Webflow" src="https://upload.wikimedia.org/wikipedia/commons/9/92/Webflow_logo.svg" height="22" /></a> &nbsp;&nbsp;&nbsp; <a href="https://medium.com/jam/add-jam-to-shopify-a77865cd7b6f"><img alt="Add Jam to Shopify" src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Shopify_logo_2018.svg/430px-Shopify_logo_2018.svg.png" height="22" /></a>
 
 ## Feature Comparison
 

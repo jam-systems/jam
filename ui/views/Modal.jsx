@@ -5,9 +5,9 @@ import {useMediaQuery, useMqParser} from '../logic/tailwind-mqp';
 const modals = [new Set()];
 
 export default function Modals() {
-  let modals_ = use(modals);
-  if (!modals_) return null;
-  return [...modals_].map(([id, Modal, props]) => (
+  let $modals = use(modals);
+  if (!$modals) return null;
+  return [...$modals].map(([id, Modal, props]) => (
     <Modal key={id} {...props} />
   ));
 }
@@ -70,23 +70,33 @@ export function Modal({close, children}) {
 }
 
 export function openModal(Component, props, id) {
+  let [$modals] = modals;
+  if (id) {
+    // don't show two modals with the same id
+    for (let modal of $modals) {
+      if (modal[0] === id) {
+        return;
+      }
+    }
+  }
   id = id || Math.random();
   let modal = [id, Component];
   let close = () => {
-    modals[0].delete(modal);
+    $modals.delete(modal);
     update(modals);
   };
   props = {...(props || null), close};
   modal.push(props);
-  modals[0].add(modal);
+  $modals.add(modal);
   update(modals);
   return close;
 }
 
 export function closeModal(id) {
-  for (let modal of modals[0]) {
+  let [$modals] = modals;
+  for (let modal of $modals) {
     if (modal[0] === id) {
-      modals[0].delete(modal);
+      $modals.delete(modal);
       break;
     }
   }

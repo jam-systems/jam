@@ -216,7 +216,7 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
           <div className="p-2 text-gray-500 italic">
             Closed rooms can only be joined by moderators.
             <br />
-            Everyone else sees the description and the
+            Everyone else sees the description and the 
             {`'call to action'`} button.
           </div>
 
