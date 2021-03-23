@@ -1,24 +1,28 @@
 import React from 'react';
 import {Modal} from './Modal';
 import {PrimaryButton, SecondaryButton} from './Button';
-import {LabeledInput, useFileInput, useInput} from './Input';
+import {LabeledInput, useFileInput} from './Input';
+import {streamAudioFromUrl} from '../logic/audio';
 
 export default function StreamingModal({close}) {
-  let [urlValue, urlInput] = useInput();
+  // let [urlValue, urlInput] = useInput();
   let [getFile, fileInput] = useFileInput();
-  let submit = e => {
+  let submit = async e => {
     e.preventDefault();
     let file = getFile();
-    console.log(urlValue, file?.name);
-    // close();
+    let url = file && URL.createObjectURL(file); // : urlValue;
+    if (url) {
+      streamAudioFromUrl(url);
+      close();
+    }
   };
   return (
     <Modal close={close}>
       <h1>Stream audio</h1>
       <br />
       <form onSubmit={submit} className="text-gray-500">
-        <p>You have several options to add an audio source</p>
-        <br />
+        {/* <p>You can have several options to add an audio source</p>
+        <br /> */}
         <LabeledInput
           accept="audio/*"
           {...fileInput}
@@ -26,13 +30,13 @@ export default function StreamingModal({close}) {
           optional
         />
         <br />
-        <LabeledInput
+        {/* <LabeledInput
           placeholder="Audio source URL"
           {...urlInput}
           label="Stream audio from URL"
           optional
         />
-        <br />
+        <br /> */}
         <div className="spaced-w-2 flex">
           <PrimaryButton onClick={submit} className="flex-grow">
             Done

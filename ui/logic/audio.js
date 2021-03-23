@@ -2,7 +2,7 @@ import swarm from '../lib/swarm';
 import hark from '../lib/hark';
 import UAParser from 'ua-parser-js';
 import state from './state';
-import {is} from 'use-minimal-state';
+import {is, set} from 'use-minimal-state';
 import identity from './identity';
 import log from '../lib/causal-log';
 import {domEvent, until} from './util';
@@ -100,9 +100,7 @@ async function play(audio) {
 
 let isRequestingAudio = false;
 async function requestAudio() {
-  if (state.myAudio && state.myAudio.active) {
-    return state.myAudio;
-  }
+  if (state.myMic && state.myMic.active) return;
   if (isRequestingAudio) return;
   isRequestingAudio = true;
   let stream = await navigator.mediaDevices
@@ -118,9 +116,27 @@ async function requestAudio() {
     });
   if (!stream) return;
   isRequestingAudio = false;
-  state.set('myAudio', stream);
-  state.set('micAllowed', true);
-  state.set('micMuted', false);
+  set(state, 'myMic', stream);
+  set(state, 'myAudio', stream);
+  set(state, 'micAllowed', true);
+  set(state, 'micMuted', false);
+}
+
+export async function streamAudioFromUrl(url) {
+  let audio = new Audio(url);
+  audio.crossOrigin = 'anonymous';
+  // let stream = audio.captureStream(); // not supported in Safari & Firefox
+  let ctx = state.audioContext;
+  let streamDestination = ctx.createMediaStreamDestination();
+  let source = ctx.createMediaElementSource(audio);
+  source.connect(streamDestination);
+  source.connect(ctx.destination);
+  let stream = streamDestination.stream;
+
+  set(state, 'myAudio', stream);
+  await audio.play();
+  await domEvent(audio, 'ended');
+  if (state.myMic) set(state, 'myAudio', state.myMic);
 }
 
 async function requestMicPermissionOnly() {
@@ -144,9 +160,10 @@ async function requestMicPermissionOnly() {
 }
 
 async function stopAudio() {
-  if (state.myAudio) {
-    state.myAudio.getTracks().forEach(track => track.stop());
+  if (state.myMic) {
+    state.myMic.getTracks().forEach(track => track.stop());
   }
+  is(state, 'myMic', null);
   is(state, 'myAudio', null);
 }
 
