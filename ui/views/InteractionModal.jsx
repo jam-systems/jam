@@ -9,15 +9,17 @@ export default function InterationModal({close}) {
     <Modal close={close}>
       <h1>Allow playing sound</h1>
       <p>Click OK to allow our page to play sound.</p>
-      <PrimaryButton
-        onClick={() => {
-          set(state, 'soundMuted', false);
-          is(state, 'userInteracted', true);
-          close();
-        }}
-      >
-        OK
-      </PrimaryButton>
+      <p>
+        <PrimaryButton
+          onClick={() => {
+            set(state, 'soundMuted', false);
+            is(state, 'userInteracted', true);
+            close();
+          }}
+        >
+          OK
+        </PrimaryButton>
+      </p>
     </Modal>
   );
 }
