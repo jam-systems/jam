@@ -82,13 +82,17 @@ e.g.: a Raspberry Pi Zero (512 MB RAM) or the smallest [Digital Ocean Basic Drop
 ### Install
 
 1. Install docker and docker-compose (eg. `apt install docker.io docker-compose`)
-2. `git clone https://gitlab.com/jam-systems/jam.git`
-3. `git checkout stable`  
-4. `cd jam/deployment`
-5. `cp .env.example .env`
-6. `nano .env` set `JAM_HOST` to your domain
-7. In your DNS settings point `${JAM_HOST}`, and `*.${JAM_HOST}` to your IP address (if you don't want a wildcard you need the subdomains `stun` and `turn`)
-8. `docker-compose up -d`
+1. `git clone https://gitlab.com/jam-systems/jam.git`
+1. `cd jam`
+1. `git checkout stable`  
+1. `cd deployment`
+1. `cp .env.example .env`
+1. `nano .env` set `JAM_HOST` to your domain
+1. In your DNS settings point `${JAM_HOST}`, and `*.${JAM_HOST}` to your IP address (if you don't want a wildcard you need the subdomains `stun` and `turn` (e.g. stun.jam.example.com and turn.jam.example.com))
+1. If you are behind a NAT:
+   1. Open ports 3478 and 3480, both TCP and UDP, and 80 and 443, TCP, on your firewall
+   1. `nano turnserver.conf` set `realm` to your domain. If you are running coturn behind NAT, you may need to add the parameter  `external-ip` and give it the value of your public IP address.
+1. `docker-compose up -d`
 
 ### Update
 
