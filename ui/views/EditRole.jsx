@@ -7,6 +7,7 @@ import {openModal} from './Modal';
 import EditIdentity from './EditIdentity';
 import {useMqParser} from '../logic/tailwind-mqp';
 import {SecondaryButton} from './Button';
+import StreamingModal from './StreamingModal';
 
 export default function EditRole({peerId, speakers, moderators, onCancel}) {
   let mqp = useMqParser();
@@ -108,7 +109,14 @@ export function EditSelf({onCancel}) {
             ↓ Leave Stage
           </SecondaryButton>
         )}
-        <SecondaryButton>Stream audio</SecondaryButton>
+        <SecondaryButton
+          onClick={() => {
+            openModal(StreamingModal);
+            onCancel();
+          }}
+        >
+          Stream audio
+        </SecondaryButton>
         <SecondaryButton light onClick={onCancel}>
           Cancel
         </SecondaryButton>
