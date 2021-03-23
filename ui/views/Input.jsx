@@ -1,11 +1,14 @@
 import React, {useRef, useState} from 'react';
+import {useMediaQuery} from '../logic/tailwind-mqp';
 import {mergeClasses} from '../logic/util';
 
 export default function Input({className, inputRef, ...props}) {
+  let width = useMediaQuery('sm', 'w-full', 'w-96');
   return (
     <input
       className={mergeClasses(
-        'rounded placeholder-gray-400 bg-gray-50 w-full sm:w-96',
+        'rounded placeholder-gray-400 bg-gray-50',
+        width,
         className
       )}
       type="text"
