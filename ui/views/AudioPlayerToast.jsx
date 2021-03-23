@@ -46,7 +46,9 @@ export default function AudioPlayerToast({close, audio, name}) {
           }}
         >
           <div>{name || ''}</div>
-          <CloseSvg color="white" onClick={end} />
+          <div onClick={end} style={{cursor: 'pointer'}}>
+            <CloseSvg color="white" />
+          </div>
         </div>
       </div>
     </div>
