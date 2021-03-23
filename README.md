@@ -81,7 +81,7 @@ e.g.: a Raspberry Pi Zero (512 MB RAM) or the smallest [Digital Ocean Basic Drop
 
 ### Install
 
-1. Install docker and docker-compose (eg. `apt install docker.io docker-compose`)
+1. Install docker and docker-compose (https://docs.docker.com/compose/install/)
 1. `git clone https://gitlab.com/jam-systems/jam.git`
 1. `cd jam`
 1. `git checkout stable`  
@@ -96,11 +96,23 @@ e.g.: a Raspberry Pi Zero (512 MB RAM) or the smallest [Digital Ocean Basic Drop
 
 ### Update
 
+**NOTE:** Make sure you have the newest version of docker-compose (install according to https://docs.docker.com/compose/install/).
+
 1. `cd jam/deployment`
 2. `git checkout stable`
 3. `git pull`
 4. `docker-compose pull`
 5. `docker-compose up -d`
+
+**NOTE:** If you update from a version before March 23rd to one after and you want to keep users' identities and rooms:
+
+1. `cd jam/deployment`
+2. `docker-compose down`   
+3. `git checkout stable`
+4. `git pull`
+5. `docker-compose pull`
+6. `mv ../pantryredis ../data`   
+7. `docker-compose up -d`
 
 ## Develop
 
