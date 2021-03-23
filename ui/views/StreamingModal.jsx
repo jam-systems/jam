@@ -12,7 +12,7 @@ export default function StreamingModal({close}) {
     let file = getFile();
     let url = file && URL.createObjectURL(file); // : urlValue;
     if (url) {
-      streamAudioFromUrl(url);
+      streamAudioFromUrl(url, file.name);
       close();
     }
   };

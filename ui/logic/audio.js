@@ -8,6 +8,7 @@ import log from '../lib/causal-log';
 import {domEvent, until} from './util';
 import {openModal} from '../views/Modal';
 import InteractionModal from '../views/InteractionModal';
+import AudioPlayerToast from '../views/AudioPlayerToast';
 
 var userAgent = UAParser();
 
@@ -122,7 +123,7 @@ async function requestAudio() {
   set(state, 'micMuted', false);
 }
 
-export async function streamAudioFromUrl(url) {
+export async function streamAudioFromUrl(url, name) {
   let audio = new Audio(url);
   audio.crossOrigin = 'anonymous';
   // let stream = audio.captureStream(); // not supported in Safari & Firefox
@@ -135,6 +136,7 @@ export async function streamAudioFromUrl(url) {
 
   set(state, 'myAudio', stream);
   await audio.play();
+  openModal(AudioPlayerToast, {audio, name}, 'player');
   await domEvent(audio, 'ended');
   if (state.myMic) set(state, 'myAudio', state.myMic);
 }
