@@ -6,7 +6,7 @@ import {use} from 'use-minimal-state';
 import {openModal} from './Modal';
 import EditIdentity from './EditIdentity';
 import {useMqParser} from '../logic/tailwind-mqp';
-import {SecondaryButton} from './Button';
+import {ButtonContainer, SecondaryButton} from './Button';
 import StreamingModal from './StreamingModal';
 
 export default function EditRole({peerId, speakers, moderators, onCancel}) {
@@ -76,7 +76,7 @@ export function EditSelf({onCancel}) {
     <div className={mqp('md:p-10')}>
       <h3 className="font-medium">Actions</h3>
       <br />
-      <div className="spaced-w-2" style={{lineHeight: '56px'}}>
+      <ButtonContainer>
         <SecondaryButton
           onClick={() => {
             openModal(EditIdentity);
@@ -120,7 +120,7 @@ export function EditSelf({onCancel}) {
         <SecondaryButton light onClick={onCancel}>
           Cancel
         </SecondaryButton>
-      </div>
+      </ButtonContainer>
       <br />
       <br />
       <hr />

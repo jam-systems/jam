@@ -18,3 +18,13 @@ export function SecondaryButton({light, className, ...props}) {
   );
   return <button className={className} {...props} />;
 }
+
+export function ButtonContainer({className, style, ...props}) {
+  return (
+    <div
+      className={mergeClasses('spaced-w-2', className)}
+      style={{lineHeight: '56px', ...style}}
+      {...props}
+    />
+  );
+}
