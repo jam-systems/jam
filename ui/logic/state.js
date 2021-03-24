@@ -15,7 +15,9 @@ const state = State({
   micAllowed: false,
   soundMuted: true,
   micMuted: true,
+  myMic: null,
   myAudio: null,
+
   speaking: new Set(),
   audioContext: null,
 
