@@ -170,13 +170,18 @@ async function stopAudio() {
 }
 
 state.on('micMuted', micMuted => {
-  let {myAudio} = state;
+  let {myAudio, myMic} = state;
   if (!myAudio?.active && !micMuted) {
     requestAudio();
     return;
   }
   if (myAudio) {
     for (let track of myAudio.getTracks()) {
+      track.enabled = !micMuted;
+    }
+  }
+  if (myMic && myMic !== myAudio) {
+    for (let track of myMic.getTracks()) {
       track.enabled = !micMuted;
     }
   }
