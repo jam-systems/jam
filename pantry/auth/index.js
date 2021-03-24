@@ -50,6 +50,13 @@ const isAdmin = async (req) => {
     return isInList(extractToken(req), await get('server/admins'));
 }
 
+const initializeServerAdminIfNecessary = async (req) => {
+    const moderators = await get('server/admins');
+    if(!moderators || moderators.length === 0) {
+        await set('server/admins', [req.params.id])
+    }
+}
+
 const roomAuthenticator = {
     ...permitAllAuthenticator,
     canPost: async (req, res, next) => {
@@ -84,10 +91,7 @@ const roomAuthenticator = {
 const identityAuthenticator = {
     ...permitAllAuthenticator,
     canPost: async (req, res, next) => {
-        const moderators = await get('server/admins');
-        if(!moderators || moderators.length === 0) {
-            await set('server/admins', [req.params.id])
-        }
+        await initializeServerAdminIfNecessary(req);
         next()
     },
     canPut: async (req, res, next) => {
@@ -107,7 +111,6 @@ const identityAuthenticator = {
         if(req.body.identities) {
             try {
                 await verifyIdentities(req.body.identities, req.params.id);
-                next();
             } catch(error) {
                 res.status(400).json(
                     {
@@ -117,10 +120,12 @@ const identityAuthenticator = {
                             message: error.message
                         }
                     });
+                return
             }
-        } else {
-            next();
         }
+
+        await initializeServerAdminIfNecessary(req);
+        next();
     },
 }
 
