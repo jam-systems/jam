@@ -116,7 +116,7 @@ e.g.: a Raspberry Pi Zero (512 MB RAM) or the smallest [Digital Ocean Basic Drop
 
 ## Develop
 
-In in the `ui` directory use `yarn` to install dependencies and `yarn start` to start the local development server.
+In the `ui` directory, use `yarn` to install dependencies, and `yarn start` to start the local development server.
 
 Directory overview:
 
