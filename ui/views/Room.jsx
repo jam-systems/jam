@@ -123,7 +123,7 @@ export default function Room({room, roomId}) {
             />
           </svg>
           Open in {userAgent.os?.name == "iOS" ? "Safari" : "Chrome"} for best experience.<br/>
-          <a href="https://gitlab.com/jam-systems/jam" target="_blank" rel="nofollow">Learn more</a>.
+          <a class="underline" href="https://gitlab.com/jam-systems/jam" target="_blank" rel="nofollow">Learn more</a>.
         </div>
         <div
           className={
