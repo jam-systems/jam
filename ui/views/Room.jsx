@@ -122,7 +122,8 @@ export default function Room({room, roomId}) {
               d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          in WebView
+          Open this room in {userAgent.os == "iOS" ? "Safari" : "Chrome"} for the best experience.<br/>
+          <a href="https://gitlab.com/jam-systems/jam" target="_blank" rel="nofollow">Learn more</a>.
         </div>
         <div
           className={
