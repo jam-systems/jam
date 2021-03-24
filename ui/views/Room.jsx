@@ -19,7 +19,7 @@ export default function Room({room, roomId}) {
   useWakeLock();
 
   let userAgent = UAParser();
-  let inWebView = (userAgent.browser == "Chrome WebView") || ((userAgent.os == "iOS") && (userAgent.browser != "Mobile Safari"))
+  let inWebView = (userAgent.browser?.name == "Chrome WebView") || ((userAgent.os?.name == "iOS") && (userAgent.browser?.name != "Mobile Safari"))
 
   let myInfo = use(identity, 'info');
   let [
@@ -122,7 +122,7 @@ export default function Room({room, roomId}) {
               d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          Open this room in {userAgent.os == "iOS" ? "Safari" : "Chrome"} for the best experience.<br/>
+          Open in {userAgent.os?.name == "iOS" ? "Safari" : "Chrome"} for best experience.<br/>
           <a href="https://gitlab.com/jam-systems/jam" target="_blank" rel="nofollow">Learn more</a>.
         </div>
         <div
