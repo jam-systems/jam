@@ -26,6 +26,7 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
   let [buttonURI, setButtonURI] = useState(room.buttonURI || '');
   let [buttonText, setButtonText] = useState(room.buttonText || '');
   let [closed, setClosed] = useState(room.closed || false);
+  let [shareUrl, setShareUrl] = useState(room.shareUrl || '');
 
   let submit = e => {
     e.preventDefault();
@@ -39,6 +40,7 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
         buttonURI,
         buttonText,
         closed,
+        shareUrl,
       });
   };
 
@@ -192,6 +194,25 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
           ></input>
           <div className="p-2 text-gray-500 italic">
             Set the text for the {`'call to action'`} button.{' '}
+            <span className="text-gray-400">(optional)</span>
+          </div>
+
+          <br />
+          <input
+            className={mqp(
+              'rounded placeholder-gray-400 bg-gray-50 w-full md:w-96'
+            )}
+            type="text"
+            placeholder="Share URL"
+            value={shareUrl}
+            name="jam-room-share-url"
+            autoComplete="off"
+            onChange={e => {
+              setShareUrl(e.target.value);
+            }}
+          ></input>
+          <div className="p-2 text-gray-500 italic">
+            The URL used for sharing the room.
             <span className="text-gray-400">(optional)</span>
           </div>
 

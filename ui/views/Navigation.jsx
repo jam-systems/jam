@@ -50,7 +50,7 @@ export default function Navigation({
   let [showReactions, setShowReactions] = useState(false);
   let [showShareInfo, setShowShareInfo] = useState(false);
 
-  let {name, color, speakers, moderators} = room || {};
+  let {name, color, speakers, moderators, shareUrl} = room || {};
 
   let isColorDark = useMemo(() => isDark(color), [color]);
 
@@ -186,10 +186,10 @@ export default function Navigation({
               navigator.share({
                 title: name || 'A Jam room',
                 text: 'Hi, join me in this room on Jam.',
-                url: location.href,
+                url: (shareUrl ? shareUrl : location.href),
               });
             } else {
-              copyToClipboard(location.href);
+              copyToClipboard((shareUrl ? shareUrl : location.href));
               setShowShareInfo(true);
               setTimeout(() => setShowShareInfo(false), 2000);
             }

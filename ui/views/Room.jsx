@@ -57,6 +57,7 @@ export default function Room({room, roomId}) {
     speakers,
     moderators,
     closed,
+    shareUrl,
   } = room || {};
 
   let mqp = useMqParser();
