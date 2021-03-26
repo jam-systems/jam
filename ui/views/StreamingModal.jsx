@@ -27,7 +27,6 @@ export default function StreamingModal({close}) {
           accept="audio/*"
           {...fileInput}
           label="Stream audio from file"
-          optional
         />
         <br />
         {/* <LabeledInput
@@ -39,7 +38,7 @@ export default function StreamingModal({close}) {
         <br /> */}
         <div className="spaced-w-2 flex">
           <PrimaryButton onClick={submit} className="flex-grow">
-            Done
+            Stream
           </PrimaryButton>
           <SecondaryButton light className="flex-none" onClick={close}>
             Cancel
