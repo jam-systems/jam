@@ -126,9 +126,42 @@ const currentTimeCode = () => Math.round(Date.now() / 30000);
 const timeCodeValid = code => Math.abs(code - currentTimeCode()) <= 10;
 
 function randomName() {
-  let adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-  let noun = nouns[Math.floor(Math.random() * nouns.length)];
-  return `${adj} ${noun}`;
+  let names = [
+    'Ali',
+    'Alex',
+    'Ash',
+    'Blue',
+    'Chi',
+    'Drew',
+    'Eight',
+    'Fin',
+    'Floor',
+    'Five',
+    'Four',
+    'Jam',
+    'Jaz',
+    'Misha',
+    'Mu',
+    'Nine',
+    'One',
+    'Pat',
+    'Sam',
+    'Seven',
+    'Six',
+    'Sky',
+    'Sol',
+    'Storm',
+    'Sun',
+    'Tao',
+    'Ten',
+    'Three',
+    'Tsu',
+    'Two',
+    'Yu',
+    'Zero',
+  ]
+  let name = names[Math.floor(Math.random() * names.length)];
+  return name;
 }
 
 // util for uint8array
