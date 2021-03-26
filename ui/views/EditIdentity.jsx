@@ -210,19 +210,21 @@ export default function EditIdentity({close}) {
         <br />
         <hr />
         <br />
-        <input
-          className="rounded placeholder-gray-400 bg-gray-50 w-72"
-          type="email"
-          placeholder="email@example.com"
-          value={email || ''}
-          name="email"
-          onChange={e => {
-            setEmail(e.target.value);
-          }}
-        />
-        <div className="p-2 text-gray-500 italic">
-          {`What's your email?`}
-          <span className="text-gray-300"> (used for Gravatar)</span>
+        <div class="hidden">
+          <input
+            className="rounded placeholder-gray-400 bg-gray-50 w-72"
+            type="email"
+            placeholder="email@example.com"
+            value={email || ''}
+            name="email"
+            onChange={e => {
+              setEmail(e.target.value);
+            }}
+          />
+          <div className="p-2 text-gray-500 italic">
+            {`What's your email?`}
+            <span className="text-gray-300"> (used for Gravatar)</span>
+          </div>
         </div>
         <div className="flex">
           <button
