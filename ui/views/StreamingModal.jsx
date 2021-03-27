@@ -24,7 +24,7 @@ export default function StreamingModal({close}) {
         {/* <p>You can have several options to add an audio source</p>
         <br /> */}
         <LabeledInput
-          accept="audio/*"
+          accept="audio/*,.mp3,.wav,.m4a,.oga,.3gp,.3g2,.aiff,.mp4"
           {...fileInput}
           label="Stream audio from file"
         />
