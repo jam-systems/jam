@@ -17,9 +17,6 @@ build-pantry:
     - docker build -t $DOCKER_NAMESPACE/pantry:${CI_COMMIT_REF_SLUG} pantry
     - docker push $DOCKER_NAMESPACE/pantry:${CI_COMMIT_REF_SLUG}
   only:
-    refs:
-      - master
-      - stable
     changes:
       - pantry/**/*
       - .gitlab-ci.yml
@@ -32,9 +29,6 @@ build-signalhub:
     - docker build -t $DOCKER_NAMESPACE/signalhub:${CI_COMMIT_REF_SLUG} signalhub
     - docker push $DOCKER_NAMESPACE/signalhub:${CI_COMMIT_REF_SLUG}
   only:
-    refs:
-      - master
-      - stable
     changes:
       - signalhub/**/*
       - .gitlab-ci.yml
@@ -46,9 +40,6 @@ build-ui:
     - docker build -t $DOCKER_NAMESPACE/ui:${CI_COMMIT_REF_SLUG} ui
     - docker push $DOCKER_NAMESPACE/ui:${CI_COMMIT_REF_SLUG}
   only:
-    refs:
-      - master
-      - stable
     changes:
       - ui/**/*
       - .gitlab-ci.yml

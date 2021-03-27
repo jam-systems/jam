@@ -1,5 +1,7 @@
 version: '3'
 services:
+  torproxy:
+    image: palnabarun/tor
   coturn:
     image: woahbase/alpine-coturn
     volumes:
