@@ -9,6 +9,8 @@ import EditRole, {EditSelf} from './EditRole';
 import {breakpoints, useWidth} from '../logic/tailwind-mqp';
 import UAParser from 'ua-parser-js';
 import {requestAudio} from '../logic/audio';
+import {openModal} from './Modal';
+import {InfoModal} from './InfoModal';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
@@ -260,24 +262,21 @@ export default function Navigation({
           </span>
         )}
         <button
-          onClick={() => {
-            if (navigator.share) {
-              navigator.share({
-                title: name || 'A Jam room',
-                text: 'Hi, join me in this room on Jam.',
-                url: (shareUrl ? shareUrl : location.href),
-              });
-            } else {
-              copyToClipboard((shareUrl ? shareUrl : location.href));
-              setShowShareInfo(true);
-              setTimeout(() => setShowShareInfo(false), 2000);
-            }
-          }}
+          onClick={() => {openModal(InfoModal, {roomId, room})}}
           className="ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
         >
+          {/* information-circle */}
+          <svg
+            className="text-gray-600 w-6 h-6"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
           {/* heroicons/share-small */}
           <svg
-            className={userAgent.os.name == "Android" ? "text-gray-600 w-5 h-5" : "hidden"}
+            className="hidden"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
             fill="currentColor"
@@ -285,7 +284,7 @@ export default function Navigation({
             <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
           </svg>
           <svg
-            className={userAgent.os?.name == "Android" ? "hidden" : "text-gray-600 w-5 h-5"}
+            className="hidden"
             viewBox="0 0 512 512"
             xmlns="http://www.w3.org/2000/svg"
             fill="currentColor"
