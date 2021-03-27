@@ -105,7 +105,7 @@ export default function Navigation({
                 : "hidden"
               : "hidden"}>
               <svg
-                className="w-5 h-5 mr-2 text-gray-300 inline-block"
+                className="w-5 h-5 mr-2 opacity-80 inline-block"
                 version="1.1"
                 xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -116,7 +116,7 @@ export default function Navigation({
                 viewBox="0 0 96.666 96.666"
                 xml:space="preserve"
                 fill="currentColor"
-                stroke="#374151"
+                stroke={color || '#4B5563'}
                 style={{transform: 'scale(-1,1)'}}
               >
                 <g>
@@ -142,7 +142,7 @@ export default function Navigation({
                 : ""
               : "hidden"}>
               <svg
-                className="w-5 h-5 mr-2 text-gray-300 inline-block"
+                className="w-5 h-5 mr-2 opacity-80 inline-block"
                 version="1.1"
                 xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -153,7 +153,7 @@ export default function Navigation({
                 viewBox="0 0 96.666 96.666"
                 xml:space="preserve"
                 fill="currentColor"
-                stroke="#374151"
+                stroke={color || '#4B5563'}
               >
                 <g>
                   <g>
