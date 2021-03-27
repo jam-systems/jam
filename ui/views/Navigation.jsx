@@ -8,6 +8,7 @@ import {sendReaction, raiseHand} from '../logic/reactions';
 import EditRole, {EditSelf} from './EditRole';
 import {breakpoints, useWidth} from '../logic/tailwind-mqp';
 import UAParser from 'ua-parser-js';
+import {requestAudio} from '../logic/audio';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
@@ -63,9 +64,7 @@ export default function Navigation({
     if (micOn) {
       state.set('micMuted', !micMuted);
     } else {
-      // reload page to get back to microphone permissions
-      // on iOS and macOS Safari
-      location.reload();
+      requestAudio();
     }
   }
 
