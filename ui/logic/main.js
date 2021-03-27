@@ -41,11 +41,11 @@ export function enterRoom(roomId) {
   state.set('inRoom', roomId);
   swarm.set('sharedState', state => ({...state, inRoom: true}));
   is(state, 'soundMuted', false);
-  // if (state.iAmSpeaker) {
-  //   requestAudio().then(() => state.set('soundMuted', false));
-  // } else {
-  //   requestMicPermissionOnly().then(() => state.set('soundMuted', false));
-  // }
+  if (state.iAmSpeaker) {
+    requestAudio().then(() => state.set('soundMuted', false));
+  } else {
+    requestMicPermissionOnly().then(() => state.set('soundMuted', false));
+  }
 }
 on(actions.ENTER, roomId => enterRoom(roomId));
 
