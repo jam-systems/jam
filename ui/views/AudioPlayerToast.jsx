@@ -22,7 +22,7 @@ export default function AudioPlayerToast({close, audio, name}) {
   };
   return (
     <div
-      className="mt-40 w-80"
+      className="mt-40 w-96"
       style={{
         position: 'absolute',
         zIndex: '10',
