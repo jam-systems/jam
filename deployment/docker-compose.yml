@@ -5,6 +5,8 @@ services:
     volumes:
       - "./turnserver.conf:/var/lib/coturn/turnserver.conf"
     network_mode: host
+    restart: always
+    profiles: ["coturn"]
   prometheus:
     image: prom/prometheus:latest
     volumes:
@@ -17,6 +19,7 @@ services:
       - '--web.console.templates=/usr/share/prometheus/consoles'
       - '--storage.tsdb.retention.time=1y'
     restart: always
+    profiles: [ "metrics" ]
   grafana:
     image: grafana/grafana
     user: "472"
@@ -36,6 +39,7 @@ services:
       - traefik.http.routers.grafana.tls=true
       - traefik.http.routers.grafana.tls.certresolver=letsencrypt
       - traefik.enable=true
+    profiles: [ "metrics" ]
   postgres:
     image: postgres:12
     restart: always
@@ -47,39 +51,45 @@ services:
   ui:
     image: registry.gitlab.com/jam-systems/jam/ui:${CHANNEL}
     restart: always
-    env_file:
-      - ".env"
+    environment:
+      - JAM_HOST
+      - JAM_STUN_SERVER
+      - JAM_TURN_SERVER
+      - JAM_TURN_SERVER_USERNAME
+      - JAM_TURN_SERVER_CREDENTIAL
+      - JAM_RESTRICT_ROOM_CREATION
     labels:
-      - traefik.http.routers.ui.rule=Host(`${JAM_HOST}`)
-      - traefik.http.routers.ui.tls=true
-      - traefik.http.routers.ui.tls.certresolver=letsencrypt
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}_ui.rule=Host(`${JAM_HOST}`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}_ui.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}_ui.tls.certresolver=letsencrypt
       - traefik.enable=true
   pantryredis:
     image: library/redis
     volumes:
-      - "../pantryredis:/data"
+      - "../data/pantryredis:/data"
     command: "redis-server --appendonly yes"
   pantry:
     image: registry.gitlab.com/jam-systems/jam/pantry:${CHANNEL}
     restart: always
-    env_file:
-      - ".env"
+    environment:
+      - JAM_HOST
+      - JAM_RESTRICT_ROOM_CREATION
     labels:
-      - traefik.http.routers.pantry.rule=(Host(`${JAM_HOST}`) && PathPrefix(`/_/pantry`))
-      - traefik.http.routers.pantry.middlewares=pantry-stripprefix
-      - traefik.http.middlewares.pantry-stripprefix.stripprefix.prefixes=/_/pantry
-      - traefik.http.routers.pantry.tls=true
-      - traefik.http.routers.pantry.tls.certresolver=letsencrypt
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}_pantry.rule=(Host(`${JAM_HOST}`) && PathPrefix(`/_/pantry`))
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}_pantry.middlewares=${COMPOSE_PROJECT_NAME}_pantry_stripprefix
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}_pantry_stripprefix.stripprefix.prefixes=/_/pantry
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}_pantry.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}_pantry.tls.certresolver=letsencrypt
       - traefik.enable=true
   signalhub:
     image: registry.gitlab.com/jam-systems/jam/signalhub:${CHANNEL}
     restart: always
     labels:
-      - traefik.http.routers.signalhub.rule=(Host(`${JAM_HOST}`) && PathPrefix(`/_/signalhub`))
-      - traefik.http.routers.signalhub.middlewares=signalhub-stripprefix
-      - traefik.http.middlewares.signalhub-stripprefix.stripprefix.prefixes=/_/signalhub
-      - traefik.http.routers.signalhub.tls=true
-      - traefik.http.routers.signalhub.tls.certresolver=letsencrypt
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}_signalhub.rule=(Host(`${JAM_HOST}`) && PathPrefix(`/_/signalhub`))
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}_signalhub.middlewares=${COMPOSE_PROJECT_NAME}_signalhub_stripprefix
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}_signalhub_stripprefix.stripprefix.prefixes=/_/signalhub
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}_signalhub.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}_signalhub.tls.certresolver=letsencrypt
       - traefik.enable=true
   traefik:
     hostname: traefik
@@ -110,6 +120,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ../data/traefik/acme:/acme
+    profiles: [ "web" ]
 volumes:
   prometheus_data: {}
   grafana_data: {}

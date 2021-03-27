@@ -12,6 +12,14 @@
   color: rgba(30, 64, 175); /* blue-800 */
 }
 
+/* util */
+.spaced-w-2 > *:not(:last-child) {
+  margin-right: 0.5rem;
+}
+.spaced-h-2 > *:not(:last-child) {
+  margin-bottom: 0.5rem;
+}
+
 /* bazaar */
 .jam .room-header a[href^="https://gumroad.com"]
 {
@@ -154,7 +162,8 @@
   text-decoration: underline;
 }
 
-.jam .room-header a[href^='https://cash.app'] {
+.jam .room-header a[href^='https://cash.app']
+{
   background-image: url('/img/bazaar/cashapp-logo.svg');
   background-repeat: no-repeat;
   background-size: 16px;
@@ -279,7 +288,8 @@
   padding-left: 48px;
 }
 
-.jam .room-header .call-to-action a[href^='https://cash.app'] {
+.jam .room-header .call-to-action a[href^='https://cash.app']
+{
   background-image: url('/img/bazaar/cashapp-logo.svg');
   background-position: 16px 50%;
   background-size: 16px;

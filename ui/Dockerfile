@@ -4,7 +4,7 @@ COPY yarn.lock package.json ./
 
 RUN yarn install && yarn global add esbuild
 COPY . .
-RUN npx esbuild --bundle ./App.jsx --outfile=./bundle.js --format=esm --target=es6 --define:process.env.NODE_ENV='"development"'
+RUN npx esbuild --bundle ./App.jsx --outfile=./bundle.js --minify --format=esm --target=es6 --define:process.env.NODE_ENV='"production"'
 
 FROM node:alpine
 

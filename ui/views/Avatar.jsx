@@ -38,7 +38,7 @@ export function StageAvatar({
           <div className="human-radius p-1 bg-white relative flex justify-center">
             <img
               className={mqp(
-                'human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28 object-cover'
+                'human-radius border border-gray-300 w-20 h-20 md:w-28 md:h-28 object-cover'
               )}
               alt={info.displayName}
               src={avatarUrl(info)}
@@ -59,7 +59,35 @@ export function StageAvatar({
               'absolute w-10 h-10 right-0 top-12 md:top-20 rounded-full bg-white border-2 text-2xl border-gray-400 flex items-center justify-center'
             )}
           >
-            🙊
+            <svg
+              className="w-5 h-5 text-gray-700"
+              version="1.1"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              x="0px"
+              y="0px"
+              width="96.666px"
+              height="96.666px"
+              viewBox="0 0 96.666 96.666"
+              xml:space="preserve"
+              fill="currentColor"
+              stroke="white"
+              style={{transform: 'scale(-1,1)'}}
+            >
+              <g>
+                <g>
+                  <path d="M65.595,56.035V43.349L38.639,70.307c2.766,1.885,6.104,2.989,9.695,2.989C57.852,73.296,65.595,65.553,65.595,56.035z"/>
+                  <path d="M76.078,45.715H72.64c-1.104,0-2,0.896-2,2v7.029c0,12.3-10.007,22.308-22.308,22.308c-4.654,0-8.979-1.435-12.559-3.882
+                    l-5.245,5.245c4.037,3.084,8.856,5.177,14.086,5.835v4.98h-15.35c-1.104,0-2,0.896-2,2v3.436c0,1.104,0.896,2,2,2h38.138
+                    c1.104,0,2-0.896,2-2V91.23c0-1.104-0.896-2-2-2H52.051v-4.98c14.594-1.838,26.026-14.799,26.026-29.506v-7.029
+                    C78.078,46.61,77.182,45.715,76.078,45.715z"/>
+                  <path d="M85.972,7.694c-2.146-2.147-5.631-2.147-7.777,0l-12.6,12.6v-3.032C65.595,7.743,57.852,0,48.333,0
+                    c-9.519,0-17.262,7.743-17.262,17.262v37.554l-4.552,4.552c-0.317-1.493-0.494-3.038-0.494-4.624v-7.029c0-1.104-0.896-2-2-2
+                    h-3.437c-1.104,0-2,0.896-2,2v7.029c0,3.67,0.726,7.227,2.022,10.533l-9.917,9.916c-2.148,2.148-2.148,5.631,0,7.779
+                    c1.073,1.073,2.481,1.61,3.889,1.61s2.815-0.537,3.889-1.61l67.5-67.5C88.121,13.324,88.121,9.842,85.972,7.694z"/>
+                </g>
+              </g>
+            </svg>
           </div>
         </div>
         <div className={mqp('w-20 md:w-28 m-2')}>
@@ -128,7 +156,7 @@ export function AudienceAvatar({
         <div className="relative flex justify-center">
           <img
             className={mqp(
-              'human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50 object-cover'
+              'human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 object-cover'
             )}
             alt={info.displayName}
             src={avatarUrl(info)}

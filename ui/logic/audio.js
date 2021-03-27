@@ -2,12 +2,13 @@ import swarm from '../lib/swarm';
 import hark from '../lib/hark';
 import UAParser from 'ua-parser-js';
 import state from './state';
-import {is} from 'use-minimal-state';
+import {is, set} from 'use-minimal-state';
 import identity from './identity';
 import log from '../lib/causal-log';
 import {domEvent, until} from './util';
 import {openModal} from '../views/Modal';
 import InteractionModal from '../views/InteractionModal';
+import AudioPlayerToast from '../views/AudioPlayerToast';
 
 var userAgent = UAParser();
 
@@ -100,9 +101,7 @@ async function play(audio) {
 
 let isRequestingAudio = false;
 async function requestAudio() {
-  if (state.myAudio && state.myAudio.active) {
-    return state.myAudio;
-  }
+  if (state.myMic && state.myMic.active) return;
   if (isRequestingAudio) return;
   isRequestingAudio = true;
   let stream = await navigator.mediaDevices
@@ -118,9 +117,28 @@ async function requestAudio() {
     });
   if (!stream) return;
   isRequestingAudio = false;
-  state.set('myAudio', stream);
-  state.set('micAllowed', true);
-  state.set('micMuted', false);
+  set(state, 'myMic', stream);
+  set(state, 'myAudio', stream);
+  set(state, 'micAllowed', true);
+  set(state, 'micMuted', false);
+}
+
+export async function streamAudioFromUrl(url, name) {
+  let audio = new Audio(url);
+  audio.crossOrigin = 'anonymous';
+  // let stream = audio.captureStream(); // not supported in Safari & Firefox
+  let ctx = state.audioContext;
+  let streamDestination = ctx.createMediaStreamDestination();
+  let source = ctx.createMediaElementSource(audio);
+  source.connect(streamDestination);
+  source.connect(ctx.destination);
+  let stream = streamDestination.stream;
+
+  set(state, 'myAudio', stream);
+  await audio.play();
+  openModal(AudioPlayerToast, {audio, name}, 'player');
+  await domEvent(audio, 'ended');
+  if (state.myMic) set(state, 'myAudio', state.myMic);
 }
 
 async function requestMicPermissionOnly() {
@@ -144,20 +162,26 @@ async function requestMicPermissionOnly() {
 }
 
 async function stopAudio() {
-  if (state.myAudio) {
-    state.myAudio.getTracks().forEach(track => track.stop());
+  if (state.myMic) {
+    state.myMic.getTracks().forEach(track => track.stop());
   }
+  is(state, 'myMic', null);
   is(state, 'myAudio', null);
 }
 
 state.on('micMuted', micMuted => {
-  let {myAudio} = state;
+  let {myAudio, myMic} = state;
   if (!myAudio?.active && !micMuted) {
     requestAudio();
     return;
   }
   if (myAudio) {
     for (let track of myAudio.getTracks()) {
+      track.enabled = !micMuted;
+    }
+  }
+  if (myMic && myMic !== myAudio) {
+    for (let track of myMic.getTracks()) {
       track.enabled = !micMuted;
     }
   }

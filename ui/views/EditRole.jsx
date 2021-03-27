@@ -6,6 +6,8 @@ import {use} from 'use-minimal-state';
 import {openModal} from './Modal';
 import EditIdentity from './EditIdentity';
 import {useMqParser} from '../logic/tailwind-mqp';
+import {ButtonContainer, SecondaryButton} from './Button';
+import StreamingModal from './StreamingModal';
 
 export default function EditRole({peerId, speakers, moderators, onCancel}) {
   let mqp = useMqParser();
@@ -74,56 +76,51 @@ export function EditSelf({onCancel}) {
     <div className={mqp('md:p-10')}>
       <h3 className="font-medium">Actions</h3>
       <br />
-      <button
-        onClick={() => {
-          openModal(EditIdentity);
-          onCancel();
-        }}
-        className={
-          'mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2'
-        }
-      >
-        Edit Profile
-      </button>
-      {iModerate && !iSpeak && (
-        <button
-          onClick={() => addRole(myPeerId, 'speakers').then(onCancel)}
-          className={
-            'mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2'
-          }
-        >
-          ↑ Move to Stage
-        </button>
-      )}
-      {iModerate && iSpeak && (
-        <button
-          onClick={() => removeRole(myPeerId, 'speakers').then(onCancel)}
-          className={
-            'mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2'
-          }
-        >
-          ↓ Leave Stage
-        </button>
-      )}
-      {!iModerate && iSpeak && (
-        <button
+      <ButtonContainer>
+        <SecondaryButton
           onClick={() => {
-            leaveStage();
+            openModal(EditIdentity);
             onCancel();
           }}
-          className={
-            'mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2'
-          }
         >
-          ↓ Leave Stage
-        </button>
-      )}
-      <button
-        onClick={onCancel}
-        className="mb-2 h-12 px-6 text-lg text-black bg-gray-100 rounded-lg focus:shadow-outline active:bg-gray-300"
-      >
-        Cancel
-      </button>
+          Edit Profile
+        </SecondaryButton>
+        {iModerate && !iSpeak && (
+          <SecondaryButton
+            onClick={() => addRole(myPeerId, 'speakers').then(onCancel)}
+          >
+            ↑ Move to Stage
+          </SecondaryButton>
+        )}
+        {iModerate && iSpeak && (
+          <SecondaryButton
+            onClick={() => removeRole(myPeerId, 'speakers').then(onCancel)}
+          >
+            ↓ Leave Stage
+          </SecondaryButton>
+        )}
+        {!iModerate && iSpeak && (
+          <SecondaryButton
+            onClick={() => {
+              leaveStage();
+              onCancel();
+            }}
+          >
+            ↓ Leave Stage
+          </SecondaryButton>
+        )}
+        <SecondaryButton
+          onClick={() => {
+            openModal(StreamingModal);
+            onCancel();
+          }}
+        >
+          Stream audio
+        </SecondaryButton>
+        <SecondaryButton light onClick={onCancel}>
+          Cancel
+        </SecondaryButton>
+      </ButtonContainer>
       <br />
       <br />
       <hr />
