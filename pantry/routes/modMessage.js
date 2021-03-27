@@ -22,7 +22,7 @@ const verifyIdentity = (req, res, next) => {
   next();
 };
 
-const verifyModerator = (req, res, next) => {
+const verifyModerator = async (req, res, next) => {
   const authHeader = req.header('Authorization');
 
   if (!authHeader) {
@@ -30,7 +30,7 @@ const verifyModerator = (req, res, next) => {
     return;
   }
 
-  if (!isModerator(req, req.params.id)) {
+  if (!(await isModerator(req, req.params.id))) {
     res.sendStatus(403);
     return;
   }

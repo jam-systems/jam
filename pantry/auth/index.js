@@ -39,6 +39,12 @@ const isInList = (token, publicKeys) => {
     return false
 }
 
+const hasAccessToRoom = async (req, roomId) => {
+    const roomInfo = await get('rooms/' + roomId);
+    if (!roomInfo) return false;
+    return isInList(extractToken(req), (roomInfo.access && roomInfo.access.identities) || []);
+}
+
 
 const isModerator = async (req, roomId) => {
     const roomInfo = await get('rooms/' + roomId);
@@ -129,4 +135,6 @@ const identityAuthenticator = {
     },
 }
 
-module.exports = {verify, isModerator, isAdmin, roomAuthenticator, identityAuthenticator}
+
+
+module.exports = {verify, isModerator, isAdmin, roomAuthenticator, identityAuthenticator, hasAccessToRoom}

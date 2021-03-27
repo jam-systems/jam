@@ -8,6 +8,7 @@ const metricsRouter = require('./routes/metrics');
 const {roomAuthenticator, identityAuthenticator} = require('./auth');
 const {controller} = require('./routes/controller');
 const modMessageRouter = require('./routes/modMessage');
+const roomKeyRouter = require('./routes/roomKey');
 const app = express();
 
 app.use(logger('dev'));
@@ -19,6 +20,7 @@ app.use('/metrics', metricsRouter);
 
 app.use('/api/v1/', controller('rooms', roomAuthenticator, (id) => id, () => 'room-info'));
 app.use('/api/v1/rooms/:id/modMessage', modMessageRouter);
+app.use('/api/v1/rooms/:id/roomKey', roomKeyRouter);
 
 app.use('/api/v1/', controller('identities', identityAuthenticator));
 
