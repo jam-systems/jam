@@ -13,6 +13,6 @@ scrape_configs:
       - targets: ['traefik:8080']
   - job_name: 'pantry'
     static_configs:
-      - targets: ['pantry:3000']
+      - targets: ['pantry:3001']
 
 
