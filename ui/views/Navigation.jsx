@@ -64,7 +64,11 @@ export default function Navigation({
     if (micOn) {
       state.set('micMuted', !micMuted);
     } else {
-      requestAudio();
+      if (userAgent.browser?.name === 'Safari') {
+        location.reload();
+      } else {
+        requestAudio();
+      }
     }
   };
 
