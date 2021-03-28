@@ -117,8 +117,8 @@ async function requestAudio() {
       state.set('micMuted', true);
       state.set('micAllowed', false);
     });
-  if (!stream) return;
   isRequestingAudio = false;
+  if (!stream) return;
   set(state, 'myMic', stream);
   set(state, 'myAudio', stream);
   set(state, 'micAllowed', true);
