@@ -24,10 +24,9 @@ export default function StreamingModal({close}) {
         {/* <p>You can have several options to add an audio source</p>
         <br /> */}
         <LabeledInput
-          accept="audio/*"
+          accept="audio/*,.mp3,.wav,.m4a,.oga,.3gp,.3g2,.aiff,.mp4"
           {...fileInput}
           label="Stream audio from file"
-          optional
         />
         <br />
         {/* <LabeledInput
@@ -39,7 +38,7 @@ export default function StreamingModal({close}) {
         <br /> */}
         <div className="spaced-w-2 flex">
           <PrimaryButton onClick={submit} className="flex-grow">
-            Done
+            Stream
           </PrimaryButton>
           <SecondaryButton light className="flex-none" onClick={close}>
             Cancel

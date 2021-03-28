@@ -2,12 +2,15 @@ import React, {useMemo, useState} from 'react';
 import {leaveRoom} from '../logic/main';
 import state from '../logic/state';
 import {use} from 'use-minimal-state';
-import copyToClipboard from '../lib/copy-to-clipboard';
 import identity from '../logic/identity';
 import {sendReaction, raiseHand} from '../logic/reactions';
 import EditRole, {EditSelf} from './EditRole';
 import {breakpoints, useWidth} from '../logic/tailwind-mqp';
 import UAParser from 'ua-parser-js';
+import {requestAudio} from '../logic/audio';
+import {openModal} from './Modal';
+import {InfoModal} from './InfoModal';
+import {MicOffSvg, MicOnSvg} from './Svg';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
@@ -48,9 +51,8 @@ export default function Navigation({
   let micOn = myAudio?.active;
 
   let [showReactions, setShowReactions] = useState(false);
-  let [showShareInfo, setShowShareInfo] = useState(false);
 
-  let {name, color, speakers, moderators} = room || {};
+  let {color, speakers, moderators} = room || {};
 
   let isColorDark = useMemo(() => isDark(color), [color]);
 
@@ -58,6 +60,18 @@ export default function Navigation({
   let myHandRaised = raisedHands.has(myPeerId);
 
   let width = useWidth();
+
+  let talk = () => {
+    if (micOn) {
+      state.set('micMuted', !micMuted);
+    } else {
+      if (userAgent.browser?.name === 'Safari') {
+        location.reload();
+      } else {
+        requestAudio();
+      }
+    }
+  };
 
   return (
     <div
@@ -78,59 +92,51 @@ export default function Navigation({
       )}
       {editSelf && <EditSelf onCancel={() => setEditSelf(false)} />}
       {/* microphone mute/unmute button */}
-      {iSpeak && (
-        <div className="flex">
-          <button
-            onClick={() => state.set('micMuted', !micMuted)}
-            className="flex-grow select-none h-12 mt-4 px-6 text-lg text-white bg-gray-600 rounded-lg focus:outline-none active:bg-gray-600"
-            style={{
-              backgroundColor: color || '#4B5563',
-              color: isColorDark ? 'white' : 'black',
-            }}
-          >
-            {micOn
-              ? micMuted
-                ? "🙊 You're silent"
-                : "🐵 You're on"
-              : "🙊 You're off"}
-          </button>
-
-          {/* <button
-              className="flex-shrink mt-4 ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
-              onClick={() => leaveStage(roomId)}
-            >
-              ↓ Leave Stage
-            </button> */}
-        </div>
-      )}
-      {!iSpeak && (
-        <div className="flex relative">
-          <button
-            className="select-none h-12 px-6 text-lg text-white bg-gray-600 rounded-lg focus:shadow-outline active:bg-gray-600 flex-grow"
-            style={{
-              backgroundColor: color || '#4B5563',
-              color: isColorDark ? 'white' : 'black',
-            }}
-            onClick={() => {
-              raiseHand(!myHandRaised);
-            }}
-          >
-            {myHandRaised ? (
-              <>Stop&nbsp;raising&nbsp;hand</>
-            ) : (
-              <>✋🏽&nbsp;Raise&nbsp;hand&nbsp;to&nbsp;get&nbsp;on&nbsp;stage</>
-            )}
-          </button>
-        </div>
-      )}
+      <div className="flex">
+        <button
+          onClick={iSpeak ? talk : () => raiseHand(!myHandRaised)}
+          className="flex-grow select-none h-12 mt-4 px-6 text-lg text-white bg-gray-600 rounded-lg focus:outline-none active:bg-gray-600"
+          style={{
+            backgroundColor: color || '#4B5563',
+            color: isColorDark ? 'white' : 'black',
+          }}
+        >
+          {iSpeak && (
+            <>
+              {micOn && micMuted && (
+                <>
+                  <MicOffSvg
+                    className="w-5 h-5 mr-2 opacity-80 inline-block"
+                    stroke={color}
+                  />
+                  Your&nbsp;microphone&nbsp;is&nbsp;off
+                </>
+              )}
+              {micOn && !micMuted && (
+                <>
+                  <MicOnSvg
+                    className="w-5 h-5 mr-2 opacity-80 inline-block"
+                    stroke={color}
+                  />
+                  Your&nbsp;microphone&nbsp;is&nbsp;on
+                </>
+              )}
+              {!micOn && <>Allow&nbsp;microphone&nbsp;access</>}
+            </>
+          )}
+          {!iSpeak && (
+            <>
+              {myHandRaised ? (
+                <>Stop&nbsp;raising&nbsp;hand</>
+              ) : (
+                <>✋🏽&nbsp;Raise&nbsp;hand&nbsp;to&nbsp;get&nbsp;on&nbsp;stage</>
+              )}
+            </>
+          )}
+        </button>
+      </div>
       <br />
       <div className="flex relative">
-        {/* <button
-            onClick={() => state.set('soundMuted', !soundMuted)}
-            className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 flex-grow"
-          >
-            {soundMuted ? '🔇' : '🔊'}&nbsp;{soundMuted ? 'Off' : 'On'}
-          </button> */}
         <button
           onClick={() => setShowReactions(s => !s)}
           className="flex-grow select-none text-center h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
@@ -167,54 +173,27 @@ export default function Navigation({
           </div>
         )}
 
-        {/* Share */}
-        {showShareInfo && (
-          <span
-            style={{
-              position: 'absolute',
-              top: '-20px',
-              right: '2px',
-              fontSize: '13px',
-            }}
-          >
-            Link copied to clipboard!
-          </span>
-        )}
+        {/* Info */}
         <button
           onClick={() => {
-            if (navigator.share) {
-              navigator.share({
-                title: name || 'A Jam room',
-                text: 'Hi, join me in this room on Jam.',
-                url: location.href,
-              });
-            } else {
-              copyToClipboard(location.href);
-              setShowShareInfo(true);
-              setTimeout(() => setShowShareInfo(false), 2000);
-            }
+            openModal(InfoModal, {roomId, room});
           }}
           className="ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
         >
-          {/* heroicons/share-small */}
+          {/* information-circle */}
           <svg
-            className={userAgent.os.name == "Android" ? "text-gray-600 w-5 h-5" : "hidden"}
+            className="text-gray-600 w-6 h-6"
             xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
-            <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
-          </svg>
-          <svg
-            className={userAgent.os.name == "Android" ? "hidden" : "text-gray-600 w-5 h-5"}
-            viewBox="0 0 512 512"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="currentColor"
-          >
-            <g id="Solid">
-              <path d="m182.461 155.48 49.539-49.539v262.059a24 24 0 0 0 48 0v-262.059l49.539 49.539a24 24 0 1 0 33.941-33.941l-90.509-90.51a24 24 0 0 0 -33.942 0l-90.509 90.51a24 24 0 1 0 33.941 33.941z"/>
-              <path d="m464 232a24 24 0 0 0 -24 24v184h-368v-184a24 24 0 0 0 -48 0v192a40 40 0 0 0 40 40h384a40 40 0 0 0 40-40v-192a24 24 0 0 0 -24-24z"/>
-            </g>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
         </button>
 

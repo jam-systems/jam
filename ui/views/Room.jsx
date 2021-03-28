@@ -12,10 +12,15 @@ import {AudienceAvatar, StageAvatar} from './Avatar';
 import {useMqParser} from '../logic/tailwind-mqp';
 import Container from './Container';
 import Navigation from './Navigation';
+import UAParser from 'ua-parser-js';
 
 export default function Room({room, roomId}) {
   // room = {name, description, moderators: [peerId], speakers: [peerId]}
   useWakeLock();
+
+  let userAgent = UAParser();
+  let inWebView = (userAgent.browser?.name == "Chrome WebView") || ((userAgent.os?.name == "iOS") && (userAgent.browser?.name != "Mobile Safari"))
+
   let myInfo = use(identity, 'info');
   let [
     reactions,
@@ -52,6 +57,7 @@ export default function Room({room, roomId}) {
     speakers,
     moderators,
     closed,
+    shareUrl,
   } = room || {};
 
   let mqp = useMqParser();
@@ -95,6 +101,31 @@ export default function Room({room, roomId}) {
         className={mqp('flex flex-col pt-2 md:pt-10 md:p-10')}
         style={{flex: '1', overflowY: 'auto', minHeight: '0'}}
       >
+        <div
+          className={
+            inWebView
+              ? 'rounded bg-blue-50 border border-blue-150 text-gray-600 ml-2 p-3 mb-3 inline text-center'
+              : 'hidden'
+          }
+        >
+          {/*  heroicons/exclamation-circle */}
+          <svg
+            className="w-5 h-5 inline mr-2 -mt-1"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          Open in {userAgent.os?.name == "iOS" ? "Safari" : "Chrome"} for best experience.<br/>
+          <a class="underline" href="https://gitlab.com/jam-systems/jam" target="_blank" rel="nofollow">Learn more</a>.
+        </div>
         <div
           className={
             closed

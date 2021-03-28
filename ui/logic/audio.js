@@ -16,11 +16,15 @@ export {requestAudio, stopAudio, requestMicPermissionOnly};
 
 state.on('myAudio', myAudio => {
   // if i am speaker, send audio to peers
-  if (state.iAmSpeaker) {
+  if (state.iAmSpeaker && myAudio) {
     connectVolumeMeter(identity.publicKey, myAudio);
     swarm.addLocalStream(myAudio, 'audio', myAudio =>
       state.set('myAudio', myAudio)
     );
+  }
+  if (!myAudio) {
+    disconnectVolumeMeter(identity.publicKey);
+    swarm.addLocalStream(null, 'audio');
   }
 });
 
@@ -39,9 +43,7 @@ state.on('iAmSpeaker', iAmSpeaker => {
     }
   } else {
     // stop sending stream when I become audience member
-    disconnectVolumeMeter(identity.publicKey);
-    swarm.addLocalStream(null, 'audio');
-    // stopAudio();
+    stopAudio();
   }
 });
 
@@ -115,8 +117,8 @@ async function requestAudio() {
       state.set('micMuted', true);
       state.set('micAllowed', false);
     });
-  if (!stream) return;
   isRequestingAudio = false;
+  if (!stream) return;
   set(state, 'myMic', stream);
   set(state, 'myAudio', stream);
   set(state, 'micAllowed', true);
@@ -170,13 +172,18 @@ async function stopAudio() {
 }
 
 state.on('micMuted', micMuted => {
-  let {myAudio} = state;
+  let {myAudio, myMic} = state;
   if (!myAudio?.active && !micMuted) {
     requestAudio();
     return;
   }
   if (myAudio) {
     for (let track of myAudio.getTracks()) {
+      track.enabled = !micMuted;
+    }
+  }
+  if (myMic && myMic !== myAudio) {
+    for (let track of myMic.getTracks()) {
       track.enabled = !micMuted;
     }
   }

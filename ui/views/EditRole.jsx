@@ -109,17 +109,19 @@ export function EditSelf({onCancel}) {
             ↓ Leave Stage
           </SecondaryButton>
         )}
-        <SecondaryButton
-          onClick={() => {
-            openModal(StreamingModal);
-            onCancel();
-          }}
-        >
-          Stream audio
-        </SecondaryButton>
-        <SecondaryButton light onClick={onCancel}>
-          Cancel
-        </SecondaryButton>
+        {iModerate && iSpeak && (
+          <SecondaryButton
+            onClick={() => {
+              openModal(StreamingModal);
+              onCancel();
+            }}
+          >
+            Stream audio
+          </SecondaryButton>
+        )}
+          <SecondaryButton light onClick={onCancel}>
+            Cancel
+          </SecondaryButton>
       </ButtonContainer>
       <br />
       <br />

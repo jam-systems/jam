@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {avatarUrl} from '../lib/avatar';
 import animateEmoji from '../lib/animate-emoji';
 import {useMqParser} from '../logic/tailwind-mqp';
+import {MicOffSvg} from './Svg';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
@@ -38,7 +39,7 @@ export function StageAvatar({
           <div className="human-radius p-1 bg-white relative flex justify-center">
             <img
               className={mqp(
-                'human-radius border border-gray-300 bg-yellow-50 w-20 h-20 md:w-28 md:h-28 object-cover'
+                'human-radius border border-gray-300 w-20 h-20 md:w-28 md:h-28 object-cover'
               )}
               alt={info.displayName}
               src={avatarUrl(info)}
@@ -59,7 +60,7 @@ export function StageAvatar({
               'absolute w-10 h-10 right-0 top-12 md:top-20 rounded-full bg-white border-2 text-2xl border-gray-400 flex items-center justify-center'
             )}
           >
-            🙊
+            <MicOffSvg className="w-5 h-5 text-gray-700" stroke="white" />
           </div>
         </div>
         <div className={mqp('w-20 md:w-28 m-2')}>
@@ -128,7 +129,7 @@ export function AudienceAvatar({
         <div className="relative flex justify-center">
           <img
             className={mqp(
-              'human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 bg-yellow-50 object-cover'
+              'human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 object-cover'
             )}
             alt={info.displayName}
             src={avatarUrl(info)}
