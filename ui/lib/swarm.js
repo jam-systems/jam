@@ -58,14 +58,17 @@ function addLocalStream(stream, name, onNewStream) {
   try {
     addStreamToPeers(stream, name);
   } catch (err) {
-    log('cloning tracks');
-    // clone tracks to handle error on removing and readding the same stream
-    let clonedTracks = stream.getTracks().map(t => t.clone());
-    let clonedStream = new MediaStream(clonedTracks);
-    // we have to re-add that cloned stream and notify caller
-    swarm.localStreams[name] = clonedStream;
-    addStreamToPeers(clonedStream, name);
-    onNewStream?.(clonedStream);
+    console.error('ERROR: add stream to peers');
+    console.error(err);
+    return;
+    // log('cloning tracks');
+    // // clone tracks to handle error on removing and readding the same stream
+    // let clonedTracks = stream.getTracks().map(t => t.clone());
+    // let clonedStream = new MediaStream(clonedTracks);
+    // // we have to re-add that cloned stream and notify caller
+    // swarm.localStreams[name] = clonedStream;
+    // addStreamToPeers(clonedStream, name);
+    // onNewStream?.(clonedStream);
   }
 }
 
