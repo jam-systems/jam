@@ -1,12 +1,13 @@
 import SimplePeer from './simple-peer-light';
 import causalLog from './causal-log';
+import {DEV} from '../logic/config';
 
 const MAX_CONNECT_TIME = 6000;
 const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;
 const MIN_MAX_CONNECT_TIME_AFTER_SIGNAL = 2000;
 const MAX_FAIL_TIME = 20000;
 
-let _debug = false;
+let _debug = DEV;
 
 export {createPeer, removePeer, addStreamToPeer, connectPeer, handleSignal};
 
@@ -122,6 +123,24 @@ function handleSignal(swarm, {connId, yourConnId, peerId, data}) {
     log('ignoring msg to old connection', yourConnId);
     return;
   }
+
+  if (data.youStart) {
+    // only accept back-connection if connect request was made
+    log('i initiate, but dont override if i already have a peer');
+    // (because no-you-connect can only happen after i sent connect, at which point i couldn't have had peers,
+    // so the peer i already have comes from a racing connect from the other peer)
+    let {peers} = swarm;
+    if (!peers[peerId]) {
+      log('creating peer because i didnt have one');
+      createPeer(swarm, peerId, connId, true);
+    } else if (peers[peerId].connId !== connId) {
+      log('creating peer because the connId was outdated');
+      createPeer(swarm, peerId, connId, true);
+    } else {
+      log('not creating peer');
+    }
+  }
+
   let peer = swarm.peers[peerId];
   let {first, from} = data;
   let iAmActive = myPeerId > peerId;
@@ -288,11 +307,12 @@ function connectPeer(swarm, hub, peerId, connId) {
     createPeer(swarm, peerId, connId, true);
   } else {
     log('i dont initiate, wait for first signal');
-    hub.broadcast(`no-you-connect-${peerId}`, {
+    hub.broadcast(`signal-${peerId}`, {
       peerId: myPeerId,
       connId: hub.connId,
       yourConnId: connId,
       sharedState,
+      data: {youStart: true, type: 'you-start'},
     });
     let peer = peers[peerId];
     if (peer) {

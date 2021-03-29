@@ -138,34 +138,6 @@ function connect(room) {
   });
 
   hub.subscribe(
-    `no-you-connect-${myPeerId}`,
-    ({peerId, connId, yourConnId, sharedState}) => {
-      if (peerId === myPeerId) return;
-      log('got no-you-connect', s(peerId), {connId, yourConnId});
-      initializePeer(swarm, peerId, connId, sharedState);
-      if (yourConnId !== myConnId) {
-        console.warn('no-you-connect to old connection, should be ignored');
-        log('ignoring msg to old connection', yourConnId);
-      } else {
-        // only accept back-connection if connect request was made
-        log('i initiate, but dont override if i already have a peer');
-        // (because no-you-connect can only happen after i sent connect, at which point i couldn't have had peers,
-        // so the peer i already have comes from a racing connect from the other peer)
-        let {peers} = swarm;
-        if (!peers[peerId]) {
-          log('creating peer because i didnt have one');
-          createPeer(swarm, peerId, connId, true);
-        } else if (peers[peerId].connId !== connId) {
-          log('creating peer because the connId was outdated');
-          createPeer(swarm, peerId, connId, true);
-        } else {
-          log('not creating peer');
-        }
-      }
-    }
-  );
-
-  hub.subscribe(
     `signal-${myPeerId}`,
     ({peerId, data, connId, yourConnId, sharedState}) => {
       log('signal received from', s(peerId), connId, data.type);
