@@ -1985,11 +1985,6 @@ signal-exit@^3.0.0:
   resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-3.0.3.tgz#a1410c2edd8f077b08b4e253c8eacfcaf057461c"
   integrity sha512-VUJ49FC8U1OxwZLxIbTTrDvLnf/6TDgxZcK8wxR8zs13xpx7xbG60ndBlhNrFi2EMuFRoeDoJO7wthSLq42EjA==
 
-simple-peer-light@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/simple-peer-light/-/simple-peer-light-1.0.0.tgz#2a9b478cf70d8f7e8885f7ba3544877dd6377582"
-  integrity sha512-F5tPuIb4j0Sjv9ZK1w57iaqCeGcf3s8XgZEUKR0LE710TxutBd4yzqGyLMA+Vg5anMwi9oyWOld9xL4aMSwLyA==
-
 slice-ansi@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/slice-ansi/-/slice-ansi-4.0.0.tgz#500e8dd0fd55b05815086255b3195adf2a45fe6b"
