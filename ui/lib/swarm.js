@@ -107,7 +107,8 @@ function connect(room) {
   });
 
   hub
-    .broadcast('connect-me', {
+    .broadcast('all', {
+      type: 'connect-me',
       peerId: myPeerId,
       connId: myConnId,
       sharedState,
@@ -124,23 +125,13 @@ function connect(room) {
   hub.connId = myConnId;
   swarm.hub = hub;
 
-  hub.subscribe('connect-me', ({peerId, connId, sharedState}) => {
-    if (peerId === myPeerId) return;
-    log('got connect-me');
-    initializePeer(swarm, peerId, connId, sharedState);
-    connectPeer(swarm, hub, peerId, connId);
-  });
-
-  hub.subscribe(
-    `signal-${myPeerId}`,
-    ({peerId, data, connId, yourConnId, sharedState}) => {
-      log('signal received from', s(peerId), connId, data.type);
+  hub.subscribe('all', ({type, peerId, connId, data, sharedState}) => {
+    if (type === 'connect-me') {
+      if (peerId === myPeerId) return;
+      log('got connect-me');
       initializePeer(swarm, peerId, connId, sharedState);
-      handleSignal(swarm, {peerId, connId, yourConnId, data});
+      connectPeer(swarm, hub, peerId, connId);
     }
-  );
-
-  hub.subscribe('all', ({type, peerId, data}) => {
     if (type === 'shared-state') {
       updatePeerState(swarm, peerId, data);
     }
@@ -148,6 +139,18 @@ function connect(room) {
       swarm.emit('peerEvent', peerId, data);
     }
   });
+
+  hub.subscribe(
+    myPeerId,
+    ({type, peerId, data, connId, yourConnId, sharedState}) => {
+      if (type === 'signal') {
+        log('signal received from', s(peerId), connId, data.type);
+        initializePeer(swarm, peerId, connId, sharedState);
+        handleSignal(swarm, {peerId, connId, yourConnId, data});
+      }
+    }
+  );
+
   hub.subscribeAnonymous('anonymous', data => {
     swarm.emit('anonymous', data);
   });
