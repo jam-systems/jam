@@ -9,7 +9,7 @@ const MAX_FAIL_TIME = 20000;
 
 let _debug = DEV;
 
-export {createPeer, removePeer, addStreamToPeer, connectPeer, handleSignal};
+export {connectPeer, removePeer, addStreamToPeer, handleSignal};
 
 function createPeer(swarm, peerId, connId, initiator) {
   let {hub, localStreams, peers, myPeerId, pcConfig} = swarm;

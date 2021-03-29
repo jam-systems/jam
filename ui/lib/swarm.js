@@ -1,13 +1,7 @@
 import State from 'use-minimal-state';
 import {authenticatedHub} from './signalhub';
 import causalLog from './causal-log';
-import {
-  connectPeer,
-  createPeer,
-  removePeer,
-  addStreamToPeer,
-  handleSignal,
-} from './peer';
+import {connectPeer, removePeer, addStreamToPeer, handleSignal} from './peer';
 
 // public API starts here
 
