@@ -3,6 +3,7 @@ const express = require('express');
 const app = express();
 const fetch = require('node-fetch');
 const qs = require('qs');
+const fs = require('fs');
 
 let ejs = require('ejs');
 
@@ -56,6 +57,7 @@ const getRoomMetaInfo = async (roomPath) => {
 }
 
 const jamConfig = {
+    ...JSON.parse(fs.readFileSync(process.env.JAM_CONFIG_DIR + '/jam-config.json').toString('utf-8')),
     urls,
     development: !!process.env.DEVELOPMENT
 };
