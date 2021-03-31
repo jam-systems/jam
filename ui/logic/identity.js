@@ -133,5 +133,5 @@ function concat(arr1, arr2) {
 
 export function publicKeyToIndex(publicKey, range) {
   const bytes = decode(publicKey);
-  return timeCodeFromBytes(bytes) % range;
+  return Math.abs(timeCodeFromBytes(bytes)) % range;
 }
