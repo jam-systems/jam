@@ -13,6 +13,18 @@ const roomAvatar = (info, room) => {
     }
 }
 
+const roomDisplayName = (info, room) => {
+
+    if(room.userDisplay?.randomIdentities) {
+        const avatarIndex = publicKeyToIndex(info.id, room.userDisplay.randomIdentities.length);
+        return room.userDisplay.randomIdentities[avatarIndex].name;
+    } else if(room.userDisplay?.randomNames) {
+        const avatarIndex = publicKeyToIndex(info.id, room.userDisplay.randomNames.length);
+        return room.userDisplay.randomNames[avatarIndex];
+    } else {
+        return `/img/avatar-default.png`;
+    }
+}
 
 
 export const avatarUrl = (info, room) => {
@@ -22,3 +34,11 @@ export const avatarUrl = (info, room) => {
         return roomAvatar(info, room)
     }
 };
+
+export const displayName = (info, room) => {
+    if(info.displayName && (! room.access?.lockedIdentities)) {
+        return info.displayName
+    } else {
+        return roomDisplayName(info, room)
+    }
+}
