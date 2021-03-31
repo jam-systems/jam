@@ -6,8 +6,8 @@ const qs = require('qs');
 
 let ejs = require('ejs');
 
-
-app.use(express.static(process.env.STATIC_FILES_DIR || '.'))
+app.use(express.static(process.env.JAM_CONFIG_DIR + '/public'))
+app.use(express.static(process.env.STATIC_FILES_DIR || 'public'))
 
 const jamHost = process.env.JAM_HOST || 'beta.jam.systems';
 const jamSchema = process.env.JAM_SCHEMA || 'https://';

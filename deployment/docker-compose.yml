@@ -63,6 +63,8 @@ services:
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}_ui.tls=true
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}_ui.tls.certresolver=letsencrypt
       - traefik.enable=true
+    volumes:
+      - "../jam-config:/jam-config"
   pantryredis:
     image: library/redis
     volumes:
@@ -81,6 +83,8 @@ services:
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}_pantry.tls=true
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}_pantry.tls.certresolver=letsencrypt
       - traefik.enable=true
+    volumes:
+      - "../jam-config:/jam-config"
   signalhub:
     image: registry.gitlab.com/jam-systems/jam/signalhub:${CHANNEL}
     restart: always
