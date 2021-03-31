@@ -16,7 +16,7 @@ export {
   emptyRoom,
 };
 
-const emptyRoom = config.defaultRoom || {
+const emptyRoom = config.defaultRoom ? {...config.defaultRoom, speakers: [], moderators: []} : {
   name: '',
   description: '',
   speakers: [],

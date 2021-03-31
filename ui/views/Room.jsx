@@ -19,7 +19,7 @@ export default function Room({room, roomId}) {
   useWakeLock();
 
   let userAgent = UAParser();
-  let inWebView = (userAgent.browser?.name == "Chrome WebView") || ((userAgent.os?.name == "iOS") && (userAgent.browser?.name != "Mobile Safari"))
+  let inWebView = (userAgent.browser?.name === "Chrome WebView") || ((userAgent.os?.name === "iOS") && (userAgent.browser?.name !== "Mobile Safari"))
 
   let myInfo = use(identity, 'info');
   let [
