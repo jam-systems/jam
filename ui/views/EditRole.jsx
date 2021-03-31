@@ -71,20 +71,22 @@ export default function EditRole({peerId, speakers, moderators, onCancel}) {
 export function EditSelf({onCancel}) {
   let mqp = useMqParser();
   let myPeerId = identity.publicKey;
-  let [iSpeak, iModerate] = use(state, ['iAmSpeaker', 'iAmModerator']);
+  let [iSpeak, iModerate, room] = use(state, ['iAmSpeaker', 'iAmModerator', 'room']);
   return (
     <div className={mqp('md:p-10')}>
       <h3 className="font-medium">Actions</h3>
       <br />
       <ButtonContainer>
-        <SecondaryButton
-          onClick={() => {
-            openModal(EditIdentity);
-            onCancel();
-          }}
-        >
-          Edit Profile
-        </SecondaryButton>
+        {! room.access?.lockedIdentities && (
+            <SecondaryButton
+              onClick={() => {
+                openModal(EditIdentity);
+                onCancel();
+              }}
+            >
+              Edit Profile
+            </SecondaryButton>
+        )}
         {iModerate && !iSpeak && (
           <SecondaryButton
             onClick={() => addRole(myPeerId, 'speakers').then(onCancel)}
