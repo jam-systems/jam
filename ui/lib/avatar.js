@@ -3,11 +3,9 @@ import {publicKeyToIndex} from "../logic/identity";
 const roomAvatar = (info, room) => {
 
     if(room.userDisplay?.randomIdentities) {
-        const avatarIndex = publicKeyToIndex(info.id, room.userDisplay.randomIdentities.length);
-        return room.userDisplay.randomIdentities[avatarIndex].avatar;
+        return selectFromList(info.id, room.userDisplay?.randomIdentities).avatar;
     } else if(room.userDisplay?.randomAvatars) {
-        const avatarIndex = publicKeyToIndex(info.id, room.userDisplay.randomAvatars.length);
-        return room.userDisplay.randomAvatars[avatarIndex];
+        return selectFromList(info.id, room.userDisplay.randomAvatars);
     } else {
         return `/img/avatar-default.png`;
     }
@@ -16,13 +14,11 @@ const roomAvatar = (info, room) => {
 const roomDisplayName = (info, room) => {
 
     if(room.userDisplay?.randomIdentities) {
-        const avatarIndex = publicKeyToIndex(info.id, room.userDisplay.randomIdentities.length);
-        return room.userDisplay.randomIdentities[avatarIndex].name;
+        return selectFromList(info.id, room.userDisplay?.randomIdentities).name;
     } else if(room.userDisplay?.randomNames) {
-        const avatarIndex = publicKeyToIndex(info.id, room.userDisplay.randomNames.length);
-        return room.userDisplay.randomNames[avatarIndex];
+        return selectFromList(info.id, room.userDisplay?.randomNames);
     } else {
-        return `/img/avatar-default.png`;
+        return selectFromList(info.id, names);
     }
 }
 
@@ -42,3 +38,43 @@ export const displayName = (info, room) => {
         return roomDisplayName(info, room)
     }
 }
+
+const selectFromList = (id, list) => {
+    return list[publicKeyToIndex(id, list.length)]
+}
+
+const names = [
+    'Ali',
+    'Alex',
+    'Ash',
+    'Blue',
+    'Chi',
+    'Drew',
+    'Eight',
+    'Fin',
+    'Floor',
+    'Five',
+    'Four',
+    'Jam',
+    'Jaz',
+    'Misha',
+    'Mu',
+    'Nine',
+    'One',
+    'Pat',
+    'Sam',
+    'Sasha',
+    'Seven',
+    'Six',
+    'Sky',
+    'Sol',
+    'Storm',
+    'Sun',
+    'Tao',
+    'Ten',
+    'Three',
+    'Tsu',
+    'Two',
+    'Yu',
+    'Zero',
+]
