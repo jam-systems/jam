@@ -1,7 +1,7 @@
 /.idea
 *.iml
 node_modules
-ui/bundle*
+ui/public/bundle*
 *.DS_Store
 .env
 data
