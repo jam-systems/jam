@@ -172,3 +172,9 @@ function concat(arr1, arr2) {
   arr.set(arr2, arr1.length);
   return arr;
 }
+
+
+export function publicKeyToIndex(publicKey, range) {
+  const bytes = decode(publicKey);
+  return Number(new DataView(bytes.buffer, 0).getBigUint64(0)) % range;
+}

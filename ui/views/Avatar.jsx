@@ -7,6 +7,7 @@ import {MicOffSvg} from './Svg';
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
 export function StageAvatar({
+  room,
   speaking,
   moderators,
   peerId,
@@ -42,7 +43,7 @@ export function StageAvatar({
                 'human-radius border border-gray-300 w-20 h-20 md:w-28 md:h-28 object-cover'
               )}
               alt={info.displayName}
-              src={avatarUrl(info)}
+              src={avatarUrl(info, room)}
               onClick={onClick}
             />
             <Reactions
@@ -108,6 +109,7 @@ export function StageAvatar({
 }
 
 export function AudienceAvatar({
+  room,
   peerId,
   peerState,
   reactions,
@@ -132,7 +134,7 @@ export function AudienceAvatar({
               'human-radius w-16 h-16 md:w-24 md:h-24 border border-gray-300 object-cover'
             )}
             alt={info.displayName}
-            src={avatarUrl(info)}
+            src={avatarUrl(info, room)}
             onClick={onClick}
           />
           <Reactions

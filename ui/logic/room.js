@@ -4,6 +4,7 @@ import {get, updateApiQuery, put, useApiQuery} from './backend';
 import {on, set, update} from 'use-minimal-state';
 import identity from './identity';
 import log from '../lib/causal-log';
+import {config} from './config';
 
 export {
   useRoom,
@@ -14,6 +15,15 @@ export {
   leaveStage,
   emptyRoom,
 };
+
+const emptyRoom = config.defaultRoom || {
+  name: '',
+  description: '',
+  speakers: [],
+  moderators: [],
+};
+
+
 
 let _disconnectRoom = {};
 
@@ -121,9 +131,3 @@ on(swarm, 'peerState', peerState => {
   }
 });
 
-const emptyRoom = {
-  name: '',
-  description: '',
-  speakers: [],
-  moderators: [],
-};
