@@ -56,8 +56,16 @@ const getRoomMetaInfo = async (roomPath) => {
   }
 }
 
+
+let jamConfigFromFile = {}
+try {
+    jamConfigFromFile = JSON.parse(fs.readFileSync(process.env.JAM_CONFIG_DIR + '/jam-config.json').toString('utf-8'));
+} catch (e) {
+    console.log("No config file found, starting with empty config");
+}
+
 const jamConfig = {
-    ...JSON.parse(fs.readFileSync(process.env.JAM_CONFIG_DIR + '/jam-config.json').toString('utf-8')),
+    ...jamConfigFromFile,
     urls,
     development: !!process.env.DEVELOPMENT
 };
