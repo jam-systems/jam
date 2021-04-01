@@ -146,7 +146,6 @@ app.use(async (req, res) => {
       console.log(metaInfo);
       if (!metaInfo.id) return res.sendStatus(404);
 
-      console.log("IIICS");
       const calendar = ical({
         domain: urls.jam,
         name: metaInfo.ogTitle,
