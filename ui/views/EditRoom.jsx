@@ -2,6 +2,8 @@ import React, {useState} from 'react';
 import {put} from '../logic/backend';
 import {useMqParser} from '../logic/tailwind-mqp';
 import {Modal} from './Modal';
+import {rawTimeZones} from "@vvo/tzdb";
+
 
 export function EditRoomModal({roomId, room, close}) {
   let updateRoom = async room_ => {
@@ -315,37 +317,48 @@ function EditRoom({room = {}, roomId, onSubmit, onCancel}) {
         <div className={room.calendar? "hidden" : "pb-4 text-gray-500"}>
           Set the date and time for upcoming events.
         </div>
-        <div className="rounded bg-gray-50 border w-full">
-          <input
-            type="date"
-            className="bg-gray-50 text-gray-500"
-            name="date"
-            style={{border: "0"}}
-            value={scheduleCandidate?.date || ''}
-            onChange={handleScheduleChange}
-          />
-          <input
-            type="time"
-            className="bg-gray-50 text-gray-500"
-            name="time"
-            style={{border: "0"}}
-            value={scheduleCandidate?.time || ''}
-            onChange={handleScheduleChange}
-          />
-          <br/>
-          <div className="text-gray-500 p-3">
-            {Intl.DateTimeFormat().resolvedOptions().timeZone}
+        <div className="w-full">
+          <div className="flex">
+            <input
+              type="date"
+              className="flex-grow p-2 border rounded"
+              name="date"
+              value={scheduleCandidate?.date || ''}
+              onChange={handleScheduleChange}
+            />
+            <input
+              type="time"
+              className="flex-none ml-3 p-2 border rounded"
+              name="time"
+              value={scheduleCandidate?.time || ''}
+              onChange={handleScheduleChange}
+            />
           </div>
-          <input
-            type="text"
-            className="hidden placeholder-gray-400"
-            style={{border: "0"}}
+          <select
+            name="timezone"
             defaultValue={Intl.DateTimeFormat().resolvedOptions().timeZone}
-          />
+            onChange={handleScheduleChange}
+            className="w-full border mt-3 p-2 rounded"
+          >
+          {
+            rawTimeZones.map((tz) => {
+              return <option
+                       key={tz.rawFormat}
+                       value={tz.name}>{tz.rawFormat}</option>;
+            })
+          }
+          </select>
 
+        </div>
+        <div className={room.schedule? "mt-3 rounded bg-gray-50 border w-full" : "hidden"}>
+          <div className="text-gray-500 p-3">
+            {room.schedule?.date} at {room.schedule?.time}<br/>
+            {room.schedule?.timezone}
+          </div>
           <div className={room.schedule? "p-3 text-gray-500" : "hidden"}>
             <span onClick={removeSchedule} className="underline">Remove schedule</span>
           </div>
+
         </div>
 
         <div className={validSchedule()? "flex" : "hidden"}>
