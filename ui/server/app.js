@@ -163,7 +163,7 @@ app.use(async (req, res) => {
           end: enddt,
           summary: metaInfo.ogTitle,
           description: metaInfo.ogDescription,
-          url: `{urls.jam}/{metaInfo.id}`
+          url: `${urls.jam}/${metaInfo.id}`
         });
       }
 
