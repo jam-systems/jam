@@ -4,6 +4,7 @@ const app = express();
 const fetch = require('node-fetch');
 const qs = require('qs');
 const fs = require('fs');
+const ical = require('ical-generator').default;
 
 let ejs = require('ejs');
 
@@ -40,6 +41,9 @@ const defaultMetaInfo = {
 
 const getRoomMetaInfo = async (roomPath) => {
   try {
+    // remove .ics or other suffixes
+    roomPath = roomPath.split(".")[0];
+    const roomId = roomPath.substring(1);
     const roomInfo = (await (await fetch(pantryApiPrefix + roomPath)).json());
     return {
         ogTitle: roomInfo['name'],
@@ -47,8 +51,9 @@ const getRoomMetaInfo = async (roomPath) => {
         ogUrl: `${urls.jam}${roomPath}`,
         ogImage: roomInfo['logoURI'] || `${urls.jam}/img/jam-app-icon.jpg`,
         color: roomInfo['color'] || '',
-        id: roomInfo['id'] || '',
+        id: roomId || '',
         favIcon: roomInfo['logoURI'] || '/img/jam-app-icon.jpg',
+        schedule: roomInfo['schedule'],
     }
   } catch(e) {
     console.log(`Error getting info for ${roomPath}`);
@@ -135,6 +140,34 @@ app.use(async (req, res) => {
         provider_name: "Jam",
         provider_url: urls.jam
       });
+    }
+
+    if (req.path.endsWith('.ics')) {
+      console.log(metaInfo);
+      if (!metaInfo.id) return res.sendStatus(404);
+
+      console.log("IIICS");
+      const calendar = ical({
+        domain: urls.jam,
+        name: metaInfo.ogTitle,
+        prodId: {company: 'Jam', product: 'Jam'},
+        timezone: metaInfo.schedule?.timezone
+      });
+
+      if (metaInfo.schedule) {
+        let startdt = new Date(`${metaInfo.schedule?.date}T${metaInfo.schedule?.time}`);
+        let enddt = new Date(startdt.getTime() + 20*60*1000);
+        console.log(startdt);
+        calendar.createEvent({
+          start: startdt,
+          end: enddt,
+          summary: metaInfo.ogTitle,
+          description: metaInfo.ogDescription,
+          url: `{urls.jam}/{metaInfo.id}`
+        });
+      }
+
+      return res.send(calendar.toString());
     }
 
     if (req.path.endsWith('manifest.json')) {
