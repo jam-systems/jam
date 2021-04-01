@@ -1002,6 +1002,13 @@ http-errors@~1.7.2:
     statuses ">= 1.5.0 < 2"
     toidentifier "1.0.0"
 
+ical-generator@^2.0.0-develop.14:
+  version "2.0.0-develop.14"
+  resolved "https://registry.yarnpkg.com/ical-generator/-/ical-generator-2.0.0-develop.14.tgz#8c848dd9181e9f15d9fe36c697522dfd7d3877c4"
+  integrity sha512-5OCdfQk4WWBf1cM2/bUocLVHBlALdn3+SSxJFRE4x+pMxBGVOdfdthZtAfQT1wEFm2UOMNpmh2nFsylDnoHH0w==
+  dependencies:
+    uuid-random "^1.3.2"
+
 iconv-lite@0.4.24:
   version "0.4.24"
   resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.24.tgz#2022b4b25fbddc21d2f524974a474aafe733908b"
@@ -2242,6 +2249,11 @@ utils-merge@1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/utils-merge/-/utils-merge-1.0.1.tgz#9f95710f50a267947b2ccc124741c1028427e713"
   integrity sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=
+
+uuid-random@^1.3.2:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/uuid-random/-/uuid-random-1.3.2.tgz#96715edbaef4e84b1dcf5024b00d16f30220e2d0"
+  integrity sha512-UOzej0Le/UgkbWEO8flm+0y+G+ljUon1QWTEZOq1rnMAsxo2+SckbiZdKzAHHlVh6gJqI1TjC/xwgR50MuCrBQ==
 
 v8-compile-cache@^2.0.3:
   version "2.2.0"

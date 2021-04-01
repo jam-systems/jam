@@ -16,7 +16,7 @@ WORKDIR /app
 COPY public ./public/
 COPY server ./server/
 COPY --from=builder /public/bundle.js ./public
-RUN yarn add express ejs node-fetch
+RUN yarn add express ejs node-fetch ical-generator@next
 
 CMD node server/bin/www
 
