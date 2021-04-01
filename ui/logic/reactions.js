@@ -1,5 +1,6 @@
 import {set, update, on} from 'use-minimal-state';
 import swarm from '../lib/swarm';
+import {requestAudio, stopAudio} from './audio';
 import identity from './identity';
 import state, {modState} from './state';
 
@@ -32,8 +33,10 @@ function raiseHand(raise) {
   // make visible to me
   if (raise) {
     state.raisedHands.add(identity.publicKey);
+    requestAudio();
   } else {
     state.raisedHands.delete(identity.publicKey);
+    stopAudio();
   }
   update(state, 'raisedHands');
   // make visible to mods

@@ -3,11 +3,12 @@ const express = require('express');
 const app = express();
 const fetch = require('node-fetch');
 const qs = require('qs');
+const fs = require('fs');
 
 let ejs = require('ejs');
 
-
-app.use(express.static(process.env.STATIC_FILES_DIR || '.'))
+app.use(express.static(process.env.JAM_CONFIG_DIR + '/public'))
+app.use(express.static(process.env.STATIC_FILES_DIR || 'public'))
 
 const jamHost = process.env.JAM_HOST || 'beta.jam.systems';
 const jamSchema = process.env.JAM_SCHEMA || 'https://';
@@ -55,7 +56,16 @@ const getRoomMetaInfo = async (roomPath) => {
   }
 }
 
+
+let jamConfigFromFile = {}
+try {
+    jamConfigFromFile = JSON.parse(fs.readFileSync(process.env.JAM_CONFIG_DIR + '/jam-config.json').toString('utf-8'));
+} catch (e) {
+    console.log("No config file found, starting with empty config");
+}
+
 const jamConfig = {
+    ...jamConfigFromFile,
     urls,
     development: !!process.env.DEVELOPMENT
 };

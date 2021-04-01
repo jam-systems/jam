@@ -1,4 +1,4 @@
-import SimplePeer from 'simple-peer-light';
+import SimplePeer from './simple-peer-light';
 import State from 'use-minimal-state';
 import {authenticatedHub} from './signalhub';
 import causalLog from './causal-log';
@@ -58,14 +58,17 @@ function addLocalStream(stream, name, onNewStream) {
   try {
     addStreamToPeers(stream, name);
   } catch (err) {
-    log('cloning tracks');
-    // clone tracks to handle error on removing and readding the same stream
-    let clonedTracks = stream.getTracks().map(t => t.clone());
-    let clonedStream = new MediaStream(clonedTracks);
-    // we have to re-add that cloned stream and notify caller
-    swarm.localStreams[name] = clonedStream;
-    addStreamToPeers(clonedStream, name);
-    onNewStream?.(clonedStream);
+    console.error('ERROR: add stream to peers');
+    console.error(err);
+    return;
+    // log('cloning tracks');
+    // // clone tracks to handle error on removing and readding the same stream
+    // let clonedTracks = stream.getTracks().map(t => t.clone());
+    // let clonedStream = new MediaStream(clonedTracks);
+    // // we have to re-add that cloned stream and notify caller
+    // swarm.localStreams[name] = clonedStream;
+    // addStreamToPeers(clonedStream, name);
+    // onNewStream?.(clonedStream);
   }
 }
 
@@ -164,7 +167,25 @@ function createPeer(peerId, connId, initiator) {
     swarm.emit('data', rawData);
   });
 
-  peer.on('stream', stream => {
+  // peer.on('stream', stream => {
+  //   let remoteStreamInfo =
+  //     peer.remoteStreamIds &&
+  //     peer.remoteStreamIds.find(([, id]) => id === stream.id);
+  //   let name = remoteStreamInfo && remoteStreamInfo[0];
+  //   let remoteStreams = [...swarm.remoteStreams];
+  //   let i = remoteStreams.findIndex(
+  //     streamObj => streamObj.peerId === peerId && streamObj.name === name
+  //   );
+  //   if (i === -1) i = remoteStreams.length;
+  //   remoteStreams[i] = {stream, name, peerId};
+  //   swarm.set('remoteStreams', remoteStreams);
+  //   swarm.emit('stream', stream, name, peer);
+  //   swarm.stickyPeers[peerId].hadStream = true;
+  //   swarm.update('stickyPeers');
+  // });
+
+  peer.on('track', (track, stream) => {
+    log('onTrack', track, stream);
     let remoteStreamInfo =
       peer.remoteStreamIds &&
       peer.remoteStreamIds.find(([, id]) => id === stream.id);

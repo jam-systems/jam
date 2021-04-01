@@ -4,17 +4,18 @@ COPY yarn.lock package.json ./
 
 RUN yarn install && yarn global add esbuild
 COPY . .
-RUN npx esbuild --bundle ./App.jsx --outfile=./bundle.js --minify --format=esm --target=es6 --define:process.env.NODE_ENV='"production"'
+RUN yarn build
 
 FROM node:alpine
+
+ENV JAM_CONFIG_DIR=/jam-config
 
 RUN mkdir /app
 WORKDIR /app
 
-COPY css ./css/
-COPY img ./img/
+COPY public ./public/
 COPY server ./server/
-COPY --from=builder /bundle.js ./
+COPY --from=builder /public/bundle.js ./public
 RUN yarn add express ejs node-fetch
 
 CMD node server/bin/www

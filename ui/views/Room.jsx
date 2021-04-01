@@ -19,7 +19,7 @@ export default function Room({room, roomId}) {
   useWakeLock();
 
   let userAgent = UAParser();
-  let inWebView = (userAgent.browser?.name == "Chrome WebView") || ((userAgent.os?.name == "iOS") && (userAgent.browser?.name != "Mobile Safari"))
+  let inWebView = (userAgent.browser?.name === "Chrome WebView") || ((userAgent.os?.name === "iOS") && (userAgent.browser?.name !== "Mobile Safari"))
 
   let myInfo = use(identity, 'info');
   let [
@@ -166,7 +166,7 @@ export default function Room({room, roomId}) {
                 <StageAvatar
                   key={myPeerId}
                   peerId={myPeerId}
-                  {...{speaking, moderators, reactions}}
+                  {...{speaking, moderators, reactions, room}}
                   peerState={sharedState}
                   info={myInfo}
                   // onClick={() => openModal(EditIdentity)}
@@ -176,7 +176,7 @@ export default function Room({room, roomId}) {
               {stagePeers.map(peerId => (
                 <StageAvatar
                   key={peerId}
-                  {...{speaking, moderators}}
+                  {...{speaking, moderators, room}}
                   {...{peerId, peerState, reactions}}
                   peerState={peerState[peerId]}
                   info={identities[peerId]}
@@ -192,7 +192,7 @@ export default function Room({room, roomId}) {
           <ol className="flex flex-wrap">
             {!iSpeak && (
               <AudienceAvatar
-                {...{reactions}}
+                {...{reactions, room}}
                 peerId={myPeerId}
                 peerState={sharedState}
                 info={myInfo}
@@ -204,7 +204,7 @@ export default function Room({room, roomId}) {
             {audiencePeers.map(peerId => (
               <AudienceAvatar
                 key={peerId}
-                {...{peerId, peerState, reactions}}
+                {...{peerId, peerState, reactions, room}}
                 peerState={peerState[peerId]}
                 info={identities[peerId]}
                 handRaised={iModerate && raisedHands.has(peerId)}

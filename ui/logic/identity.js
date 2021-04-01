@@ -15,7 +15,6 @@ const identity = StoredState('identity', () => {
     secretKey,
     info: {
       id: publicKey,
-      displayName: randomName(),
     },
   };
 });
@@ -29,12 +28,9 @@ if (!identity.publicKey && identity.keyPair.publicKey) {
 }
 // nuked identity.info
 if (!identity.info) {
-  set(identity, 'info', {displayName: randomName(), id: identity.publicKey});
+  set(identity, 'info', {id: identity.publicKey});
 }
-if (!identity.info.displayName) {
-  identity.info.displayName = randomName();
-  update(identity, 'info');
-}
+
 // missing .id
 if (!identity.info.id) {
   identity.info.id = identity.publicKey;
@@ -125,45 +121,6 @@ const timeCodeToBytes = timeCode =>
 const currentTimeCode = () => Math.round(Date.now() / 30000);
 const timeCodeValid = code => Math.abs(code - currentTimeCode()) <= 10;
 
-function randomName() {
-  let names = [
-    'Ali',
-    'Alex',
-    'Ash',
-    'Blue',
-    'Chi',
-    'Drew',
-    'Eight',
-    'Fin',
-    'Floor',
-    'Five',
-    'Four',
-    'Jam',
-    'Jaz',
-    'Misha',
-    'Mu',
-    'Nine',
-    'One',
-    'Pat',
-    'Sam',
-    'Sasha',
-    'Seven',
-    'Six',
-    'Sky',
-    'Sol',
-    'Storm',
-    'Sun',
-    'Tao',
-    'Ten',
-    'Three',
-    'Tsu',
-    'Two',
-    'Yu',
-    'Zero',
-  ]
-  let name = names[Math.floor(Math.random() * names.length)];
-  return name;
-}
 
 // util for uint8array
 function concat(arr1, arr2) {
@@ -171,4 +128,10 @@ function concat(arr1, arr2) {
   arr.set(arr1);
   arr.set(arr2, arr1.length);
   return arr;
+}
+
+
+export function publicKeyToIndex(publicKey, range) {
+  const bytes = decode(publicKey);
+  return Math.abs(timeCodeFromBytes(bytes)) % range;
 }

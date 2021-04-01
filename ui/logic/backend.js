@@ -6,6 +6,7 @@ import identity, {signedToken} from './identity';
 import {pure} from '../lib/local-storage';
 import swarm from '../lib/swarm';
 import log from '../lib/causal-log';
+import {emptyRoom} from './room';
 // POST https://jam.systems/_/pantry/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
 // Creates room, returns 409 conflict if room exists
 
@@ -126,6 +127,7 @@ export async function createRoom(
   peerId
 ) {
   let room = {
+    ...emptyRoom,
     name,
     description,
     logoURI,
