@@ -36811,11 +36811,12 @@ function EditRoomModal({roomId, room, close}) {
     close
   }, /* @__PURE__ */ import_react13.default.createElement("h1", null, "Room Settings"), /* @__PURE__ */ import_react13.default.createElement("br", null), /* @__PURE__ */ import_react13.default.createElement(EditRoom, {
     room,
+    roomId,
     onSubmit: updateRoom,
     onCancel: close
   }));
 }
-function EditRoom({room = {}, onSubmit, onCancel}) {
+function EditRoom({room = {}, roomId, onSubmit, onCancel}) {
   let [name, setName] = (0, import_react13.useState)(room.name || "");
   let [description, setDescription] = (0, import_react13.useState)(room.description || "");
   let [color, setColor] = (0, import_react13.useState)(room.color || "#4B5563");
@@ -36824,6 +36825,36 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
   let [buttonText, setButtonText] = (0, import_react13.useState)(room.buttonText || "");
   let [closed, setClosed] = (0, import_react13.useState)(room.closed || false);
   let [shareUrl, setShareUrl] = (0, import_react13.useState)(room.shareUrl || "");
+  let [schedule, setSchedule] = (0, import_react13.useState)(room.schedule || {});
+  let [scheduleCandidate, setScheduleCandidate] = (0, import_react13.useState)();
+  let validSchedule = () => {
+    return (scheduleCandidate == null ? void 0 : scheduleCandidate.date) && (scheduleCandidate == null ? void 0 : scheduleCandidate.time) && Date.parse(`${scheduleCandidate == null ? void 0 : scheduleCandidate.date}T${scheduleCandidate == null ? void 0 : scheduleCandidate.time}`) > Date.now();
+  };
+  let handleScheduleChange = (e) => {
+    setScheduleCandidate(__assign(__assign({}, scheduleCandidate), {
+      [e.target.name]: e.target.value
+    }));
+    console.log(scheduleCandidate);
+  };
+  let removeSchedule = (e) => {
+    e.preventDefault();
+    setSchedule(void 0);
+    let schedule2 = void 0;
+    onSubmit && onSubmit(__assign(__assign({}, room), {
+      schedule: schedule2
+    }));
+  };
+  let submitSchedule = (e) => {
+    e.preventDefault();
+    if (scheduleCandidate) {
+      let schedule2 = scheduleCandidate;
+      setSchedule(scheduleCandidate);
+      schedule2.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      onSubmit && onSubmit(__assign(__assign({}, room), {
+        schedule: schedule2
+      }));
+    }
+  };
   let submit = (e) => {
     e.preventDefault();
     onSubmit && onSubmit(__assign(__assign({}, room), {
@@ -36839,7 +36870,7 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
   };
   const [showAdvanced, setShowAdvanced] = (0, import_react13.useState)(!!(room.logoURI || room.color));
   let mqp = useMqParser();
-  return /* @__PURE__ */ import_react13.default.createElement("form", {
+  return /* @__PURE__ */ import_react13.default.createElement("div", null, /* @__PURE__ */ import_react13.default.createElement("form", {
     onSubmit: submit
   }, /* @__PURE__ */ import_react13.default.createElement("input", {
     className: mqp("rounded placeholder-gray-300 bg-gray-50 w-full md:w-96"),
@@ -36969,21 +37000,11 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
     },
     defaultChecked: closed
   }), /* @__PURE__ */ import_react13.default.createElement("label", {
-    className: "pl-2",
+    className: "pl-3 ml-0.5",
     htmlFor: "jam-room-closed"
-  }, "Close the room (experimental)", " "), /* @__PURE__ */ import_react13.default.createElement("div", {
-    className: "p-2 text-gray-500 italic"
-  }, "Closed rooms can only be joined by moderators.", /* @__PURE__ */ import_react13.default.createElement("br", null), "Everyone else sees the description and the", `'call to action'`, " button."), /* @__PURE__ */ import_react13.default.createElement("br", null), /* @__PURE__ */ import_react13.default.createElement("hr", null), /* @__PURE__ */ import_react13.default.createElement("br", null), /* @__PURE__ */ import_react13.default.createElement("input", {
-    className: "rounded bg-gray-50 text-gray-400 w-full",
-    value: `<iframe src="${window.location.href}" allow="microphone *;" width="420" height="600"></iframe>`
-  }), /* @__PURE__ */ import_react13.default.createElement("div", {
-    className: "p-2 text-gray-500 italic"
-  }, "Embed this room using an iFrame. (", /* @__PURE__ */ import_react13.default.createElement("a", {
-    className: "underline",
-    href: "https://gitlab.com/jam-systems/jam",
-    target: "_blank",
-    rel: "noreferrer"
-  }, "Learn more"), ")")), /* @__PURE__ */ import_react13.default.createElement("div", {
+  }, "Close the room (experimental)", " ", /* @__PURE__ */ import_react13.default.createElement("div", {
+    className: "p-2 pl-9 text-gray-500"
+  }, "Closed rooms can only be joined by moderators.", /* @__PURE__ */ import_react13.default.createElement("br", null), "Everyone else sees the description and the\xA0", `'call to action'`, " button."))), /* @__PURE__ */ import_react13.default.createElement("div", {
     className: "flex"
   }, /* @__PURE__ */ import_react13.default.createElement("button", {
     onClick: submit,
@@ -36991,7 +37012,60 @@ function EditRoom({room = {}, onSubmit, onCancel}) {
   }, "Update Room"), /* @__PURE__ */ import_react13.default.createElement("button", {
     onClick: onCancel,
     className: "mt-5 h-12 px-6 text-lg text-black bg-gray-100 rounded-lg focus:shadow-outline active:bg-gray-300"
-  }, "Cancel")));
+  }, "Cancel"))), /* @__PURE__ */ import_react13.default.createElement("br", null), /* @__PURE__ */ import_react13.default.createElement("hr", null), /* @__PURE__ */ import_react13.default.createElement("br", null), /* @__PURE__ */ import_react13.default.createElement("form", null, /* @__PURE__ */ import_react13.default.createElement("div", {
+    className: "pb-1"
+  }, "\u{1F5D3} Room Schedule (experimental)"), /* @__PURE__ */ import_react13.default.createElement("div", {
+    className: room.calendar ? "hidden" : "pb-4 text-gray-500"
+  }, "Set the date and time for upcoming events."), /* @__PURE__ */ import_react13.default.createElement("div", {
+    className: "rounded bg-gray-50 border w-full"
+  }, /* @__PURE__ */ import_react13.default.createElement("input", {
+    type: "date",
+    className: "bg-gray-50 text-gray-500",
+    name: "date",
+    style: {border: "0"},
+    value: (scheduleCandidate == null ? void 0 : scheduleCandidate.date) || "",
+    onChange: handleScheduleChange
+  }), /* @__PURE__ */ import_react13.default.createElement("input", {
+    type: "time",
+    className: "bg-gray-50 text-gray-500",
+    name: "time",
+    style: {border: "0"},
+    value: (scheduleCandidate == null ? void 0 : scheduleCandidate.time) || "",
+    onChange: handleScheduleChange
+  }), /* @__PURE__ */ import_react13.default.createElement("br", null), /* @__PURE__ */ import_react13.default.createElement("div", {
+    className: "text-gray-500 p-3"
+  }, Intl.DateTimeFormat().resolvedOptions().timeZone), /* @__PURE__ */ import_react13.default.createElement("input", {
+    type: "text",
+    className: "hidden placeholder-gray-400",
+    style: {border: "0"},
+    defaultValue: Intl.DateTimeFormat().resolvedOptions().timeZone
+  }), /* @__PURE__ */ import_react13.default.createElement("div", {
+    className: room.schedule ? "p-3 text-gray-500" : "hidden"
+  }, /* @__PURE__ */ import_react13.default.createElement("span", {
+    onClick: removeSchedule,
+    className: "underline"
+  }, "Remove schedule"))), /* @__PURE__ */ import_react13.default.createElement("div", {
+    className: validSchedule() ? "flex" : "hidden"
+  }, /* @__PURE__ */ import_react13.default.createElement("button", {
+    onClick: submitSchedule,
+    className: "flex-grow mt-5 h-12 px-6 text-lg text-white bg-gray-600 rounded-lg focus:shadow-outline active:bg-gray-600 mr-2"
+  }, "Add Schedule"), /* @__PURE__ */ import_react13.default.createElement("button", {
+    onClick: (e) => {
+      e.preventDefault();
+      setScheduleCandidate(false);
+    },
+    className: "mt-5 h-12 px-6 text-lg text-black bg-gray-100 rounded-lg focus:shadow-outline active:bg-gray-300"
+  }, "Cancel"))), /* @__PURE__ */ import_react13.default.createElement("br", null), /* @__PURE__ */ import_react13.default.createElement("hr", null), /* @__PURE__ */ import_react13.default.createElement("br", null), /* @__PURE__ */ import_react13.default.createElement("input", {
+    className: "rounded bg-gray-50 text-gray-400 w-full",
+    defaultValue: `<iframe src="${window.location.href}" allow="microphone *;" width="420" height="600"></iframe>`
+  }), /* @__PURE__ */ import_react13.default.createElement("div", {
+    className: "p-2 text-gray-500 italic"
+  }, "Embed this room using an iFrame. (", /* @__PURE__ */ import_react13.default.createElement("a", {
+    className: "underline",
+    href: "https://gitlab.com/jam-systems/jam",
+    target: "_blank",
+    rel: "noreferrer"
+  }, "Learn more"), ")"));
 }
 
 // lib/use-wake-lock.js
