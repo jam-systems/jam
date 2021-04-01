@@ -37905,7 +37905,7 @@ function Room({room, roomId}) {
     strokeWidth: 2,
     d: "M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
   })), "Open in ", ((_d = userAgent3.os) == null ? void 0 : _d.name) == "iOS" ? "Safari" : "Chrome", " for best experience.", /* @__PURE__ */ import_react23.default.createElement("br", null), /* @__PURE__ */ import_react23.default.createElement("a", {
-    class: "underline",
+    className: "underline",
     href: "https://gitlab.com/jam-systems/jam",
     target: "_blank",
     rel: "nofollow"
