@@ -51,6 +51,7 @@ export default function Room({room, roomId}) {
   let {
     name,
     description,
+    schedule,
     logoURI,
     buttonURI,
     buttonText,
@@ -68,6 +69,7 @@ export default function Room({room, roomId}) {
         roomId={roomId}
         name={name}
         description={description}
+        schedule={schedule}
         logoURI={logoURI}
         closed={closed}
         buttonURI={buttonURI}
@@ -82,6 +84,7 @@ export default function Room({room, roomId}) {
         roomId={roomId}
         name={name}
         description={description}
+        schedule={schedule}
         logoURI={logoURI}
       />
     );

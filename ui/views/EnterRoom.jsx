@@ -14,6 +14,7 @@ export default function EnterRoom({
   roomId,
   name,
   description,
+  schedule,
   closed,
   buttonURI,
   buttonText,
@@ -80,11 +81,19 @@ export default function EnterRoom({
           className={
             closed
               ? 'hidden'
-              : 'mt-5 mb-10 select-none w-full h-12 px-6 text-lg text-white bg-gray-600 rounded-lg focus:shadow-outline active:bg-gray-600'
+              : 'mt-5 select-none w-full h-12 px-6 text-lg text-white bg-gray-600 rounded-lg focus:shadow-outline active:bg-gray-600'
           }
         >
           Join this Jam
         </button>
+
+        <a
+          className={schedule ? "block mt-5 text-center h-12 p-3 px-6 text-lg bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-200" : "hidden"}
+          href={`/${roomId}.ics`}
+          download={`${name}.ics`}
+        >
+          🗓 Add to Calendar
+        </a>
 
         <div className={iOS ? 'mt-40 text-gray-500 text-center' : 'hidden'}>
           🎧 Use headphones or earbuds
