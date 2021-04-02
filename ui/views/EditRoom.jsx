@@ -323,6 +323,7 @@ function EditRoom({room = {}, roomId, onSubmit, onCancel}) {
               type="date"
               className="flex-grow p-2 border rounded"
               name="date"
+              placeholder="yyyy-mm-dd"
               value={scheduleCandidate?.date || ''}
               onChange={handleScheduleChange}
             />
@@ -330,6 +331,7 @@ function EditRoom({room = {}, roomId, onSubmit, onCancel}) {
               type="time"
               className="flex-none ml-3 p-2 border rounded"
               name="time"
+              placeholder="hh:mm"
               value={scheduleCandidate?.time || ''}
               onChange={handleScheduleChange}
             />
