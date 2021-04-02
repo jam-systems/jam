@@ -30,15 +30,19 @@ function EditRoom({room = {}, roomId, onSubmit, onCancel}) {
   let [closed, setClosed] = useState(room.closed || false);
   let [shareUrl, setShareUrl] = useState(room.shareUrl || '');
 
-  let [schedule, setSchedule] = useState(room.schedule || {});
-  let [scheduleCandidate, setScheduleCandidate] = useState();
+  let [schedule, setSchedule] = useState(room.schedule);
+  let [scheduleCandidate, setScheduleCandidate] = useState({
+    'date': `${new Date().toISOString().split("T")[0]}`,
+    'timezone': Intl.DateTimeFormat().resolvedOptions().timeZone
+  });
+  let [showTimezoneSelect, setShowTimezoneSelect] = useState(false);
+  let [showRepeatSelect, setShowRepeatSelect] = useState(false);
 
-  let validSchedule = () => {
+
+  let completeSchedule = () => {
     // both date and time are set
     // and the datetime is in the future
-    return scheduleCandidate?.date
-           && scheduleCandidate?.time
-           && (Date.parse(`${scheduleCandidate?.date}T${scheduleCandidate?.time}`) > Date.now());
+    return scheduleCandidate?.date && scheduleCandidate?.time
   }
 
   let handleScheduleChange = e => {
@@ -66,7 +70,6 @@ function EditRoom({room = {}, roomId, onSubmit, onCancel}) {
     if (scheduleCandidate) {
       let schedule = scheduleCandidate;
       setSchedule(scheduleCandidate);
-      schedule.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       onSubmit &&
         onSubmit({
           ...room,
@@ -314,17 +317,19 @@ function EditRoom({room = {}, roomId, onSubmit, onCancel}) {
         <div className="pb-1">
           🗓 Room Schedule (experimental)
         </div>
-        <div className={room.calendar? "hidden" : "pb-4 text-gray-500"}>
-          Set the date and time for upcoming events.
+        <div className="pb-3 text-gray-500">
+          Set the date and time for an upcoming event.
         </div>
-        <div className="w-full">
+
+        <div className={schedule? "hidden" : "w-full"}>
           <div className="flex">
             <input
               type="date"
               className="flex-grow p-2 border rounded"
               name="date"
               placeholder="yyyy-mm-dd"
-              value={scheduleCandidate?.date || ''}
+              min={`${(new Date((new Date() - 86400000))).toISOString().split("T")[0]}`}
+              value={scheduleCandidate?.date || `${new Date().toISOString().split("T")[0]}`}
               onChange={handleScheduleChange}
             />
             <input
@@ -336,11 +341,16 @@ function EditRoom({room = {}, roomId, onSubmit, onCancel}) {
               onChange={handleScheduleChange}
             />
           </div>
+          <div className={showTimezoneSelect? "hidden" : "p-2 pt-4 text-gray-500"}>
+            {scheduleCandidate.timezone}
+            {' '}
+            <span className="underline" onClick={() => setShowTimezoneSelect(true)}>change</span>
+          </div>
           <select
             name="timezone"
-            defaultValue={Intl.DateTimeFormat().resolvedOptions().timeZone}
+            defaultValue={scheduleCandidate.timezone}
             onChange={handleScheduleChange}
-            className="w-full border mt-3 p-2 rounded"
+            className={showTimezoneSelect? "w-full border mt-3 p-2 rounded" : "hidden"}
           >
           {
             rawTimeZones.map((tz) => {
@@ -351,11 +361,14 @@ function EditRoom({room = {}, roomId, onSubmit, onCancel}) {
           }
           </select>
 
-          repeat: <select
+          <div className={showRepeatSelect? "hidden" : "p-2 text-gray-500"}>
+            <span className="underline" onClick={() => setShowRepeatSelect(true)}>repeat?</span>
+          </div>
+          <select
             name="repeat"
             defaultValue="never"
             onChange={handleScheduleChange}
-            className="border mt-3 p-2 rounded"
+            className={showRepeatSelect? "border mt-3 p-2 rounded" : "hidden"}
           >
           {
             ["never", "weekly", "monthly"].map((rep) => {
@@ -365,20 +378,21 @@ function EditRoom({room = {}, roomId, onSubmit, onCancel}) {
             })
           }
           </select>
-
         </div>
-        <div className={room.schedule? "mt-3 rounded bg-gray-50 border w-full" : "hidden"}>
+
+        <div className={schedule? "rounded bg-gray-50 border w-full" : "hidden"}>
           <div className="text-gray-500 p-3">
-            {room.schedule?.date} at {room.schedule?.time}<br/>
-            {room.schedule?.timezone}
+            {schedule?.date} at {schedule?.time}<br/>
+            {schedule?.timezone}<br/>
+            {(schedule?.repeat == "weekly") || (schedule?.repeat == "monthly") ? schedule?.repeat : ""}
           </div>
-          <div className={room.schedule? "p-3 text-gray-500" : "hidden"}>
+          <div className={schedule? "p-3 text-gray-500" : "hidden"}>
             <span onClick={removeSchedule} className="underline">Remove schedule</span>
           </div>
 
         </div>
 
-        <div className={validSchedule()? "flex" : "hidden"}>
+        <div className={completeSchedule()? "flex" : "hidden"}>
           <button
             onClick={submitSchedule}
             className="flex-grow mt-5 h-12 px-6 text-lg text-white bg-gray-600 rounded-lg focus:shadow-outline active:bg-gray-600 mr-2"
