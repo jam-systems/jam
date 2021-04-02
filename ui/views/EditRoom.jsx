@@ -351,6 +351,21 @@ function EditRoom({room = {}, roomId, onSubmit, onCancel}) {
           }
           </select>
 
+          repeat: <select
+            name="repeat"
+            defaultValue="never"
+            onChange={handleScheduleChange}
+            className="border mt-3 p-2 rounded"
+          >
+          {
+            ["never", "weekly", "monthly"].map((rep) => {
+              return <option
+                       key={rep}
+                       value={rep}>{rep}</option>;
+            })
+          }
+          </select>
+
         </div>
         <div className={room.schedule? "mt-3 rounded bg-gray-50 border w-full" : "hidden"}>
           <div className="text-gray-500 p-3">

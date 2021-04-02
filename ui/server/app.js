@@ -157,13 +157,18 @@ app.use(async (req, res) => {
         let startdt = new Date(`${metaInfo.schedule?.date}T${metaInfo.schedule?.time}`);
         let enddt = new Date(startdt.getTime() + 20*60*1000);
         console.log(startdt);
-        calendar.createEvent({
+        let event = calendar.createEvent({
           start: startdt,
           end: enddt,
           summary: metaInfo.ogTitle,
           description: metaInfo.ogDescription,
           url: `${urls.jam}/${metaInfo.id}`
         });
+        if (metaInfo.schedule?.repeat) {
+          event.repeating({
+            freq: metaInfo.schedule.repeat.toUpperCase()
+          })
+        }
       }
 
       return res.send(calendar.toString());
