@@ -401,21 +401,12 @@ export function EditRoomModal({roomId, room, close}) {
             </div>
           </div>
 
-          <div className={completeSchedule() ? 'flex' : 'hidden'}>
+          <div className={!schedule && completeSchedule() ? 'flex' : 'hidden'}>
             <button
               onClick={submitSchedule}
               className="flex-grow mt-5 h-12 px-6 text-lg text-white bg-gray-600 rounded-lg focus:shadow-outline active:bg-gray-600 mr-2"
             >
-              Add Schedule
-            </button>
-            <button
-              onClick={e => {
-                e.preventDefault();
-                setScheduleCandidate(false);
-              }}
-              className="mt-5 h-12 px-6 text-lg text-black bg-gray-100 rounded-lg focus:shadow-outline active:bg-gray-300"
-            >
-              Cancel
+              Set Schedule
             </button>
           </div>
         </form>
