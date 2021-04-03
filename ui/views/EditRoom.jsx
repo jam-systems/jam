@@ -58,9 +58,9 @@ export function EditRoomModal({roomId, room, close}) {
     }
   };
 
-  let submit = e => {
+  let submit = async e => {
     e.preventDefault();
-    updateRoom({
+    await updateRoom({
       ...room,
       name,
       description,
