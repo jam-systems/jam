@@ -15,11 +15,13 @@
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0",
     "express": "^4.17.1",
+    "ical-generator": "^2.0.0-develop.14",
     "node-fetch": "^2.6.1",
     "serve": "^11.3.2"
   },
   "license": "MIT",
   "dependencies": {
+    "@vvo/tzdb": "^6.5.1",
     "compact-base64": "^2.1.2",
     "qs": "^6.9.6",
     "react": "^17.0.1",

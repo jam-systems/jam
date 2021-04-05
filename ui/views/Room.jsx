@@ -51,6 +51,7 @@ export default function Room({room, roomId}) {
   let {
     name,
     description,
+    schedule,
     logoURI,
     buttonURI,
     buttonText,
@@ -68,6 +69,7 @@ export default function Room({room, roomId}) {
         roomId={roomId}
         name={name}
         description={description}
+        schedule={schedule}
         logoURI={logoURI}
         closed={closed}
         buttonURI={buttonURI}
@@ -82,6 +84,7 @@ export default function Room({room, roomId}) {
         roomId={roomId}
         name={name}
         description={description}
+        schedule={schedule}
         logoURI={logoURI}
       />
     );
@@ -124,7 +127,7 @@ export default function Room({room, roomId}) {
             />
           </svg>
           Open in {userAgent.os?.name == "iOS" ? "Safari" : "Chrome"} for best experience.<br/>
-          <a class="underline" href="https://gitlab.com/jam-systems/jam" target="_blank" rel="nofollow">Learn more</a>.
+          <a className="underline" href="https://gitlab.com/jam-systems/jam" target="_blank" rel="nofollow">Learn more</a>.
         </div>
         <div
           className={

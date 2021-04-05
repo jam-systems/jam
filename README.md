@@ -87,7 +87,7 @@ e.g.: a Raspberry Pi Zero (512 MB RAM) or the smallest [Digital Ocean Basic Drop
 1. `git checkout stable`  
 1. `cd deployment`
 1. `cp .env.example .env`
-1. `nano .env` set `JAM_HOST` to your domain
+1. `nano .env` set `JAM_HOST` to the domain you want Jam to be available (If you are deploying on AWS you need a domain you own pointing to your sever as letsencrypt does not issue certificates for `*.compute.amazonaws.com` domains)
 1. In your DNS settings point `${JAM_HOST}`, and `*.${JAM_HOST}` to your IP address (if you don't want a wildcard you need the subdomains `stun` and `turn` (e.g. stun.jam.example.com and turn.jam.example.com))
 1. If you are behind a NAT:
    1. Open ports 3478 and 3480, both TCP and UDP, and 80 and 443, TCP, on your firewall
