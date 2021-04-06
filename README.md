@@ -75,9 +75,9 @@ Hosting your own Jam server is easy.
 
 ### Minimum Requirements
 
-To run your own Jam instance we recommend a minimum of 512 MB RAM and a 1GHz CPU.
+To run your own Jam instance we recommend a minimum of 1 GB RAM and a 1GHz CPU.
 
-e.g.: a Raspberry Pi Zero (512 MB RAM) or the smallest [Digital Ocean Basic Droplet (1 GB RAM)](https://www.digitalocean.com/pricing/) or the smallest [Linode shared plan (1 GB RAM)](https://www.linode.com/pricing/) should be enough to get started.
+e.g.: a Raspberry Pi (1+ GB RAM) or the smallest [Digital Ocean Basic Droplet (1 GB RAM)](https://www.digitalocean.com/pricing/) or the smallest [Linode shared plan (1 GB RAM)](https://www.linode.com/pricing/) or [t2.micro (1 GB RAM) on Amazon Web Services](https://aws.amazon.com/ec2/instance-types/t2/) should be enough to get started.
 
 ### Install
 
