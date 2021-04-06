@@ -28,8 +28,6 @@ export function EditRoomModal({roomId, room, close}) {
   let [showRepeatSelect, setShowRepeatSelect] = useState(false);
 
   let completeSchedule = () => {
-    // both date and time are set
-    // and the datetime is in the future
     return scheduleCandidate?.date && scheduleCandidate?.time;
   };
 

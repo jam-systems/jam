@@ -158,7 +158,8 @@
   background-image: url('/img/bazaar/ethereum-logo.svg');
   background-repeat: no-repeat;
   background-size: 10px;
-  padding-left: 16px;
+  background-position: 4px;
+  padding-left: 23px;
   text-decoration: underline;
 }
 

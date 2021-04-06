@@ -88,9 +88,9 @@ export default function EnterRoom({
         </button>
 
         <a
-          className={schedule ? "block mt-5 text-center h-12 p-3 px-6 text-lg bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-200" : "hidden"}
+          className={schedule ? "block mt-5 text-center h-12 p-3 px-6 text-lg text-gray-500" : "hidden"}
           href={`/${roomId}.ics`}
-          download={`${name}.ics`}
+          download={`${(name || 'room')}.ics`}
         >
           🗓 Add to Calendar
         </a>

@@ -171,6 +171,7 @@ app.use(async (req, res) => {
         }
       }
 
+      res.set('Content-Type', 'text/calendar');
       return res.send(calendar.toString());
     }
 
