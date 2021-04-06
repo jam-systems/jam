@@ -84,7 +84,7 @@ export default function EnterRoom({
               : 'mt-5 select-none w-full h-12 px-6 text-lg text-white bg-gray-600 rounded-lg focus:shadow-outline active:bg-gray-600'
           }
         >
-          Join this Jam
+          Join
         </button>
 
         <a
