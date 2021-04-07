@@ -37,4 +37,4 @@ export const actions = {
 if (DEV) debug(state);
 
 // mod visible state
-export const modState = State({raiseHand: false});
+export const modState = {raiseHand: false};
