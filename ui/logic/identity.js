@@ -1,6 +1,5 @@
 import nacl from 'tweetnacl';
 import base64 from 'compact-base64';
-import {adjectives, nouns} from '../lib/names';
 import {StoredState} from '../lib/local-storage';
 import {DEV} from './config';
 import {set, update} from 'use-minimal-state';
