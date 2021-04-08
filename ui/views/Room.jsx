@@ -13,13 +13,14 @@ import {useMqParser} from '../logic/tailwind-mqp';
 import Container from './Container';
 import Navigation from './Navigation';
 import UAParser from 'ua-parser-js';
+const userAgent = UAParser();
+const inWebView =
+  userAgent.browser?.name === 'Chrome WebView' ||
+  (userAgent.os?.name === 'iOS' && userAgent.browser?.name !== 'Mobile Safari');
 
 export default function Room({room, roomId}) {
   // room = {name, description, moderators: [peerId], speakers: [peerId]}
   useWakeLock();
-
-  let userAgent = UAParser();
-  let inWebView = (userAgent.browser?.name === "Chrome WebView") || ((userAgent.os?.name === "iOS") && (userAgent.browser?.name !== "Mobile Safari"))
 
   let myInfo = use(identity, 'info');
   let [
@@ -126,8 +127,18 @@ export default function Room({room, roomId}) {
               d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          Open in {userAgent.os?.name == "iOS" ? "Safari" : "Chrome"} for best experience.<br/>
-          <a className="underline" href="https://gitlab.com/jam-systems/jam" target="_blank" rel="nofollow">Learn more</a>.
+          Open in {userAgent.os?.name == 'iOS' ? 'Safari' : 'Chrome'} for best
+          experience.
+          <br />
+          <a
+            className="underline"
+            href="https://gitlab.com/jam-systems/jam"
+            target="_blank"
+            rel="nofollow noreferrer"
+          >
+            Learn more
+          </a>
+          .
         </div>
         <div
           className={
