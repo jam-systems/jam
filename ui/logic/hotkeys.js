@@ -14,7 +14,6 @@ export function usePushToTalk() {
         !event.repeat &&
         event.target?.tagName !== 'INPUT'
       ) {
-        console.log('unmuting!');
         isPressingKey = true;
         event.stopPropagation();
         event.preventDefault();
@@ -29,7 +28,6 @@ export function usePushToTalk() {
         event.target?.tagName !== 'INPUT' &&
         event.target?.tagName !== 'TEXTAREA'
       ) {
-        console.log('muting!');
         isPressingKey = false;
         event.stopPropagation();
         event.preventDefault();
