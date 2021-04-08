@@ -12,7 +12,8 @@ export function usePushToTalk() {
         keys.includes(event.key) &&
         state.micMuted &&
         !event.repeat &&
-        event.target?.tagName !== 'INPUT'
+        event.target?.tagName !== 'INPUT' &&
+        event.target?.tagName !== 'TEXTAREA'
       ) {
         isPressingKey = true;
         event.stopPropagation();
