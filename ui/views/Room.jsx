@@ -13,6 +13,7 @@ import {useMqParser} from '../logic/tailwind-mqp';
 import Container from './Container';
 import Navigation from './Navigation';
 import UAParser from 'ua-parser-js';
+import {usePushToTalk} from '../logic/hotkeys';
 const userAgent = UAParser();
 const inWebView =
   userAgent.browser?.name === 'Chrome WebView' ||
@@ -21,6 +22,7 @@ const inWebView =
 export default function Room({room, roomId}) {
   // room = {name, description, moderators: [peerId], speakers: [peerId]}
   useWakeLock();
+  usePushToTalk();
 
   let myInfo = use(identity, 'info');
   let [
