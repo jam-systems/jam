@@ -32,7 +32,7 @@ const pantryApiPrefix = `${urls.pantry}/api/v1/rooms`;
 
 const defaultMetaInfo = {
     ogTitle: "Jam",
-    ogDescription: "Join this Jam audio space",
+    ogDescription: "Join this audio room",
     ogUrl: urls.jam,
     ogImage: `${urls.jam}/img/jam-app-icon.jpg`,
     favIcon: '/img/jam-app-icon.jpg',
