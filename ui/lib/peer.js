@@ -253,10 +253,10 @@ function handlePeerFail(swarm, peerId, connId) {
   let {stickyPeers, hub} = swarm;
   stopTimeout(swarm, peerId, connId);
 
-  let peer = stickyPeers[peerId];
+  let connection = stickyPeers[peerId].connections[connId];
   let now = Date.now();
-  peer.lastFailure = peer.lastFailure || now;
-  let failTime = now - peer.lastFailure;
+  connection.lastFailure = connection.lastFailure || now;
+  let failTime = now - connection.lastFailure;
 
   log('handle peer fail! time failing:', failTime);
 
