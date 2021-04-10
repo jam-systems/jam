@@ -7,15 +7,13 @@ import {connectPeer, removePeer, addStreamToPeer, handleSignal} from './peer';
 
 const swarm = State({
   // state
-  stickyPeers: {}, // {peerId: {lastFailure: number, hadStream: boolean}}
+  stickyPeers: {}, // {peerId: {connections: {connId: {lastFailure: number, pc: SimplePeer, timeout}}}
   myPeerId: null,
   connected: false,
   remoteStreams: [], // [{stream, name, peerId}], only one per (name, peerId) if name is set
   peerState: {}, // {peerId: sharedState}
   sharedState: null, // my portion of peerState, gets shared on update and on peer join
-  // shared peer state can be authenticated by passing sign / verify functions to config()
   // internal
-  peers: {},
   url: '',
   room: '',
   debug: false,
@@ -45,10 +43,15 @@ function config({url, room, myPeerId, sign, verify, pcConfig, debug}) {
 function addLocalStream(stream, name) {
   log('addlocalstream', stream, name);
   if (!name) name = randomHex4();
-  swarm.localStreams[name] = stream;
+  let {localStreams, stickyPeers} = swarm;
+  localStreams[name] = stream;
   try {
-    for (let peerId in swarm.peers) {
-      addStreamToPeer(swarm, peerId, stream, name);
+    for (let peerId in stickyPeers) {
+      let {connections} = stickyPeers[peerId];
+      for (let connId in connections) {
+        let {pc} = connections[connId];
+        if (pc) addStreamToPeer(pc, stream, name);
+      }
     }
   } catch (err) {
     console.error('ERROR: add stream to peers');
@@ -95,7 +98,7 @@ function connect(room) {
     );
   }
   let myConnId = randomHex4();
-  swarm.connId = myConnId;
+  swarm.myConnId = myConnId;
   log('connecting. conn id', myConnId);
   let {myPeerId, sign, verify, sharedState} = swarm;
   let hub = authenticatedHub({
@@ -121,15 +124,14 @@ function connect(room) {
       console.error(err);
       disconnect();
     });
-
-  hub.connId = myConnId;
   swarm.hub = hub;
 
   hub.subscribe('all', ({type, peerId, connId, data, sharedState}) => {
     if (type === 'connect-me') {
       if (peerId === myPeerId) return;
       log('got connect-me');
-      initializePeer(swarm, peerId, connId, sharedState);
+      initializePeer(swarm, peerId, connId);
+      if (sharedState) updatePeerState(swarm, peerId, sharedState);
       connectPeer(swarm, hub, peerId, connId);
     }
     if (type === 'shared-state') {
@@ -145,7 +147,8 @@ function connect(room) {
     ({type, peerId, data, connId, yourConnId, sharedState}) => {
       if (type === 'signal') {
         log('signal received from', s(peerId), connId, data.type);
-        initializePeer(swarm, peerId, connId, sharedState);
+        initializePeer(swarm, peerId, connId);
+        if (sharedState) updatePeerState(swarm, peerId, sharedState);
         handleSignal(swarm, {peerId, connId, yourConnId, data});
       }
     }
@@ -157,16 +160,19 @@ function connect(room) {
 }
 
 function disconnect() {
-  let {hub, peers} = swarm;
+  let {hub, stickyPeers} = swarm;
   if (hub) hub.close();
   swarm.hub = null;
-  swarm.connId = null;
+  swarm.myConnId = null;
   swarm.set('connected', false);
-  for (let peerId in peers) {
-    try {
-      peers[peerId].destroy();
-      removePeer(swarm, peerId);
-    } catch (e) {}
+  for (let peerId in stickyPeers) {
+    let {connections} = stickyPeers[peerId];
+    for (let connId in connections) {
+      try {
+        connections[connId].pc.destroy();
+      } catch (e) {}
+      removePeer(swarm, peerId, connId);
+    }
   }
 }
 
@@ -190,18 +196,18 @@ let log = (...a) => {
   causalLog(time, ...a);
 };
 
-function initializePeer(swarm, peerId, connId, sharedState) {
+function initializePeer(swarm, peerId, connId) {
   let {stickyPeers} = swarm;
   if (!stickyPeers[peerId]) {
     stickyPeers[peerId] = {
-      hadStream: false,
-      lastFailure: null,
+      connections: {},
     };
     swarm.update('stickyPeers');
     swarm.emit('newPeer', peerId);
   }
-  stickyPeers[peerId].connId = connId;
-  if (sharedState) updatePeerState(swarm, peerId, sharedState);
+  if (!stickyPeers[peerId].connections[connId]) {
+    stickyPeers[peerId].connections[connId] = {lastFailure: null};
+  }
 }
 
 function updatePeerState(swarm, peerId, state) {
