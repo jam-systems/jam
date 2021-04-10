@@ -140,6 +140,7 @@ function handleSignal(swarm, {connId, yourConnId, peerId, data}) {
     } else {
       log('not creating peer');
     }
+    return;
   }
 
   let peer = swarm.peers[peerId];
