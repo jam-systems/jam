@@ -242,8 +242,8 @@ function stopTimeout(swarm, peerId, connId) {
 }
 
 function handlePeerSuccess(swarm, peerId, connId) {
-  let peer = swarm.stickyPeers[peerId];
-  peer.lastFailure = null; // TODO update problem indicators?
+  let connection = swarm.stickyPeers[peerId].connections[connId];
+  connection.lastFailure = null; // TODO update problem indicators?
   stopTimeout(swarm, peerId, connId);
 }
 
