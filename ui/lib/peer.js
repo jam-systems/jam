@@ -11,6 +11,100 @@ let _debug = DEV;
 
 export {connectPeer, removePeer, addStreamToPeer, handleSignal};
 
+function connectPeer(swarm, hub, peerId, connId) {
+  // connect to a peer whose peerId & connId we already know
+  // either after being pinged by connect-me or as a retry
+  // SPEC:
+  // -) this has to be callable by both peers without race conflict
+  // -) this has to work in every state of swarm.peers (e.g. with or without existing Peer instance)
+  log('connecting peer', s(peerId), connId);
+  let {myPeerId, myConnId, stickyPeers, sharedState} = swarm;
+  let peer = stickyPeers[peerId];
+  timeoutPeer(swarm, peerId, connId, MAX_CONNECT_TIME);
+  if (myPeerId > peerId) {
+    log('i initiate, and override any previous peer!');
+    createPeer(swarm, peerId, connId, true);
+  } else {
+    log('i dont initiate, wait for first signal');
+    hub.broadcast(peerId, {
+      type: 'signal',
+      peerId: myPeerId,
+      connId: myConnId,
+      yourConnId: connId,
+      sharedState,
+      data: {youStart: true, type: 'you-start'},
+    });
+    let {pc} = peer.connections[connId];
+    if (pc) {
+      log('destroying old peer', s(peerId));
+      pc.garbage = true;
+      pc.destroy();
+    }
+    log('sent no-you-connect', s(peerId));
+  }
+}
+
+function handleSignal(swarm, {connId, yourConnId, peerId, data}) {
+  let {myConnId, myPeerId, hub, stickyPeers} = swarm;
+  if (yourConnId !== myConnId) {
+    console.warn('signal to different session, should be ignored');
+    log('ignoring msg to different session', yourConnId);
+    return;
+  }
+  let connection = stickyPeers[peerId].connections[connId];
+
+  if (data.youStart) {
+    // only accept back-connection if connect request was made
+    log('i initiate, but dont override if i already have a peer');
+    // (because no-you-connect can only happen after i sent connect, at which point i couldn't have had peers,
+    // so the peer i already have comes from a racing connect from the other peer)
+    if (!connection.pc) {
+      log('creating peer because i didnt have one');
+      createPeer(swarm, peerId, connId, true);
+    } else {
+      log('not creating peer');
+    }
+    return;
+  }
+
+  let peer = connection.pc;
+  let {first, from} = data;
+  let iAmActive = myPeerId > peerId;
+
+  if (first && !iAmActive) {
+    // this is the ONLY place a peer should ever be created by non-initiator
+    log('I got the first signal and create a new peer to receive it');
+    peer = createPeer(swarm, peerId, connId, false);
+    peer.from = from;
+  }
+
+  if (!peer || peer.destroyed) {
+    console.warn(
+      'I received a signal without being in a valid state for any further action. Reconnecting!'
+    );
+    log('Signal data:', data);
+    connectPeer(swarm, hub, peerId, connId);
+    return;
+  }
+
+  if (!peer.from) {
+    peer.from = from;
+    if (!iAmActive) console.error('Something impossible happened');
+  }
+
+  // at this point we have peer && peer.from
+  if (peer.from !== from) {
+    console.warn('Ignoring signal from wrong peer instance.');
+    return;
+  }
+
+  // from here on we are in the happy path
+  addPeerMetaData(peer, data.meta);
+  peer.signal(data);
+  if (!(first && !iAmActive))
+    addToTimeout(swarm, peerId, connId, MIN_MAX_CONNECT_TIME_AFTER_SIGNAL);
+}
+
 function createPeer(swarm, peerId, connId, initiator) {
   let {hub, localStreams, stickyPeers, myPeerId, myConnId, pcConfig} = swarm;
   if (!myPeerId || peerId === myPeerId) return;
@@ -116,67 +210,6 @@ function createPeer(swarm, peerId, connId, initiator) {
     handlePeerFail(swarm, peerId, connId);
   });
   return peer;
-}
-
-function handleSignal(swarm, {connId, yourConnId, peerId, data}) {
-  let {myConnId, myPeerId, hub, stickyPeers} = swarm;
-  if (yourConnId !== myConnId) {
-    console.warn('signal to different session, should be ignored');
-    log('ignoring msg to different session', yourConnId);
-    return;
-  }
-  let connection = stickyPeers[peerId].connections[connId];
-
-  if (data.youStart) {
-    // only accept back-connection if connect request was made
-    log('i initiate, but dont override if i already have a peer');
-    // (because no-you-connect can only happen after i sent connect, at which point i couldn't have had peers,
-    // so the peer i already have comes from a racing connect from the other peer)
-    if (!connection.pc) {
-      log('creating peer because i didnt have one');
-      createPeer(swarm, peerId, connId, true);
-    } else {
-      log('not creating peer');
-    }
-    return;
-  }
-
-  let peer = connection.pc;
-  let {first, from} = data;
-  let iAmActive = myPeerId > peerId;
-
-  if (first && !iAmActive) {
-    // this is the ONLY place a peer should ever be created by non-initiator
-    log('I got the first signal and create a new peer to receive it');
-    peer = createPeer(swarm, peerId, connId, false);
-    peer.from = from;
-  }
-
-  if (!peer || peer.destroyed) {
-    console.warn(
-      'I received a signal without being in a valid state for any further action. Reconnecting!'
-    );
-    log('Signal data:', data);
-    connectPeer(swarm, hub, peerId, connId);
-    return;
-  }
-
-  if (!peer.from) {
-    peer.from = from;
-    if (!iAmActive) console.error('Something impossible happened');
-  }
-
-  // at this point we have peer && peer.from
-  if (peer.from !== from) {
-    console.warn('Ignoring signal from wrong peer instance.');
-    return;
-  }
-
-  // from here on we are in the happy path
-  addPeerMetaData(peer, data.meta);
-  peer.signal(data);
-  if (!(first && !iAmActive))
-    addToTimeout(swarm, peerId, connId, MIN_MAX_CONNECT_TIME_AFTER_SIGNAL);
 }
 
 function timeoutPeer(swarm, peerId, connId, delay, message) {
@@ -293,39 +326,6 @@ function addStreamToPeer(peer, stream, name) {
         console.error(err);
       }
     }
-  }
-}
-
-function connectPeer(swarm, hub, peerId, connId) {
-  // connect to a peer whose peerId & connId we already know
-  // either after being pinged by connect-me or as a retry
-  // SPEC:
-  // -) this has to be callable by both peers without race conflict
-  // -) this has to work in every state of swarm.peers (e.g. with or without existing Peer instance)
-  log('connecting peer', s(peerId), connId);
-  let {myPeerId, myConnId, stickyPeers, sharedState} = swarm;
-  let peer = stickyPeers[peerId];
-  timeoutPeer(swarm, peerId, connId, MAX_CONNECT_TIME);
-  if (myPeerId > peerId) {
-    log('i initiate, and override any previous peer!');
-    createPeer(swarm, peerId, connId, true);
-  } else {
-    log('i dont initiate, wait for first signal');
-    hub.broadcast(peerId, {
-      type: 'signal',
-      peerId: myPeerId,
-      connId: myConnId,
-      yourConnId: connId,
-      sharedState,
-      data: {youStart: true, type: 'you-start'},
-    });
-    let {pc} = peer.connections[connId];
-    if (pc) {
-      log('destroying old peer', s(peerId));
-      pc.garbage = true;
-      pc.destroy();
-    }
-    log('sent no-you-connect', s(peerId));
   }
 }
 
