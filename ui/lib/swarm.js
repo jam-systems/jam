@@ -32,6 +32,7 @@ const swarm = State({
   newPeer: null,
   failedConnection: null,
   sharedEvent: null,
+  rawPeerState: null,
   peerEvent: null,
   anonymous: null,
 });
@@ -255,8 +256,9 @@ function* yieldConnections(swarm) {
 
 function newPeerState(connection, newState) {
   if (newState === undefined) return;
-  let {swarm, peerId} = connection;
+  let {swarm, peerId, connId} = connection;
   connection.state = newState;
+  swarm.emit('rawPeerState', newState, peerId, connId);
   updatePeerState(swarm, peerId, newState);
 }
 
