@@ -26,7 +26,7 @@ function connectPeer(connection) {
   // -) this has to work in every state of swarm.peers (e.g. with or without existing Peer instance)
   let {swarm, peerId, connId} = connection;
   log('connecting peer', s(peerId), connId);
-  let {myPeerId, myConnId, sharedState} = swarm;
+  let {myPeerId, myConnId, sharedState, sharedStateTime} = swarm;
   timeoutPeer(connection, MAX_CONNECT_TIME);
   if (myPeerId > peerId || (myPeerId === peerId && myConnId > connId)) {
     log('i initiate, and override any previous peer!');
@@ -38,7 +38,7 @@ function connectPeer(connection) {
       peerId: myPeerId,
       connId: myConnId,
       yourConnId: connId,
-      sharedState,
+      state: {state: sharedState, time: sharedStateTime},
       data: {youStart: true, type: 'you-start'},
     });
     let {pc} = connection;
@@ -148,11 +148,11 @@ function createPeer(connection, initiator) {
     }
     data.meta = {remoteStreamIds};
     data.from = peer._id;
-    let sharedState;
+    let state;
     if (!peer.didSignal) {
       data.first = true;
       peer.didSignal = true;
-      sharedState = swarm.sharedState;
+      state = {state: swarm.sharedState, time: swarm.sharedStateTime};
     }
     hub.broadcast(peerId, {
       type: 'signal',
@@ -160,7 +160,7 @@ function createPeer(connection, initiator) {
       connId: myConnId,
       yourConnId: connId,
       data,
-      sharedState,
+      state,
     });
   });
   peer.on('connect', () => {
@@ -275,7 +275,7 @@ function addPeerMetaData(peer, data) {
 // for reference: https://github.com/feross/simple-peer/issues/606
 function addStreamToPeer(connection, stream, name) {
   let peer = connection.pc;
-  if (peer === undefined) return;
+  if (peer === undefined || peer.destroyed) return;
   let oldStream = peer.streams[name];
   if (oldStream && oldStream === stream) return; // avoid error if listener is called twice
   if (oldStream) {

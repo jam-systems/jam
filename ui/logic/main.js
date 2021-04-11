@@ -20,9 +20,9 @@ function configSignalhub() {
     url: config.urls.signalHub + '/',
     sign: signData,
     verify: verifyData,
-    reduceState: (states, oldState, newState) => {
-      if (newState?.inRoom) return newState;
-      return {...oldState, inRoom: states.some(s => s.inRoom)};
+    reduceState: (states, _, latestState) => {
+      if (latestState.inRoom) return latestState;
+      return {...latestState, inRoom: states.some(s => s.inRoom)};
     },
     pcConfig: {
       iceTransportPolicy: 'all',
@@ -67,15 +67,22 @@ on(state, 'room', room => {
   }
 });
 // leave room when same peer joins it from elsewhere and I'm in room
-on(swarm, 'rawPeerState', ({inRoom}, peerId, connId) => {
-  if (
-    peerId === swarm.myPeerId &&
-    connId !== swarm.myConnId &&
-    inRoom &&
-    state.inRoom
-  ) {
-    leaveRoom();
+on(swarm.connectionState, identity.publicKey, myConnState => {
+  if (myConnState === undefined) {
+    is(state, {otherDeviceInRoom: false});
+    return;
   }
+  let {states, latest} = myConnState;
+  let {myConnId} = swarm;
+  let otherDeviceInRoom = false;
+  for (let connId in states) {
+    if (connId !== myConnId && states[connId].state.inRoom) {
+      otherDeviceInRoom = true;
+      if (connId === latest && state.inRoom) leaveRoom();
+      break;
+    }
+  }
+  is(state, {otherDeviceInRoom});
 });
 
 swarm.on('newPeer', async id => {

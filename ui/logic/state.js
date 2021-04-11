@@ -8,6 +8,7 @@ const state = State({
   iAmSpeaker: false,
   iAmModerator: false,
   identities: {},
+  otherDeviceInRoom: false,
 
   reactions: {},
   raisedHands: new Set(),
