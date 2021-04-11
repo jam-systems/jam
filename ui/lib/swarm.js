@@ -80,12 +80,11 @@ swarm.on('sharedEvent', data => {
   });
 });
 
-export {config, connect, disconnect, reconnect, addLocalStream};
+export {config, connect, disconnect, addLocalStream};
 
 swarm.config = config;
 swarm.connect = connect;
 swarm.disconnect = disconnect;
-swarm.reconnect = reconnect;
 swarm.addLocalStream = addLocalStream;
 
 // public API ends here
@@ -174,11 +173,6 @@ function disconnect() {
     } catch (e) {}
     removeConnection(connection);
   }
-}
-
-function reconnect() {
-  disconnect();
-  connect();
 }
 
 function randomHex4() {
