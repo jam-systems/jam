@@ -20,6 +20,10 @@ function configSignalhub() {
     url: config.urls.signalHub + '/',
     sign: signData,
     verify: verifyData,
+    reduceState: (states, oldState, newState) => {
+      if (newState?.inRoom) return newState;
+      return {...oldState, inRoom: states.some(s => s.inRoom)};
+    },
     pcConfig: {
       iceTransportPolicy: 'all',
       iceServers: [
