@@ -78,10 +78,9 @@ function getAudio(id) {
 }
 
 function playOrShowModal(audio) {
-  let inRoom = state.inRoom;
   return play(audio).catch(err => {
     console.warn(err);
-    if (inRoom) {
+    if (state.inRoom) {
       openModal(InteractionModal, {}, 'interaction');
     }
   });
