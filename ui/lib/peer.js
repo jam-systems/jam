@@ -9,24 +9,28 @@ const MAX_FAIL_TIME = 20000;
 
 let _debug = DEV;
 
-export {connectPeer, removePeer, addStreamToPeer, handleSignal};
+export {newConnection, connectPeer, addStreamToPeer, handleSignal};
 
-function connectPeer(swarm, hub, peerId, connId) {
+function newConnection({swarm, peerId, connId}) {
+  return {lastFailure: null, peerId, connId, swarm};
+}
+
+function connectPeer(connection) {
   // connect to a peer whose peerId & connId we already know
   // either after being pinged by connect-me or as a retry
   // SPEC:
   // -) this has to be callable by both peers without race conflict
   // -) this has to work in every state of swarm.peers (e.g. with or without existing Peer instance)
+  let {swarm, peerId, connId} = connection;
   log('connecting peer', s(peerId), connId);
-  let {myPeerId, myConnId, stickyPeers, sharedState} = swarm;
-  let peer = stickyPeers[peerId];
-  timeoutPeer(swarm, peerId, connId, MAX_CONNECT_TIME);
+  let {myPeerId, myConnId, sharedState} = swarm;
+  timeoutPeer(connection, MAX_CONNECT_TIME);
   if (myPeerId > peerId) {
     log('i initiate, and override any previous peer!');
-    createPeer(swarm, peerId, connId, true);
+    createPeer(connection, true);
   } else {
     log('i dont initiate, wait for first signal');
-    hub.broadcast(peerId, {
+    swarm.hub.broadcast(peerId, {
       type: 'signal',
       peerId: myPeerId,
       connId: myConnId,
@@ -34,7 +38,7 @@ function connectPeer(swarm, hub, peerId, connId) {
       sharedState,
       data: {youStart: true, type: 'you-start'},
     });
-    let {pc} = peer.connections[connId];
+    let {pc} = connection;
     if (pc) {
       log('destroying old peer', s(peerId));
       pc.garbage = true;
@@ -44,15 +48,14 @@ function connectPeer(swarm, hub, peerId, connId) {
   }
 }
 
-function handleSignal(swarm, {connId, yourConnId, peerId, data}) {
-  let {myConnId, myPeerId, hub, stickyPeers} = swarm;
+function handleSignal(connection, {yourConnId, data}) {
+  let {swarm, peerId} = connection;
+  let {myConnId, myPeerId} = swarm;
   if (yourConnId !== myConnId) {
     console.warn('signal to different session, should be ignored');
     log('ignoring msg to different session', yourConnId);
     return;
   }
-  let connection = stickyPeers[peerId].connections[connId];
-
   if (data.youStart) {
     // only accept back-connection if connect request was made
     log('i initiate, but dont override if i already have a peer');
@@ -60,7 +63,7 @@ function handleSignal(swarm, {connId, yourConnId, peerId, data}) {
     // so the peer i already have comes from a racing connect from the other peer)
     if (!connection.pc) {
       log('creating peer because i didnt have one');
-      createPeer(swarm, peerId, connId, true);
+      createPeer(connection, true);
     } else {
       log('not creating peer');
     }
@@ -74,7 +77,7 @@ function handleSignal(swarm, {connId, yourConnId, peerId, data}) {
   if (first && !iAmActive) {
     // this is the ONLY place a peer should ever be created by non-initiator
     log('I got the first signal and create a new peer to receive it');
-    peer = createPeer(swarm, peerId, connId, false);
+    peer = createPeer(connection, false);
     peer.from = from;
   }
 
@@ -83,7 +86,7 @@ function handleSignal(swarm, {connId, yourConnId, peerId, data}) {
       'I received a signal without being in a valid state for any further action. Reconnecting!'
     );
     log('Signal data:', data);
-    connectPeer(swarm, hub, peerId, connId);
+    connectPeer(connection);
     return;
   }
 
@@ -102,14 +105,14 @@ function handleSignal(swarm, {connId, yourConnId, peerId, data}) {
   addPeerMetaData(peer, data.meta);
   peer.signal(data);
   if (!(first && !iAmActive))
-    addToTimeout(swarm, peerId, connId, MIN_MAX_CONNECT_TIME_AFTER_SIGNAL);
+    addToTimeout(connection, MIN_MAX_CONNECT_TIME_AFTER_SIGNAL);
 }
 
-function createPeer(swarm, peerId, connId, initiator) {
-  let {hub, localStreams, stickyPeers, myPeerId, myConnId, pcConfig} = swarm;
+function createPeer(connection, initiator) {
+  let {swarm, peerId, connId} = connection;
+  let {hub, localStreams, myPeerId, myConnId, pcConfig} = swarm;
   if (!myPeerId || peerId === myPeerId) return;
   // destroy any existing peer
-  let connection = stickyPeers[peerId].connections[connId];
   let peer = connection.pc;
   if (peer) {
     log('destroying old peer', s(peerId));
@@ -164,7 +167,7 @@ function createPeer(swarm, peerId, connId, initiator) {
   });
   peer.on('connect', () => {
     log('connected peer', s(peerId), 'after', Date.now() - peer.connectStart);
-    handlePeerSuccess(swarm, peerId, connId);
+    handlePeerSuccess(connection);
   });
 
   peer.on('data', rawData => {
@@ -194,26 +197,23 @@ function createPeer(swarm, peerId, connId, initiator) {
     log('ice state', state);
     if (state === 'disconnected') {
       timeoutPeer(
-        swarm,
-        peerId,
-        connId,
+        connection,
         MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT,
         'peer timed out after ice disconnect'
       );
     }
     if (state === 'connected' || state === 'completed') {
-      handlePeerSuccess(swarm, peerId, connId);
+      handlePeerSuccess(connection);
     }
   });
   peer.on('close', () => {
     if (peer.garbage) return;
-    handlePeerFail(swarm, peerId, connId);
+    handlePeerFail(connection);
   });
   return peer;
 }
 
-function timeoutPeer(swarm, peerId, connId, delay, message) {
-  let connection = swarm.stickyPeers[peerId].connections[connId];
+function timeoutPeer(connection, delay, message) {
   let now = Date.now();
   connection.lastFailure = connection.lastFailure || now; // TODO update problem indicators?
   clearTimeout(connection.timeout);
@@ -222,38 +222,32 @@ function timeoutPeer(swarm, peerId, connId, delay, message) {
   if (message) connection.timeoutMessage = message;
   connection.timeout = setTimeout(() => {
     log(connection.timeoutMessage || 'peer timed out');
-    handlePeerFail(swarm, peerId, connId);
+    handlePeerFail(connection);
   }, delay);
 
   log('timeout peer in', delay);
 }
 
-function addToTimeout(swarm, peerId, connId, delay) {
-  let connection = swarm.stickyPeers[peerId].connections[connId];
-  if (connection.timeout) timeoutPeer(swarm, peerId, connId, delay);
+function addToTimeout(connection, delay) {
+  if (connection.timeout) timeoutPeer(connection, delay);
 }
 
-function stopTimeout(swarm, peerId, connId) {
-  let connection = swarm.stickyPeers[peerId].connections[connId];
+function stopTimeout(connection) {
   clearTimeout(connection.timeout);
   connection.timeout = null;
   connection.timeoutMessage = '';
   connection.timeoutEnd = 0;
 }
 
-function handlePeerSuccess(swarm, peerId, connId) {
-  let connection = swarm.stickyPeers[peerId].connections[connId];
+function handlePeerSuccess(connection) {
   connection.lastFailure = null; // TODO update problem indicators?
-  stopTimeout(swarm, peerId, connId);
+  stopTimeout(connection);
 }
 
-function handlePeerFail(swarm, peerId, connId) {
+function handlePeerFail(connection) {
   // peer either took too long to fire 'connect', or fired an error-like event
   // depending how long we already tried, either reconnect or remove peer
-  let {stickyPeers, hub} = swarm;
-  stopTimeout(swarm, peerId, connId);
-
-  let connection = stickyPeers[peerId].connections[connId];
+  stopTimeout(connection);
   let now = Date.now();
   connection.lastFailure = connection.lastFailure || now;
   let failTime = now - connection.lastFailure;
@@ -261,28 +255,9 @@ function handlePeerFail(swarm, peerId, connId) {
   log('handle peer fail! time failing:', failTime);
 
   if (failTime > MAX_FAIL_TIME) {
-    removePeer(swarm, peerId, connId);
+    connection.swarm.emit('failedConnection', connection);
   } else {
-    connectPeer(swarm, hub, peerId, connId);
-  }
-}
-
-function removePeer(swarm, peerId, connId) {
-  let {stickyPeers} = swarm;
-  log('removing peer', s(peerId), connId);
-  if (stickyPeers[peerId]) {
-    delete stickyPeers[peerId].connections[connId];
-  }
-  let connections = Object.keys(stickyPeers[peerId]?.connections || {});
-  if (connections.length === 0) delete stickyPeers[peerId];
-  swarm.update('stickyPeers');
-  if (connections.length > 0) return;
-  let {remoteStreams} = swarm;
-  if (remoteStreams.find(streamObj => streamObj.peerId === peerId)) {
-    swarm.set(
-      'remoteStreams',
-      remoteStreams.filter(streamObj => streamObj.peerId !== peerId)
-    );
+    connectPeer(connection);
   }
 }
 
@@ -300,7 +275,9 @@ function addPeerMetaData(peer, data) {
 // TODO: replaceTrack is less invasive than removeTrack + addTrack,
 // use it if both old and new tracks exist?
 // for reference: https://github.com/feross/simple-peer/issues/606
-function addStreamToPeer(peer, stream, name) {
+function addStreamToPeer(connection, stream, name) {
+  let peer = connection.pc;
+  if (peer === undefined) return;
   let oldStream = peer.streams[name];
   if (oldStream && oldStream === stream) return; // avoid error if listener is called twice
   if (oldStream) {

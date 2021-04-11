@@ -1,13 +1,18 @@
 import State from 'use-minimal-state';
 import {authenticatedHub} from './signalhub';
 import causalLog from './causal-log';
-import {connectPeer, removePeer, addStreamToPeer, handleSignal} from './peer';
+import {
+  newConnection,
+  connectPeer,
+  addStreamToPeer,
+  handleSignal,
+} from './peer';
 
 // public API starts here
 
 const swarm = State({
   // state
-  stickyPeers: {}, // {peerId: {connections: {connId: {lastFailure: number, pc: SimplePeer, timeout}}}
+  stickyPeers: {}, // {peerId: {connections: {connId: {lastFailure: number, pc: SimplePeer, timeout, peerId, connId}}}
   myPeerId: null,
   connected: false,
   remoteStreams: [], // [{stream, name, peerId}], only one per (name, peerId) if name is set
@@ -23,6 +28,7 @@ const swarm = State({
   stream: null,
   data: null,
   newPeer: null,
+  failedConnection: null,
   sharedEvent: null,
   peerEvent: null,
   anonymous: null,
@@ -43,15 +49,10 @@ function config({url, room, myPeerId, sign, verify, pcConfig, debug}) {
 function addLocalStream(stream, name) {
   log('addlocalstream', stream, name);
   if (!name) name = randomHex4();
-  let {localStreams, stickyPeers} = swarm;
-  localStreams[name] = stream;
+  swarm.localStreams[name] = stream;
   try {
-    for (let peerId in stickyPeers) {
-      let {connections} = stickyPeers[peerId];
-      for (let connId in connections) {
-        let {pc} = connections[connId];
-        if (pc) addStreamToPeer(pc, stream, name);
-      }
+    for (let connection of yieldConnections(swarm)) {
+      addStreamToPeer(connection, stream, name);
     }
   } catch (err) {
     console.error('ERROR: add stream to peers');
@@ -130,9 +131,10 @@ function connect(room) {
     if (type === 'connect-me') {
       if (peerId === myPeerId) return;
       log('got connect-me');
-      initializePeer(swarm, peerId, connId);
+      initializePeer(swarm, peerId);
       if (sharedState) updatePeerState(swarm, peerId, sharedState);
-      connectPeer(swarm, hub, peerId, connId);
+      let connection = getConnection(swarm, peerId, connId);
+      connectPeer(connection);
     }
     if (type === 'shared-state') {
       updatePeerState(swarm, peerId, data);
@@ -147,9 +149,10 @@ function connect(room) {
     ({type, peerId, data, connId, yourConnId, sharedState}) => {
       if (type === 'signal') {
         log('signal received from', s(peerId), connId, data.type);
-        initializePeer(swarm, peerId, connId);
+        initializePeer(swarm, peerId);
         if (sharedState) updatePeerState(swarm, peerId, sharedState);
-        handleSignal(swarm, {peerId, connId, yourConnId, data});
+        let connection = getConnection(swarm, peerId, connId);
+        handleSignal(connection, {yourConnId, data});
       }
     }
   );
@@ -160,19 +163,16 @@ function connect(room) {
 }
 
 function disconnect() {
-  let {hub, stickyPeers} = swarm;
+  let {hub} = swarm;
   if (hub) hub.close();
   swarm.hub = null;
   swarm.myConnId = null;
   swarm.set('connected', false);
-  for (let peerId in stickyPeers) {
-    let {connections} = stickyPeers[peerId];
-    for (let connId in connections) {
-      try {
-        connections[connId].pc.destroy();
-      } catch (e) {}
-      removePeer(swarm, peerId, connId);
-    }
+  for (let connection of yieldConnections(swarm)) {
+    try {
+      connection.pc.destroy();
+    } catch (e) {}
+    removeConnection(connection);
   }
 }
 
@@ -196,17 +196,61 @@ let log = (...a) => {
   causalLog(time, ...a);
 };
 
-function initializePeer(swarm, peerId, connId) {
-  let {stickyPeers} = swarm;
-  if (!stickyPeers[peerId]) {
-    stickyPeers[peerId] = {
-      connections: {},
-    };
+function initializePeer(swarm, peerId) {
+  if (swarm.stickyPeers[peerId] === undefined) {
+    getPeer(swarm, peerId);
     swarm.update('stickyPeers');
     swarm.emit('newPeer', peerId);
   }
-  if (!stickyPeers[peerId].connections[connId]) {
-    stickyPeers[peerId].connections[connId] = {lastFailure: null};
+}
+
+function getPeer(swarm, peerId) {
+  let {stickyPeers} = swarm;
+  let peer = stickyPeers[peerId];
+  if (peer === undefined) {
+    peer = {connections: {}};
+    stickyPeers[peerId] = peer;
+  }
+  return peer;
+}
+
+function getConnection(swarm, peerId, connId) {
+  let peer = getPeer(swarm, peerId);
+  let connection = peer.connections[connId];
+  if (connection === undefined) {
+    connection = newConnection({swarm, peerId, connId});
+    peer.connections[connId] = connection;
+  }
+  return connection;
+}
+
+function removeConnection({swarm, peerId, connId}) {
+  let {stickyPeers} = swarm;
+  log('removing peer', s(peerId), connId);
+  if (stickyPeers[peerId]) {
+    delete stickyPeers[peerId].connections[connId];
+  }
+  let connections = Object.keys(stickyPeers[peerId]?.connections || {});
+  if (connections.length === 0) delete stickyPeers[peerId];
+  swarm.update('stickyPeers');
+  if (connections.length > 0) return;
+  let {remoteStreams} = swarm;
+  if (remoteStreams.find(streamObj => streamObj.peerId === peerId)) {
+    swarm.set(
+      'remoteStreams',
+      remoteStreams.filter(streamObj => streamObj.peerId !== peerId)
+    );
+  }
+}
+swarm.on('failedConnection', c => removeConnection(c));
+
+function* yieldConnections(swarm) {
+  let {stickyPeers} = swarm;
+  for (let peerId in stickyPeers) {
+    let {connections} = stickyPeers[peerId];
+    for (let connId in connections) {
+      yield connections[connId];
+    }
   }
 }
 
