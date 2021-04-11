@@ -12,7 +12,8 @@ import {
 
 const swarm = State({
   // state
-  stickyPeers: {}, // {peerId: {connections: {connId: {lastFailure: number, pc: SimplePeer, timeout, peerId, connId}}}
+  stickyPeers: {}, // {peerId: {connections: {connId: {state: {}, lastFailure: number, pc: SimplePeer, timeout, peerId, connId}}}
+  myPeer: {connections: {}}, // other sessions of same peer
   myPeerId: null,
   connected: false,
   remoteStreams: [], // [{stream, name, peerId}], only one per (name, peerId) if name is set
@@ -24,6 +25,7 @@ const swarm = State({
   debug: false,
   hub: null,
   localStreams: {},
+  reduceState: (_allStates, newState) => newState,
   // events
   stream: null,
   data: null,
@@ -36,12 +38,22 @@ const swarm = State({
 
 export default swarm;
 
-function config({url, room, myPeerId, sign, verify, pcConfig, debug}) {
+function config({
+  url,
+  room,
+  myPeerId,
+  sign,
+  verify,
+  reduceState,
+  pcConfig,
+  debug,
+}) {
   if (url) swarm.url = url;
   if (room) swarm.room = room;
   if (myPeerId) swarm.myPeerId = myPeerId;
   if (sign) swarm.sign = sign; // sign(state): string
   if (verify) swarm.verify = verify; // verify(signedState, peerId): state | undefined
+  if (reduceState) swarm.reduceState = reduceState; // reduceState([state], newState, connection): state
   if (pcConfig) swarm.pcConfig = pcConfig;
   if (debug) swarm.debug = debug;
 }
@@ -61,21 +73,23 @@ function addLocalStream(stream, name) {
 }
 
 swarm.on('sharedState', data => {
-  let {hub, myPeerId} = swarm;
-  if (!hub || !myPeerId) return;
+  let {hub, myPeerId, myConnId} = swarm;
+  if (!hub || !myPeerId || !myConnId) return;
   hub.broadcast('all', {
     type: 'shared-state',
     peerId: myPeerId,
+    connId: myConnId,
     data,
   });
 });
 
 swarm.on('sharedEvent', data => {
-  let {hub, myPeerId} = swarm;
-  if (!hub || !myPeerId) return;
+  let {hub, myPeerId, myConnId} = swarm;
+  if (!hub || !myPeerId || !myConnId) return;
   hub.broadcast('all', {
     type: 'shared-event',
     peerId: myPeerId,
+    connId: myConnId,
     data,
   });
 });
@@ -128,15 +142,16 @@ function connect(room) {
 
   hub.subscribe('all', ({type, peerId, connId, data, sharedState}) => {
     if (type === 'connect-me') {
-      if (peerId === myPeerId) return;
+      if (peerId === myPeerId && connId === myConnId) return;
       log('got connect-me');
       initializePeer(swarm, peerId);
-      if (sharedState) updatePeerState(swarm, peerId, sharedState);
       let connection = getConnection(swarm, peerId, connId);
+      if (sharedState) updatePeerState(connection, sharedState);
       connectPeer(connection);
     }
     if (type === 'shared-state') {
-      updatePeerState(swarm, peerId, data);
+      let connection = getConnection(swarm, peerId, connId);
+      updatePeerState(connection, data);
     }
     if (type === 'shared-event') {
       swarm.emit('peerEvent', peerId, data);
@@ -149,8 +164,8 @@ function connect(room) {
       if (type === 'signal') {
         log('signal received from', s(peerId), connId, data.type);
         initializePeer(swarm, peerId);
-        if (sharedState) updatePeerState(swarm, peerId, sharedState);
         let connection = getConnection(swarm, peerId, connId);
+        if (sharedState) updatePeerState(connection, sharedState);
         handleSignal(connection, {yourConnId, data});
       }
     }
@@ -175,21 +190,6 @@ function disconnect() {
   }
 }
 
-function randomHex4() {
-  return ((Math.random() * 16 ** 4) | 0).toString(16).padStart(4, '0');
-}
-
-let s = id => id.slice(0, 2);
-
-let log = (...a) => {
-  if (!swarm.debug) return;
-  let d = new Date();
-  let time = `[${d.toLocaleTimeString('de-DE')},${String(
-    d.getMilliseconds()
-  ).padStart(3, '0')}]`;
-  causalLog(time, ...a);
-};
-
 function initializePeer(swarm, peerId) {
   if (swarm.stickyPeers[peerId] === undefined) {
     getPeer(swarm, peerId);
@@ -199,6 +199,7 @@ function initializePeer(swarm, peerId) {
 }
 
 function getPeer(swarm, peerId) {
+  if (peerId === swarm.myPeerId) return swarm.myPeer;
   let {stickyPeers} = swarm;
   let peer = stickyPeers[peerId];
   if (peer === undefined) {
@@ -239,7 +240,10 @@ function removeConnection({swarm, peerId, connId}) {
 swarm.on('failedConnection', c => removeConnection(c));
 
 function* yieldConnections(swarm) {
-  let {stickyPeers} = swarm;
+  let {stickyPeers, myPeer} = swarm;
+  for (let connId in myPeer.connections) {
+    yield myPeer.connections[connId];
+  }
   for (let peerId in stickyPeers) {
     let {connections} = stickyPeers[peerId];
     for (let connId in connections) {
@@ -248,7 +252,28 @@ function* yieldConnections(swarm) {
   }
 }
 
-function updatePeerState(swarm, peerId, state) {
+function updatePeerState(connection, newState) {
+  let {swarm, peerId} = connection;
+  connection.state = newState;
+  let peer = getPeer(swarm, peerId);
+  let allStates = Object.values(peer.connections).map(c => c.state);
+  if (peerId === swarm.myPeerId) allStates.push(swarm.sharedState);
+  let state = swarm.reduceState(allStates, newState, connection);
   swarm.peerState[peerId] = state;
   swarm.update('peerState');
 }
+
+function randomHex4() {
+  return ((Math.random() * 16 ** 4) | 0).toString(16).padStart(4, '0');
+}
+
+let s = id => id.slice(0, 2);
+
+let log = (...a) => {
+  if (!swarm.debug) return;
+  let d = new Date();
+  let time = `[${d.toLocaleTimeString('de-DE')},${String(
+    d.getMilliseconds()
+  ).padStart(3, '0')}]`;
+  causalLog(time, ...a);
+};

@@ -11,8 +11,11 @@ let _debug = DEV;
 
 export {newConnection, connectPeer, addStreamToPeer, handleSignal};
 
-function newConnection({swarm, peerId, connId}) {
-  return {lastFailure: null, peerId, connId, swarm};
+// connection:
+// {swarm, peerId, connId, lastFailure, ...timeoutStuff, }
+
+function newConnection({swarm, peerId, connId, state}) {
+  return {lastFailure: null, peerId, connId, swarm, state: state || {}};
 }
 
 function connectPeer(connection) {
@@ -25,7 +28,7 @@ function connectPeer(connection) {
   log('connecting peer', s(peerId), connId);
   let {myPeerId, myConnId, sharedState} = swarm;
   timeoutPeer(connection, MAX_CONNECT_TIME);
-  if (myPeerId > peerId) {
+  if (myPeerId > peerId || (myPeerId === peerId && myConnId > connId)) {
     log('i initiate, and override any previous peer!');
     createPeer(connection, true);
   } else {
@@ -49,7 +52,7 @@ function connectPeer(connection) {
 }
 
 function handleSignal(connection, {yourConnId, data}) {
-  let {swarm, peerId} = connection;
+  let {swarm, peerId, connId} = connection;
   let {myConnId, myPeerId} = swarm;
   if (yourConnId !== myConnId) {
     console.warn('signal to different session, should be ignored');
@@ -72,7 +75,8 @@ function handleSignal(connection, {yourConnId, data}) {
 
   let peer = connection.pc;
   let {first, from} = data;
-  let iAmActive = myPeerId > peerId;
+  let iAmActive =
+    myPeerId > peerId || (myPeerId === peerId && myConnId > connId);
 
   if (first && !iAmActive) {
     // this is the ONLY place a peer should ever be created by non-initiator
@@ -111,7 +115,6 @@ function handleSignal(connection, {yourConnId, data}) {
 function createPeer(connection, initiator) {
   let {swarm, peerId, connId} = connection;
   let {hub, localStreams, myPeerId, myConnId, pcConfig} = swarm;
-  if (!myPeerId || peerId === myPeerId) return;
   // destroy any existing peer
   let peer = connection.pc;
   if (peer) {
