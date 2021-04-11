@@ -12,10 +12,10 @@ let _debug = DEV;
 export {newConnection, connectPeer, addStreamToPeer, handleSignal};
 
 // connection:
-// {swarm, peerId, connId, lastFailure, ...timeoutStuff, }
+// {swarm, peerId, connId, ...timeoutStuff, pc }
 
-function newConnection({swarm, peerId, connId, state}) {
-  return {lastFailure: null, peerId, connId, swarm, state: state || {}};
+function newConnection({swarm, peerId, connId}) {
+  return {swarm, peerId, connId, lastFailure: null};
 }
 
 function connectPeer(connection) {
@@ -305,10 +305,6 @@ function addStreamToPeer(connection, stream, name) {
 }
 
 let s = id => id.slice(0, 2);
-
-let debug = doDebug => {
-  _debug = doDebug;
-};
 
 let log = (...a) => {
   if (!_debug) return;
