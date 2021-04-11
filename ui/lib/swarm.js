@@ -25,7 +25,7 @@ const swarm = State({
   debug: false,
   hub: null,
   localStreams: {},
-  reduceState: (_allStates, newState) => newState,
+  reduceState: (_allStates, oldState, newState) => newState || oldState,
   // events
   stream: null,
   data: null,
@@ -53,7 +53,7 @@ function config({
   if (myPeerId) swarm.myPeerId = myPeerId;
   if (sign) swarm.sign = sign; // sign(state): string
   if (verify) swarm.verify = verify; // verify(signedState, peerId): state | undefined
-  if (reduceState) swarm.reduceState = reduceState; // reduceState([state], newState, connection): state
+  if (reduceState) swarm.reduceState = reduceState; // reduceState([state], oldState, newState?): state
   if (pcConfig) swarm.pcConfig = pcConfig;
   if (debug) swarm.debug = debug;
 }
@@ -146,12 +146,12 @@ function connect(room) {
       log('got connect-me');
       initializePeer(swarm, peerId);
       let connection = getConnection(swarm, peerId, connId);
-      if (sharedState) updatePeerState(connection, sharedState);
+      newPeerState(connection, sharedState);
       connectPeer(connection);
     }
     if (type === 'shared-state') {
       let connection = getConnection(swarm, peerId, connId);
-      updatePeerState(connection, data);
+      newPeerState(connection, data);
     }
     if (type === 'shared-event') {
       swarm.emit('peerEvent', peerId, data);
@@ -161,12 +161,17 @@ function connect(room) {
   hub.subscribe(
     myPeerId,
     ({type, peerId, data, connId, yourConnId, sharedState}) => {
+      if (yourConnId !== myConnId) {
+        // console.warn('message to different session, should be ignored');
+        log('ignoring msg to different session', yourConnId);
+        return;
+      }
       if (type === 'signal') {
         log('signal received from', s(peerId), connId, data.type);
         initializePeer(swarm, peerId);
         let connection = getConnection(swarm, peerId, connId);
-        if (sharedState) updatePeerState(connection, sharedState);
-        handleSignal(connection, {yourConnId, data});
+        newPeerState(connection, sharedState);
+        handleSignal(connection, {data});
       }
     }
   );
@@ -191,22 +196,16 @@ function disconnect() {
 }
 
 function initializePeer(swarm, peerId) {
+  if (peerId === swarm.myPeerId) return;
   if (swarm.stickyPeers[peerId] === undefined) {
-    getPeer(swarm, peerId);
+    swarm.stickyPeers[peerId] = {connections: {}};
     swarm.update('stickyPeers');
     swarm.emit('newPeer', peerId);
   }
 }
 
 function getPeer(swarm, peerId) {
-  if (peerId === swarm.myPeerId) return swarm.myPeer;
-  let {stickyPeers} = swarm;
-  let peer = stickyPeers[peerId];
-  if (peer === undefined) {
-    peer = {connections: {}};
-    stickyPeers[peerId] = peer;
-  }
-  return peer;
+  return peerId === swarm.myPeerId ? swarm.myPeer : swarm.stickyPeers[peerId];
 }
 
 function getConnection(swarm, peerId, connId) {
@@ -220,15 +219,17 @@ function getConnection(swarm, peerId, connId) {
 }
 
 function removeConnection({swarm, peerId, connId}) {
-  let {stickyPeers} = swarm;
   log('removing peer', s(peerId), connId);
-  if (stickyPeers[peerId]) {
-    delete stickyPeers[peerId].connections[connId];
-  }
-  let connections = Object.keys(stickyPeers[peerId]?.connections || {});
-  if (connections.length === 0) delete stickyPeers[peerId];
+  let peer = getPeer(swarm, peerId);
+  if (peer !== undefined) delete peer.connections[connId];
+  updatePeerState(swarm, peerId);
+  let nConnections = Object.keys(peer?.connections || {}).length;
+  if (nConnections > 0 || peerId === swarm.myPeerId) return;
+
+  delete swarm.stickyPeers[peerId];
   swarm.update('stickyPeers');
-  if (connections.length > 0) return;
+  delete swarm.peerState[peerId];
+  swarm.update('peerState');
   let {remoteStreams} = swarm;
   if (remoteStreams.find(streamObj => streamObj.peerId === peerId)) {
     swarm.set(
@@ -252,13 +253,24 @@ function* yieldConnections(swarm) {
   }
 }
 
-function updatePeerState(connection, newState) {
+function newPeerState(connection, newState) {
+  if (newState === undefined) return;
   let {swarm, peerId} = connection;
   connection.state = newState;
+  updatePeerState(swarm, peerId, newState);
+}
+
+function updatePeerState(swarm, peerId, newState) {
   let peer = getPeer(swarm, peerId);
   let allStates = Object.values(peer.connections).map(c => c.state);
   if (peerId === swarm.myPeerId) allStates.push(swarm.sharedState);
-  let state = swarm.reduceState(allStates, newState, connection);
+  let oldState = swarm.peerState[peerId];
+  let state = newState || oldState;
+  try {
+    state = swarm.reduceState(allStates, oldState, newState);
+  } catch (err) {
+    console.error(err);
+  }
   swarm.peerState[peerId] = state;
   swarm.update('peerState');
 }

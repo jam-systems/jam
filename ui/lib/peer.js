@@ -51,14 +51,9 @@ function connectPeer(connection) {
   }
 }
 
-function handleSignal(connection, {yourConnId, data}) {
+function handleSignal(connection, {data}) {
   let {swarm, peerId, connId} = connection;
   let {myConnId, myPeerId} = swarm;
-  if (yourConnId !== myConnId) {
-    console.warn('signal to different session, should be ignored');
-    log('ignoring msg to different session', yourConnId);
-    return;
-  }
   if (data.youStart) {
     // only accept back-connection if connect request was made
     log('i initiate, but dont override if i already have a peer');
