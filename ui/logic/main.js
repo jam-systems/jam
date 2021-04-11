@@ -66,6 +66,17 @@ on(state, 'room', room => {
     leaveRoom();
   }
 });
+// leave room when same peer joins it from elsewhere and I'm in room
+on(swarm, 'rawPeerState', ({inRoom}, peerId, connId) => {
+  if (
+    peerId === swarm.myPeerId &&
+    connId !== swarm.myConnId &&
+    inRoom &&
+    state.inRoom
+  ) {
+    leaveRoom();
+  }
+});
 
 swarm.on('newPeer', async id => {
   for (let i = 0; i < 5; i++) {
