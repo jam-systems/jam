@@ -1,5 +1,6 @@
 import React from 'react';
-import {enterRoom} from '../logic/main';
+import {use} from 'use-minimal-state';
+import {enterRoom, state} from '../logic/main';
 import {useMqParser} from '../logic/tailwind-mqp';
 import Container from './Container';
 import RoomHeader from './RoomHeader';
@@ -21,6 +22,7 @@ export default function EnterRoom({
   logoURI,
 }) {
   let mqp = useMqParser();
+  let otherDevice = use(state, 'otherDeviceInRoom');
   return (
     <Container>
       <div className={mqp('p-2 pt-60 md:p-10 md:pt-60')}>
@@ -63,6 +65,19 @@ export default function EnterRoom({
         <p className="hidden pt-4 pb-4">
           🗓 February 3rd 2021 at ⌚️ 14:06 (Vienna Time)
         </p>
+        {/* warning if peer is in the same room on another device */}
+        {otherDevice && (
+          <div
+            className={
+              'mt-5 mb--1 p-4 text-gray-700 rounded-lg border border-yellow-100 bg-yellow-50'
+            }
+          >
+            <span className="text-gray-900 bg-yellow-200">Warning:</span> You
+            already joined this room from a different device or browser tab.
+            Click {`'`}
+            Join{`'`} to switch to this tab.
+          </div>
+        )}
         {/*
             button for entering this room
             for now this is possible without
@@ -88,9 +103,13 @@ export default function EnterRoom({
         </button>
 
         <a
-          className={schedule ? "block mt-5 text-center h-12 p-3 px-6 text-lg text-gray-500" : "hidden"}
+          className={
+            schedule
+              ? 'block mt-5 text-center h-12 p-3 px-6 text-lg text-gray-500'
+              : 'hidden'
+          }
           href={`/${roomId}.ics`}
-          download={`${(name || 'room')}.ics`}
+          download={`${name || 'room'}.ics`}
         >
           🗓 Add to Calendar
         </a>
