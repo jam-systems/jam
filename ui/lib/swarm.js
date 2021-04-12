@@ -6,6 +6,8 @@ import {
   connectPeer,
   addStreamToPeer,
   handleSignal,
+  handlePing,
+  handlePong,
 } from './swarm-peer';
 import {removePeerState, updatePeerState} from './swarm-state';
 
@@ -176,6 +178,12 @@ function connect(room) {
       let connection = getConnection(swarm, peerId, connId);
       updatePeerState(connection, state);
       handleSignal(connection, {data});
+    }
+    if (type === 'ping') {
+      handlePing(swarm, peerId, connId, data);
+    }
+    if (type === 'pong') {
+      handlePong(swarm, peerId, connId, data);
     }
   });
 

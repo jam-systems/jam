@@ -6,10 +6,18 @@ const MAX_CONNECT_TIME = 6000;
 const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;
 const MIN_MAX_CONNECT_TIME_AFTER_SIGNAL = 2000;
 const MAX_FAIL_TIME = 20000;
+const MAX_PING_TIME = 3000;
 
 let _debug = DEV;
 
-export {newConnection, connectPeer, addStreamToPeer, handleSignal};
+export {
+  newConnection,
+  connectPeer,
+  addStreamToPeer,
+  handleSignal,
+  handlePing,
+  handlePong,
+};
 
 // connection:
 // {swarm, peerId, connId, ...timeoutStuff, pc }
@@ -26,6 +34,8 @@ function connectPeer(connection) {
   // -) this has to work in every state of swarm.peers (e.g. with or without existing Peer instance)
   let {swarm, peerId, connId} = connection;
   log('connecting peer', s(peerId), connId);
+  deathPing(connection);
+
   let {myPeerId, myConnId, sharedState, sharedStateTime} = swarm;
   timeoutPeer(connection, MAX_CONNECT_TIME);
   if (myPeerId > peerId || (myPeerId === peerId && myConnId > connId)) {
@@ -194,6 +204,7 @@ function createPeer(connection, initiator) {
   peer.on('iceStateChange', state => {
     log('ice state', state);
     if (state === 'disconnected') {
+      deathPing(connection);
       timeoutPeer(
         connection,
         MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT,
@@ -242,7 +253,7 @@ function handlePeerSuccess(connection) {
   stopTimeout(connection);
 }
 
-function handlePeerFail(connection) {
+function handlePeerFail(connection, forcedFail) {
   // peer either took too long to fire 'connect', or fired an error-like event
   // depending how long we already tried, either reconnect or remove peer
   stopTimeout(connection);
@@ -252,7 +263,7 @@ function handlePeerFail(connection) {
 
   log('handle peer fail! time failing:', failTime);
 
-  if (failTime > MAX_FAIL_TIME) {
+  if (forcedFail === true || failTime > MAX_FAIL_TIME) {
     connection.swarm.emit('failedConnection', connection);
   } else {
     connectPeer(connection);
@@ -302,6 +313,63 @@ function addStreamToPeer(connection, stream, name) {
       }
     }
   }
+}
+
+function deathPing(connection) {
+  let {peerId, connId} = connection;
+  ping(connection, MAX_PING_TIME).then(ms => {
+    if (ms) log('PING', s(peerId), connId, ms);
+    else {
+      console.warn('ping failed', s(peerId), connId);
+      handlePeerFail(connection, true);
+    }
+  });
+}
+
+// peer pings
+let pingCount = 0;
+let pings = new Map();
+
+function ping({swarm, peerId, connId}, timeout) {
+  let id = pingCount++;
+  let promise = Resolvable();
+  promise.start = Date.now();
+  setTimeout(() => {
+    promise.resolve(undefined);
+    pings.delete(id);
+  }, timeout);
+  pings.set(id, promise);
+  swarm.hub.broadcast(peerId, {
+    type: 'ping',
+    yourConnId: connId,
+    connId: swarm.myConnId,
+    data: id,
+  });
+  return promise;
+}
+
+function handlePing(swarm, peerId, connId, id) {
+  swarm.hub.broadcast(peerId, {
+    type: 'pong',
+    connId: swarm.myConnId,
+    yourConnId: connId,
+    data: id,
+  });
+}
+
+function handlePong(_swarm, _peerId, _connId, id) {
+  let promise = pings.get(id);
+  if (promise !== undefined) {
+    promise.resolve(Date.now() - promise.start);
+  }
+  pings.delete(id);
+}
+
+function Resolvable() {
+  let resolve;
+  let promise = new Promise(r => (resolve = r));
+  promise.resolve = resolve;
+  return promise;
 }
 
 let s = id => id.slice(0, 2);
