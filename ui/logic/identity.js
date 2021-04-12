@@ -110,8 +110,8 @@ export const verifyToken = (authToken) => {
   return ssr.verify(decode(authToken));
 };
 
-export function signedToken(identity) {
-  return encode(JSON.stringify(signData({}, identity)));
+export function signedToken() {
+  return base64.encodeUrl(JSON.stringify(signData({})));
 }
 
 export function verifyData(record) {

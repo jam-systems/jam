@@ -2,7 +2,7 @@ import swarm from '../lib/swarm';
 import state from './state';
 import {get, updateApiQuery, put, useApiQuery} from './backend';
 import {on, set, update} from 'use-minimal-state';
-import { currentId }  from './identity';
+import {currentId} from './identity';
 import log from '../lib/causal-log';
 import {config} from './config';
 
@@ -16,14 +16,14 @@ export {
   emptyRoom,
 };
 
-const emptyRoom = config.defaultRoom ? {...config.defaultRoom, speakers: [], moderators: []} : {
-  name: '',
-  description: '',
-  speakers: [],
-  moderators: [],
-};
-
-
+const emptyRoom = config.defaultRoom
+  ? {...config.defaultRoom, speakers: [], moderators: []}
+  : {
+      name: '',
+      description: '',
+      speakers: [],
+      moderators: [],
+    };
 
 let _disconnectRoom = {};
 
@@ -65,7 +65,7 @@ on(state, 'room', (room, oldRoom) => {
   let {speakers: oldSpeakers, moderators: oldModerators} = oldRoom;
   let {speakers, moderators} = room;
 
-  let myId = currentId().publicKey;
+  let myId = currentId();
   if (!oldSpeakers.includes(myId) && speakers.includes(myId)) {
     set(state, 'iAmSpeaker', true);
     joinStage();
@@ -130,4 +130,3 @@ on(swarm, 'peerState', peerState => {
     }
   }
 });
-
