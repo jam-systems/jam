@@ -1,11 +1,10 @@
 import {useCallback, useEffect, useState} from 'react';
 import {emit, on, set, use} from 'use-minimal-state';
 import state, {actions, modState} from './state';
-import {config, DEV} from './config';
-import {signedToken} from './identity';
+import {config} from './config';
+import {signedToken, signData, currentIdentity, currentId} from './identity';
 import {pure} from '../lib/local-storage';
 import swarm from '../lib/swarm';
-import log from '../lib/causal-log';
 import {emptyRoom} from './room';
 // POST https://jam.systems/_/pantry/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
 // Creates room, returns 409 conflict if room exists
@@ -73,9 +72,8 @@ async function authenticatedApiRequest(method, path, payload) {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      Authorization: `Token ${signedToken()}`,
     },
-    body: payload ? JSON.stringify(payload) : undefined,
+    body: payload ? JSON.stringify(signData(payload)) : undefined,
   });
   return res.ok;
 }
@@ -168,17 +166,17 @@ export function useCreateRoom({roomId, room, isLoading, newRoom}) {
 // identity
 
 export async function initializeIdentity() {
-  if (DEV) log('identity', identity);
+  const identity = currentIdentity();
   return (
-    (await put(`/identities/${identity.publicKey}`, identity.info)) ||
-    (await post(`/identities/${identity.publicKey}`, identity.info))
+    (await put(`/identities/${currentId()}`, identity.info)) ||
+    (await post(`/identities/${currentId()}`, identity.info))
   );
 }
 
 export async function updateInfoServer(info) {
   return (
-    (await put(`/identities/${identity.publicKey}`, info)) ||
-    (await post(`/identities/${identity.publicKey}`, info))
+    (await put(`/identities/${currentId()}`, info)) ||
+    (await post(`/identities/${currentId()}`, info))
   );
 }
 
@@ -195,7 +193,7 @@ on(modState, () => {
 async function sendModMessage(msg) {
   let {inRoom} = state;
   if (inRoom) {
-    await post(`/rooms/${inRoom}/modMessage/${identity.publicKey}`, msg);
+    await post(`/rooms/${inRoom}/modMessage/${currentId()}`, msg);
   }
 }
 // fetch mod messages when we become moderator
