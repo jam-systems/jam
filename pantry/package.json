@@ -17,6 +17,7 @@
     "nets": "^3.2.0",
     "redis": "^3.0.2",
     "signalhub": "^4.9.0",
+    "simple-signed-records-engine": "^0.1.1",
     "tweetnacl": "^1.0.3"
   }
 }
