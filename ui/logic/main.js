@@ -20,9 +20,11 @@ function configSignalhub() {
     url: config.urls.signalHub + '/',
     sign: signData,
     verify: verifyData,
-    reduceState: (states, _, latestState) => {
-      if (latestState.inRoom) return latestState;
-      return {...latestState, inRoom: states.some(s => s.inRoom)};
+    reduceState: (states, current, latest) => {
+      if (latest.inRoom) return latest;
+      // if latest is not inRoom, we probably want to ignore most props from it
+      // if not, add them here
+      return {...current, inRoom: states.some(s => s.inRoom)};
     },
     pcConfig: {
       iceTransportPolicy: 'all',
