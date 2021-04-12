@@ -8,6 +8,7 @@ const state = State({
   iAmSpeaker: false,
   iAmModerator: false,
   identities: {},
+  otherDeviceInRoom: false,
 
   reactions: {},
   raisedHands: new Set(),
@@ -37,4 +38,4 @@ export const actions = {
 if (DEV) debug(state);
 
 // mod visible state
-export const modState = State({raiseHand: false});
+export const modState = {raiseHand: false};

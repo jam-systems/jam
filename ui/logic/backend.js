@@ -3,7 +3,6 @@ import {emit, on, set, use} from 'use-minimal-state';
 import state, {actions, modState} from './state';
 import {config, DEV} from './config';
 import identity, {signedToken} from './identity';
-import {pure} from '../lib/local-storage';
 import swarm from '../lib/swarm';
 import log from '../lib/causal-log';
 import {emptyRoom} from './room';
@@ -193,11 +192,11 @@ export async function updateInfoServer(info) {
 
 // post initial status on entering room
 on(state, 'inRoom', () => {
-  sendModMessage(pure(modState));
+  sendModMessage(modState);
 });
 // post on changes
 on(modState, () => {
-  sendModMessage(pure(modState));
+  sendModMessage(modState);
 });
 async function sendModMessage(msg) {
   let {inRoom} = state;

@@ -20,6 +20,12 @@ function configSignalhub() {
     url: config.urls.signalHub + '/',
     sign: signData,
     verify: verifyData,
+    reduceState: (states, current, latest) => {
+      if (latest.inRoom) return latest;
+      // if latest is not inRoom, we probably want to ignore most props from it
+      // if not, add them here
+      return {...current, inRoom: states.some(s => s.inRoom)};
+    },
     pcConfig: {
       iceTransportPolicy: 'all',
       iceServers: [
@@ -61,6 +67,24 @@ on(state, 'room', room => {
   if (state.inRoom && closed && !moderators.includes(identity.publicKey)) {
     leaveRoom();
   }
+});
+// leave room when same peer joins it from elsewhere and I'm in room
+on(swarm.connectionState, identity.publicKey, myConnState => {
+  if (myConnState === undefined) {
+    is(state, {otherDeviceInRoom: false});
+    return;
+  }
+  let {states, latest} = myConnState;
+  let {myConnId} = swarm;
+  let otherDeviceInRoom = false;
+  for (let connId in states) {
+    if (connId !== myConnId && states[connId].state.inRoom) {
+      otherDeviceInRoom = true;
+      if (connId === latest && state.inRoom) leaveRoom();
+      break;
+    }
+  }
+  is(state, {otherDeviceInRoom});
 });
 
 swarm.on('newPeer', async id => {
