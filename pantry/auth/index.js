@@ -108,4 +108,4 @@ const identityAuthenticator = {
 
 
 
-module.exports = {verify, isModerator, isAdmin, roomAuthenticator, identityAuthenticator, hasAccessToRoom}
+module.exports = {isModerator, isAdmin, roomAuthenticator, identityAuthenticator, hasAccessToRoom}

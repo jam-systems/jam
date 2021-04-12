@@ -1,5 +1,5 @@
 const express = require('express');
-const {verify, isModerator} = require('../auth');
+const {isModerator} = require('../auth');
 const {set, get, del, list} = require('../services/redis');
 const {hub} = require('../services/signalhub');
 
@@ -13,8 +13,8 @@ const verifyIdentity = (req, res, next) => {
     return;
   }
 
-  const token = authHeader.substring(6);
-  if (!verify(token, req.params.identityKey)) {
+
+  if (!req.ssrIdentities.includes(req.params.identityKey)) {
     res.sendStatus(403);
     return;
   }
