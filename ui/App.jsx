@@ -4,6 +4,7 @@ import {usePath} from './lib/use-location';
 import Jam from './Jam';
 import Start from './views/Start';
 import { parseUrlHash } from './lib/url-utils';
+import {importRoomIdentity} from "./logic/identity";
 
 render(<App />, document.querySelector('#root'));
 
@@ -19,7 +20,7 @@ function App() {
   )
 
   if(roomId != null) {
-      importRoomIdentity(roomId, urlData.identity, urldata.keys);
+      importRoomIdentity(roomId, urlData.identity, urlData.keys);
   }
 
 

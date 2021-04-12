@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import SparkMD5 from 'spark-md5';
 import swarm from '../lib/swarm';
 import {Modal} from './Modal';
-import { currentId, currentIdentity } from '../logic/identity';
+import { currentId, useCurrentIdentity } from '../logic/identity';
 import {updateInfoServer} from '../logic/backend';
 import {useMqParser} from '../logic/tailwind-mqp';
 
@@ -30,7 +30,7 @@ let updateInfo = async info => {
 
 export default function EditIdentity({close}) {
   let mqp = useMqParser();
-  let info = currentIdentity().info;
+  let info = useCurrentIdentity().info;
   let id = currentId()
   let [displayName, setDisplayName] = useState(info?.displayName);
   let [email, setEmail] = useState(info?.email);

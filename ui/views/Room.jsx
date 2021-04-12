@@ -4,7 +4,7 @@ import {use} from 'use-minimal-state';
 import swarm from '../lib/swarm';
 import EnterRoom from './EnterRoom';
 import RoomHeader from './RoomHeader';
-import { currentIdentity } from '../logic/identity';
+import { useCurrentIdentity } from '../logic/identity';
 import {openModal} from './Modal';
 import {EditRoomModal} from './EditRoom';
 import useWakeLock from '../lib/use-wake-lock';
@@ -24,7 +24,7 @@ export default function Room({room, roomId}) {
   useWakeLock();
   usePushToTalk();
 
-  let myInfo = currentIdentity().info;
+  let myInfo = useCurrentIdentity().info;
   let [
     reactions,
     raisedHands,

@@ -8,6 +8,7 @@ import { importLegacyIdentity } from "../lib/migrations";
 
 const MESSAGE_VALIDITY_SECONDS = 20;
 
+window.Buffer = require('buffer/').Buffer
 
 const createIdentityFromSecretKey = (info, privatekeyBase64) => {
   const keypair = nacl.sign.keyPair.fromSecretKey(decode(privatekeyBase64));
@@ -46,7 +47,7 @@ export const identities = StoredState('identities', () => {
     };
 });
 
-export const currentIdentity = () => {
+export const useCurrentIdentity = () => {
   const roomId = state.roomId;
   if(identities[roomId]) {
     return use(identities, roomId);
@@ -55,20 +56,37 @@ export const currentIdentity = () => {
   }
 }
 
+
+export const currentIdentity = () => {
+  const roomId = state.roomId;
+  if(identities[roomId]) {
+    return identities[roomId];
+  } else {
+    return identities['_default'];
+  }
+}
+
 export const currentId = () => {
-  return currentIdentity().publicKey;
+  const roomId = state.roomId;
+  if(identities[roomId]) {
+    return identities[roomId].publicKey;
+  } else {
+    return identities['_default'].publicKey;
+  }
 }
 
 
-export const importRoomIdentity = (roomId, identity, keys) => {
-  if(keys[identity.id]) {
-    if(keys[identity.id].seed) {
-      addIdentity(roomId, createIdentityFromSeed(identity, keys[identity.id].seed))
+export const importRoomIdentity = (roomId, roomIdentity, keys) => {
+  if(roomIdentity) {
+    if (keys[roomIdentity.id]) {
+      if (keys[roomIdentity.id].seed) {
+        addIdentity(roomId, createIdentityFromSeed(roomIdentity, keys[roomIdentity.id].seed))
+      } else {
+        addIdentity(roomId, createIdentityFromSeed(roomIdentity, keys[roomIdentity.id].secretKey))
+      }
     } else {
-      addIdentity(roomId, createIdentityFromSeed(identity, keys[identity.id].secretKey))
+      addIdentity(roomId, createIdentity(roomIdentity))
     }
-  } else {
-    addIdentity(roomId, createIdentity(identity))
   }
 }
 

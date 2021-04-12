@@ -22,6 +22,7 @@
   "license": "MIT",
   "dependencies": {
     "@vvo/tzdb": "^6.5.1",
+    "buffer": "^6.0.3",
     "compact-base64": "^2.1.2",
     "qs": "^6.9.6",
     "react": "^17.0.1",

@@ -26,6 +26,7 @@ const urls = {
     }
 }
 
+console.log(urls);
 
 
 const pantryApiPrefix = `${urls.pantry}/api/v1/rooms`;

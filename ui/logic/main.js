@@ -69,7 +69,7 @@ on(state, 'room', room => {
   }
 });
 // leave room when same peer joins it from elsewhere and I'm in room
-on(swarm.connectionState, identity.publicKey, myConnState => {
+on(swarm.connectionState, currentId(), myConnState => {
   if (myConnState === undefined) {
     is(state, {otherDeviceInRoom: false});
     return;

@@ -10,6 +10,7 @@ const extractToken = (req) => {
 
 
 const ssr = (req, res, next) => {
+
     const method = req.method;
     req.ssrIdentities = [];
     switch (method) {
@@ -19,7 +20,7 @@ const ssr = (req, res, next) => {
                 const record = base64.decode(extractToken(req));
                 const verifiedRecord = data(record);
                 if (verifiedRecord) {
-                    req.ssrIdentities = verifiedRecord.identities;
+                    req.ssrIdentities = verifiedRecord.identities.map(base64.originalToUrl);
                 }
             }
             break;
@@ -29,7 +30,7 @@ const ssr = (req, res, next) => {
                 const record = req.body;
                 const verifiedRecord = data(record);
                 if (verifiedRecord) {
-                    req.ssrIdentities = verifiedRecord.identities;
+                    req.ssrIdentities = verifiedRecord.identities.map(base64.originalToUrl);
                     req.body = verifiedRecord.data;
                 }
             }
