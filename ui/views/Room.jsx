@@ -4,7 +4,7 @@ import {use} from 'use-minimal-state';
 import swarm from '../lib/swarm';
 import EnterRoom from './EnterRoom';
 import RoomHeader from './RoomHeader';
-import identity from '../logic/identity';
+import { currentIdentity } from '../logic/identity';
 import {openModal} from './Modal';
 import {EditRoomModal} from './EditRoom';
 import useWakeLock from '../lib/use-wake-lock';
@@ -24,7 +24,7 @@ export default function Room({room, roomId}) {
   useWakeLock();
   usePushToTalk();
 
-  let myInfo = use(identity, 'info');
+  let myInfo = currentIdentity().info;
   let [
     reactions,
     raisedHands,
@@ -93,7 +93,7 @@ export default function Room({room, roomId}) {
     );
   }
 
-  let myPeerId = identity.publicKey;
+  let myPeerId = myInfo.id;
   let stagePeers = (speakers || []).filter(id => id in peers);
   let audiencePeers = Object.keys(peers || {}).filter(
     id => !stagePeers.includes(id)
@@ -129,7 +129,7 @@ export default function Room({room, roomId}) {
               d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          Open in {userAgent.os?.name == 'iOS' ? 'Safari' : 'Chrome'} for best
+          Open in {userAgent.os?.name === 'iOS' ? 'Safari' : 'Chrome'} for best
           experience.
           <br />
           <a

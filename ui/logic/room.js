@@ -2,7 +2,7 @@ import swarm from '../lib/swarm';
 import state from './state';
 import {get, updateApiQuery, put, useApiQuery} from './backend';
 import {on, set, update} from 'use-minimal-state';
-import identity from './identity';
+import { currentId }  from './identity';
 import log from '../lib/causal-log';
 import {config} from './config';
 
@@ -65,7 +65,7 @@ on(state, 'room', (room, oldRoom) => {
   let {speakers: oldSpeakers, moderators: oldModerators} = oldRoom;
   let {speakers, moderators} = room;
 
-  let myId = identity.publicKey;
+  let myId = currentId().publicKey;
   if (!oldSpeakers.includes(myId) && speakers.includes(myId)) {
     set(state, 'iAmSpeaker', true);
     joinStage();

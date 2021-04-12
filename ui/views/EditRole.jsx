@@ -1,6 +1,6 @@
 import React from 'react';
 import {addRole, removeRole, leaveStage} from '../logic/room';
-import identity from '../logic/identity';
+import { currentId } from '../logic/identity';
 import {state} from '../logic/main';
 import {use} from 'use-minimal-state';
 import {openModal} from './Modal';
@@ -70,7 +70,7 @@ export default function EditRole({peerId, speakers, moderators, onCancel}) {
 
 export function EditSelf({onCancel}) {
   let mqp = useMqParser();
-  let myPeerId = identity.publicKey;
+  let myPeerId = currentId();
   let [iSpeak, iModerate, room] = use(state, ['iAmSpeaker', 'iAmModerator', 'room']);
   return (
     <div className={mqp('md:p-10')}>

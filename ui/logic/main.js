@@ -1,7 +1,7 @@
 import swarm from '../lib/swarm';
 import state, {actions} from './state';
 import {get} from './backend';
-import identity, {signData, verifyData} from './identity';
+import {currentId, signData, verifyData} from './identity';
 import {DEV, config} from './config';
 import {requestAudio, stopAudio} from './audio';
 import './reactions';
@@ -64,7 +64,7 @@ export function leaveRoom() {
 // leave room when it gets closed
 on(state, 'room', room => {
   let {moderators, closed} = room;
-  if (state.inRoom && closed && !moderators.includes(identity.publicKey)) {
+  if (state.inRoom && closed && !moderators.includes(currentId())) {
     leaveRoom();
   }
 });

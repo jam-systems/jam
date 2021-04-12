@@ -2,7 +2,8 @@ import {useCallback, useEffect, useState} from 'react';
 import {emit, on, set, use} from 'use-minimal-state';
 import state, {actions, modState} from './state';
 import {config, DEV} from './config';
-import identity, {signedToken} from './identity';
+import {signedToken} from './identity';
+import {pure} from '../lib/local-storage';
 import swarm from '../lib/swarm';
 import log from '../lib/causal-log';
 import {emptyRoom} from './room';
@@ -45,8 +46,7 @@ export function useApiQuery(path, doFetch = true, key, defaultQuery) {
 
   useEffect(() => {
     if (key) {
-      let off = forwardApiQuery(path, key, defaultQuery);
-      return off;
+      return forwardApiQuery(path, key, defaultQuery);
     }
   }, [path, key, defaultQuery]);
 
@@ -173,12 +173,6 @@ export async function initializeIdentity() {
     (await put(`/identities/${identity.publicKey}`, identity.info)) ||
     (await post(`/identities/${identity.publicKey}`, identity.info))
   );
-}
-
-// UNUSED
-async function getInfoServer() {
-  let [data, ok] = await get(`/identities/${identity.publicKey}`);
-  return ok && data;
 }
 
 export async function updateInfoServer(info) {

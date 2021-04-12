@@ -2,7 +2,7 @@ import React, {useMemo, useState} from 'react';
 import {leaveRoom} from '../logic/main';
 import state from '../logic/state';
 import {use} from 'use-minimal-state';
-import identity from '../logic/identity';
+import { currentId } from '../logic/identity';
 import {sendReaction, raiseHand} from '../logic/reactions';
 import EditRole, {EditSelf} from './EditRole';
 import {breakpoints, useWidth} from '../logic/tailwind-mqp';
@@ -56,7 +56,7 @@ export default function Navigation({
 
   let isColorDark = useMemo(() => isDark(color), [color]);
 
-  let myPeerId = identity.publicKey;
+  let myPeerId = currentId();
   let myHandRaised = raisedHands.has(myPeerId);
 
   let width = useWidth();

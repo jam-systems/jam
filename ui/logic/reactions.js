@@ -1,7 +1,7 @@
 import {set, update, on} from 'use-minimal-state';
 import swarm from '../lib/swarm';
 import {requestAudio, stopAudio} from './audio';
-import identity from './identity';
+import { currentId } from './identity';
 import state, {modState} from './state';
 
 export {sendReaction, raiseHand};
@@ -32,10 +32,10 @@ function showReaction(reaction, peerId) {
 function raiseHand(raise) {
   // make visible to me
   if (raise) {
-    state.raisedHands.add(identity.publicKey);
+    state.raisedHands.add(currentId());
     requestAudio();
   } else {
-    state.raisedHands.delete(identity.publicKey);
+    state.raisedHands.delete(currentId());
     stopAudio();
   }
   update(state, 'raisedHands');
