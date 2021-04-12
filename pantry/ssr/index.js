@@ -17,8 +17,11 @@ const ssr = (req, res, next) => {
         case 'GET':
         case 'DELETE':
             {
-                const record = JSON.parse(base64.decode(extractToken(req)));
-                const verifiedRecord = data(record);
+                let record, verifiedRecord;
+                try {
+                    record = JSON.parse(base64.decode(extractToken(req)));
+                    verifiedRecord = data(record);
+                } catch (_) {}
                 if (verifiedRecord) {
                     req.ssrIdentities = verifiedRecord.identities.map(base64.originalToUrl);
                 }
