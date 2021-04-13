@@ -201,9 +201,6 @@ function disconnect(swarm) {
   swarm.myConnId = null;
   swarm.set('connected', false);
   for (let connection of yieldConnections(swarm)) {
-    try {
-      connection.pc.destroy();
-    } catch (e) {}
     removeConnection(connection);
   }
 }
@@ -234,7 +231,16 @@ function getConnection(swarm, peerId, connId) {
 function removeConnection({swarm, peerId, connId}) {
   log('removing peer', s(peerId), connId);
   let peer = getPeer(swarm, peerId);
-  if (peer !== undefined) delete peer.connections[connId];
+  if (peer !== undefined) {
+    let pc = peer.connections[connId]?.pc;
+    if (pc !== undefined) {
+      pc.garbage = true;
+      try {
+        pc.destroy();
+      } catch (e) {}
+    }
+    delete peer.connections[connId];
+  }
   let nConnections = Object.keys(peer?.connections || {}).length;
   if (nConnections === 0 && peerId !== swarm.myPeerId) {
     delete swarm.stickyPeers[peerId];
