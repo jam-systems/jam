@@ -117,9 +117,15 @@ app.use(async (req, res) => {
             'Content-type': 'application/x-www-form-urlencoded;charset=utf-8'
         }
       });
-      let jsonResult = await result.json();
-      console.log(jsonResult);
-      return res.send("success");
+      let apiResponse = await result.json();
+      if (apiResponse.ok) {
+        console.log(apiResponse);
+        return res.send("Jam was successfully added to your workspace.");
+
+      } else {
+        console.log(apiResponse);
+        return res.send("Jam was not added to your workspace, please try again later.");
+      }
     }
 
     const metaInfo = req.path === '/' ? defaultMetaInfo : {
