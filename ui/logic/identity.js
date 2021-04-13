@@ -50,6 +50,12 @@ export const identities = StoredState('identities', () => {
   };
 });
 
+export function setCurrentIdentity(valueOrFunction) {
+  let {roomId} = state;
+  let identKey = identities[roomId] ? roomId : '_default';
+  set(identities, identKey, valueOrFunction);
+}
+
 export const useCurrentIdentity = () => {
   const roomId = state.roomId;
   if (identities[roomId]) {

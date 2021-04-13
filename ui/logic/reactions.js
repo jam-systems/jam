@@ -1,7 +1,7 @@
 import {set, update, on} from 'use-minimal-state';
 import swarm from '../lib/swarm';
 import {requestAudio, stopAudio} from './audio';
-import { currentId } from './identity';
+import {currentId} from './identity';
 import state, {modState} from './state';
 
 export {sendReaction, raiseHand};

@@ -3,7 +3,6 @@ import {emit, on, set, use} from 'use-minimal-state';
 import state, {actions, modState} from './state';
 import {config} from './config';
 import {signedToken, signData, currentIdentity, currentId} from './identity';
-import {pure} from '../lib/local-storage';
 import swarm from '../lib/swarm';
 import {emptyRoom} from './room';
 // POST https://jam.systems/_/pantry/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
