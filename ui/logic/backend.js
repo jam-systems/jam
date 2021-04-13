@@ -2,7 +2,7 @@ import {useCallback, useEffect, useState} from 'react';
 import {emit, on, set, use} from 'use-minimal-state';
 import state, {actions, modState} from './state';
 import {config} from './config';
-import {signedToken, signData, currentIdentity, currentId} from './identity';
+import {signedToken, signData, currentId, identities} from './identity';
 import swarm from '../lib/swarm';
 import {emptyRoom} from './room';
 // POST https://jam.systems/_/pantry/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
@@ -164,11 +164,13 @@ export function useCreateRoom({roomId, room, isLoading, newRoom}) {
 
 // identity
 
-export async function initializeIdentity() {
-  const identity = currentIdentity();
+export async function initializeIdentity(roomId) {
+  const identity = roomId
+    ? identities['_default']
+    : identities[roomId] || identities['_default'];
   return (
-    (await put(`/identities/${currentId()}`, identity.info)) ||
-    (await post(`/identities/${currentId()}`, identity.info))
+    (await put(`/identities/${identity.publicKey}`, identity.info)) ||
+    (await post(`/identities/${identity.publicKey}`, identity.info))
   );
 }
 

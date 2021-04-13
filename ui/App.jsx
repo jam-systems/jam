@@ -5,6 +5,7 @@ import Jam from './Jam';
 import Start from './views/Start';
 import {parseUrlHash} from './lib/url-utils';
 import {importRoomIdentity} from './logic/identity';
+import {initializeIdentity} from './logic/backend';
 
 render(<App />, document.querySelector('#root'));
 
@@ -14,8 +15,9 @@ function App() {
 
   const urlData = useMemo(() => {
     let data = parseUrlHash();
-    if (roomId !== null) {
+    if (roomId !== null && data.identity) {
       importRoomIdentity(roomId, data.identity, data.keys);
+      initializeIdentity(roomId);
     }
     return data;
   }, [roomId]);

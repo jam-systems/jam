@@ -34,8 +34,9 @@ function useRoom(roomId) {
 function maybeConnectRoom(roomId) {
   if (swarm.room === roomId && swarm.hub) return;
   log('connecting room', roomId);
-  // set(state, 'roomId', roomId);
   if (swarm.hub) swarm.disconnect();
+  // make sure peerId is the current one
+  swarm.config({myPeerId: currentId()});
   swarm.connect(roomId);
   swarm.hub.subscribe('identity-updates', async ({peerId}) => {
     let [data, ok] = await get(`/identities/${peerId}`);
