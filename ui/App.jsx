@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo} from 'react';
+import React, {useMemo} from 'react';
 import {render} from 'react-dom';
 import {usePath} from './lib/use-location';
 import Jam from './Jam';
@@ -12,12 +12,12 @@ function App() {
   // detect roomId from URL
   const [roomId = null] = usePath();
 
-  const urlData = useMemo(parseUrlHash, [roomId]);
-
-  useEffect(() => {
+  const urlData = useMemo(() => {
+    let data = parseUrlHash();
     if (roomId !== null) {
-      importRoomIdentity(roomId, urlData.identity, urlData.keys);
+      importRoomIdentity(roomId, data.identity, data.keys);
     }
+    return data;
   }, [roomId]);
 
   return (
