@@ -117,7 +117,8 @@ app.use(async (req, res) => {
             'Content-type': 'application/x-www-form-urlencoded;charset=utf-8'
         }
       });
-      console.log(await result.json());
+      let jsonResult = await result.json();
+      console.log(jsonResult);
       return res.send("success");
     }
 
