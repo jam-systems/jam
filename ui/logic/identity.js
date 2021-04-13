@@ -130,8 +130,12 @@ export function signedToken() {
   return base64.encodeUrl(JSON.stringify(signData({})));
 }
 
-export function verifyData(record) {
-  return ssr.data(record);
+export function verifyData(record, key) {
+  let verifiedRecord = ssr.data(record);
+  if (!verifiedRecord) return;
+  let {identities, data} = verifiedRecord;
+  if (!identities.includes(base64.urlToOriginal(key))) return;
+  return data;
 }
 
 function decode(base64String) {
