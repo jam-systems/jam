@@ -276,7 +276,7 @@ function randomHex4() {
 let s = id => id.slice(0, 2);
 
 let log = (...a) => {
-  if (DEV) return;
+  if (!DEV) return;
   let d = new Date();
   let time = `[${d.toLocaleTimeString('de-DE')},${String(
     d.getMilliseconds()
