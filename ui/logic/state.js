@@ -1,4 +1,5 @@
 import State from 'use-minimal-state';
+import Swarm from '../lib/swarm';
 import {DEV} from './config';
 import {debug} from './util';
 const state = State({
@@ -27,6 +28,9 @@ const state = State({
   userInteracted: false,
 });
 export default state;
+
+const swarm = Swarm();
+export {swarm};
 
 // actions that can be emitted to trigger events
 // emit(action.NAME, payload)

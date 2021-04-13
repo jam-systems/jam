@@ -1,9 +1,8 @@
 import {useCallback, useEffect, useState} from 'react';
 import {emit, on, set, use} from 'use-minimal-state';
-import state, {actions, modState} from './state';
+import state, {actions, modState, swarm} from './state';
 import {config} from './config';
 import {signedToken, signData, currentId, identities} from './identity';
-import swarm from '../lib/swarm';
 import {emptyRoom} from './room';
 // POST https://jam.systems/_/pantry/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
 // Creates room, returns 409 conflict if room exists
@@ -147,7 +146,7 @@ export function useCreateRoom({roomId, room, isLoading, newRoom}) {
           newRoom?.description || '',
           newRoom?.logoURI || '',
           newRoom?.color || '',
-          swarm.myPeerId
+          currentId()
         );
         setCreateLoading(false);
         if (roomCreated) {

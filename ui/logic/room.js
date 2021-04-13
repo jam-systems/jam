@@ -1,5 +1,4 @@
-import swarm from '../lib/swarm';
-import state from './state';
+import state, {swarm} from './state';
 import {get, updateApiQuery, put, useApiQuery} from './backend';
 import {on, set, update} from 'use-minimal-state';
 import {currentId} from './identity';

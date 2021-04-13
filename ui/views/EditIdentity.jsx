@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import SparkMD5 from 'spark-md5';
-import swarm from '../lib/swarm';
+import {swarm} from '../logic/state';
 import {Modal} from './Modal';
 import {
   currentId,

@@ -1,5 +1,4 @@
-import swarm from '../lib/swarm';
-import state, {actions} from './state';
+import state, {actions, swarm} from './state';
 import {get} from './backend';
 import {currentId, signData, verifyData} from './identity';
 import {DEV, config} from './config';
@@ -14,7 +13,7 @@ if (DEV) {
 }
 export {state};
 
-function configSignalhub() {
+function configSwarm() {
   swarm.config({
     debug: config.development,
     url: config.urls.signalHub + '/',
@@ -39,8 +38,8 @@ function configSignalhub() {
     },
   });
 }
-configSignalhub();
-on(config, () => configSignalhub());
+configSwarm();
+on(config, () => configSwarm());
 
 export function enterRoom(roomId) {
   state.set('userInteracted', true);

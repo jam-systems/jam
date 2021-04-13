@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
-import state from '../logic/state';
+import state, {swarm} from '../logic/state';
 import {use} from 'use-minimal-state';
-import swarm from '../lib/swarm';
 import EnterRoom from './EnterRoom';
 import RoomHeader from './RoomHeader';
 import {useCurrentIdentity} from '../logic/identity';

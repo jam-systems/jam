@@ -3,9 +3,8 @@ import Room from './views/Room';
 import {currentId} from './logic/identity';
 import {useCreateRoom, initializeIdentity} from './logic/backend';
 import {useRoom, maybeConnectRoom, disconnectRoom} from './logic/room';
-import swarm from './lib/swarm';
 import Modals from './views/Modal';
-import state from './logic/state';
+import state, {swarm} from './logic/state';
 import {mergeClasses, useSync} from './logic/util';
 import {stopAudio} from './logic/audio';
 import {config} from './logic/config';
@@ -60,7 +59,7 @@ function Main({roomId, newRoom, config: customConfig, onError}) {
   useEffect(() => {
     initializeIdentity();
     swarm.config({myPeerId: currentId()});
-    swarm.set('sharedState', {inRoom: false});
+    set(swarm, 'sharedState', {inRoom: false});
   }, []);
 
   // fetch room if we are in one

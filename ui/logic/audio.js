@@ -1,9 +1,9 @@
-import swarm from '../lib/swarm';
+import {addLocalStream} from '../lib/swarm';
 import hark from '../lib/hark';
 import UAParser from 'ua-parser-js';
-import state from './state';
+import state, {swarm} from './state';
 import {is, set} from 'use-minimal-state';
-import { currentId } from './identity';
+import {currentId} from './identity';
 import log from '../lib/causal-log';
 import {domEvent, until} from './util';
 import {openModal} from '../views/Modal';
@@ -18,13 +18,11 @@ state.on('myAudio', myAudio => {
   // if i am speaker, send audio to peers
   if (state.iAmSpeaker && myAudio) {
     connectVolumeMeter(currentId(), myAudio);
-    swarm.addLocalStream(myAudio, 'audio', myAudio =>
-      state.set('myAudio', myAudio)
-    );
+    addLocalStream(swarm, myAudio, 'audio');
   }
   if (!myAudio) {
     disconnectVolumeMeter(currentId());
-    swarm.addLocalStream(null, 'audio');
+    addLocalStream(swarm, null, 'audio');
   }
 });
 
@@ -34,9 +32,7 @@ state.on('iAmSpeaker', iAmSpeaker => {
     let {myAudio} = state;
     if (myAudio) {
       connectVolumeMeter(currentId(), myAudio);
-      swarm.addLocalStream(myAudio, 'audio', myAudio =>
-        state.set('myAudio', myAudio)
-      );
+      addLocalStream(swarm, myAudio, 'audio');
     } else {
       // or request audio if not on yet
       if (state.inRoom) requestAudio();
