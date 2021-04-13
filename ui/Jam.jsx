@@ -9,9 +9,8 @@ import state from './logic/state';
 import {mergeClasses, useSync} from './logic/util';
 import {stopAudio} from './logic/audio';
 import {config} from './logic/config';
-import {set} from 'minimal-state';
 import {useProvideWidth, WidthContext} from './logic/tailwind-mqp';
-import {use} from 'use-minimal-state';
+import {set, use} from 'use-minimal-state';
 
 export default function Jam({
   style,

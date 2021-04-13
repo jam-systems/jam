@@ -1,4 +1,4 @@
-import {set} from 'minimal-state';
+import {set} from 'use-minimal-state';
 import {useEffect} from 'react';
 import state from './state';
 

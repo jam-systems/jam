@@ -1,4 +1,4 @@
-import {set} from 'minimal-state';
+import {set} from 'use-minimal-state';
 import React, {useEffect, useState} from 'react';
 import state from '../logic/state';
 import {domEvent} from '../logic/util';
