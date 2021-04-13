@@ -42,12 +42,8 @@ const createIdentityFromKeypair = (info, keypair) => {
 };
 
 export const identities = StoredState('identities', () => {
-  const _default = localStorage['identity']
-    ? importLegacyIdentity()
-    : createIdentity();
-  return {
-    _default,
-  };
+  const _default = importLegacyIdentity() || createIdentity();
+  return {_default};
 });
 
 export function setCurrentIdentity(valueOrFunction) {
