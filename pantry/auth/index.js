@@ -3,18 +3,8 @@ const { permitAllAuthenticator } = require('../routes/controller');
 const verifyIdentities = require("../verifications");
 const { restrictRoomCreation } = require('../config');
 
-const isInList = (token, publicKeys) => {
-    for (const key of publicKeys)
-    {
-        if (verify(token, key)) {
-            return true;
-        }
-    }
-    return false
-}
-
 const isAnyInList = (tokens, publicKeys) => {
-    return tokens.some((token) => isInList(token, publicKeys));
+    return tokens.some((token) => publicKeys.includes(token));
 }
 
 
