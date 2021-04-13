@@ -1,28 +1,24 @@
-import React, {useMemo} from 'react';
+import React, {useEffect, useMemo} from 'react';
 import {render} from 'react-dom';
 import {usePath} from './lib/use-location';
 import Jam from './Jam';
 import Start from './views/Start';
-import { parseUrlHash } from './lib/url-utils';
-import {importRoomIdentity} from "./logic/identity";
+import {parseUrlHash} from './lib/url-utils';
+import {importRoomIdentity} from './logic/identity';
 
 render(<App />, document.querySelector('#root'));
 
 function App() {
-
-
   // detect roomId from URL
   const [roomId = null] = usePath();
 
-  const urlData = useMemo(
-      parseUrlHash,
-      [roomId]
-  )
+  const urlData = useMemo(parseUrlHash, [roomId]);
 
-  if(roomId != null) {
+  useEffect(() => {
+    if (roomId !== null) {
       importRoomIdentity(roomId, urlData.identity, urlData.keys);
-  }
-
+    }
+  }, [roomId]);
 
   return (
     <Jam
@@ -37,4 +33,3 @@ function App() {
     />
   );
 }
-
