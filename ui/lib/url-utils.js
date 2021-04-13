@@ -2,7 +2,7 @@ import base64 from 'compact-base64';
 
 const parseParams = params => {
   return params.split('&').reduce(function (res, item) {
-    var parts = item.split('=');
+    const parts = item.split('=');
     res[decodeURIComponent(parts[0])] = decodeURIComponent(parts[1]);
     return res;
   }, {});

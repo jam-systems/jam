@@ -74,7 +74,7 @@ export const currentId = () => {
 
 export const importRoomIdentity = (roomId, roomIdentity, keys) => {
   if (roomIdentity) {
-    if (keys[roomIdentity.id]) {
+    if (keys && keys[roomIdentity.id]) {
       if (keys[roomIdentity.id].seed) {
         addIdentity(
           roomId,
