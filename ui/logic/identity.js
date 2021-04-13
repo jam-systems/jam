@@ -53,21 +53,14 @@ export function setCurrentIdentity(valueOrFunction) {
 }
 
 export const useCurrentIdentity = () => {
-  const roomId = state.roomId;
-  if (identities[roomId]) {
-    return use(identities, roomId);
-  } else {
-    return use(identities, '_default');
-  }
+  let roomId = use(state, 'roomId');
+  let roomIdentity = use(identities, roomId);
+  let defaultIdentity = use(identities, '_default');
+  return roomIdentity || defaultIdentity;
 };
 
 export const currentIdentity = () => {
-  const roomId = state.roomId;
-  if (identities[roomId]) {
-    return identities[roomId];
-  } else {
-    return identities['_default'];
-  }
+  return identities[state.roomId] || identities['_default'];
 };
 
 export const currentId = () => {
