@@ -7,7 +7,7 @@ import {StoredState} from '../lib/local-storage';
 import {importLegacyIdentity} from '../lib/migrations';
 import {Buffer} from 'buffer';
 
-const MESSAGE_VALIDITY_SECONDS = 20;
+const MESSAGE_VALIDITY_SECONDS = 300;
 
 window.Buffer = Buffer; // ugh
 
