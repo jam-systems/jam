@@ -165,8 +165,8 @@ export function useCreateRoom({roomId, room, isLoading, newRoom}) {
 
 export async function initializeIdentity(roomId) {
   const identity = roomId
-    ? identities['_default']
-    : identities[roomId] || identities['_default'];
+    ? identities[roomId] || identities['_default']
+    : identities['_default'];
   return (
     (await put(`/identities/${identity.publicKey}`, identity.info)) ||
     (await post(`/identities/${identity.publicKey}`, identity.info))
