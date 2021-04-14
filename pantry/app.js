@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const logger = require('morgan');
 
+const { ssr } = require('./ssr');
+
 const indexRouter = require('./routes/index');
 const metricsRouter = require('./routes/metrics');
 
@@ -14,6 +16,7 @@ const app = express();
 app.use(logger('dev'));
 app.use(cors());
 app.use(express.json({limit: "500kb"}));
+app.use(ssr);
 
 app.use('/', indexRouter);
 app.use('/metrics', metricsRouter);

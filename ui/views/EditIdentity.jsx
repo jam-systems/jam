@@ -1,9 +1,13 @@
 import React, {useState} from 'react';
 import SparkMD5 from 'spark-md5';
-import swarm from '../lib/swarm';
+import {swarm} from '../logic/state';
 import {Modal} from './Modal';
-import identity from '../logic/identity';
-import {use} from 'use-minimal-state';
+import {
+  currentId,
+  currentIdentity,
+  setCurrentIdentity,
+  useCurrentIdentity,
+} from '../logic/identity';
 import {updateInfoServer} from '../logic/backend';
 import {useMqParser} from '../logic/tailwind-mqp';
 
@@ -20,10 +24,11 @@ let updateInfo = async info => {
       twitterIdentity.id = twitterHandle;
     }
   }
+  let identity = currentIdentity();
   let newInfo = {...identity.info, ...info};
   let ok = await updateInfoServer(newInfo);
   if (ok) {
-    identity.set('info', newInfo);
+    setCurrentIdentity(i => ({...i, info: newInfo}));
     swarm.hub.broadcast('identity-updates', {});
   }
   return ok;
@@ -31,7 +36,8 @@ let updateInfo = async info => {
 
 export default function EditIdentity({close}) {
   let mqp = useMqParser();
-  let [info, id] = use(identity, ['info', 'publicKey']);
+  let info = useCurrentIdentity().info;
+  let id = currentId();
   let [displayName, setDisplayName] = useState(info?.displayName);
   let [email, setEmail] = useState(info?.email);
   let twitterIdentity = info?.identities?.find(i => i.type === 'twitter');
@@ -49,7 +55,6 @@ export default function EditIdentity({close}) {
   let submit = async e => {
     e.preventDefault();
     let tweet = tweetInput;
-    // console.log('submitting tweet', tweet);
 
     let identities = [
       {
@@ -210,7 +215,7 @@ export default function EditIdentity({close}) {
         <br />
         <hr />
         <br />
-        <div class="hidden">
+        <div className="hidden">
           <input
             className="rounded placeholder-gray-400 bg-gray-50 w-72"
             type="email"

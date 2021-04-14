@@ -1,8 +1,7 @@
-import swarm from '../lib/swarm';
-import state from './state';
+import state, {swarm} from './state';
 import {get, updateApiQuery, put, useApiQuery} from './backend';
 import {on, set, update} from 'use-minimal-state';
-import identity from './identity';
+import {currentId} from './identity';
 import log from '../lib/causal-log';
 import {config} from './config';
 
@@ -16,14 +15,14 @@ export {
   emptyRoom,
 };
 
-const emptyRoom = config.defaultRoom ? {...config.defaultRoom, speakers: [], moderators: []} : {
-  name: '',
-  description: '',
-  speakers: [],
-  moderators: [],
-};
-
-
+const emptyRoom = config.defaultRoom
+  ? {...config.defaultRoom, speakers: [], moderators: []}
+  : {
+      name: '',
+      description: '',
+      speakers: [],
+      moderators: [],
+    };
 
 let _disconnectRoom = {};
 
@@ -34,8 +33,9 @@ function useRoom(roomId) {
 function maybeConnectRoom(roomId) {
   if (swarm.room === roomId && swarm.hub) return;
   log('connecting room', roomId);
-  // set(state, 'roomId', roomId);
   if (swarm.hub) swarm.disconnect();
+  // make sure peerId is the current one
+  swarm.config({myPeerId: currentId()});
   swarm.connect(roomId);
   swarm.hub.subscribe('identity-updates', async ({peerId}) => {
     let [data, ok] = await get(`/identities/${peerId}`);
@@ -65,7 +65,7 @@ on(state, 'room', (room, oldRoom) => {
   let {speakers: oldSpeakers, moderators: oldModerators} = oldRoom;
   let {speakers, moderators} = room;
 
-  let myId = identity.publicKey;
+  let myId = currentId();
   if (!oldSpeakers.includes(myId) && speakers.includes(myId)) {
     set(state, 'iAmSpeaker', true);
     joinStage();
@@ -130,4 +130,3 @@ on(swarm, 'peerState', peerState => {
     }
   }
 });
-

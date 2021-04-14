@@ -1,7 +1,6 @@
-import swarm from '../lib/swarm';
-import state, {actions} from './state';
+import state, {actions, swarm} from './state';
 import {get} from './backend';
-import identity, {signData, verifyData} from './identity';
+import {currentId, signData, verifyData} from './identity';
 import {DEV, config} from './config';
 import {requestAudio, stopAudio} from './audio';
 import './reactions';
@@ -14,12 +13,18 @@ if (DEV) {
 }
 export {state};
 
-function configSignalhub() {
+function configSwarm() {
   swarm.config({
     debug: config.development,
     url: config.urls.signalHub + '/',
     sign: signData,
     verify: verifyData,
+    reduceState: (states, current, latest) => {
+      if (latest.inRoom) return latest;
+      // if latest is not inRoom, we probably want to ignore most props from it
+      // if not, add them here
+      return {...current, inRoom: states.some(s => s.inRoom)};
+    },
     pcConfig: {
       iceTransportPolicy: 'all',
       iceServers: [
@@ -33,8 +38,8 @@ function configSignalhub() {
     },
   });
 }
-configSignalhub();
-on(config, () => configSignalhub());
+configSwarm();
+on(config, () => configSwarm());
 
 export function enterRoom(roomId) {
   state.set('userInteracted', true);
@@ -58,9 +63,27 @@ export function leaveRoom() {
 // leave room when it gets closed
 on(state, 'room', room => {
   let {moderators, closed} = room;
-  if (state.inRoom && closed && !moderators.includes(identity.publicKey)) {
+  if (state.inRoom && closed && !moderators.includes(currentId())) {
     leaveRoom();
   }
+});
+// leave room when same peer joins it from elsewhere and I'm in room
+on(swarm.connectionState, currentId(), myConnState => {
+  if (myConnState === undefined) {
+    is(state, {otherDeviceInRoom: false});
+    return;
+  }
+  let {states, latest} = myConnState;
+  let {myConnId} = swarm;
+  let otherDeviceInRoom = false;
+  for (let connId in states) {
+    if (connId !== myConnId && states[connId].state.inRoom) {
+      otherDeviceInRoom = true;
+      if (connId === latest && state.inRoom) leaveRoom();
+      break;
+    }
+  }
+  is(state, {otherDeviceInRoom});
 });
 
 swarm.on('newPeer', async id => {

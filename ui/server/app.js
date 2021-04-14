@@ -26,13 +26,14 @@ const urls = {
     }
 }
 
+console.log(urls);
 
 
 const pantryApiPrefix = `${urls.pantry}/api/v1/rooms`;
 
 const defaultMetaInfo = {
     ogTitle: "Jam",
-    ogDescription: "Join this Jam audio space",
+    ogDescription: "Join this audio room",
     ogUrl: urls.jam,
     ogImage: `${urls.jam}/img/jam-app-icon.jpg`,
     favIcon: '/img/jam-app-icon.jpg',
@@ -116,8 +117,15 @@ app.use(async (req, res) => {
             'Content-type': 'application/x-www-form-urlencoded;charset=utf-8'
         }
       });
-      console.log(await result.json());
-      return res.send("success");
+      let apiResponse = await result.json();
+      if (apiResponse.ok) {
+        console.log(apiResponse);
+        return res.send("Jam was successfully added to your workspace.");
+
+      } else {
+        console.log(apiResponse);
+        return res.send("Jam was not added to your workspace, please try again later.");
+      }
     }
 
     const metaInfo = req.path === '/' ? defaultMetaInfo : {

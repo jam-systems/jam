@@ -58,6 +58,9 @@ services:
       - JAM_TURN_SERVER_USERNAME
       - JAM_TURN_SERVER_CREDENTIAL
       - JAM_RESTRICT_ROOM_CREATION
+      - SLACK_CLIENT_ID
+      - SLACK_CLIENT_SECRET
+      - SLACK_API_URL
     labels:
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}_ui.rule=Host(`${JAM_HOST}`)
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}_ui.tls=true

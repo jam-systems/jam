@@ -2,7 +2,7 @@ import React, {useMemo, useState} from 'react';
 import {leaveRoom} from '../logic/main';
 import state from '../logic/state';
 import {use} from 'use-minimal-state';
-import identity from '../logic/identity';
+import { currentId } from '../logic/identity';
 import {sendReaction, raiseHand} from '../logic/reactions';
 import EditRole, {EditSelf} from './EditRole';
 import {breakpoints, useWidth} from '../logic/tailwind-mqp';
@@ -56,7 +56,7 @@ export default function Navigation({
 
   let isColorDark = useMemo(() => isDark(color), [color]);
 
-  let myPeerId = identity.publicKey;
+  let myPeerId = currentId();
   let myHandRaised = raisedHands.has(myPeerId);
 
   let width = useWidth();
@@ -92,9 +92,14 @@ export default function Navigation({
       )}
       {editSelf && <EditSelf onCancel={() => setEditSelf(false)} />}
       {/* microphone mute/unmute button */}
+      {/* TODO: button content breaks between icon and text on small screens. fix by using flexbox & text-overflow */}
       <div className="flex">
         <button
           onClick={iSpeak ? talk : () => raiseHand(!myHandRaised)}
+          onKeyUp={e => {
+            // don't allow clicking mute button with space bar to prevent confusion with push-to-talk w/ space bar
+            if (e.key === ' ') e.preventDefault();
+          }}
           className="flex-grow select-none h-12 mt-4 px-6 text-lg text-white bg-gray-600 rounded-lg focus:outline-none active:bg-gray-600"
           style={{
             backgroundColor: color || '#4B5563',

@@ -1,4 +1,5 @@
 import State from 'use-minimal-state';
+import Swarm from '../lib/swarm';
 import {DEV} from './config';
 import {debug} from './util';
 const state = State({
@@ -8,6 +9,7 @@ const state = State({
   iAmSpeaker: false,
   iAmModerator: false,
   identities: {},
+  otherDeviceInRoom: false,
 
   reactions: {},
   raisedHands: new Set(),
@@ -27,6 +29,9 @@ const state = State({
 });
 export default state;
 
+const swarm = Swarm();
+export {swarm};
+
 // actions that can be emitted to trigger events
 // emit(action.NAME, payload)
 // on(action.NAME, payload => {})
@@ -37,4 +42,4 @@ export const actions = {
 if (DEV) debug(state);
 
 // mod visible state
-export const modState = State({raiseHand: false});
+export const modState = {raiseHand: false};

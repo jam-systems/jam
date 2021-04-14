@@ -1,10 +1,9 @@
 import React, {useState} from 'react';
-import state from '../logic/state';
+import state, {swarm} from '../logic/state';
 import {use} from 'use-minimal-state';
-import swarm from '../lib/swarm';
 import EnterRoom from './EnterRoom';
 import RoomHeader from './RoomHeader';
-import identity from '../logic/identity';
+import {useCurrentIdentity} from '../logic/identity';
 import {openModal} from './Modal';
 import {EditRoomModal} from './EditRoom';
 import useWakeLock from '../lib/use-wake-lock';
@@ -13,15 +12,18 @@ import {useMqParser} from '../logic/tailwind-mqp';
 import Container from './Container';
 import Navigation from './Navigation';
 import UAParser from 'ua-parser-js';
+import {usePushToTalk} from '../logic/hotkeys';
+const userAgent = UAParser();
+const inWebView =
+  userAgent.browser?.name === 'Chrome WebView' ||
+  (userAgent.os?.name === 'iOS' && userAgent.browser?.name !== 'Mobile Safari');
 
 export default function Room({room, roomId}) {
   // room = {name, description, moderators: [peerId], speakers: [peerId]}
   useWakeLock();
+  usePushToTalk();
 
-  let userAgent = UAParser();
-  let inWebView = (userAgent.browser?.name === "Chrome WebView") || ((userAgent.os?.name === "iOS") && (userAgent.browser?.name !== "Mobile Safari"))
-
-  let myInfo = use(identity, 'info');
+  let myInfo = useCurrentIdentity().info;
   let [
     reactions,
     raisedHands,
@@ -90,7 +92,7 @@ export default function Room({room, roomId}) {
     );
   }
 
-  let myPeerId = identity.publicKey;
+  let myPeerId = myInfo.id;
   let stagePeers = (speakers || []).filter(id => id in peers);
   let audiencePeers = Object.keys(peers || {}).filter(
     id => !stagePeers.includes(id)
@@ -126,8 +128,18 @@ export default function Room({room, roomId}) {
               d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          Open in {userAgent.os?.name == "iOS" ? "Safari" : "Chrome"} for best experience.<br/>
-          <a className="underline" href="https://gitlab.com/jam-systems/jam" target="_blank" rel="nofollow">Learn more</a>.
+          Open in {userAgent.os?.name === 'iOS' ? 'Safari' : 'Chrome'} for best
+          experience.
+          <br />
+          <a
+            className="underline"
+            href="https://gitlab.com/jam-systems/jam"
+            target="_blank"
+            rel="nofollow noreferrer"
+          >
+            Learn more
+          </a>
+          .
         </div>
         <div
           className={

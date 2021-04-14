@@ -1,11 +1,8 @@
 import {useCallback, useEffect, useState} from 'react';
 import {emit, on, set, use} from 'use-minimal-state';
-import state, {actions, modState} from './state';
-import {config, DEV} from './config';
-import identity, {signedToken} from './identity';
-import {pure} from '../lib/local-storage';
-import swarm from '../lib/swarm';
-import log from '../lib/causal-log';
+import state, {actions, modState, swarm} from './state';
+import {config} from './config';
+import {signedToken, signData, currentId, identities} from './identity';
 import {emptyRoom} from './room';
 // POST https://jam.systems/_/pantry/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
 // Creates room, returns 409 conflict if room exists
@@ -46,8 +43,7 @@ export function useApiQuery(path, doFetch = true, key, defaultQuery) {
 
   useEffect(() => {
     if (key) {
-      let off = forwardApiQuery(path, key, defaultQuery);
-      return off;
+      return forwardApiQuery(path, key, defaultQuery);
     }
   }, [path, key, defaultQuery]);
 
@@ -74,9 +70,8 @@ async function authenticatedApiRequest(method, path, payload) {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      Authorization: `Token ${signedToken()}`,
     },
-    body: payload ? JSON.stringify(payload) : undefined,
+    body: payload ? JSON.stringify(signData(payload)) : undefined,
   });
   return res.ok;
 }
@@ -151,7 +146,7 @@ export function useCreateRoom({roomId, room, isLoading, newRoom}) {
           newRoom?.description || '',
           newRoom?.logoURI || '',
           newRoom?.color || '',
-          swarm.myPeerId
+          currentId()
         );
         setCreateLoading(false);
         if (roomCreated) {
@@ -168,24 +163,20 @@ export function useCreateRoom({roomId, room, isLoading, newRoom}) {
 
 // identity
 
-export async function initializeIdentity() {
-  if (DEV) log('identity', identity);
+export async function initializeIdentity(roomId) {
+  const identity = roomId
+    ? identities[roomId] || identities['_default']
+    : identities['_default'];
   return (
     (await put(`/identities/${identity.publicKey}`, identity.info)) ||
     (await post(`/identities/${identity.publicKey}`, identity.info))
   );
 }
 
-// UNUSED
-async function getInfoServer() {
-  let [data, ok] = await get(`/identities/${identity.publicKey}`);
-  return ok && data;
-}
-
 export async function updateInfoServer(info) {
   return (
-    (await put(`/identities/${identity.publicKey}`, info)) ||
-    (await post(`/identities/${identity.publicKey}`, info))
+    (await put(`/identities/${currentId()}`, info)) ||
+    (await post(`/identities/${currentId()}`, info))
   );
 }
 
@@ -193,16 +184,16 @@ export async function updateInfoServer(info) {
 
 // post initial status on entering room
 on(state, 'inRoom', () => {
-  sendModMessage(pure(modState));
+  sendModMessage(modState);
 });
 // post on changes
 on(modState, () => {
-  sendModMessage(pure(modState));
+  sendModMessage(modState);
 });
 async function sendModMessage(msg) {
   let {inRoom} = state;
   if (inRoom) {
-    await post(`/rooms/${inRoom}/modMessage/${identity.publicKey}`, msg);
+    await post(`/rooms/${inRoom}/modMessage/${currentId()}`, msg);
   }
 }
 // fetch mod messages when we become moderator

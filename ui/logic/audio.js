@@ -1,9 +1,9 @@
-import swarm from '../lib/swarm';
+import {addLocalStream} from '../lib/swarm';
 import hark from '../lib/hark';
 import UAParser from 'ua-parser-js';
-import state from './state';
+import state, {swarm} from './state';
 import {is, set} from 'use-minimal-state';
-import identity from './identity';
+import {currentId} from './identity';
 import log from '../lib/causal-log';
 import {domEvent, until} from './util';
 import {openModal} from '../views/Modal';
@@ -17,14 +17,12 @@ export {requestAudio, stopAudio, requestMicPermissionOnly};
 state.on('myAudio', myAudio => {
   // if i am speaker, send audio to peers
   if (state.iAmSpeaker && myAudio) {
-    connectVolumeMeter(identity.publicKey, myAudio);
-    swarm.addLocalStream(myAudio, 'audio', myAudio =>
-      state.set('myAudio', myAudio)
-    );
+    connectVolumeMeter(currentId(), myAudio);
+    addLocalStream(swarm, myAudio, 'audio');
   }
   if (!myAudio) {
-    disconnectVolumeMeter(identity.publicKey);
-    swarm.addLocalStream(null, 'audio');
+    disconnectVolumeMeter(currentId());
+    addLocalStream(swarm, null, 'audio');
   }
 });
 
@@ -33,10 +31,8 @@ state.on('iAmSpeaker', iAmSpeaker => {
     // send audio stream when I become speaker
     let {myAudio} = state;
     if (myAudio) {
-      connectVolumeMeter(identity.publicKey, myAudio);
-      swarm.addLocalStream(myAudio, 'audio', myAudio =>
-        state.set('myAudio', myAudio)
-      );
+      connectVolumeMeter(currentId(), myAudio);
+      addLocalStream(swarm, myAudio, 'audio');
     } else {
       // or request audio if not on yet
       if (state.inRoom) requestAudio();
@@ -78,10 +74,9 @@ function getAudio(id) {
 }
 
 function playOrShowModal(audio) {
-  let inRoom = state.inRoom;
   return play(audio).catch(err => {
     console.warn(err);
-    if (inRoom) {
+    if (state.inRoom) {
       openModal(InteractionModal, {}, 'interaction');
     }
   });

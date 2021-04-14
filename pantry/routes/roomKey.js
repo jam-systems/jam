@@ -22,12 +22,6 @@ const verifyModerator = async (req, res, next) => {
 };
 
 const verifyRoomKeyAccess = async (req, res, next) => {
-  const authHeader = req.header('Authorization');
-
-  if (!authHeader) {
-    res.sendStatus(401);
-    return;
-  }
 
   if (await isModerator(req, req.params.id)) {
     next();
