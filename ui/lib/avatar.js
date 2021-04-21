@@ -32,8 +32,9 @@ export const avatarUrl = (info, room) => {
 };
 
 export const displayName = (info, room) => {
-    if(info.displayName && (! room.access?.lockedIdentities)) {
-        return info.displayName
+    const infoName = info.name || info.displayName;
+    if(infoName && (! room.access?.lockedIdentities)) {
+        return infoName
     } else {
         return roomDisplayName(info, room)
     }
