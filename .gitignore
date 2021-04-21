@@ -1,9 +1,11 @@
-/.idea
+.idea
 *.iml
 node_modules
 ui/public/bundle*
 ui/bundle*
 *.DS_Store
 .env
+.venv
 data
 jam-config
+__pycache__
