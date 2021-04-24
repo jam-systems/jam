@@ -7,13 +7,15 @@
 
 # Jam
 
+![Discord](https://img.shields.io/discord/813009761468416000?label=Jam%20discord&logo=discord) ![Twitter Follow](https://img.shields.io/twitter/follow/jam_systems?style=social) ![GitHub Repo stars](https://img.shields.io/github/stars/jam-systems/jam?style=social) ![npm](https://img.shields.io/npm/v/jam-react?label=jam-react%20on%20npm)
+
 🍞 Jam is an open source alternative to Clubhouse, Twitter Spaces and similar audio spaces.
 
 With Jam you can create audio rooms that can be used for panel discussions, jam sessions, free flowing conversations, debates, theatre plays, musicals and more. The only limit is your imagination.
 
-try Jam on [https://jam.systems/](https://jam.systems/)
+try Jam for free on [https://jam.systems/](https://jam.systems/)
 
-sign up to the **[Jam Pro _Early Access_ Program here](https://pro.jam.systems)** (Get your own branded version of Jam and use your own custom domain)
+get your own Jam server hosted by us with the **[Jam _Early Access_ Program here](https://jamshelf.com)**
 
 join the [Jam community on 🎧 Discord](https://discord.gg/BfakmCuXSX)
 
