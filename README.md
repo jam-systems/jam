@@ -7,7 +7,7 @@
 
 # Jam
 
-![Discord](https://img.shields.io/discord/813009761468416000?label=Jam%20discord&logo=discord) ![Twitter Follow](https://img.shields.io/twitter/follow/jam_systems?style=social) ![GitHub Repo stars](https://img.shields.io/github/stars/jam-systems/jam?style=social) ![npm](https://img.shields.io/npm/v/jam-react?label=jam-react%20on%20npm)
+<a href="https://discord.gg/BfakmCuXSX">![Discord](https://img.shields.io/discord/813009761468416000?label=Jam%20discord&logo=discord)</a> <a href="https://twitter.com/jam_systems">![Twitter Follow](https://img.shields.io/twitter/follow/jam_systems?style=social)</a> <a href="https://github.com/jam-systems/jam">![GitHub Repo stars](https://img.shields.io/github/stars/jam-systems/jam?style=social)</a> <a href="https://www.npmjs.com/package/jam-react">![npm](https://img.shields.io/npm/v/jam-react?label=jam-react%20on%20npm)</a>
 
 🍞 Jam is an open source alternative to Clubhouse, Twitter Spaces and similar audio spaces.
 
