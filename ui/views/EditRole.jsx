@@ -1,6 +1,6 @@
 import React from 'react';
 import {addRole, removeRole, leaveStage} from '../logic/room';
-import { currentId } from '../logic/identity';
+import {currentId} from '../logic/identity';
 import {state} from '../logic/main';
 import {use} from 'use-minimal-state';
 import {openModal} from './Modal';
@@ -71,21 +71,25 @@ export default function EditRole({peerId, speakers, moderators, onCancel}) {
 export function EditSelf({onCancel}) {
   let mqp = useMqParser();
   let myPeerId = currentId();
-  let [iSpeak, iModerate, room] = use(state, ['iAmSpeaker', 'iAmModerator', 'room']);
+  let [iSpeak, iModerate, room] = use(state, [
+    'iAmSpeaker',
+    'iAmModerator',
+    'room',
+  ]);
   return (
     <div className={mqp('md:p-10')}>
       <h3 className="font-medium">Actions</h3>
       <br />
       <ButtonContainer>
-        {! room.access?.lockedIdentities && (
-            <SecondaryButton
-              onClick={() => {
-                openModal(EditIdentity);
-                onCancel();
-              }}
-            >
-              Edit Profile
-            </SecondaryButton>
+        {!room.access?.lockedIdentities && (
+          <SecondaryButton
+            onClick={() => {
+              openModal(EditIdentity);
+              onCancel();
+            }}
+          >
+            Edit Profile
+          </SecondaryButton>
         )}
         {iModerate && !iSpeak && (
           <SecondaryButton
@@ -121,9 +125,9 @@ export function EditSelf({onCancel}) {
             Stream audio
           </SecondaryButton>
         )}
-          <SecondaryButton light onClick={onCancel}>
-            Cancel
-          </SecondaryButton>
+        <SecondaryButton light onClick={onCancel}>
+          Cancel
+        </SecondaryButton>
       </ButtonContainer>
       <br />
       <br />
