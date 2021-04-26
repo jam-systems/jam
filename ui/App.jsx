@@ -3,7 +3,7 @@ import {render} from 'react-dom';
 import {usePath} from './lib/use-location';
 import Jam from './Jam';
 import Start from './views/Start';
-import {parseUrlHash} from './lib/url-utils';
+import {parseUrlConfig} from './lib/url-utils';
 import {importRoomIdentity} from './logic/identity';
 import {initializeIdentity} from './logic/backend';
 
@@ -14,7 +14,7 @@ function App() {
   const [roomId = null] = usePath();
 
   const urlData = useMemo(() => {
-    let data = parseUrlHash();
+    let data = parseUrlConfig();
     if (roomId !== null && data.identity) {
       importRoomIdentity(roomId, data.identity, data.keys);
       initializeIdentity(roomId);
