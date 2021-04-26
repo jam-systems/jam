@@ -9,3 +9,11 @@ ui/bundle*
 data
 jam-config
 __pycache__
+
+.husky/
+deployment/
+examples/
+signalhub/
+resources/
+**/bundle.js
+**/dist/
