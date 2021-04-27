@@ -8,14 +8,14 @@ function broadcast(roomId, topic, message) {
   publish(roomId, topic, {t: topic, d: message});
 }
 
-function handleMessage(ws, roomId, msg) {
+function handleMessage(ws, roomId, peerId, msg) {
   // TODO: allow unsubscribe
   let {s: subscribeTopics, t: topic, d: data} = msg;
   if (subscribeTopics !== undefined) {
     subscribe(ws, roomId, subscribeTopics);
   }
   if (topic !== undefined) {
-    publish(roomId, topic, {t: topic, d: data});
+    publish(roomId, topic, {t: topic, d: data, p: peerId});
   }
 }
 
@@ -41,7 +41,7 @@ function handleConnection(ws, req) {
   ws.on('message', jsonMsg => {
     let msg = parseMessage(jsonMsg);
     // console.log('ws message', msg);
-    if (msg !== undefined) handleMessage(ws, roomId, msg);
+    if (msg !== undefined) handleMessage(ws, roomId, peerId, msg);
   });
 
   ws.on('close', (_code, _reason) => {

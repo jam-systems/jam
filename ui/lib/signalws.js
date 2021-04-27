@@ -30,11 +30,17 @@ export default function signalws({
   ws.addEventListener('message', ({data}) => {
     let msg = decode(data);
     if (msg === undefined) return;
-    let {t: topic, d} = msg;
+    let {t: topic, d, p} = msg;
     // if (d?.peerId !== myPeerId) {
     //   console.log('ws message', data);
     // }
-    emit(hub, topic, d);
+    let payload = d ?? {};
+    if (p) {
+      let [peerId, connId] = p.split(';');
+      payload.peerId = peerId;
+      payload.connId = connId;
+    }
+    emit(hub, topic, payload);
   });
 
   const hub = {
@@ -66,9 +72,9 @@ function subscribe(hub, topic, onMessage) {
 }
 
 async function broadcast(hub, topic, message) {
-  let {ws, myPeerId} = hub;
+  let {ws} = hub;
   await until(hub, 'opened');
-  send(ws, {t: topic, d: {...message, peerId: myPeerId}});
+  send(ws, {t: topic, d: message});
 }
 
 function close({ws}) {

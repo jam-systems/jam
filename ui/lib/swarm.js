@@ -52,27 +52,13 @@ function Swarm(initialConfig) {
   }
 
   swarm.on('sharedState', state => {
-    let {hub, myPeerId, myConnId} = swarm;
     let time = Date.now();
     swarm.sharedStateTime = time;
-    if (!hub || !myPeerId || !myConnId) return;
-    hub.broadcast('all', {
-      type: 'shared-state',
-      peerId: myPeerId,
-      connId: myConnId,
-      state: {state, time},
-    });
+    swarm.hub?.broadcast('all', {type: 'shared-state', state: {state, time}});
   });
 
   swarm.on('sharedEvent', data => {
-    let {hub, myPeerId, myConnId} = swarm;
-    if (!hub || !myPeerId || !myConnId) return;
-    hub.broadcast('all', {
-      type: 'shared-event',
-      peerId: myPeerId,
-      connId: myConnId,
-      data,
-    });
+    swarm.hub?.broadcast('all', {type: 'shared-event', data});
   });
 
   swarm.on('failedConnection', c => removeConnection(c));
@@ -137,8 +123,6 @@ function connect(swarm, room) {
   hub
     .broadcast('all', {
       type: 'connect-me',
-      peerId: myPeerId,
-      connId: myConnId,
       state: {state: swarm.sharedState, time: swarm.sharedStateTime},
     })
     .then(() => {

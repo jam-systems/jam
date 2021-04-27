@@ -45,8 +45,6 @@ function connectPeer(connection) {
     log('i dont initiate, wait for first signal');
     swarm.hub.broadcast(peerId, {
       type: 'signal',
-      peerId: myPeerId,
-      connId: myConnId,
       yourConnId: connId,
       state: {state: sharedState, time: sharedStateTime},
       data: {youStart: true, type: 'you-start'},
@@ -119,7 +117,7 @@ function handleSignal(connection, {data}) {
 
 function createPeer(connection, initiator) {
   let {swarm, peerId, connId} = connection;
-  let {hub, localStreams, myPeerId, myConnId, pcConfig} = swarm;
+  let {hub, localStreams, pcConfig} = swarm;
   // destroy any existing peer
   let peer = connection.pc;
   if (peer) {
@@ -166,8 +164,6 @@ function createPeer(connection, initiator) {
     }
     hub.broadcast(peerId, {
       type: 'signal',
-      peerId: myPeerId,
-      connId: myConnId,
       yourConnId: connId,
       data,
       state,
@@ -342,7 +338,6 @@ function ping({swarm, peerId, connId}, timeout) {
   swarm.hub.broadcast(peerId, {
     type: 'ping',
     yourConnId: connId,
-    connId: swarm.myConnId,
     data: id,
   });
   return promise;
@@ -351,7 +346,6 @@ function ping({swarm, peerId, connId}, timeout) {
 function handlePing(swarm, peerId, connId, id) {
   swarm.hub.broadcast(peerId, {
     type: 'pong',
-    connId: swarm.myConnId,
     yourConnId: connId,
     data: id,
   });
