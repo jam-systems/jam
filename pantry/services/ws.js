@@ -3,6 +3,10 @@ const querystring = require('querystring');
 
 // pub sub websocket
 
+function broadcast(roomId, topic, message) {
+  publish(roomId, topic, {t: topic, d: message});
+}
+
 function handleMessage(ws, roomId, msg) {
   // TODO: allow unsubscribe
   let {s: subscribeTopics, t: topic, d: data} = msg;
@@ -55,7 +59,7 @@ function handleConnection(ws, req) {
   });
 }
 
-function countConnections() {
+function activeUserCount() {
   return nConnections;
 }
 
@@ -87,7 +91,7 @@ function addWebsocket(server) {
   });
 }
 
-module.exports = {addWebsocket, countConnections};
+module.exports = {addWebsocket, activeUserCount, broadcast};
 
 // peer connections per room
 
