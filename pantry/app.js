@@ -4,6 +4,8 @@ const logger = require('morgan');
 
 const {ssr} = require('./ssr');
 
+require('./services/initDb')();
+
 const indexRouter = require('./routes/index');
 const metricsRouter = require('./routes/metrics');
 

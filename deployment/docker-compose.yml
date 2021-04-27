@@ -88,16 +88,6 @@ services:
       - traefik.enable=true
     volumes:
       - "../jam-config:/jam-config"
-  signalhub:
-    image: registry.gitlab.com/jam-systems/jam/signalhub:${CHANNEL}
-    restart: always
-    labels:
-      - traefik.http.routers.${COMPOSE_PROJECT_NAME}_signalhub.rule=(Host(`${JAM_HOST}`) && PathPrefix(`/_/signalhub`))
-      - traefik.http.routers.${COMPOSE_PROJECT_NAME}_signalhub.middlewares=${COMPOSE_PROJECT_NAME}_signalhub_stripprefix
-      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}_signalhub_stripprefix.stripprefix.prefixes=/_/signalhub
-      - traefik.http.routers.${COMPOSE_PROJECT_NAME}_signalhub.tls=true
-      - traefik.http.routers.${COMPOSE_PROJECT_NAME}_signalhub.tls.certresolver=letsencrypt
-      - traefik.enable=true
   traefik:
     hostname: traefik
     image: traefik
