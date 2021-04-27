@@ -1,7 +1,14 @@
+import base64 from 'compact-base64';
 import {emit, is, on} from 'use-minimal-state';
 import {until} from '../logic/util';
 
-export default function signalws({url, roomId, myPeerId, subscriptions = []}) {
+export default function signalws({
+  url,
+  roomId,
+  myPeerId,
+  sign,
+  subscriptions = [],
+}) {
   if (!url) throw new Error('signaling url required');
   if (!roomId) throw new Error('room id required');
   if (!myPeerId) throw new Error('peer id required');
@@ -9,7 +16,9 @@ export default function signalws({url, roomId, myPeerId, subscriptions = []}) {
   url = url.indexOf('://') === -1 ? 'wss://' + url : url;
   url = url.replace('http', 'ws');
   if (!url.endsWith('/')) url += '/';
-  url += `${roomId}?id=${myPeerId}&subs=${subscriptions.join(',')}`;
+  let token = base64.encodeUrl(JSON.stringify(sign({})));
+  let subs = subscriptions.join(',');
+  url += `${roomId}?id=${myPeerId}&token=${token}&subs=${subs}`;
 
   let ws = new WebSocket(url);
 

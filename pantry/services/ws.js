@@ -1,5 +1,6 @@
 const WebSocket = require('ws');
 const querystring = require('querystring');
+const {ssrVerifyToken} = require('../ssr');
 
 // pub sub websocket
 
@@ -74,8 +75,13 @@ function addWebsocket(server) {
     let [roomId] = path.split('/').filter(t => t);
     let params = querystring.parse(query);
     // console.log(path, params);
-    let {id: peerId, subs} = params; // TODO auth // peerId = publicKey + ";" + sessionId
-    if (peerId === undefined || roomId === undefined) {
+    // TODO make peerId = publicKey + ";" + sessionId
+    let {id: peerId, subs, token} = params;
+    if (
+      peerId === undefined ||
+      roomId === undefined ||
+      !ssrVerifyToken(token, peerId)
+    ) {
       console.log('ws rejected!', req.url, 'room', roomId, 'peer', peerId);
       socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
       socket.destroy();

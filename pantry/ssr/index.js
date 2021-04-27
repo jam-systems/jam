@@ -13,9 +13,9 @@ const ssr = (req, res, next) => {
     case 'GET':
     case 'DELETE':
       {
-        let record, verifiedRecord;
+        let verifiedRecord;
         try {
-          record = JSON.parse(base64.decode(extractToken(req)));
+          let record = JSON.parse(base64.decode(extractToken(req)));
           verifiedRecord = data(record);
         } catch (_) {}
         if (verifiedRecord) {
@@ -43,6 +43,17 @@ const ssr = (req, res, next) => {
   next();
 };
 
+function ssrVerifyToken(token, publicKey) {
+  let identities;
+  try {
+    let record = JSON.parse(base64.decode(token));
+    identities = data(record).identities;
+  } catch (_) {}
+  if (identities === undefined) return false;
+  return identities.includes(base64.urlToOriginal(publicKey));
+}
+
 module.exports = {
   ssr,
+  ssrVerifyToken,
 };
