@@ -1,5 +1,5 @@
 import State from 'use-minimal-state';
-import {authenticatedHub} from './signalhub';
+import signalws from './signalws';
 import causalLog from './causal-log';
 import {
   newConnection,
@@ -125,8 +125,8 @@ function connect(swarm, room) {
   swarm.myConnId = myConnId;
   log('connecting. conn id', myConnId);
   let {myPeerId, sign, verify} = swarm;
-  let hub = authenticatedHub({
-    room: swarm.room,
+  let hub = signalws({
+    roomId: swarm.room,
     url: swarm.url,
     myPeerId,
     sign,

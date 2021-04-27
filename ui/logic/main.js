@@ -16,7 +16,7 @@ export {state};
 function configSwarm() {
   swarm.config({
     debug: config.development,
-    url: config.urls.signalHub + '/',
+    url: config.urls.pantry,
     sign: signData,
     verify: verifyData,
     reduceState: (states, current, latest) => {

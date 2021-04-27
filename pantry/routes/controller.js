@@ -1,5 +1,5 @@
 const express = require('express');
-const {hub} = require('../services/signalhub');
+const {broadcast} = require('../services/ws');
 const {get, set} = require('../services/redis');
 
 const permitAllAuthenticator = {
@@ -37,7 +37,8 @@ const controller = (prefix, authenticator, broadcastRoom, broadcastChannel) => {
     if (await get(key)) {
       await set(key, req.body);
       if (broadcastRoom && broadcastChannel)
-        hub(broadcastRoom(req.params.id)).broadcast(
+        broadcast(
+          broadcastRoom(req.params.id),
           broadcastChannel(req.params.id),
           req.body
         );

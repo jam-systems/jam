@@ -1,5 +1,5 @@
 const express = require('express');
-const {activeUserCount} = require('../services/signalhub');
+const {activeUserCount} = require('../services/ws');
 const {roomCount, identityCount} = require('../services/redis');
 
 const router = express.Router();
