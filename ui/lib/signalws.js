@@ -48,8 +48,6 @@ export default function signalws({
     broadcast(topic, message = {}) {
       return broadcast(hub, topic, message);
     },
-    broadcastAnonymous: (...args) => hub.broadcast(...args),
-    subscribeAnonymous: (...args) => hub.subscribe(...args),
     close() {
       close(hub);
     },

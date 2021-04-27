@@ -190,7 +190,7 @@ function connect(swarm, room) {
     }
   });
 
-  hub.subscribeAnonymous('anonymous', data => {
+  hub.subscribe('anonymous', data => {
     swarm.emit('anonymous', data);
   });
 }

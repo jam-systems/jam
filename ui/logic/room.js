@@ -44,7 +44,7 @@ function maybeConnectRoom(roomId) {
       state.update('identities');
     }
   });
-  swarm.hub.subscribeAnonymous('room-info', data => {
+  swarm.hub.subscribe('room-info', data => {
     log('new room info', data);
     updateApiQuery(`/rooms/${state.roomId}`, data);
   });
