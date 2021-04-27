@@ -198,8 +198,9 @@ async function sendModMessage(msg) {
 }
 // fetch mod messages when we become moderator
 on(state, 'iAmModerator', async iAmModerator => {
-  if (iAmModerator) {
-    let [msgs, ok] = await authedGet(`/rooms/${state.roomId}/modMessage`);
+  let {roomId} = state;
+  if (iAmModerator && roomId) {
+    let [msgs, ok] = await authedGet(`/rooms/${roomId}/modMessage`);
     if (ok) set(state, 'modMessages', msgs);
   } else {
     set(state, 'modMessages', {}); // delete when we stop being moderator
@@ -209,7 +210,7 @@ on(state, 'iAmModerator', async iAmModerator => {
 on(swarm, 'anonymous', async ({modMessage}) => {
   let {iAmModerator, roomId} = state;
   if (modMessage && iAmModerator && roomId) {
-    let [msgs, ok] = await authedGet(`/rooms/${state.roomId}/modMessage`);
+    let [msgs, ok] = await authedGet(`/rooms/${roomId}/modMessage`);
     if (ok) set(state, 'modMessages', msgs);
   }
 });
