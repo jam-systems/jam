@@ -1,4 +1,5 @@
 const WebSocket = require('ws');
+const querystring = require('querystring');
 
 // pub sub websocket
 
@@ -15,8 +16,7 @@ function handleMessage(ws, roomId, msg) {
 let nConnections = 0;
 
 function handleConnection(ws, req) {
-  let {roomId, peerId} = req;
-  let subs = req.headers['x-subs']?.split('/'); // custom encoding, don't use "/" in topic names
+  let {roomId, peerId, subs} = req;
 
   addPeer(roomId, peerId);
   nConnections++;
@@ -64,24 +64,20 @@ function addWebsocket(server) {
   wss.on('connection', handleConnection);
 
   server.on('upgrade', (req, socket, head) => {
-    let [roomId] = req.url
-      .split('?')[0]
-      .split('/')
-      .filter(t => t);
-    let peerId = req.headers['x-peer']; // TODO auth // peerId = publicKey + ";" + sessionId
+    let [path, query] = req.url.split('?');
+    let [roomId] = path.split('/').filter(t => t);
+    let params = querystring.parse(query);
+    // console.log(path, params);
+    let {id: peerId, subs} = params; // TODO auth // peerId = publicKey + ";" + sessionId
     if (peerId === undefined || roomId === undefined) {
-      console.log(
-        'ws connection rejected! url',
-        req.url,
-        'headers',
-        req.headers
-      );
+      console.log('ws rejected!', req.url, 'room', roomId, 'peer', peerId);
       socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
       socket.destroy();
       return;
     }
     req.peerId = peerId;
     req.roomId = roomId;
+    req.subs = subs?.split(',').filter(t => t) ?? []; // custom encoding, don't use "," in topic names
 
     wss.handleUpgrade(req, socket, head, socket => {
       wss.emit('connection', socket, req);
