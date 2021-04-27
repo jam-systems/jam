@@ -4,6 +4,7 @@ const querystring = require('querystring');
 // pub sub websocket
 
 function handleMessage(ws, roomId, msg) {
+  // TODO: allow unsubscribe
   let {s: subscribeTopics, t: topic, d: data} = msg;
   if (subscribeTopics !== undefined) {
     subscribe(ws, roomId, subscribeTopics);
@@ -17,6 +18,7 @@ let nConnections = 0;
 
 function handleConnection(ws, req) {
   let {roomId, peerId, subs} = req;
+  console.log('ws open', roomId, peerId, subs);
 
   addPeer(roomId, peerId);
   nConnections++;
