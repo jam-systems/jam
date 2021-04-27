@@ -2,41 +2,52 @@ const WebSocket = require('ws');
 
 // pub sub websocket
 
-function handleMessage(ws, msg) {
-  let {s: subscribeTopic, p: publishTopic, d: data} = msg;
-  if (subscribeTopic !== undefined) {
-    if (subscribeTopic instanceof Array) {
-      for (let topic of subscribeTopic) {
-        subscribe(ws, topic);
-      }
-    } else {
-      subscribe(ws, subscribeTopic);
-    }
+function handleMessage(ws, roomId, msg) {
+  let {s: subscribeTopics, t: topic, d: data} = msg;
+  if (subscribeTopics !== undefined) {
+    subscribe(ws, roomId, subscribeTopics);
   }
-  if (publishTopic !== undefined) {
-    publish(ws, publishTopic, {p: publishTopic, d: data});
+  if (topic !== undefined) {
+    publish(roomId, topic, {t: topic, d: data});
   }
-}
-
-function handleClose(ws) {
-  unsubscribeAll(ws);
 }
 
 let nConnections = 0;
 
-function handleConnection(ws, _req) {
-  // could also use request here for auth
+function handleConnection(ws, req) {
+  let {roomId, peerId} = req;
+  let subs = req.headers['x-subs']?.split('/'); // custom encoding, don't use "/" in topic names
+
+  addPeer(roomId, peerId);
   nConnections++;
+
+  // inform every participant about new peer connection
+  publish(roomId, 'add-peer', {t: 'add-peer', d: peerId});
+
+  // auto subscribe to updates about connected peers
+  subscribe(ws, roomId, ['add-peer', 'remove-peer', 'peers']);
+  if (subs !== undefined) subscribe(ws, roomId, subs);
+
+  // inform about peers immediately
+  sendMessage(ws, {t: 'peers', d: getPeers(roomId)});
+
   ws.on('message', jsonMsg => {
     let msg = parseMessage(jsonMsg);
     // console.log('ws message', msg);
-    if (msg !== undefined) handleMessage(ws, msg);
+    if (msg !== undefined) handleMessage(ws, roomId, msg);
   });
+
   ws.on('close', (_code, _reason) => {
     // console.log('ws closed', code, reason);
     nConnections--;
-    handleClose(ws);
+    removePeer(roomId, peerId);
+    unsubscribeAll(ws);
+
+    publish(roomId, 'remove-peer', {t: 'remove-peer', d: peerId});
+
+    // console.log('debug', roomPeerIds, subscriptions);
   });
+
   ws.on('error', error => {
     console.log('ws error', error);
   });
@@ -46,40 +57,88 @@ function countConnections() {
   return nConnections;
 }
 
-// ws server
+// ws server, handles upgrade requests for http server
 
 function addWebsocket(server) {
   const wss = new WebSocket.Server({noServer: true});
   wss.on('connection', handleConnection);
-  server.on('upgrade', (request, socket, head) => {
-    wss.handleUpgrade(request, socket, head, socket => {
-      wss.emit('connection', socket, request);
+
+  server.on('upgrade', (req, socket, head) => {
+    let [roomId] = req.url
+      .split('?')[0]
+      .split('/')
+      .filter(t => t);
+    let peerId = req.headers['x-peer']; // TODO auth // peerId = publicKey + ";" + sessionId
+    if (peerId === undefined || roomId === undefined) {
+      console.log(
+        'ws connection rejected! url',
+        req.url,
+        'headers',
+        req.headers
+      );
+      socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+      socket.destroy();
+      return;
+    }
+    req.peerId = peerId;
+    req.roomId = roomId;
+
+    wss.handleUpgrade(req, socket, head, socket => {
+      wss.emit('connection', socket, req);
     });
   });
 }
 
 module.exports = {addWebsocket, countConnections};
 
+// peer connections per room
+
+const roomPeerIds = new Map(); // room => Set(peerId)
+
+function addPeer(roomId, peerId) {
+  let peerIds =
+    roomPeerIds.get(roomId) ?? roomPeerIds.set(roomId, new Set()).get(roomId);
+  peerIds.add(peerId);
+}
+function removePeer(roomId, peerId) {
+  let peerIds = roomPeerIds.get(roomId);
+  if (peerIds !== undefined) {
+    peerIds.delete(peerId);
+    if (peerIds.size === 0) roomPeerIds.delete(roomId);
+  }
+}
+function getPeers(roomId) {
+  let peerIds = roomPeerIds.get(roomId);
+  if (peerIds === undefined) return [];
+  return [...peerIds];
+}
+
 // pub sub
 
-const subscriptions = new Map();
+const subscriptions = new Map(); // "roomId/topic" => Set(ws)
 
-function publish(_ws, topic, msg) {
-  let subscribers =
-    subscriptions.get(topic) || subscriptions.set(topic, new Set()).get(topic);
+function publish(room, topic, msg) {
+  let key = `${room}/${topic}`;
+  let subscribers = subscriptions.get(key);
+  if (subscribers === undefined) return;
   for (let subscriber of subscribers) {
     sendMessage(subscriber, msg);
   }
 }
-function subscribe(ws, topic) {
-  let subscribers =
-    subscriptions.get(topic) || subscriptions.set(topic, new Set()).get(topic);
-  subscribers.add(ws);
+function subscribe(ws, room, topics) {
+  if (!(topics instanceof Array)) topics = [topics];
+  for (let topic of topics) {
+    let key = `${room}/${topic}`;
+    let subscribers =
+      subscriptions.get(key) ?? subscriptions.set(key, new Set()).get(key);
+    subscribers.add(ws);
+  }
 }
 function unsubscribeAll(ws) {
   for (let entry of subscriptions) {
-    let [, subscribers] = entry;
+    let [key, subscribers] = entry;
     subscribers.delete(ws);
+    if (subscribers.size === 0) subscriptions.delete(key);
   }
 }
 
