@@ -75,12 +75,12 @@ function addWebsocket(server) {
     let [roomId] = path.split('/').filter(t => t);
     let params = querystring.parse(query);
     // console.log(path, params);
-    // TODO make peerId = publicKey + ";" + sessionId
     let {id: peerId, subs, token} = params;
+    let publicKey = peerId?.split(';')[0];
     if (
       peerId === undefined ||
       roomId === undefined ||
-      !ssrVerifyToken(token, peerId)
+      !ssrVerifyToken(token, publicKey)
     ) {
       console.log('ws rejected!', req.url, 'room', roomId, 'peer', peerId);
       socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');

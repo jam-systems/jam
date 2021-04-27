@@ -6,19 +6,21 @@ export default function signalws({
   url,
   roomId,
   myPeerId,
+  myConnId,
   sign,
   subscriptions = [],
 }) {
   if (!url) throw new Error('signaling url required');
   if (!roomId) throw new Error('room id required');
   if (!myPeerId) throw new Error('peer id required');
+  if (!myConnId) myConnId = String(Math.random()).slice(2, 10);
 
   url = url.indexOf('://') === -1 ? 'wss://' + url : url;
   url = url.replace('http', 'ws');
   if (!url.endsWith('/')) url += '/';
   let token = base64.encodeUrl(JSON.stringify(sign({})));
   let subs = subscriptions.join(',');
-  url += `${roomId}?id=${myPeerId}&token=${token}&subs=${subs}`;
+  url += `${roomId}?id=${myPeerId};${myConnId}&token=${token}&subs=${subs}`;
 
   let ws = new WebSocket(url);
 

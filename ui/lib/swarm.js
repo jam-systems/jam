@@ -129,6 +129,7 @@ function connect(swarm, room) {
     roomId: swarm.room,
     url: swarm.url,
     myPeerId,
+    myConnId,
     sign,
     verify,
   });
