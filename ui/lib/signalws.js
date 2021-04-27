@@ -31,9 +31,9 @@ export default function signalws({
     let msg = decode(data);
     if (msg === undefined) return;
     let {t: topic, d} = msg;
-    if (d?.peerId !== myPeerId) {
-      console.log('ws message', data);
-    }
+    // if (d?.peerId !== myPeerId) {
+    //   console.log('ws message', data);
+    // }
     emit(hub, topic, d);
   });
 
@@ -79,7 +79,7 @@ function close({ws}) {
 
 function send(ws, msg) {
   msg = JSON.stringify(msg);
-  console.log('ws sending', msg);
+  // console.log('ws sending', msg);
   ws.send(msg);
 }
 
