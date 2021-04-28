@@ -22,13 +22,11 @@ export default function Jam({
 }) {
   useSync(state, {roomId}, [roomId]);
   let {color} = use(state, 'room');
-  let [width, container, setContainer, mqp] = useProvideWidth();
-
-  useLayoutEffect(() => {
-    if (container && color && color !== '#4B5563') {
-      container.style.backgroundColor = hexToRGB(color, '0.123');
-    }
-  }, [color, container]);
+  let [width, , setContainer, mqp] = useProvideWidth();
+  let backgroundColor = useMemo(
+    () => (color && color !== '#4B5563' ? hexToRGB(color, '0.123') : undefined),
+    [color]
+  );
 
   return (
     <div
@@ -38,6 +36,7 @@ export default function Jam({
         position: 'relative',
         height: '100%',
         minHeight: '-webkit-fill-available',
+        backgroundColor,
         ...(style || null),
       }}
       {...props}
