@@ -43,9 +43,8 @@ function connectPeer(connection) {
     createPeer(connection, true);
   } else {
     log('i dont initiate, wait for first signal');
-    swarm.hub.broadcast(peerId, {
+    swarm.hub.broadcast(`${peerId};${connId}`, {
       type: 'signal',
-      yourConnId: connId,
       state: {state: sharedState, time: sharedStateTime},
       data: {youStart: true, type: 'you-start'},
     });
@@ -162,12 +161,7 @@ function createPeer(connection, initiator) {
       peer.didSignal = true;
       state = {state: swarm.sharedState, time: swarm.sharedStateTime};
     }
-    hub.broadcast(peerId, {
-      type: 'signal',
-      yourConnId: connId,
-      data,
-      state,
-    });
+    hub.broadcast(`${peerId};${connId}`, {type: 'signal', data, state});
   });
   peer.on('connect', () => {
     log('connected peer', s(peerId), 'after', Date.now() - peer.connectStart);
@@ -335,18 +329,16 @@ function ping({swarm, peerId, connId}, timeout) {
     pings.delete(id);
   }, timeout);
   pings.set(id, promise);
-  swarm.hub.broadcast(peerId, {
+  swarm.hub.broadcast(`${peerId};${connId}`, {
     type: 'ping',
-    yourConnId: connId,
     data: id,
   });
   return promise;
 }
 
 function handlePing(swarm, peerId, connId, id) {
-  swarm.hub.broadcast(peerId, {
+  swarm.hub.broadcast(`${peerId};${connId}`, {
     type: 'pong',
-    yourConnId: connId,
     data: id,
   });
 }

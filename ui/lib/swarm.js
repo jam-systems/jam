@@ -114,7 +114,7 @@ function connect(swarm, room) {
   swarm.myConnId = myConnId;
   log('connecting. conn id', myConnId);
   let {myPeerId, sign, verify} = swarm;
-  // let combinedPeerId = `${myPeerId};${myConnId}`;
+  let combinedPeerId = `${myPeerId};${myConnId}`;
   let hub = signalws({
     roomId: swarm.room,
     url: swarm.url,
@@ -122,7 +122,7 @@ function connect(swarm, room) {
     myConnId,
     sign,
     verify,
-    subscriptions: ['all', myPeerId],
+    subscriptions: ['all', combinedPeerId],
   });
   once(hub, 'opened', () => set(swarm, 'connected', true));
   on(hub, 'error', () => disconnect(swarm));
@@ -151,12 +151,7 @@ function connect(swarm, room) {
     }
   });
 
-  on(hub, myPeerId, ({type, peerId, data, connId, yourConnId, state}) => {
-    if (yourConnId !== myConnId) {
-      // console.warn('message to different session, should be ignored');
-      // log('ignoring msg to different session', yourConnId);
-      return;
-    }
+  on(hub, combinedPeerId, ({type, peerId, data, connId, state}) => {
     if (type === 'signal') {
       log('signal received from', s(peerId), connId, data.type);
       initializePeer(swarm, peerId);
