@@ -76,7 +76,7 @@ export default function Start({urlRoomId, roomFromURIError}) {
           </a>
           <br />
           <br />
-          You can use the form below to start a room.
+          You can use the button below to start a room.
         </div>
 
         <h1>Start a Room</h1>

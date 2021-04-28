@@ -3,7 +3,7 @@ import {get, updateApiQuery, put, useApiQuery} from './backend';
 import {on, set, update} from 'use-minimal-state';
 import {currentId} from './identity';
 import log from '../lib/causal-log';
-import {config} from './config';
+import {staticConfig} from './config';
 
 export {
   useRoom,
@@ -15,8 +15,8 @@ export {
   emptyRoom,
 };
 
-const emptyRoom = config.defaultRoom
-  ? {...config.defaultRoom, speakers: [], moderators: []}
+const emptyRoom = staticConfig.defaultRoom
+  ? {...staticConfig.defaultRoom, speakers: [], moderators: []}
   : {
       name: '',
       description: '',

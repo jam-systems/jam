@@ -1,5 +1,5 @@
-const config = window.jamConfig || {};
-config.isEmbedded = false;
+const staticConfig = window.jamConfig || {};
+staticConfig.isEmbedded = false;
 
-export {config};
-export const DEV = config.development;
+export {staticConfig};
+export const DEV = staticConfig.development;

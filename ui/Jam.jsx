@@ -1,26 +1,66 @@
-import React, {createElement, useEffect, useLayoutEffect, useMemo} from 'react';
-import Room from './views/Room';
+import React, {useEffect, useMemo} from 'react';
 import {currentId} from './logic/identity';
-import {useCreateRoom, initializeIdentity} from './logic/backend';
-import {useRoom, maybeConnectRoom, disconnectRoom} from './logic/room';
+import {initializeIdentity} from './logic/backend';
 import Modals from './views/Modal';
 import state, {swarm} from './logic/state';
-import {mergeClasses, useSync} from './logic/util';
-import {stopAudio} from './logic/audio';
-import {config} from './logic/config';
+import {mergeClasses} from './logic/util';
+import {staticConfig} from './logic/config';
 import {useProvideWidth, WidthContext} from './logic/tailwind-mqp';
 import {set, use} from 'use-minimal-state';
+import Start from './views/Start';
+import Me from './views/Me';
+import PossibleRoom from './views/PossibleRoom';
 
 export default function Jam({
   style,
   className,
-  roomId,
-  newRoom,
-  config,
-  onError,
+  route = null,
+  dynamicConfig = {},
+  staticConfig: staticConfig_,
   ...props
 }) {
-  useSync(state, {roomId}, [roomId]);
+  // routing
+  const View = (() => {
+    switch (route) {
+      case null:
+        return <Start />;
+      case 'me':
+        return <Me />;
+      default:
+        return (
+          <PossibleRoom
+            roomId={route}
+            newRoom={dynamicConfig.room}
+            roomIdentity={dynamicConfig.identity}
+            roomIdentityKeys={dynamicConfig.keys}
+            onError={({error}) => (
+              <Start urlRoomId={route} roomFromURIError={!!error.createRoom} />
+            )}
+          />
+        );
+    }
+  })();
+
+  // static config for cases where it can not be set by app server
+  useMemo(() => {
+    if (staticConfig_) set(staticConfig, staticConfig_);
+  }, []);
+
+  // initialize identity, swarm
+  useEffect(() => {
+    initializeIdentity();
+    swarm.config({myPeerId: currentId()});
+    set(swarm, 'sharedState', {inRoom: false});
+  }, []);
+
+  // toggle debugging
+  useEffect(() => {
+    if (dynamicConfig.debug) {
+      window.DEBUG = true;
+    }
+  }, [dynamicConfig.debug]);
+
+  // global styling
   let {color} = use(state, 'room');
   let [width, , setContainer, mqp] = useProvideWidth();
   let backgroundColor = useMemo(
@@ -42,70 +82,11 @@ export default function Jam({
       {...props}
     >
       <WidthContext.Provider value={width}>
-        <Main {...{roomId, newRoom, config, onError}} />
+        {View}
         <Modals />
       </WidthContext.Provider>
     </div>
   );
-}
-
-function Main({roomId, newRoom, config: customConfig, onError}) {
-  useMemo(() => {
-    if (customConfig) set(config, customConfig);
-  }, []); // TODO: make this react to config changes
-
-  // initialize identity
-  useEffect(() => {
-    initializeIdentity();
-    swarm.config({myPeerId: currentId()});
-    set(swarm, 'sharedState', {inRoom: false});
-  }, []);
-
-  // fetch room if we are in one
-  let [room, isLoading] = useRoom(roomId);
-
-  // connect to signalhub if room exists (and not already connected)
-  useEffect(() => {
-    if (room) maybeConnectRoom(roomId);
-    if (!room && roomId) disconnectRoom(roomId);
-  }, [room, roomId]);
-  // clean up on navigating away
-  useEffect(() => {
-    if (roomId) {
-      return () => {
-        disconnectRoom(roomId);
-        stopAudio();
-      };
-    }
-  }, [roomId]);
-
-  // if roomId is present but room does not exist, try to create new one
-  let [roomFromURILoading, roomFromURIError] = useCreateRoom({
-    roomId,
-    room,
-    isLoading,
-    newRoom,
-  });
-
-  if (roomId) {
-    if (isLoading) return null;
-    if (room) return <Room room={room} roomId={roomId} />;
-    if (roomFromURILoading) return null;
-  }
-  // TODO: could be nice to document possible errors
-  let error = !roomId
-    ? {noRoomId: true}
-    : roomFromURIError
-    ? {createRoom: true}
-    : {};
-  return typeof onError === 'function'
-    ? createElement(onError, {roomId, error})
-    : onError || <Error />;
-}
-
-// TODO
-function Error() {
-  return <div>An error ocurred</div>;
 }
 
 function hexToRGB(hex, alpha) {

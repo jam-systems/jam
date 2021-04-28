@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import {emit, on, set, use} from 'use-minimal-state';
 import state, {actions, modState, swarm} from './state';
-import {config} from './config';
+import {staticConfig} from './config';
 import {signedToken, signData, currentId, identities} from './identity';
 import {emptyRoom} from './room';
 // POST https://jam.systems/_/pantry/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
@@ -13,9 +13,9 @@ import {emptyRoom} from './room';
 // PUT https://jam.systems/_/pantry/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
 // updates room and broadcasts to roomId / channel room-info on signal hub
 
-let API = `${config.urls.pantry}/api/v1`;
-on(config, () => {
-  API = `${config.urls.pantry}/api/v1`;
+let API = `${staticConfig.urls.pantry}/api/v1`;
+on(staticConfig, () => {
+  API = `${staticConfig.urls.pantry}/api/v1`;
 });
 
 export function useApiQuery(path, doFetch = true, key, defaultQuery) {
