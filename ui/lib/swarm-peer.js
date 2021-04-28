@@ -34,7 +34,6 @@ function connectPeer(connection) {
   // -) this has to work in every state of swarm.peers (e.g. with or without existing Peer instance)
   let {swarm, peerId, connId} = connection;
   log('connecting peer', s(peerId), connId);
-  deathPing(connection);
 
   let {myPeerId, myConnId, sharedState, sharedStateTime} = swarm;
   timeoutPeer(connection, MAX_CONNECT_TIME);
@@ -194,7 +193,6 @@ function createPeer(connection, initiator) {
   peer.on('iceStateChange', state => {
     log('ice state', state);
     if (state === 'disconnected') {
-      deathPing(connection);
       timeoutPeer(
         connection,
         MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT,

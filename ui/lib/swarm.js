@@ -114,7 +114,7 @@ function connect(swarm, room) {
   swarm.myConnId = myConnId;
   log('connecting. conn id', myConnId);
   let {myPeerId, sign, verify} = swarm;
-  let combinedPeerId = `${myPeerId};${myConnId}`;
+  let myCombinedPeerId = `${myPeerId};${myConnId}`;
   let hub = signalws({
     roomId: swarm.room,
     url: swarm.url,
@@ -122,26 +122,46 @@ function connect(swarm, room) {
     myConnId,
     sign,
     verify,
-    subscriptions: ['all', combinedPeerId],
+    subscriptions: ['all', myCombinedPeerId],
   });
   once(hub, 'opened', () => set(swarm, 'connected', true));
   on(hub, 'error', () => disconnect(swarm));
 
+  function initializeConnection(combinedPeerId) {
+    let [peerId, connId] = combinedPeerId.split(';');
+    initializePeer(swarm, peerId);
+    let connection = getConnection(swarm, peerId, connId);
+    connectPeer(connection);
+  }
+
+  on(hub, 'peers', peers => {
+    for (let id of peers) {
+      if (id === myCombinedPeerId) continue;
+      initializeConnection(id);
+    }
+  });
+  on(hub, 'add-peer', id => initializeConnection(id));
+  on(hub, 'remove-peer', id => {
+    let [peerId, connId] = id.split(';');
+    let connection = getConnection(swarm, peerId, connId);
+    removeConnection(connection);
+  });
+
   hub.broadcast('all', {
-    type: 'connect-me',
+    type: 'shared-state',
     state: {state: swarm.sharedState, time: swarm.sharedStateTime},
   });
   swarm.hub = hub;
 
   on(hub, 'all', ({type, peerId, connId, data, state}) => {
     initializePeer(swarm, peerId);
-    if (type === 'connect-me') {
-      if (peerId === myPeerId && connId === myConnId) return;
-      log('got connect-me');
-      let connection = getConnection(swarm, peerId, connId);
-      updatePeerState(connection, state);
-      connectPeer(connection);
-    }
+    // if (type === 'connect-me') {
+    //   if (peerId === myPeerId && connId === myConnId) return;
+    //   log('got connect-me');
+    //   let connection = getConnection(swarm, peerId, connId);
+    //   updatePeerState(connection, state);
+    //   // connectPeer(connection);
+    // }
     if (type === 'shared-state') {
       let connection = getConnection(swarm, peerId, connId);
       updatePeerState(connection, state);
@@ -151,7 +171,7 @@ function connect(swarm, room) {
     }
   });
 
-  on(hub, combinedPeerId, ({type, peerId, data, connId, state}) => {
+  on(hub, myCombinedPeerId, ({type, peerId, data, connId, state}) => {
     if (type === 'signal') {
       log('signal received from', s(peerId), connId, data.type);
       initializePeer(swarm, peerId);
@@ -159,12 +179,12 @@ function connect(swarm, room) {
       updatePeerState(connection, state);
       handleSignal(connection, {data});
     }
-    if (type === 'ping') {
-      handlePing(swarm, peerId, connId, data);
-    }
-    if (type === 'pong') {
-      handlePong(swarm, peerId, connId, data);
-    }
+    // if (type === 'ping') {
+    //   handlePing(swarm, peerId, connId, data);
+    // }
+    // if (type === 'pong') {
+    //   handlePong(swarm, peerId, connId, data);
+    // }
   });
 
   on(hub, 'server', ({t: event, d: payload}) =>
