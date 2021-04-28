@@ -37,14 +37,14 @@ function maybeConnectRoom(roomId) {
   // make sure peerId is the current one
   swarm.config({myPeerId: currentId()});
   swarm.connect(roomId);
-  swarm.hub.subscribe('identity-updates', async ({peerId}) => {
+  on(swarm.peerEvent, 'identity-update', async peerId => {
     let [data, ok] = await get(`/identities/${peerId}`);
     if (ok) {
       state.identities[peerId] = data;
-      state.update('identities');
+      update(state, 'identities');
     }
   });
-  swarm.hub.subscribe('room-info', data => {
+  on(swarm.serverEvent, 'room-info', data => {
     log('new room info', data);
     updateApiQuery(`/rooms/${state.roomId}`, data);
   });

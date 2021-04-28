@@ -4,8 +4,10 @@ const {ssrVerifyToken} = require('../ssr');
 
 // pub sub websocket
 
+const reservedTopics = ['server', 'peers', 'add-peer', 'remove-peer'];
+
 function broadcast(roomId, topic, message) {
-  publish(roomId, topic, {t: topic, d: message});
+  publish(roomId, 'server', {t: 'server', d: {t: topic, d: message}});
 }
 
 function handleMessage(ws, roomId, peerId, msg) {
@@ -14,7 +16,7 @@ function handleMessage(ws, roomId, peerId, msg) {
   if (subscribeTopics !== undefined) {
     subscribe(ws, roomId, subscribeTopics);
   }
-  if (topic !== undefined) {
+  if (topic !== undefined && !reservedTopics.includes(topic)) {
     publish(roomId, topic, {t: topic, d: data, p: peerId});
   }
 }
@@ -32,7 +34,7 @@ function handleConnection(ws, req) {
   publish(roomId, 'add-peer', {t: 'add-peer', d: peerId});
 
   // auto subscribe to updates about connected peers
-  subscribe(ws, roomId, ['add-peer', 'remove-peer', 'peers']);
+  subscribe(ws, roomId, reservedTopics);
   if (subs !== undefined) subscribe(ws, roomId, subs);
 
   // inform about peers immediately

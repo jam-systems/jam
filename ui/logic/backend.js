@@ -207,9 +207,9 @@ on(state, 'iAmModerator', async iAmModerator => {
   }
 });
 // listen for mod message pings and fetch if we are moderator
-on(swarm, 'anonymous', async ({modMessage}) => {
+on(swarm.serverEvent, 'mod-message', async () => {
   let {iAmModerator, roomId} = state;
-  if (modMessage && iAmModerator && roomId) {
+  if (iAmModerator && roomId) {
     let [msgs, ok] = await authedGet(`/rooms/${roomId}/modMessage`);
     if (ok) set(state, 'modMessages', msgs);
   }

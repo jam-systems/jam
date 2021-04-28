@@ -10,6 +10,7 @@ import {
 } from '../logic/identity';
 import {updateInfoServer} from '../logic/backend';
 import {useMqParser} from '../logic/tailwind-mqp';
+import {sendPeerEvent} from '../lib/swarm';
 
 let updateInfo = async info => {
   if (info.identities) {
@@ -29,7 +30,7 @@ let updateInfo = async info => {
   let ok = await updateInfoServer(newInfo);
   if (ok) {
     setCurrentIdentity(i => ({...i, info: newInfo}));
-    swarm.hub.broadcast('identity-updates', {});
+    sendPeerEvent(swarm, 'identity-update');
   }
   return ok;
 };

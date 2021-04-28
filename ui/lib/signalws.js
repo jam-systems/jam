@@ -1,5 +1,5 @@
 import base64 from 'compact-base64';
-import {emit, is, on} from 'use-minimal-state';
+import {clear, emit, is, on} from 'use-minimal-state';
 import {until} from '../logic/util';
 
 export default function signalws({
@@ -34,6 +34,7 @@ export default function signalws({
     if (window.DEBUG && d?.peerId !== myPeerId) {
       console.log('ws message', data);
     }
+    if (topic === 'error' || topic === 'opened') return;
     let payload = d ?? {};
     if (p) {
       let [peerId, connId] = p.split(';');
@@ -42,6 +43,8 @@ export default function signalws({
     }
     emit(hub, topic, payload);
   });
+  ws.addEventListener('error', () => emit(hub, 'error'));
+  ws.addEventListener('close', () => clear(hub));
 
   const hub = {
     opened: false,

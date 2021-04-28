@@ -25,7 +25,7 @@ router.post('/:identityKey', verifyIdentity, async function (req, res) {
   const roomId = req.params.id;
   const identityKey = req.params.identityKey;
   await set(`rooms/${roomId}/modMessage/${identityKey}`, req.body);
-  broadcast(roomId, 'anonymous', {modMessage: true});
+  broadcast(roomId, 'mod-message');
   res.json({success: true});
 });
 
@@ -33,7 +33,7 @@ router.delete('/:identityKey', verifyIdentity, async function (req, res) {
   const roomId = req.params.id;
   const identityKey = req.params.identityKey;
   await del(`rooms/${roomId}/modMessage/${identityKey}`);
-  broadcast(roomId, 'anonymous', {modMessage: true});
+  broadcast(roomId, 'mod-message');
   res.json({success: true});
 });
 
