@@ -1,22 +1,29 @@
 import base64 from 'compact-base64';
 
-const parseParams = params => {
-  return params.split('&').reduce(function (res, item) {
-    const parts = item.split('=');
-    const namespace = parts[0].split(".");
-    if (namespace.length > 1) {
-      res[decodeURIComponent(namespace[0])][decodeURIComponent(namespace[1])] = decodeURIComponent(parts[1]);
-    } else {
-      res["room"][decodeURIComponent(parts[0])] = decodeURIComponent(parts[1]);
-    }
-    return res;
-  }, {"room": {},
-      "identity": {}});
-};
+function parseParams(params) {
+  return params.split('&').reduce((res, item) => {
+    let [key, value] = item.split('=').map(decodeURIComponent);
 
-export const parseUrlConfig = () => {
-  const hashContent = location.hash.substr(1);
-  const queryString = location.search.substr(1);
+    // backwards compatibility, maybe remove later
+    if (key === 'name' || key === 'displayName' || key === 'description') {
+      key = 'room.' + key;
+    }
+
+    const namespace = key.split('.');
+    key = namespace.pop();
+    let obj = res;
+    for (let prop of namespace) {
+      if (obj[prop] === undefined) obj[prop] = {};
+      obj = obj[prop];
+    }
+    obj[key] = value;
+    return res;
+  }, {});
+}
+
+export function parseUrlConfig() {
+  const hashContent = location.hash.slice(1);
+  const queryString = location.search.slice(1);
 
   if (hashContent) {
     try {
@@ -30,5 +37,5 @@ export const parseUrlConfig = () => {
     return parseParams(queryString);
   }
 
-  return {}
-};
+  return {};
+}
