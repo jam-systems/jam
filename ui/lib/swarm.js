@@ -6,6 +6,7 @@ import {
   connectPeer,
   addStreamToPeer,
   handleSignal,
+  handlePeerFail,
   handlePing,
   handlePong,
 } from './swarm-peer';
@@ -144,7 +145,7 @@ function connect(swarm, room) {
   on(hub, 'remove-peer', id => {
     let [peerId, connId] = id.split(';');
     let connection = getConnection(swarm, peerId, connId);
-    removeConnection(connection);
+    handlePeerFail(connection, true);
   });
 
   hub.broadcast('all', {
