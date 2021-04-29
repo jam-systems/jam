@@ -8,6 +8,7 @@ require('./services/initDb')();
 
 const indexRouter = require('./routes/index');
 const metricsRouter = require('./routes/metrics');
+const adminRouter = require('./routes/admin');
 
 const {roomAuthenticator, identityAuthenticator} = require('./auth');
 const {controller} = require('./routes/controller');
@@ -36,5 +37,7 @@ app.use('/api/v1/rooms/:id/modMessage', modMessageRouter);
 app.use('/api/v1/rooms/:id/roomKey', roomKeyRouter);
 
 app.use('/api/v1/', controller('identities', identityAuthenticator));
+
+app.use('/api/v1/admin/', adminRouter);
 
 module.exports = app;

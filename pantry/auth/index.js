@@ -22,13 +22,34 @@ const isModerator = async (req, roomId) => {
   return isAnyInList(req.ssrIdentities, roomInfo['moderators']);
 };
 
+const identityIsAdmin = async identityKeys => {
+  const adminKeys = await get('server/admins');
+  return isAnyInList(identityKeys, adminKeys);
+};
+
 const isAdmin = async req => {
-  return isAnyInList(req.ssrIdentities, await get('server/admins'));
+  return await identityIsAdmin(req.ssrIdentities);
+};
+
+const addAdmin = async serverAdminId => {
+  const currentServerAdmins = await get('server/admins');
+  if (currentServerAdmins && !currentServerAdmins.includes(serverAdminId)) {
+    currentServerAdmins.push(serverAdminId);
+    await set('server/admins', currentServerAdmins);
+  } else {
+    await set('server/admins', [serverAdminId]);
+  }
+};
+
+const removeAdmin = async serverAdminId => {
+  const currentServerAdmins = await get('server/admins');
+  const newServerAdmins = currentServerAdmins.filter(e => e !== serverAdminId);
+  await set('server/admins', newServerAdmins);
 };
 
 const initializeServerAdminIfNecessary = async req => {
-  const moderators = await get('server/admins');
-  if (!moderators || moderators.length === 0) {
+  const admins = await get('server/admins');
+  if (!admins || admins.length === 0) {
     await set('server/admins', [req.params.id]);
   }
 };
@@ -97,7 +118,10 @@ const identityAuthenticator = {
 
 module.exports = {
   isModerator,
+  identityIsAdmin,
   isAdmin,
+  addAdmin,
+  removeAdmin,
   roomAuthenticator,
   identityAuthenticator,
   hasAccessToRoom,

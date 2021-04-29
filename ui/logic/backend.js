@@ -24,7 +24,13 @@ export function useApiQuery(path, doFetch = true, key, defaultQuery) {
   let [isLoading, setLoading] = useState(shouldFetch);
 
   let refetch = useCallback(async () => {
-    let res = await fetch(API + path).catch(console.warn);
+    let res = await fetch(API + path, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Token ${signedToken()}`,
+      },
+    }).catch(console.warn);
     if (!res) {
       setLoading(false);
       return;

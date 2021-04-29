@@ -11,7 +11,6 @@ const ssr = (req, res, next) => {
   req.ssrIdentities = [];
   switch (method) {
     case 'GET':
-    case 'DELETE':
       {
         let verifiedRecord;
         try {
@@ -25,6 +24,7 @@ const ssr = (req, res, next) => {
         }
       }
       break;
+    case 'DELETE':
     case 'POST':
     case 'PUT':
       {

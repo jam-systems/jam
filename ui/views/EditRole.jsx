@@ -1,5 +1,6 @@
 import React from 'react';
 import {addRole, removeRole, leaveStage} from '../logic/room';
+import {addAdmin, removeAdmin, useIdentityAdminStatus} from '../logic/admin';
 import {currentId} from '../logic/identity';
 import {state} from '../logic/main';
 import {use} from 'use-minimal-state';
@@ -11,8 +12,39 @@ import StreamingModal from './StreamingModal';
 
 export default function EditRole({peerId, speakers, moderators, onCancel}) {
   let mqp = useMqParser();
+  let [myAdminStatus] = useIdentityAdminStatus(currentId());
+  let [peerAdminStatus] = useIdentityAdminStatus(peerId);
   return (
     <div className={mqp('md:p-10')}>
+      {myAdminStatus?.admin && (
+        <div>
+          <h3 className="font-medium">Admin Actions</h3>
+          <br />
+          {(peerAdminStatus?.admin && (
+            <button
+              onClick={() => removeAdmin(peerId).then(onCancel)}
+              className={
+                'mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2'
+              }
+            >
+              ❎️ Remove Admin
+            </button>
+          )) || (
+            <button
+              onClick={() => addAdmin(peerId).then(onCancel)}
+              className={
+                'mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2'
+              }
+            >
+              👑️ Make Admin
+            </button>
+          )}
+          <br />
+          <br />
+          <hr />
+          <br />
+        </div>
+      )}
       <h3 className="font-medium">Moderator Actions</h3>
       <br />
       <button
