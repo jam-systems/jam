@@ -353,7 +353,7 @@ function handlePong(_swarm, _peerId, _connId, id) {
 function Resolvable() {
   let resolve;
   let promise = new Promise(r => (resolve = r));
-  promise.resolve = resolve;
+  promise.resolve = () => resolve();
   return promise;
 }
 

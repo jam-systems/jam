@@ -43,8 +43,14 @@ export default function signalws({
     }
     emit(hub, topic, payload);
   });
-  ws.addEventListener('error', () => emit(hub, 'error'));
-  ws.addEventListener('close', () => clear(hub));
+  ws.addEventListener('error', err => {
+    if (window.DEBUG) console.log('ws error', err);
+    emit(hub, 'error');
+  });
+  ws.addEventListener('close', () => {
+    if (window.DEBUG) console.log('ws closed');
+    clear(hub);
+  });
 
   const hub = {
     opened: false,
@@ -77,7 +83,7 @@ function subscribe(hub, topic, onMessage) {
 async function broadcast(hub, topic, message) {
   let {ws} = hub;
   await until(hub, 'opened');
-  send(ws, {t: topic, d: message});
+  return send(ws, {t: topic, d: message});
 }
 
 function close({ws}) {
@@ -87,7 +93,13 @@ function close({ws}) {
 function send(ws, msg) {
   msg = JSON.stringify(msg);
   if (window.DEBUG) console.log('ws sending', msg);
-  ws.send(msg);
+  try {
+    ws.send(msg);
+    return true;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
 }
 
 function decode(data) {
