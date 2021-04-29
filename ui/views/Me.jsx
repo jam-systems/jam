@@ -9,9 +9,11 @@ export default function Me() {
 
         <h1>Your Identity</h1>
 
-        <p>
-          Your id is: {currentId()}
-        </p>
+        <p className="mt-4 text-gray-600">This is your identity on {window.location.hostname}</p>
+
+        <pre className="rounded-md bg-yellow-50 not-italic text-xs text-center py-2 -ml-2 mt-4 md:text-base">
+          {currentId()}
+        </pre>
 
         <hr className="mt-14 mb-14" />
 
