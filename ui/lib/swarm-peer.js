@@ -1,14 +1,13 @@
 import SimplePeer from './simple-peer-light';
 import causalLog from './causal-log';
-import {DEV} from '../logic/config';
+import debounce from './debounce';
+import {is, on} from 'use-minimal-state';
 
 const MAX_CONNECT_TIME = 6000;
 const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;
 const MIN_MAX_CONNECT_TIME_AFTER_SIGNAL = 2000;
 const MAX_FAIL_TIME = 20000;
 const MAX_PING_TIME = 5000;
-
-let _debug = DEV;
 
 export {
   newConnection,
@@ -18,7 +17,13 @@ export {
   handlePeerFail,
   handlePing,
   handlePong,
+  log,
 };
+
+const online = [navigator.onLine];
+window.addEventListener('online', () => is(online, true));
+window.addEventListener('offline', () => is(online, false));
+on(online, v => console.log('online?', v));
 
 // connection:
 // {swarm, peerId, connId, ...timeoutStuff, pc }
@@ -27,7 +32,7 @@ function newConnection({swarm, peerId, connId}) {
   return {swarm, peerId, connId, lastFailure: null};
 }
 
-function connectPeer(connection) {
+const connectPeer = debounce(2000, connection => {
   // connect to a peer whose peerId & connId we already know
   // either after being pinged by connect-me or as a retry
   // SPEC:
@@ -35,6 +40,11 @@ function connectPeer(connection) {
   // -) this has to work in every state of swarm.peers (e.g. with or without existing Peer instance)
   let {swarm, peerId, connId} = connection;
   log('connecting peer', s(peerId), connId);
+  // if (pc?.connected) {
+  //   log('already connected!');
+  //   return;
+  // }
+  if (swarm.hub === null) return;
 
   let {myPeerId, myConnId, sharedState, sharedStateTime} = swarm;
   timeoutPeer(connection, MAX_CONNECT_TIME);
@@ -56,7 +66,7 @@ function connectPeer(connection) {
     }
     log('sent no-you-connect', s(peerId));
   }
-}
+});
 
 function handleSignal(connection, {data}) {
   let {swarm, peerId, connId} = connection;
@@ -359,11 +369,11 @@ function Resolvable() {
 
 let s = id => id.slice(0, 2);
 
-let log = (...a) => {
-  if (!_debug) return;
+function log(...args) {
+  if (!window.DEBUG) return;
   let d = new Date();
   let time = `[${d.toLocaleTimeString('de-DE')},${String(
     d.getMilliseconds()
   ).padStart(3, '0')}]`;
-  causalLog(time, ...a);
-};
+  causalLog(time, ...args);
+}

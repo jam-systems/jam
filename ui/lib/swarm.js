@@ -1,6 +1,5 @@
 import State, {emit, on, once, set} from 'use-minimal-state';
 import signalws from './signalws';
-import causalLog from './causal-log';
 import {
   newConnection,
   connectPeer,
@@ -9,9 +8,9 @@ import {
   handlePeerFail,
   handlePing,
   handlePong,
+  log
 } from './swarm-peer';
 import {removePeerState, updatePeerState} from './swarm-state';
-import {DEV} from '../logic/config';
 
 // public API starts here
 
@@ -273,12 +272,3 @@ function randomHex4() {
 }
 
 let s = id => id.slice(0, 2);
-
-let log = (...a) => {
-  if (!DEV) return;
-  let d = new Date();
-  let time = `[${d.toLocaleTimeString('de-DE')},${String(
-    d.getMilliseconds()
-  ).padStart(3, '0')}]`;
-  causalLog(time, ...a);
-};
