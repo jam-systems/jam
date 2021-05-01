@@ -1,6 +1,7 @@
 import SimplePeer from './simple-peer-light';
 import causalLog from './causal-log';
-import {DEV} from '../logic/config';
+import debounce from './debounce';
+import {is, on} from 'use-minimal-state';
 
 const MAX_CONNECT_TIME = 6000;
 const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;
@@ -8,16 +9,21 @@ const MIN_MAX_CONNECT_TIME_AFTER_SIGNAL = 2000;
 const MAX_FAIL_TIME = 20000;
 const MAX_PING_TIME = 5000;
 
-let _debug = DEV;
-
 export {
   newConnection,
   connectPeer,
   addStreamToPeer,
   handleSignal,
+  handlePeerFail,
   handlePing,
   handlePong,
+  log,
 };
+
+const online = [navigator.onLine];
+window.addEventListener('online', () => is(online, true));
+window.addEventListener('offline', () => is(online, false));
+on(online, v => console.log('online?', v));
 
 // connection:
 // {swarm, peerId, connId, ...timeoutStuff, pc }
@@ -26,7 +32,7 @@ function newConnection({swarm, peerId, connId}) {
   return {swarm, peerId, connId, lastFailure: null};
 }
 
-function connectPeer(connection) {
+const connectPeer = debounce(2000, connection => {
   // connect to a peer whose peerId & connId we already know
   // either after being pinged by connect-me or as a retry
   // SPEC:
@@ -34,7 +40,11 @@ function connectPeer(connection) {
   // -) this has to work in every state of swarm.peers (e.g. with or without existing Peer instance)
   let {swarm, peerId, connId} = connection;
   log('connecting peer', s(peerId), connId);
-  deathPing(connection);
+  // if (pc?.connected) {
+  //   log('already connected!');
+  //   return;
+  // }
+  if (swarm.hub === null) return;
 
   let {myPeerId, myConnId, sharedState, sharedStateTime} = swarm;
   timeoutPeer(connection, MAX_CONNECT_TIME);
@@ -43,11 +53,8 @@ function connectPeer(connection) {
     createPeer(connection, true);
   } else {
     log('i dont initiate, wait for first signal');
-    swarm.hub.broadcast(peerId, {
+    swarm.hub.broadcast(`${peerId};${connId}`, {
       type: 'signal',
-      peerId: myPeerId,
-      connId: myConnId,
-      yourConnId: connId,
       state: {state: sharedState, time: sharedStateTime},
       data: {youStart: true, type: 'you-start'},
     });
@@ -59,7 +66,7 @@ function connectPeer(connection) {
     }
     log('sent no-you-connect', s(peerId));
   }
-}
+});
 
 function handleSignal(connection, {data}) {
   let {swarm, peerId, connId} = connection;
@@ -119,7 +126,7 @@ function handleSignal(connection, {data}) {
 
 function createPeer(connection, initiator) {
   let {swarm, peerId, connId} = connection;
-  let {hub, localStreams, myPeerId, myConnId, pcConfig} = swarm;
+  let {hub, localStreams, pcConfig} = swarm;
   // destroy any existing peer
   let peer = connection.pc;
   if (peer) {
@@ -164,14 +171,7 @@ function createPeer(connection, initiator) {
       peer.didSignal = true;
       state = {state: swarm.sharedState, time: swarm.sharedStateTime};
     }
-    hub.broadcast(peerId, {
-      type: 'signal',
-      peerId: myPeerId,
-      connId: myConnId,
-      yourConnId: connId,
-      data,
-      state,
-    });
+    hub.broadcast(`${peerId};${connId}`, {type: 'signal', data, state});
   });
   peer.on('connect', () => {
     log('connected peer', s(peerId), 'after', Date.now() - peer.connectStart);
@@ -204,7 +204,6 @@ function createPeer(connection, initiator) {
   peer.on('iceStateChange', state => {
     log('ice state', state);
     if (state === 'disconnected') {
-      deathPing(connection);
       timeoutPeer(
         connection,
         MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT,
@@ -339,20 +338,16 @@ function ping({swarm, peerId, connId}, timeout) {
     pings.delete(id);
   }, timeout);
   pings.set(id, promise);
-  swarm.hub.broadcast(peerId, {
+  swarm.hub.broadcast(`${peerId};${connId}`, {
     type: 'ping',
-    yourConnId: connId,
-    connId: swarm.myConnId,
     data: id,
   });
   return promise;
 }
 
 function handlePing(swarm, peerId, connId, id) {
-  swarm.hub.broadcast(peerId, {
+  swarm.hub.broadcast(`${peerId};${connId}`, {
     type: 'pong',
-    connId: swarm.myConnId,
-    yourConnId: connId,
     data: id,
   });
 }
@@ -368,17 +363,17 @@ function handlePong(_swarm, _peerId, _connId, id) {
 function Resolvable() {
   let resolve;
   let promise = new Promise(r => (resolve = r));
-  promise.resolve = resolve;
+  promise.resolve = () => resolve();
   return promise;
 }
 
 let s = id => id.slice(0, 2);
 
-let log = (...a) => {
-  if (!_debug) return;
+function log(...args) {
+  if (!window.DEBUG) return;
   let d = new Date();
   let time = `[${d.toLocaleTimeString('de-DE')},${String(
     d.getMilliseconds()
   ).padStart(3, '0')}]`;
-  causalLog(time, ...a);
-};
+  causalLog(time, ...args);
+}

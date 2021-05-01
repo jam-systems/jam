@@ -1,4 +1,5 @@
 import {set, update, on} from 'use-minimal-state';
+import {sendPeerEvent} from '../lib/swarm';
 import {requestAudio, stopAudio} from './audio';
 import {currentId} from './identity';
 import state, {modState, swarm} from './state';
@@ -6,13 +7,12 @@ import state, {modState, swarm} from './state';
 export {sendReaction, raiseHand};
 
 function sendReaction(reaction) {
-  swarm.emit('sharedEvent', {reaction});
+  sendPeerEvent(swarm, 'reaction', reaction);
   showReaction(reaction, swarm.myPeerId);
 }
 // listen for reactions
-swarm.on('peerEvent', (peerId, data) => {
+on(swarm.peerEvent, 'reaction', (peerId, reaction) => {
   if (peerId === swarm.myPeerId) return;
-  let {reaction} = data;
   if (reaction) showReaction(reaction, peerId);
 });
 function showReaction(reaction, peerId) {

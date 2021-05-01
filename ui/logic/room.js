@@ -3,7 +3,7 @@ import {get, updateApiQuery, put, useApiQuery} from './backend';
 import {on, set, update} from 'use-minimal-state';
 import {currentId} from './identity';
 import log from '../lib/causal-log';
-import {config} from './config';
+import {staticConfig} from './config';
 
 export {
   useRoom,
@@ -15,8 +15,8 @@ export {
   emptyRoom,
 };
 
-const emptyRoom = config.defaultRoom
-  ? {...config.defaultRoom, speakers: [], moderators: []}
+const emptyRoom = staticConfig.defaultRoom
+  ? {...staticConfig.defaultRoom, speakers: [], moderators: []}
   : {
       name: '',
       description: '',
@@ -37,14 +37,14 @@ function maybeConnectRoom(roomId) {
   // make sure peerId is the current one
   swarm.config({myPeerId: currentId()});
   swarm.connect(roomId);
-  swarm.hub.subscribe('identity-updates', async ({peerId}) => {
+  on(swarm.peerEvent, 'identity-update', async peerId => {
     let [data, ok] = await get(`/identities/${peerId}`);
     if (ok) {
       state.identities[peerId] = data;
-      state.update('identities');
+      update(state, 'identities');
     }
   });
-  swarm.hub.subscribeAnonymous('room-info', data => {
+  on(swarm.serverEvent, 'room-info', data => {
     log('new room info', data);
     updateApiQuery(`/rooms/${state.roomId}`, data);
   });

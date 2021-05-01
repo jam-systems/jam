@@ -1,7 +1,7 @@
 const express = require('express');
 const {isModerator} = require('../auth');
 const {set, get, del, list} = require('../services/redis');
-const {hub} = require('../services/signalhub');
+const {broadcast} = require('../services/ws');
 
 const router = express.Router({mergeParams: true});
 
@@ -25,7 +25,7 @@ router.post('/:identityKey', verifyIdentity, async function (req, res) {
   const roomId = req.params.id;
   const identityKey = req.params.identityKey;
   await set(`rooms/${roomId}/modMessage/${identityKey}`, req.body);
-  hub(roomId).broadcast('anonymous', {modMessage: true});
+  broadcast(roomId, 'mod-message');
   res.json({success: true});
 });
 
@@ -33,7 +33,7 @@ router.delete('/:identityKey', verifyIdentity, async function (req, res) {
   const roomId = req.params.id;
   const identityKey = req.params.identityKey;
   await del(`rooms/${roomId}/modMessage/${identityKey}`);
-  hub(roomId).broadcast('anonymous', {modMessage: true});
+  broadcast(roomId, 'mod-message');
   res.json({success: true});
 });
 

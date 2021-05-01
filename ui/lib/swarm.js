@@ -1,16 +1,16 @@
-import State from 'use-minimal-state';
-import {authenticatedHub} from './signalhub';
-import causalLog from './causal-log';
+import State, {emit, on, once, set} from 'use-minimal-state';
+import signalws from './signalws';
 import {
   newConnection,
   connectPeer,
   addStreamToPeer,
   handleSignal,
+  handlePeerFail,
   handlePing,
   handlePong,
+  log
 } from './swarm-peer';
 import {removePeerState, updatePeerState} from './swarm-state';
-import {DEV} from '../logic/config';
 
 // public API starts here
 
@@ -38,9 +38,9 @@ function Swarm(initialConfig) {
     data: null,
     newPeer: null,
     failedConnection: null,
-    sharedEvent: null,
     rawPeerState: null,
-    peerEvent: null,
+    peerEvent: {},
+    serverEvent: {},
     anonymous: null,
   });
   swarm.config = (...args) => config(swarm, ...args);
@@ -52,27 +52,9 @@ function Swarm(initialConfig) {
   }
 
   swarm.on('sharedState', state => {
-    let {hub, myPeerId, myConnId} = swarm;
     let time = Date.now();
     swarm.sharedStateTime = time;
-    if (!hub || !myPeerId || !myConnId) return;
-    hub.broadcast('all', {
-      type: 'shared-state',
-      peerId: myPeerId,
-      connId: myConnId,
-      state: {state, time},
-    });
-  });
-
-  swarm.on('sharedEvent', data => {
-    let {hub, myPeerId, myConnId} = swarm;
-    if (!hub || !myPeerId || !myConnId) return;
-    hub.broadcast('all', {
-      type: 'shared-event',
-      peerId: myPeerId,
-      connId: myConnId,
-      data,
-    });
+    swarm.hub?.broadcast('all', {type: 'shared-state', state: {state, time}});
   });
 
   swarm.on('failedConnection', c => removeConnection(c));
@@ -109,7 +91,14 @@ function addLocalStream(swarm, stream, name) {
   }
 }
 
-export {config, connect, disconnect, addLocalStream};
+function sendPeerEvent(swarm, event, payload) {
+  swarm.hub?.broadcast('all', {
+    type: 'peer-event',
+    data: {t: event, d: payload},
+  });
+}
+
+export {config, connect, disconnect, addLocalStream, sendPeerEvent};
 
 // public API ends here
 
@@ -125,55 +114,64 @@ function connect(swarm, room) {
   swarm.myConnId = myConnId;
   log('connecting. conn id', myConnId);
   let {myPeerId, sign, verify} = swarm;
-  let hub = authenticatedHub({
-    room: swarm.room,
+  let myCombinedPeerId = `${myPeerId};${myConnId}`;
+  let hub = signalws({
+    roomId: swarm.room,
     url: swarm.url,
     myPeerId,
+    myConnId,
     sign,
     verify,
+    subscriptions: ['all', myCombinedPeerId],
+  });
+  once(hub, 'opened', () => set(swarm, 'connected', true));
+  on(hub, 'error', () => disconnect(swarm));
+
+  function initializeConnection(combinedPeerId) {
+    let [peerId, connId] = combinedPeerId.split(';');
+    initializePeer(swarm, peerId);
+    let connection = getConnection(swarm, peerId, connId);
+    connectPeer(connection);
+  }
+
+  on(hub, 'peers', peers => {
+    for (let id of peers) {
+      if (id === myCombinedPeerId) continue;
+      initializeConnection(id);
+    }
+  });
+  on(hub, 'add-peer', id => initializeConnection(id));
+  on(hub, 'remove-peer', id => {
+    let [peerId, connId] = id.split(';');
+    let connection = getConnection(swarm, peerId, connId);
+    handlePeerFail(connection, true);
   });
 
-  hub
-    .broadcast('all', {
-      type: 'connect-me',
-      peerId: myPeerId,
-      connId: myConnId,
-      state: {state: swarm.sharedState, time: swarm.sharedStateTime},
-    })
-    .then(() => {
-      swarm.set('connected', true);
-    })
-    .catch(err => {
-      console.error('error connecting to signalhub');
-      console.error(err);
-      disconnect(swarm);
-    });
+  hub.broadcast('all', {
+    type: 'shared-state',
+    state: {state: swarm.sharedState, time: swarm.sharedStateTime},
+  });
   swarm.hub = hub;
 
-  hub.subscribe('all', ({type, peerId, connId, data, state}) => {
+  on(hub, 'all', ({type, peerId, connId, data, state}) => {
     initializePeer(swarm, peerId);
-    if (type === 'connect-me') {
-      if (peerId === myPeerId && connId === myConnId) return;
-      log('got connect-me');
-      let connection = getConnection(swarm, peerId, connId);
-      updatePeerState(connection, state);
-      connectPeer(connection);
-    }
+    // if (type === 'connect-me') {
+    //   if (peerId === myPeerId && connId === myConnId) return;
+    //   log('got connect-me');
+    //   let connection = getConnection(swarm, peerId, connId);
+    //   updatePeerState(connection, state);
+    //   // connectPeer(connection);
+    // }
     if (type === 'shared-state') {
       let connection = getConnection(swarm, peerId, connId);
       updatePeerState(connection, state);
     }
-    if (type === 'shared-event') {
-      swarm.emit('peerEvent', peerId, data);
+    if (type === 'peer-event') {
+      emit(swarm.peerEvent, data.t, peerId, data.d);
     }
   });
 
-  hub.subscribe(myPeerId, ({type, peerId, data, connId, yourConnId, state}) => {
-    if (yourConnId !== myConnId) {
-      // console.warn('message to different session, should be ignored');
-      // log('ignoring msg to different session', yourConnId);
-      return;
-    }
+  on(hub, myCombinedPeerId, ({type, peerId, data, connId, state}) => {
     if (type === 'signal') {
       log('signal received from', s(peerId), connId, data.type);
       initializePeer(swarm, peerId);
@@ -181,17 +179,17 @@ function connect(swarm, room) {
       updatePeerState(connection, state);
       handleSignal(connection, {data});
     }
-    if (type === 'ping') {
-      handlePing(swarm, peerId, connId, data);
-    }
-    if (type === 'pong') {
-      handlePong(swarm, peerId, connId, data);
-    }
+    // if (type === 'ping') {
+    //   handlePing(swarm, peerId, connId, data);
+    // }
+    // if (type === 'pong') {
+    //   handlePong(swarm, peerId, connId, data);
+    // }
   });
 
-  hub.subscribeAnonymous('anonymous', data => {
-    swarm.emit('anonymous', data);
-  });
+  on(hub, 'server', ({t: event, d: payload}) =>
+    emit(swarm.serverEvent, event, payload)
+  );
 }
 
 function disconnect(swarm) {
@@ -199,7 +197,7 @@ function disconnect(swarm) {
   if (hub) hub.close();
   swarm.hub = null;
   swarm.myConnId = null;
-  swarm.set('connected', false);
+  set(swarm, 'connected', false);
   for (let connection of yieldConnections(swarm)) {
     removeConnection(connection);
   }
@@ -274,12 +272,3 @@ function randomHex4() {
 }
 
 let s = id => id.slice(0, 2);
-
-let log = (...a) => {
-  if (!DEV) return;
-  let d = new Date();
-  let time = `[${d.toLocaleTimeString('de-DE')},${String(
-    d.getMilliseconds()
-  ).padStart(3, '0')}]`;
-  causalLog(time, ...a);
-};

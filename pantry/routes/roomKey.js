@@ -4,7 +4,6 @@ const {set, get} = require('../services/redis');
 
 const router = express.Router({mergeParams: true});
 
-
 const verifyModerator = async (req, res, next) => {
   const authHeader = req.header('Authorization');
 
@@ -22,7 +21,6 @@ const verifyModerator = async (req, res, next) => {
 };
 
 const verifyRoomKeyAccess = async (req, res, next) => {
-
   if (await isModerator(req, req.params.id)) {
     next();
     return;

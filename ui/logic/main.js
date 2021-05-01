@@ -1,7 +1,7 @@
 import state, {actions, swarm} from './state';
 import {get} from './backend';
 import {currentId, signData, verifyData} from './identity';
-import {DEV, config} from './config';
+import {DEV, staticConfig} from './config';
 import {requestAudio, stopAudio} from './audio';
 import './reactions';
 import './room';
@@ -15,8 +15,8 @@ export {state};
 
 function configSwarm() {
   swarm.config({
-    debug: config.development,
-    url: config.urls.signalHub + '/',
+    debug: staticConfig.development,
+    url: staticConfig.urls.pantry,
     sign: signData,
     verify: verifyData,
     reduceState: (states, current, latest) => {
@@ -29,17 +29,17 @@ function configSwarm() {
       iceTransportPolicy: 'all',
       iceServers: [
         {urls: `stun:stun.jam.systems:3478`},
-        {urls: `${config.urls.stun}`},
+        {urls: `${staticConfig.urls.stun}`},
         {
-          ...config.urls.turnCredentials,
-          urls: `${config.urls.turn}`,
+          ...staticConfig.urls.turnCredentials,
+          urls: `${staticConfig.urls.turn}`,
         },
       ],
     },
   });
 }
 configSwarm();
-on(config, () => configSwarm());
+on(staticConfig, () => configSwarm());
 
 export function enterRoom(roomId) {
   state.set('userInteracted', true);

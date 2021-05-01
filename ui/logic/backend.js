@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import {emit, on, set, use} from 'use-minimal-state';
 import state, {actions, modState, swarm} from './state';
-import {config} from './config';
+import {staticConfig} from './config';
 import {signedToken, signData, currentId, identities} from './identity';
 import {emptyRoom} from './room';
 // POST https://jam.systems/_/pantry/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
@@ -13,9 +13,9 @@ import {emptyRoom} from './room';
 // PUT https://jam.systems/_/pantry/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
 // updates room and broadcasts to roomId / channel room-info on signal hub
 
-let API = `${config.urls.pantry}/api/v1`;
-on(config, () => {
-  API = `${config.urls.pantry}/api/v1`;
+let API = `${staticConfig.urls.pantry}/api/v1`;
+on(staticConfig, () => {
+  API = `${staticConfig.urls.pantry}/api/v1`;
 });
 
 export function useApiQuery(path, doFetch = true, key, defaultQuery) {
@@ -24,7 +24,13 @@ export function useApiQuery(path, doFetch = true, key, defaultQuery) {
   let [isLoading, setLoading] = useState(shouldFetch);
 
   let refetch = useCallback(async () => {
-    let res = await fetch(API + path).catch(console.warn);
+    let res = await fetch(API + path, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Token ${signedToken()}`,
+      },
+    }).catch(console.warn);
     if (!res) {
       setLoading(false);
       return;
@@ -198,18 +204,19 @@ async function sendModMessage(msg) {
 }
 // fetch mod messages when we become moderator
 on(state, 'iAmModerator', async iAmModerator => {
-  if (iAmModerator) {
-    let [msgs, ok] = await authedGet(`/rooms/${state.roomId}/modMessage`);
+  let {roomId} = state;
+  if (iAmModerator && roomId) {
+    let [msgs, ok] = await authedGet(`/rooms/${roomId}/modMessage`);
     if (ok) set(state, 'modMessages', msgs);
   } else {
     set(state, 'modMessages', {}); // delete when we stop being moderator
   }
 });
 // listen for mod message pings and fetch if we are moderator
-on(swarm, 'anonymous', async ({modMessage}) => {
+on(swarm.serverEvent, 'mod-message', async () => {
   let {iAmModerator, roomId} = state;
-  if (modMessage && iAmModerator && roomId) {
-    let [msgs, ok] = await authedGet(`/rooms/${state.roomId}/modMessage`);
+  if (iAmModerator && roomId) {
+    let [msgs, ok] = await authedGet(`/rooms/${roomId}/modMessage`);
     if (ok) set(state, 'modMessages', msgs);
   }
 });
