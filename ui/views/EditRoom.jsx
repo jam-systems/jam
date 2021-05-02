@@ -79,7 +79,7 @@ export function EditRoomModal({roomId, room, close}) {
 
   return (
     <Modal close={close}>
-      <h1>Room Settings</h1>
+      <h1>Configurar </h1>
       <br />
       <div>
         <form onSubmit={submit}>
@@ -88,7 +88,7 @@ export function EditRoomModal({roomId, room, close}) {
               'rounded placeholder-gray-300 bg-gray-50 w-full md:w-96'
             )}
             type="text"
-            placeholder="Room topic"
+            placeholder="Titulo da sala"
             value={name}
             name="jam-room-topic"
             autoComplete="off"
@@ -98,8 +98,8 @@ export function EditRoomModal({roomId, room, close}) {
           ></input>
           <br />
           <div className="p-2 text-gray-500 italic">
-            Pick a topic to talk about.{' '}
-            <span className="text-gray-400">(optional)</span>
+            Coloque um titulo com o tema da conferência{' '}
+            <span className="text-gray-400">(opcional)</span>
           </div>
           <br />
           <textarea
@@ -116,16 +116,16 @@ export function EditRoomModal({roomId, room, close}) {
             }}
           ></textarea>
           <div className="p-2 text-gray-500 italic">
-            Describe what this room is about.{' '}
+            Uma descrição breve do seu programa.{' '}
             <span className="text-gray-400">
-              (optional) (supports{' '}
+              (opcional) (suporta{' '}
               <a
                 className="underline"
                 href="https://www.markdownguide.org/cheat-sheet/"
                 target="_blank"
                 rel="noreferrer"
               >
-                Markdown
+                Quebra de linha
               </a>
               )
             </span>{' '}
@@ -163,7 +163,7 @@ export function EditRoomModal({roomId, room, close}) {
                   'rounded placeholder-gray-300 bg-gray-50 w-full md:w-full'
                 )}
                 type="text"
-                placeholder="Logo URI"
+                placeholder="Endereço da sua logo aqui"
                 value={logoURI}
                 name="jam-room-logo-uri"
                 autoComplete="off"
@@ -172,8 +172,8 @@ export function EditRoomModal({roomId, room, close}) {
                 }}
               ></input>
               <div className="p-2 text-gray-500 italic">
-                Set the URI for your logo.{' '}
-                <span className="text-gray-400">(optional)</span>
+               Cole um link da sua logo.{' '
+                <span className="text-gray-400">(opcional)</span>
               </div>
 
               <br />
@@ -188,8 +188,8 @@ export function EditRoomModal({roomId, room, close}) {
                 }}
               ></input>
               <div className="p-2 text-gray-500 italic">
-                Set primary color for your Room.{' '}
-                <span className="text-gray-400">(optional)</span>
+                Selecione a cor primaria da sala.{' '}
+                <span className="text-gray-400">(opcional)</span>
               </div>
 
               <br />
@@ -207,8 +207,8 @@ export function EditRoomModal({roomId, room, close}) {
                 }}
               ></input>
               <div className="p-2 text-gray-500 italic">
-                Set the link for the {`'call to action'`} button.{' '}
-                <span className="text-gray-400">(optional)</span>
+                Cole o link do {`'botão de ação'`} .{' '}
+                <span className="text-gray-400">(opcional)</span>
               </div>
 
               <br />
@@ -226,8 +226,8 @@ export function EditRoomModal({roomId, room, close}) {
                 }}
               ></input>
               <div className="p-2 text-gray-500 italic">
-                Set the text for the {`'call to action'`} button.{' '}
-                <span className="text-gray-400">(optional)</span>
+                Escreva e nome para o {`'botão de ação'`} .{' '}
+                <span className="text-gray-400">(opcional)</span>
               </div>
 
               <br />
@@ -266,7 +266,7 @@ export function EditRoomModal({roomId, room, close}) {
               <label className="pl-3 ml-0.5" htmlFor="jam-room-closed">
                 Close the room (experimental){' '}
                 <div className="p-2 pl-9 text-gray-500">
-                  Closed rooms can only be joined by moderators.
+                  Sala fechada, apenas moderadores podem aprovar a entrada.
                   <br />
                   Everyone else sees the description and the&nbsp;
                   {`'call to action'`} button.
@@ -279,13 +279,13 @@ export function EditRoomModal({roomId, room, close}) {
               onClick={submit}
               className="flex-grow mt-5 h-12 px-6 text-lg text-white bg-gray-600 rounded-lg focus:shadow-outline active:bg-gray-600 mr-2"
             >
-              Update Room
+              Atualizar
             </button>
             <button
               onClick={close}
               className="mt-5 h-12 px-6 text-lg text-black bg-gray-100 rounded-lg focus:shadow-outline active:bg-gray-300"
             >
-              Cancel
+              Cancelar
             </button>
           </div>
         </form>
@@ -294,9 +294,9 @@ export function EditRoomModal({roomId, room, close}) {
         <br />
 
         <form>
-          <div className="pb-1">🗓 Room Schedule (experimental)</div>
+          <div className="pb-1">🗓 Agenda (experimental)</div>
           <div className="pb-3 text-gray-500">
-            Set the date and time for an upcoming event.
+            Defina data e hora para seu evento.
           </div>
 
           <div className={schedule ? 'hidden' : 'w-full'}>
