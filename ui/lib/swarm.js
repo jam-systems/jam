@@ -59,6 +59,7 @@ function Swarm(initialConfig) {
   swarm.on('failedConnection', c => removeConnection(c));
 
   on(online, onl => {
+    log('online', onl);
     switch (swarm.connectState) {
       case DISCONNECTED:
         if (onl) connect(swarm, swarm.room);
@@ -70,6 +71,10 @@ function Swarm(initialConfig) {
       default:
     }
   });
+
+  if (window.DEBUG) {
+    window.swarm = swarm;
+  }
 
   return swarm;
 }
