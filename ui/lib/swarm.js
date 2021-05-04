@@ -1,4 +1,4 @@
-import State, {emit, on, once, set} from 'use-minimal-state';
+import State, {emit, on, is} from 'use-minimal-state';
 import signalws from './signalws';
 import {
   newConnection,
@@ -6,9 +6,7 @@ import {
   addStreamToPeer,
   handleSignal,
   handlePeerFail,
-  handlePing,
-  handlePong,
-  log
+  log,
 } from './swarm-peer';
 import {removePeerState, updatePeerState} from './swarm-state';
 
@@ -21,6 +19,7 @@ function Swarm(initialConfig) {
     myPeer: {connections: {}}, // other sessions of same peer
     myPeerId: null,
     connected: false,
+    connectState: INITIAL,
     remoteStreams: [], // [{stream, name, peerId}], only one per (name, peerId) if name is set
     peerState: {}, // {peerId: sharedState}
     connectionState: {}, // {peerId: {latest: connId, states: {connId: {state, time}}}}
@@ -58,6 +57,9 @@ function Swarm(initialConfig) {
   });
 
   swarm.on('failedConnection', c => removeConnection(c));
+
+  // TODO: dis- / reconnect on on- / offline
+
   return swarm;
 }
 
@@ -102,17 +104,34 @@ export {config, connect, disconnect, addLocalStream, sendPeerEvent};
 
 // public API ends here
 
+// connection states
+const INITIAL = 0;
+const CONNECTING = 1;
+const CONNECTED = 2;
+const DISCONNECTED = 3;
+
 function connect(swarm, room) {
-  if (swarm.hub) return;
   config(swarm, {room});
   if (!swarm.room || !swarm.url) {
     return console.error(
       'Must call swarm.config({url, room}) before connecting!'
     );
   }
+  switch (swarm.connectState) {
+    case CONNECTED:
+    case CONNECTING:
+      return;
+    case DISCONNECTED:
+      for (let connection of yieldConnections(swarm)) {
+        removeConnection(connection);
+      }
+      break;
+    default:
+  }
   let myConnId = randomHex4();
   swarm.myConnId = myConnId;
   log('connecting. conn id', myConnId);
+  swarm.connectState = CONNECTING;
   let {myPeerId, sign, verify} = swarm;
   let myCombinedPeerId = `${myPeerId};${myConnId}`;
   let hub = signalws({
@@ -124,8 +143,13 @@ function connect(swarm, room) {
     verify,
     subscriptions: ['all', myCombinedPeerId],
   });
-  once(hub, 'opened', () => set(swarm, 'connected', true));
-  on(hub, 'error', () => disconnect(swarm));
+  on(hub, 'opened', () => {
+    swarm.connectState = CONNECTED;
+    is(swarm, 'connected', true);
+  });
+  on(hub, 'closed', () => {
+    disconnectUnwanted(swarm);
+  });
 
   function initializeConnection(combinedPeerId) {
     let [peerId, connId] = combinedPeerId.split(';');
@@ -137,6 +161,7 @@ function connect(swarm, room) {
   on(hub, 'peers', peers => {
     for (let id of peers) {
       if (id === myCombinedPeerId) continue;
+      // note: the other peer will get add-peer and try to connect as well
       initializeConnection(id);
     }
   });
@@ -155,13 +180,6 @@ function connect(swarm, room) {
 
   on(hub, 'all', ({type, peerId, connId, data, state}) => {
     initializePeer(swarm, peerId);
-    // if (type === 'connect-me') {
-    //   if (peerId === myPeerId && connId === myConnId) return;
-    //   log('got connect-me');
-    //   let connection = getConnection(swarm, peerId, connId);
-    //   updatePeerState(connection, state);
-    //   // connectPeer(connection);
-    // }
     if (type === 'shared-state') {
       let connection = getConnection(swarm, peerId, connId);
       updatePeerState(connection, state);
@@ -179,12 +197,6 @@ function connect(swarm, room) {
       updatePeerState(connection, state);
       handleSignal(connection, {data});
     }
-    // if (type === 'ping') {
-    //   handlePing(swarm, peerId, connId, data);
-    // }
-    // if (type === 'pong') {
-    //   handlePong(swarm, peerId, connId, data);
-    // }
   });
 
   on(hub, 'server', ({t: event, d: payload}) =>
@@ -193,14 +205,22 @@ function connect(swarm, room) {
 }
 
 function disconnect(swarm) {
-  let {hub} = swarm;
-  if (hub) hub.close();
+  if (swarm.hub) swarm.hub.close();
   swarm.hub = null;
   swarm.myConnId = null;
-  set(swarm, 'connected', false);
+  swarm.connectState = INITIAL;
+  is(swarm, 'connected', false);
   for (let connection of yieldConnections(swarm)) {
     removeConnection(connection);
   }
+}
+function disconnectUnwanted(swarm) {
+  // this indicates that we want to reconnect later
+  if (swarm.connectState === INITIAL) return;
+  if (swarm.hub) swarm.hub.close();
+  swarm.hub = null;
+  swarm.connectState = DISCONNECTED;
+  is(swarm, 'connected', false);
 }
 
 function initializePeer(swarm, peerId) {
@@ -266,6 +286,10 @@ function* yieldConnections(swarm) {
     }
   }
 }
+
+const online = [navigator.onLine];
+window.addEventListener('online', () => is(online, true));
+window.addEventListener('offline', () => is(online, false));
 
 function randomHex4() {
   return ((Math.random() * 16 ** 4) | 0).toString(16).padStart(4, '0');

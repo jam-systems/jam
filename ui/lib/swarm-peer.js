@@ -1,7 +1,6 @@
 import SimplePeer from './simple-peer-light';
 import causalLog from './causal-log';
 import debounce from './debounce';
-import {is, on} from 'use-minimal-state';
 
 const MAX_CONNECT_TIME = 6000;
 const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;
@@ -20,11 +19,6 @@ export {
   log,
 };
 
-const online = [navigator.onLine];
-window.addEventListener('online', () => is(online, true));
-window.addEventListener('offline', () => is(online, false));
-on(online, v => console.log('online?', v));
-
 // connection:
 // {swarm, peerId, connId, ...timeoutStuff, pc }
 
@@ -40,14 +34,10 @@ const connectPeer = debounce(2000, connection => {
   // -) this has to work in every state of swarm.peers (e.g. with or without existing Peer instance)
   let {swarm, peerId, connId} = connection;
   log('connecting peer', s(peerId), connId);
-  // if (pc?.connected) {
-  //   log('already connected!');
-  //   return;
-  // }
   if (swarm.hub === null) return;
 
   let {myPeerId, myConnId, sharedState, sharedStateTime} = swarm;
-  timeoutPeer(connection, MAX_CONNECT_TIME);
+  // timeoutPeer(connection, MAX_CONNECT_TIME);
   if (myPeerId > peerId || (myPeerId === peerId && myConnId > connId)) {
     log('i initiate, and override any previous peer!');
     createPeer(connection, true);
@@ -64,7 +54,7 @@ const connectPeer = debounce(2000, connection => {
       pc.garbage = true;
       pc.destroy();
     }
-    log('sent no-you-connect', s(peerId));
+    log('sent you-start', s(peerId));
   }
 });
 
@@ -72,14 +62,17 @@ function handleSignal(connection, {data}) {
   let {swarm, peerId, connId} = connection;
   let {myConnId, myPeerId} = swarm;
   if (data.youStart) {
-    // only accept back-connection if connect request was made
     log('i initiate, but dont override if i already have a peer');
-    // (because no-you-connect can only happen after i sent connect, at which point i couldn't have had peers,
-    // so the peer i already have comes from a racing connect from the other peer)
+    // you-start is always ignored in the websocket case, but important in signalhub style
+    // connections where a new peer does not have access to a list of already connected peers
     if (!connection.pc) {
       log('creating peer because i didnt have one');
       createPeer(connection, true);
     } else {
+      // this means the other side can only connect a second time if
+      // a.) their connId changed, b.) we destroyed the peerconnection
+      // - so reconnection is only possible for the initiator
+      // - which should be OK because ice disconnection is fired on both sides
       log('not creating peer');
     }
     return;
@@ -199,7 +192,14 @@ function createPeer(connection, initiator) {
 
   peer.on('error', err => {
     if (peer.garbage) return;
-    log('error', err);
+    log('simplepeer error', err);
+    let errCode = err?.code;
+    if (
+      errCode !== 'ERR_ICE_CONNECTION_FAILURE' &&
+      errCode !== 'ERR_ICE_CONNECTION_CLOSED'
+    ) {
+      handlePeerFail(connection, true);
+    }
   });
   peer.on('iceStateChange', state => {
     log('ice state', state);
@@ -210,13 +210,16 @@ function createPeer(connection, initiator) {
         'peer timed out after ice disconnect'
       );
     }
+    if (state === 'failed' || state === 'closed') {
+      handlePeerFail(connection, false);
+    }
     if (state === 'connected' || state === 'completed') {
       handlePeerSuccess(connection);
     }
   });
   peer.on('close', () => {
     if (peer.garbage) return;
-    handlePeerFail(connection);
+    // handlePeerFail(connection);
   });
   return peer;
 }
