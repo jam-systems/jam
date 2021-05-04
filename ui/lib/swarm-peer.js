@@ -1,13 +1,10 @@
 import SimplePeer from './simple-peer-light';
 import causalLog from './causal-log';
-import debounce from './debounce';
-import {is, on} from 'use-minimal-state';
 
-const MAX_CONNECT_TIME = 6000;
+const MAX_CONNECT_TIME = 10000;
 const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;
 const MIN_MAX_CONNECT_TIME_AFTER_SIGNAL = 2000;
 const MAX_FAIL_TIME = 20000;
-const MAX_PING_TIME = 5000;
 
 export {
   newConnection,
@@ -15,15 +12,8 @@ export {
   addStreamToPeer,
   handleSignal,
   handlePeerFail,
-  handlePing,
-  handlePong,
   log,
 };
-
-const online = [navigator.onLine];
-window.addEventListener('online', () => is(online, true));
-window.addEventListener('offline', () => is(online, false));
-on(online, v => console.log('online?', v));
 
 // connection:
 // {swarm, peerId, connId, ...timeoutStuff, pc }
@@ -32,7 +22,7 @@ function newConnection({swarm, peerId, connId}) {
   return {swarm, peerId, connId, lastFailure: null};
 }
 
-const connectPeer = debounce(2000, connection => {
+function connectPeer(connection) {
   // connect to a peer whose peerId & connId we already know
   // either after being pinged by connect-me or as a retry
   // SPEC:
@@ -40,10 +30,6 @@ const connectPeer = debounce(2000, connection => {
   // -) this has to work in every state of swarm.peers (e.g. with or without existing Peer instance)
   let {swarm, peerId, connId} = connection;
   log('connecting peer', s(peerId), connId);
-  // if (pc?.connected) {
-  //   log('already connected!');
-  //   return;
-  // }
   if (swarm.hub === null) return;
 
   let {myPeerId, myConnId, sharedState, sharedStateTime} = swarm;
@@ -64,22 +50,25 @@ const connectPeer = debounce(2000, connection => {
       pc.garbage = true;
       pc.destroy();
     }
-    log('sent no-you-connect', s(peerId));
+    log('sent you-start', s(peerId));
   }
-});
+}
 
 function handleSignal(connection, {data}) {
   let {swarm, peerId, connId} = connection;
   let {myConnId, myPeerId} = swarm;
   if (data.youStart) {
-    // only accept back-connection if connect request was made
     log('i initiate, but dont override if i already have a peer');
-    // (because no-you-connect can only happen after i sent connect, at which point i couldn't have had peers,
-    // so the peer i already have comes from a racing connect from the other peer)
+    // you-start is always ignored in the websocket case, but important in signalhub style
+    // connections where a new peer does not have access to a list of already connected peers
     if (!connection.pc) {
       log('creating peer because i didnt have one');
       createPeer(connection, true);
     } else {
+      // this means the other side can only connect a second time if
+      // a.) their connId changed, b.) we destroyed the peerconnection
+      // - so reconnection is only possible for the initiator
+      // - which should be OK because ice disconnection is fired on both sides
       log('not creating peer');
     }
     return;
@@ -199,7 +188,14 @@ function createPeer(connection, initiator) {
 
   peer.on('error', err => {
     if (peer.garbage) return;
-    log('error', err);
+    log('simplepeer error', err);
+    let errCode = err?.code;
+    if (
+      errCode !== 'ERR_ICE_CONNECTION_FAILURE' &&
+      errCode !== 'ERR_ICE_CONNECTION_CLOSED'
+    ) {
+      handlePeerFail(connection, true);
+    }
   });
   peer.on('iceStateChange', state => {
     log('ice state', state);
@@ -210,13 +206,16 @@ function createPeer(connection, initiator) {
         'peer timed out after ice disconnect'
       );
     }
+    if (state === 'failed' || state === 'closed') {
+      handlePeerFail(connection, false);
+    }
     if (state === 'connected' || state === 'completed') {
       handlePeerSuccess(connection);
     }
   });
   peer.on('close', () => {
     if (peer.garbage) return;
-    handlePeerFail(connection);
+    // handlePeerFail(connection);
   });
   return peer;
 }
@@ -312,59 +311,6 @@ function addStreamToPeer(connection, stream, name) {
       }
     }
   }
-}
-
-function deathPing(connection) {
-  let {peerId, connId} = connection;
-  ping(connection, MAX_PING_TIME).then(ms => {
-    if (ms) log('PING', s(peerId), connId, ms);
-    else {
-      console.warn('ping failed', s(peerId), connId);
-      handlePeerFail(connection, true);
-    }
-  });
-}
-
-// peer pings
-let pingCount = 0;
-let pings = new Map();
-
-function ping({swarm, peerId, connId}, timeout) {
-  let id = pingCount++;
-  let promise = Resolvable();
-  promise.start = Date.now();
-  setTimeout(() => {
-    promise.resolve(undefined);
-    pings.delete(id);
-  }, timeout);
-  pings.set(id, promise);
-  swarm.hub.broadcast(`${peerId};${connId}`, {
-    type: 'ping',
-    data: id,
-  });
-  return promise;
-}
-
-function handlePing(swarm, peerId, connId, id) {
-  swarm.hub.broadcast(`${peerId};${connId}`, {
-    type: 'pong',
-    data: id,
-  });
-}
-
-function handlePong(_swarm, _peerId, _connId, id) {
-  let promise = pings.get(id);
-  if (promise !== undefined) {
-    promise.resolve(Date.now() - promise.start);
-  }
-  pings.delete(id);
-}
-
-function Resolvable() {
-  let resolve;
-  let promise = new Promise(r => (resolve = r));
-  promise.resolve = () => resolve();
-  return promise;
 }
 
 let s = id => id.slice(0, 2);
