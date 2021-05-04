@@ -19,7 +19,6 @@ function Swarm(initialConfig) {
     myPeer: {connections: {}}, // other sessions of same peer
     myPeerId: null,
     connected: false,
-    connectState: INITIAL,
     remoteStreams: [], // [{stream, name, peerId}], only one per (name, peerId) if name is set
     peerState: {}, // {peerId: sharedState}
     connectionState: {}, // {peerId: {latest: connId, states: {connId: {state, time}}}}
@@ -32,6 +31,7 @@ function Swarm(initialConfig) {
     localStreams: {},
     reduceState: (_states, _current, latest) => latest,
     sharedStateTime: Date.now(),
+    connectState: INITIAL,
     // events
     stream: null,
     data: null,
@@ -58,7 +58,18 @@ function Swarm(initialConfig) {
 
   swarm.on('failedConnection', c => removeConnection(c));
 
-  // TODO: dis- / reconnect on on- / offline
+  on(online, onl => {
+    switch (swarm.connectState) {
+      case DISCONNECTED:
+        if (onl) connect(swarm, swarm.room);
+        break;
+      case CONNECTING:
+      case CONNECTED:
+        if (!onl) disconnectUnwanted(swarm);
+        break;
+      default:
+    }
+  });
 
   return swarm;
 }
@@ -214,11 +225,9 @@ function disconnect(swarm) {
     removeConnection(connection);
   }
 }
+
 function disconnectUnwanted(swarm) {
-  // this indicates that we want to reconnect later
   if (swarm.connectState === INITIAL) return;
-  if (swarm.hub) swarm.hub.close();
-  swarm.hub = null;
   swarm.connectState = DISCONNECTED;
   is(swarm, 'connected', false);
 }
