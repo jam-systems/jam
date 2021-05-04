@@ -1,4 +1,4 @@
-import State, {emit, on, is} from 'use-minimal-state';
+import State, {emit, on, is, clear} from 'use-minimal-state';
 import signalws from './signalws';
 import {
   newConnection,
@@ -133,6 +133,10 @@ function connect(swarm, room) {
     case CONNECTING:
       return;
     case DISCONNECTED:
+      if (swarm.hub) {
+        clear(swarm.hub);
+        swarm.hub.close();
+      }
       for (let connection of yieldConnections(swarm)) {
         removeConnection(connection);
       }
