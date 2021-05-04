@@ -1,8 +1,7 @@
 import SimplePeer from './simple-peer-light';
 import causalLog from './causal-log';
-import debounce from './debounce';
 
-const MAX_CONNECT_TIME = 6000;
+const MAX_CONNECT_TIME = 10000;
 const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;
 const MIN_MAX_CONNECT_TIME_AFTER_SIGNAL = 2000;
 const MAX_FAIL_TIME = 20000;
@@ -23,7 +22,7 @@ function newConnection({swarm, peerId, connId}) {
   return {swarm, peerId, connId, lastFailure: null};
 }
 
-const connectPeer = debounce(2000, connection => {
+function connectPeer(connection) {
   // connect to a peer whose peerId & connId we already know
   // either after being pinged by connect-me or as a retry
   // SPEC:
@@ -34,7 +33,7 @@ const connectPeer = debounce(2000, connection => {
   if (swarm.hub === null) return;
 
   let {myPeerId, myConnId, sharedState, sharedStateTime} = swarm;
-  // timeoutPeer(connection, MAX_CONNECT_TIME);
+  timeoutPeer(connection, MAX_CONNECT_TIME);
   if (myPeerId > peerId || (myPeerId === peerId && myConnId > connId)) {
     log('i initiate, and override any previous peer!');
     createPeer(connection, true);
@@ -53,7 +52,7 @@ const connectPeer = debounce(2000, connection => {
     }
     log('sent you-start', s(peerId));
   }
-});
+}
 
 function handleSignal(connection, {data}) {
   let {swarm, peerId, connId} = connection;
