@@ -6,7 +6,6 @@ const MAX_CONNECT_TIME = 6000;
 const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;
 const MIN_MAX_CONNECT_TIME_AFTER_SIGNAL = 2000;
 const MAX_FAIL_TIME = 20000;
-const MAX_PING_TIME = 5000;
 
 export {
   newConnection,
@@ -14,8 +13,6 @@ export {
   addStreamToPeer,
   handleSignal,
   handlePeerFail,
-  handlePing,
-  handlePong,
   log,
 };
 
@@ -315,59 +312,6 @@ function addStreamToPeer(connection, stream, name) {
       }
     }
   }
-}
-
-function deathPing(connection) {
-  let {peerId, connId} = connection;
-  ping(connection, MAX_PING_TIME).then(ms => {
-    if (ms) log('PING', s(peerId), connId, ms);
-    else {
-      console.warn('ping failed', s(peerId), connId);
-      handlePeerFail(connection, true);
-    }
-  });
-}
-
-// peer pings
-let pingCount = 0;
-let pings = new Map();
-
-function ping({swarm, peerId, connId}, timeout) {
-  let id = pingCount++;
-  let promise = Resolvable();
-  promise.start = Date.now();
-  setTimeout(() => {
-    promise.resolve(undefined);
-    pings.delete(id);
-  }, timeout);
-  pings.set(id, promise);
-  swarm.hub.broadcast(`${peerId};${connId}`, {
-    type: 'ping',
-    data: id,
-  });
-  return promise;
-}
-
-function handlePing(swarm, peerId, connId, id) {
-  swarm.hub.broadcast(`${peerId};${connId}`, {
-    type: 'pong',
-    data: id,
-  });
-}
-
-function handlePong(_swarm, _peerId, _connId, id) {
-  let promise = pings.get(id);
-  if (promise !== undefined) {
-    promise.resolve(Date.now() - promise.start);
-  }
-  pings.delete(id);
-}
-
-function Resolvable() {
-  let resolve;
-  let promise = new Promise(r => (resolve = r));
-  promise.resolve = () => resolve();
-  return promise;
 }
 
 let s = id => id.slice(0, 2);
