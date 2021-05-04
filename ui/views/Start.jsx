@@ -76,10 +76,10 @@ export default function Start({urlRoomId, roomFromURIError}) {
           </a>
           <br />
           <br />
-          You can use the form below to start a room.
+          You can use the button below to start a room.
         </div>
 
-        <h1>Start a Room</h1>
+        <h1>Começar conferência</h1>
 
         <p className="text-gray-600">
           Click on the button below to start a room.
@@ -229,11 +229,11 @@ export default function Start({urlRoomId, roomFromURIError}) {
 
         <hr className="mt-14 mb-14" />
 
-        <h1>Welcome to Jam</h1>
+        <h1>navve.club</h1>
 
         <div className="flex flex-row pt-4 pb-4">
           <div className="flex-1 text-gray-600 pt-6">
-            Jam is an <span className="italic">audio&nbsp;space</span>
+            navve.club is an <span className="italic">audio&nbsp;space</span>
             <br />
             for chatting, brainstorming, debating, jamming,
             <br />
@@ -304,7 +304,7 @@ export default function Start({urlRoomId, roomFromURIError}) {
             target="_blank"
             rel="noreferrer"
           >
-            hosted in Frankfurt
+            hosted in BR
           </a>
         </div>
       </div>
