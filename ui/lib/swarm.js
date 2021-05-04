@@ -188,6 +188,7 @@ function connect(swarm, room) {
   on(hub, 'add-peer', id => initializeConnection(id));
   on(hub, 'remove-peer', id => {
     let [peerId, connId] = id.split(';');
+    if (getPeer(swarm, peerId) === undefined) return;
     let connection = getConnection(swarm, peerId, connId);
     handlePeerFail(connection, true);
   });
