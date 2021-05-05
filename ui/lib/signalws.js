@@ -43,10 +43,9 @@ export default function signalws({
     }
     emit(hub, topic, payload);
   });
-  ws.addEventListener('error', err => {
+  ws.addEventListener('error', () => {
     if (window.DEBUG) {
       console.error('ws error');
-      console.error(err);
     }
   });
   ws.addEventListener('close', () => {

@@ -11,7 +11,7 @@ export {
   connectPeer,
   addStreamToPeer,
   handleSignal,
-  handlePeerFail,
+  stopTimeout,
   log,
 };
 

@@ -1,11 +1,18 @@
 import State, {emit, on, is, clear} from 'use-minimal-state';
 import signalws from './signalws';
 import {
+  checkWsHealth,
+  INITIAL,
+  CONNECTED,
+  CONNECTING,
+  DISCONNECTED,
+} from './swarm-health';
+import {
   newConnection,
   connectPeer,
   addStreamToPeer,
   handleSignal,
-  handlePeerFail,
+  stopTimeout,
   log,
 } from './swarm-peer';
 import {removePeerState, updatePeerState} from './swarm-state';
@@ -56,21 +63,11 @@ function Swarm(initialConfig) {
     swarm.hub?.broadcast('all', {type: 'shared-state', state: {state, time}});
   });
 
-  swarm.on('failedConnection', c => removeConnection(c));
-
-  on(online, onl => {
-    log('online', onl);
-    switch (swarm.connectState) {
-      case DISCONNECTED:
-        if (onl) connect(swarm, swarm.room);
-        break;
-      case CONNECTING:
-      case CONNECTED:
-        if (!onl) disconnectUnwanted(swarm);
-        break;
-      default:
-    }
+  swarm.on('failedConnection', c => {
+    if (c === getConnection(swarm, c.peerId, c.connId)) removeConnection(c);
   });
+
+  checkWsHealth(swarm);
 
   if (window.DEBUG) {
     window.swarm = swarm;
@@ -119,12 +116,6 @@ function sendPeerEvent(swarm, event, payload) {
 export {config, connect, disconnect, addLocalStream, sendPeerEvent};
 
 // public API ends here
-
-// connection states
-const INITIAL = 0;
-const CONNECTING = 1;
-const CONNECTED = 2;
-const DISCONNECTED = 3;
 
 function connect(swarm, room) {
   config(swarm, {room});
@@ -189,8 +180,7 @@ function connect(swarm, room) {
   on(hub, 'remove-peer', id => {
     let [peerId, connId] = id.split(';');
     if (getPeer(swarm, peerId) === undefined) return;
-    let connection = getConnection(swarm, peerId, connId);
-    handlePeerFail(connection, true);
+    removeConnection({swarm, peerId, connId});
   });
 
   hub.broadcast('all', {
@@ -257,6 +247,7 @@ function getPeer(swarm, peerId) {
 
 function getConnection(swarm, peerId, connId) {
   let peer = getPeer(swarm, peerId);
+  if (peer === undefined) return;
   let connection = peer.connections[connId];
   if (connection === undefined) {
     connection = newConnection({swarm, peerId, connId});
@@ -269,12 +260,16 @@ function removeConnection({swarm, peerId, connId}) {
   log('removing peer', s(peerId), connId);
   let peer = getPeer(swarm, peerId);
   if (peer !== undefined) {
-    let pc = peer.connections[connId]?.pc;
-    if (pc !== undefined) {
-      pc.garbage = true;
-      try {
-        pc.destroy();
-      } catch (e) {}
+    let connection = peer.connections[connId];
+    if (connection !== undefined) {
+      stopTimeout(connection);
+      let {pc} = connection;
+      if (pc !== undefined) {
+        pc.garbage = true;
+        try {
+          pc.destroy();
+        } catch (e) {}
+      }
     }
     delete peer.connections[connId];
   }
@@ -305,10 +300,6 @@ function* yieldConnections(swarm) {
     }
   }
 }
-
-const online = [navigator.onLine];
-window.addEventListener('online', () => is(online, true));
-window.addEventListener('offline', () => is(online, false));
 
 function randomHex4() {
   return ((Math.random() * 16 ** 4) | 0).toString(16).padStart(4, '0');
