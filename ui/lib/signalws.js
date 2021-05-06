@@ -34,7 +34,7 @@ export default function signalws({
     if (window.DEBUG && d?.peerId !== myPeerId) {
       console.log('ws message', data);
     }
-    if (topic === 'error' || topic === 'opened') return;
+    if (topic === 'opened' || topic === 'closed') return;
     let payload = d ?? {};
     if (p) {
       let [peerId, connId] = p.split(';');
@@ -43,17 +43,20 @@ export default function signalws({
     }
     emit(hub, topic, payload);
   });
-  ws.addEventListener('error', err => {
-    if (window.DEBUG) console.log('ws error', err);
-    emit(hub, 'error');
+  ws.addEventListener('error', () => {
+    if (window.DEBUG) {
+      console.error('ws error');
+    }
   });
   ws.addEventListener('close', () => {
     if (window.DEBUG) console.log('ws closed');
+    is(hub, 'closed', true);
     clear(hub);
   });
 
   const hub = {
     opened: false,
+    closed: false,
     myPeerId,
     ws,
     subs: subscriptions,
@@ -71,33 +74,37 @@ export default function signalws({
 }
 
 function subscribe(hub, topic, onMessage) {
-  let {ws, subs} = hub;
+  let {subs} = hub;
   if (!subs.includes(topic)) {
     subs.push(topic);
-    until(hub, 'opened').then(() => send(ws, {s: topic}));
+    until(hub, 'opened').then(() => send(hub, {s: topic}));
   }
   return on(hub, topic, data => onMessage(data));
   // TODO: send unsubscribe msg on unsubscribing
 }
 
 async function broadcast(hub, topic, message) {
-  let {ws} = hub;
   await until(hub, 'opened');
-  return send(ws, {t: topic, d: message});
+  return send(hub, {t: topic, d: message});
 }
 
-function close({ws}) {
-  ws.close(1000);
+function close({ws, closed}, code = 1000) {
+  if (!closed) ws.close(code);
 }
 
-function send(ws, msg) {
+function send(hub, msg) {
+  let {ws} = hub;
   msg = JSON.stringify(msg);
   if (window.DEBUG) console.log('ws sending', msg);
   try {
     ws.send(msg);
     return true;
   } catch (err) {
-    console.error(err);
+    if (window.DEBUG) {
+      console.error('ws error');
+      console.error(err);
+    }
+    close(hub);
     return false;
   }
 }

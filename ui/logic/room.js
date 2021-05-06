@@ -27,7 +27,11 @@ const emptyRoom = staticConfig.defaultRoom
 let _disconnectRoom = {};
 
 function useRoom(roomId) {
-  return useApiQuery(`/rooms/${roomId}`, !!roomId, 'room', emptyRoom);
+  return useApiQuery(`/rooms/${roomId}`, {
+    dontFetch: !roomId,
+    key: 'room',
+    defaultQuery: emptyRoom,
+  });
 }
 
 function maybeConnectRoom(roomId) {

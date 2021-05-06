@@ -18,10 +18,14 @@ on(staticConfig, () => {
   API = `${staticConfig.urls.pantry}/api/v1`;
 });
 
-export function useApiQuery(path, doFetch = true, key, defaultQuery) {
+export function useApiQuery(
+  path,
+  {dontFetch = false, fetchOnMount = false, key, defaultQuery}
+) {
   let cached = use(state, 'queries')[path];
-  let shouldFetch = path && doFetch && !cached;
+  let shouldFetch = path && !dontFetch && !cached;
   let [isLoading, setLoading] = useState(shouldFetch);
+  let [hasFetched, setHasFetched] = useState(false);
 
   let refetch = useCallback(async () => {
     let res = await fetch(API + path, {
@@ -43,9 +47,10 @@ export function useApiQuery(path, doFetch = true, key, defaultQuery) {
   }, [path]);
 
   useEffect(() => {
-    if (shouldFetch) refetch();
-    else setLoading(false);
-  }, [shouldFetch, refetch]);
+    if (shouldFetch || (fetchOnMount && !hasFetched)) {
+      refetch().then(() => setHasFetched(true));
+    } else setLoading(false);
+  }, [shouldFetch, refetch, hasFetched, fetchOnMount]);
 
   useEffect(() => {
     if (key) {
