@@ -1,10 +1,8 @@
 import React from 'react';
 import {Modal} from './Modal';
-import {state} from '../logic/main';
-import {set, is} from 'use-minimal-state';
 import {PrimaryButton} from './Button';
 
-export default function InteractionModal({close}) {
+export default function InteractionModal({submit, close}) {
   return (
     <Modal close={close}>
       <h1>Allow playing sound</h1>
@@ -14,8 +12,7 @@ export default function InteractionModal({close}) {
       <p>
         <PrimaryButton
           onClick={() => {
-            set(state, 'soundMuted', false);
-            is(state, 'userInteracted', true);
+            submit();
             close();
           }}
         >

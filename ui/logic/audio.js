@@ -43,57 +43,81 @@ state.on('iAmSpeaker', iAmSpeaker => {
   }
 });
 
-let audios = {};
+const audios = {}; // {peerId: HTMLAudioElement}
+
 state.on('soundMuted', muted => {
-  for (let id in audios) {
-    let audio = audios[id];
+  for (let peerId in audios) {
+    let audio = audios[peerId];
     audio.muted = muted;
-    if (!muted && audio.paused) playOrShowModal(audio);
+    if (!muted && audio.paused) playOrShowModal(peerId, audio);
   }
 });
 
-swarm.on('newPeer', id => getAudio(id));
+swarm.on('newPeer', peerId => getAudio(peerId));
 
 swarm.on('stream', (stream, name, peer) => {
   log('remote stream', name, stream);
-  let id = peer.peerId;
+  let peerId = peer.peerId;
   if (!stream) return;
-  connectVolumeMeter(id, stream.clone());
-  let audio = getAudio(id);
+  connectVolumeMeter(peerId, stream.clone());
+  let audio = getAudio(peerId);
+
+  audio.removeAttribute('srcObject');
+  audio.load(); // this can cause a previous play() to reject
   audio.srcObject = stream;
-  playOrShowModal(audio);
+  if (state.inRoom) playOrShowModal(peerId, audio);
 });
 
-function getAudio(id) {
-  if (!audios[id]) {
+function getAudio(peerId) {
+  if (!audios[peerId]) {
     let audio = new Audio();
-    audios[id] = audio;
+    audios[peerId] = audio;
     audio.muted = state.soundMuted;
   }
-  return audios[id];
+  return audios[peerId];
 }
 
-function playOrShowModal(audio) {
+function onConfirmModal() {
+  for (let peerId in audios) {
+    let audio = audios[peerId];
+    if (audio.paused) play(audio).catch(console.warn);
+  }
+}
+
+function playOrShowModal(peerId, audio) {
+  let stream = audio.srcObject;
   return play(audio).catch(err => {
+    let currentStream = swarm.remoteStreams.find(s => s.peerId === peerId)
+      ?.stream;
+    if (stream !== currentStream) {
+      // call to play() was for a an older stream, error caused by racing new stream
+      // => all good, don't show modal!
+      return;
+    }
     console.warn(err);
     if (state.inRoom) {
-      openModal(InteractionModal, {}, 'interaction');
+      openModal(InteractionModal, {submit: onConfirmModal}, 'interaction');
     }
   });
 }
 
-async function play(audio) {
-  // HACK for Safari audio output bug
+function play(audio) {
+  // we make sure that audio.play() is called *synchronously* so the browser has an easier time
+  // seeing that the first play was caused by user interaction
   log('playing audio on engine', userAgent.engine.name);
   if (userAgent.engine.name === 'WebKit') {
-    let onplay = domEvent(audio, 'play');
-    await audio.play();
-    await onplay;
-    let onpause = domEvent(audio, 'pause');
-    audio.pause();
-    await onpause;
+    // HACK for Safari audio output bug
+    return audio
+      .play()
+      .then(() => {
+        let onpause = domEvent(audio, 'pause');
+        audio.pause();
+        return onpause;
+      })
+      .then(() => audio.play());
+  } else {
+    return audio.play();
   }
-  return audio.play();
 }
 
 let isRequestingAudio = false;
