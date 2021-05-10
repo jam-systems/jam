@@ -6,7 +6,7 @@ import {is, on} from 'use-minimal-state';
 // children = [element]
 // result = Component(props) = partial state
 
-export {$, declareStateRoot, useState, useMemo};
+export {S, declareStateRoot, useState, useMemo};
 
 const root = {children: []};
 let current = root;
@@ -16,7 +16,7 @@ let nUses = 0;
 
 const updateSet = new Set();
 
-function $(Component, props, state) {
+function S(Component, props, state) {
   let key = props?.key;
   let element = current.children.find(
     c => c.Component === Component && c.key === key
@@ -71,7 +71,7 @@ function declareStateRoot(Component, state) {
   const key = rootKey++;
 
   isRendering = key;
-  let result = $(Component, {...state, key}, state);
+  let result = S(Component, {...state, key}, state);
   console.log('STATE-TREE', 'root render returned', result);
   isRendering = 0;
 
@@ -82,7 +82,7 @@ function declareStateRoot(Component, state) {
     ) {
       console.log('STATE-TREE', 'root render caused by', key_);
       isRendering = key;
-      let result = $(Component, {...state, key}, state);
+      let result = S(Component, {...state, key}, state);
       console.log('STATE-TREE', 'root render returned', result);
       isRendering = 0;
     }
@@ -119,7 +119,7 @@ function queueUpdate(caller) {
     if (!updateSet.has(top)) return;
     console.log('STATE-TREE', 'root render caused by setState');
     isRendering = top.key;
-    let result = $(
+    let result = S(
       top.Component,
       {...top.props, key: top.key},
       top.globalState

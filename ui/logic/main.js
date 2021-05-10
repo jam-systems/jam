@@ -6,7 +6,7 @@ import {requestAudio, stopAudio} from './audio';
 import './reactions';
 import './room';
 import {is, on, set, update} from 'use-minimal-state';
-import {$, declareStateRoot, useMemo, useState} from '../lib/state-tree';
+import {S, declareStateRoot, useMemo, useState} from '../lib/state-tree';
 
 declareStateRoot(Root, state);
 
@@ -17,7 +17,7 @@ function Root({room, inRoom, iAmSpeaker, iAmModerator}) {
     inRoom = false;
   }
 
-  let {userInteracted, soundMuted} = $(EnterRoom, {inRoom, iAmSpeaker, swarm});
+  let {userInteracted, soundMuted} = S(EnterRoom, {inRoom, iAmSpeaker, swarm});
 
   return {userInteracted, soundMuted, inRoom};
 }
