@@ -145,11 +145,17 @@ export async function createRoom(
   if (ok) return room;
 }
 
-export function useCreateRoom({roomId, room, isLoading, newRoom}) {
-  let [roomFromURIError, setRoomFromURIError] = useState(false);
-  let [isCreateLoading, setCreateLoading] = useState(true);
+export function useCreateRoom({
+  roomId,
+  room,
+  isLoading: isRoomLoading,
+  newRoom,
+  onSuccess,
+}) {
+  let [isError, setError] = useState(false);
+  let [isLoading, setLoading] = useState(true);
   useEffect(() => {
-    if (roomId && !room && !isLoading) {
+    if (roomId && !room && !isRoomLoading) {
       (async () => {
         let roomCreated = await createRoom(
           roomId,
@@ -159,17 +165,17 @@ export function useCreateRoom({roomId, room, isLoading, newRoom}) {
           newRoom?.color || '',
           currentId()
         );
-        setCreateLoading(false);
+        setLoading(false);
         if (roomCreated) {
           updateApiQuery(`/rooms/${roomId}`, roomCreated);
-          emit(actions.ENTER, roomId);
+          onSuccess?.();
         } else {
-          setRoomFromURIError(true);
+          setError(true);
         }
       })();
     }
   }, [room, roomId, isLoading]);
-  return [isCreateLoading, roomFromURIError];
+  return [isLoading, isError];
 }
 
 // identity

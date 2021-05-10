@@ -43,7 +43,6 @@ export function enterRoom(roomId) {
     is(state, 'soundMuted', false);
   }
 }
-on(actions.ENTER, roomId => enterRoom(roomId));
 
 export function leaveRoom() {
   set(state, 'inRoom', null);

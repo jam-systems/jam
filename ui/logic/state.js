@@ -29,12 +29,5 @@ export default state;
 const swarm = Swarm();
 export {swarm};
 
-// actions that can be emitted to trigger events
-// emit(action.NAME, payload)
-// on(action.NAME, payload => {})
-export const actions = {
-  ENTER: [],
-};
-
 // mod visible state
 export const modState = {raiseHand: false};
