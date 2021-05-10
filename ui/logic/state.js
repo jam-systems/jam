@@ -20,7 +20,6 @@ const state = {
   speaking: new Set(),
   audioContext: null,
 
-  queries: {},
   modMessages: {},
   userInteracted: false,
 };

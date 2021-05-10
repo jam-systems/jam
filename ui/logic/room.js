@@ -1,9 +1,16 @@
 import state, {swarm} from './state';
-import {get, updateApiQuery, put, useApiQuery} from './backend';
+import {
+  get,
+  updateApiQuery,
+  put,
+  useApiQuery,
+  forwardApiQuery,
+} from './backend';
 import {on, set, update} from 'use-minimal-state';
 import {currentId} from './identity';
 import log from '../lib/causal-log';
 import {staticConfig} from './config';
+import {useEffect} from 'react';
 
 export {
   useRoom,
@@ -27,11 +34,12 @@ const emptyRoom = staticConfig.defaultRoom
 let _disconnectRoom = {};
 
 function useRoom(roomId) {
-  return useApiQuery(`/rooms/${roomId}`, {
+  const path = `/rooms/${roomId}`;
+  let roomResult = useApiQuery(path, {
     dontFetch: !roomId,
-    key: 'room',
-    defaultQuery: emptyRoom,
   });
+  useEffect(() => forwardApiQuery(state, path, 'room', emptyRoom), [path]);
+  return roomResult;
 }
 
 function maybeConnectRoom(roomId) {

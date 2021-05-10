@@ -18,11 +18,10 @@ on(staticConfig, () => {
   API = `${staticConfig.urls.pantry}/api/v1`;
 });
 
-export function useApiQuery(
-  path,
-  {dontFetch = false, fetchOnMount = false, key, defaultQuery}
-) {
-  let cached = use(state, 'queries')[path];
+const queries = {};
+
+export function useApiQuery(path, {dontFetch = false, fetchOnMount = false}) {
+  let cached = use(queries, path);
   let shouldFetch = path && !dontFetch && !cached;
   let [isLoading, setLoading] = useState(shouldFetch);
   let [hasFetched, setHasFetched] = useState(false);
@@ -52,25 +51,19 @@ export function useApiQuery(
     } else setLoading(false);
   }, [shouldFetch, refetch, hasFetched, fetchOnMount]);
 
-  useEffect(() => {
-    if (key) {
-      return forwardApiQuery(path, key, defaultQuery);
-    }
-  }, [path, key, defaultQuery]);
-
   let {data, status} = cached || {};
   return [data, isLoading, status, refetch];
 }
 
 export function updateApiQuery(path, data, status = 200) {
-  set(state, 'queries', {...state.queries, [path]: data && {data, status}});
+  set(queries, path, data && {data, status});
 }
 
-export function forwardApiQuery(path, key, defaultQuery) {
-  set(state, key, state.queries[path]?.data || defaultQuery);
-  return on(state, 'queries', (queries, oldQueries) => {
-    let data = queries[path]?.data || defaultQuery;
-    let oldData = oldQueries[path]?.data || defaultQuery;
+export function forwardApiQuery(state, path, key, defaultQuery) {
+  set(state, key, queries[path]?.data || defaultQuery);
+  return on(queries, path, (query, oldQuery) => {
+    let data = query?.data || defaultQuery;
+    let oldData = oldQuery?.data || defaultQuery;
     if (data !== oldData) set(state, key, data);
   });
 }
