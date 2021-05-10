@@ -167,7 +167,7 @@ export function useCreateRoom({
         }
       })();
     }
-  }, [room, roomId, isLoading]);
+  }, [room, roomId, isRoomLoading]);
   return [isLoading, isError];
 }
 
