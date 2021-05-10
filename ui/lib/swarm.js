@@ -27,9 +27,9 @@ function Swarm(initialConfig) {
     myPeerId: null,
     connected: false,
     remoteStreams: [], // [{stream, name, peerId}], only one per (name, peerId) if name is set
-    peerState: {}, // {peerId: sharedState}
+    peerState: {}, // {peerId: state}
     connectionState: {}, // {peerId: {latest: connId, states: {connId: {state, time}}}}
-    sharedState: null, // my portion of peerState, gets shared on update and on peer join
+    myPeerState: {}, // my portion of peerState, gets shared on update and on peer join
     // internal
     url: '',
     room: '',
@@ -57,10 +57,13 @@ function Swarm(initialConfig) {
     config(swarm, initialConfig);
   }
 
-  on(swarm, 'sharedState', state => {
+  on(swarm.myPeerState, (_key, _value) => {
     let time = Date.now();
     swarm.sharedStateTime = time;
-    swarm.hub?.broadcast('all', {type: 'shared-state', state: {state, time}});
+    swarm.hub?.broadcast('all', {
+      type: 'shared-state',
+      state: {state: swarm.myPeerState, time},
+    });
   });
 
   on(swarm, 'failedConnection', c => {
@@ -181,7 +184,7 @@ function connect(swarm, room) {
 
   hub.broadcast('all', {
     type: 'shared-state',
-    state: {state: swarm.sharedState, time: swarm.sharedStateTime},
+    state: {state: swarm.myPeerState, time: swarm.sharedStateTime},
   });
   swarm.hub = hub;
 

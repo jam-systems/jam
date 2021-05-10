@@ -33,12 +33,12 @@ function configSwarm() {
 configSwarm();
 on(staticConfig, () => configSwarm());
 
-function RoomState({inRoom}) {}
+function RoomState({inRoom, iAmSpeaker}) {}
 
 export function enterRoom(roomId) {
   is(state, 'userInteracted', true);
   set(state, 'inRoom', roomId);
-  set(swarm, 'sharedState', state => ({...state, inRoom: true}));
+  set(swarm.myPeerState, 'inRoom', true);
   if (state.iAmSpeaker) {
     requestAudio().then(() => is(state, 'soundMuted', false));
   } else {
@@ -48,7 +48,7 @@ export function enterRoom(roomId) {
 
 export function leaveRoom() {
   set(state, 'inRoom', null);
-  set(swarm, 'sharedState', state => ({...state, inRoom: false}));
+  set(swarm.myPeerState, 'inRoom', false);
   stopAudio();
   set(state, 'soundMuted', true);
 }

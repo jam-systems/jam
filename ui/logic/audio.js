@@ -207,7 +207,7 @@ on(state, 'micMuted', micMuted => {
       track.enabled = !micMuted;
     }
   }
-  set(swarm, 'sharedState', state => ({...state, micMuted}));
+  set(swarm.myPeerState, {micMuted});
 });
 
 let volumeMeters = {};

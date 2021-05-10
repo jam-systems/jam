@@ -118,13 +118,11 @@ async function removeRole(id, role) {
 function leaveStage(roomId) {
   roomId = roomId || state.roomId;
   if (!state.iAmSpeaker || swarm.room !== roomId) return;
-  swarm.sharedState.leftStage = true;
-  update(swarm, 'sharedState');
+  set(swarm.myPeerState, 'leftStage', true);
 }
 function joinStage() {
-  if (!swarm.sharedState.leftStage) return;
-  swarm.sharedState.leftStage = false;
-  update(swarm, 'sharedState');
+  if (!swarm.myPeerState.leftStage) return;
+  set(swarm.myPeerState, 'leftStage', false);
 }
 // if somebody left stage, update speakers
 on(swarm.peerState, (peerId, peerState) => {

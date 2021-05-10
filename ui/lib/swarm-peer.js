@@ -33,7 +33,7 @@ function connectPeer(connection) {
   log('connecting peer', s(peerId), connId);
   if (swarm.hub === null) return;
 
-  let {myPeerId, myConnId, sharedState, sharedStateTime} = swarm;
+  let {myPeerId, myConnId, myPeerState, sharedStateTime} = swarm;
   timeoutPeer(connection, MAX_CONNECT_TIME);
   if (myPeerId > peerId || (myPeerId === peerId && myConnId > connId)) {
     log('i initiate, and override any previous peer!');
@@ -42,7 +42,7 @@ function connectPeer(connection) {
     log('i dont initiate, wait for first signal');
     swarm.hub.broadcast(`${peerId};${connId}`, {
       type: 'signal',
-      state: {state: sharedState, time: sharedStateTime},
+      state: {state: myPeerState, time: sharedStateTime},
       data: {youStart: true, type: 'you-start'},
     });
     let {pc} = connection;
@@ -159,7 +159,7 @@ function createPeer(connection, initiator) {
     if (!peer.didSignal) {
       data.first = true;
       peer.didSignal = true;
-      state = {state: swarm.sharedState, time: swarm.sharedStateTime};
+      state = {state: swarm.myPeerState, time: swarm.sharedStateTime};
     }
     hub.broadcast(`${peerId};${connId}`, {type: 'signal', data, state});
   });

@@ -51,13 +51,13 @@ export default function Room({room, roomId}) {
     'iAmSpeaker',
     'iAmModerator',
   ]);
-  let [peers, peerState, sharedState] = use(swarm, [
+  let [peers, peerState, myPeerState] = use(swarm, [
     'stickyPeers',
     'peerState',
-    'sharedState',
+    'myPeerState',
   ]);
 
-  let hasEnteredRoom = sharedState?.inRoom;
+  let hasEnteredRoom = myPeerState?.inRoom;
 
   let [editRole, setEditRole] = useState(null);
   let [editSelf, setEditSelf] = useState(false);
@@ -194,7 +194,7 @@ export default function Room({room, roomId}) {
                   key={myPeerId}
                   peerId={myPeerId}
                   {...{speaking, moderators, reactions, room}}
-                  peerState={sharedState}
+                  peerState={myPeerState}
                   info={myInfo}
                   onClick={() => setEditSelf(true)}
                 />
@@ -220,7 +220,7 @@ export default function Room({room, roomId}) {
               <AudienceAvatar
                 {...{reactions, room}}
                 peerId={myPeerId}
-                peerState={sharedState}
+                peerState={myPeerState}
                 info={myInfo}
                 handRaised={myHandRaised}
                 onClick={() => setEditSelf(true)}
