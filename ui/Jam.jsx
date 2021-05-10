@@ -3,7 +3,7 @@ import {currentId} from './logic/identity';
 import {initializeIdentity} from './logic/backend';
 import Modals from './views/Modal';
 import state, {swarm} from './logic/state';
-import {mergeClasses} from './logic/util';
+import {mergeClasses, debug} from './logic/util';
 import {staticConfig} from './logic/config';
 import {useProvideWidth, WidthContext} from './logic/tailwind-mqp';
 import {set, use} from 'use-minimal-state';
@@ -57,6 +57,12 @@ export default function Jam({
   useEffect(() => {
     if (dynamicConfig.debug) {
       window.DEBUG = true;
+      debug(swarm);
+    }
+    if (dynamicConfig.debug || staticConfig.development) {
+      window.swarm = swarm;
+      window.state = state;
+      debug(state);
     }
   }, [dynamicConfig.debug]);
 

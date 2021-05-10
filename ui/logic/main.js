@@ -1,16 +1,12 @@
 import state, {actions, swarm} from './state';
 import {get} from './backend';
 import {currentId, signData, verifyData} from './identity';
-import {DEV, staticConfig} from './config';
+import {staticConfig} from './config';
 import {requestAudio, stopAudio} from './audio';
 import './reactions';
 import './room';
 import {is, on, set, update} from 'use-minimal-state';
 
-if (DEV) {
-  window.state = state; // for debugging
-  window.swarm = swarm;
-}
 export {state};
 
 function configSwarm() {
