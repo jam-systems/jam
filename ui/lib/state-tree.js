@@ -6,31 +6,31 @@ import {is, on} from 'use-minimal-state';
 // children = [element]
 // result = Component(props) = partial state
 
-export {declare, declareStateRoot};
+export {$, declareStateRoot, useState, useMemo};
 
 const root = {children: []};
 let current = root;
 let rootKey = 1;
 let isRendering = 0;
+let nUses = 0;
 
 const updateSet = new Set();
 
-function declare(Component, props, state) {
+function $(Component, props, state) {
   let key = props?.key;
   let element = current.children.find(
     c => c.Component === Component && c.key === key
   );
-  console.log('STATE-TREE', 'rendering', Component, props);
+  // console.log('STATE-TREE', 'rendering', Component, props);
 
   let mustUpdate = updateSet.has(element);
+  if (mustUpdate) updateSet.delete(element);
 
   // return fast if we can avoid re-running
   if (sameProps(element?.props, props) && !mustUpdate) {
-    console.log('STATE-TREE', 'early return');
+    // console.log('STATE-TREE', 'early return');
     return element.last;
   }
-
-  if (mustUpdate) updateSet.delete(element);
 
   if (element === undefined) {
     element = {
@@ -39,7 +39,7 @@ function declare(Component, props, state) {
       key,
       children: [],
       last: null,
-      state: {},
+      uses: [],
       globalState: state,
       parent: current,
     };
@@ -50,16 +50,12 @@ function declare(Component, props, state) {
   }
 
   // run component
-  let tmp = [current];
+  let tmp = [current, nUses];
   current = element;
-  let result = Component(
-    props,
-    element.state,
-    s => setComponentState(element, s),
-    element
-  );
+  nUses = 0;
+  let result = Component(props, element);
   element.last = result;
-  [current] = tmp;
+  [current, nUses] = tmp;
 
   // optionally use result to update state
   if (state !== undefined) {
@@ -75,7 +71,7 @@ function declareStateRoot(Component, state) {
   const key = rootKey++;
 
   isRendering = key;
-  let result = declare(Component, {...state, key}, state);
+  let result = $(Component, {...state, key}, state);
   console.log('STATE-TREE', 'root render returned', result);
   isRendering = 0;
 
@@ -84,9 +80,9 @@ function declareStateRoot(Component, state) {
       isRendering !== key &&
       !(oldValue !== undefined && value === oldValue)
     ) {
-      console.log('STATE-TREE', 'root render caused by', key_, value);
+      console.log('STATE-TREE', 'root render caused by', key_);
       isRendering = key;
-      let result = declare(Component, {...state, key}, state);
+      let result = $(Component, {...state, key}, state);
       console.log('STATE-TREE', 'root render returned', result);
       isRendering = 0;
     }
@@ -109,9 +105,7 @@ function sameProps(prevProps, props) {
 }
 
 // rerendering
-function forceUpdate_(caller) {
-  if (caller === current)
-    throw Error('forceUpdate cannot be called during render');
+function queueUpdate(caller) {
   let parent = caller;
   updateSet.add(parent);
   while (parent.parent !== root) {
@@ -120,32 +114,61 @@ function forceUpdate_(caller) {
   }
   let top = parent;
   // rerender root
-  console.log('STATE-TREE', 'root render caused by setState', caller);
-  isRendering = top.key;
-  let result = declare(
-    top.Component,
-    {...top.props, key: top.key},
-    top.globalState
-  );
-  isRendering = 0;
-  console.log('STATE-TREE', 'root render returned', result);
-}
-
-function setComponentState(caller, state) {
-  if (caller === current)
-    throw Error('setComponentState cannot be called during render');
-  if (sameState(caller.state, state)) return;
   queueMicrotask(() => {
-    caller.state = {...caller.state, ...state};
-    forceUpdate_(caller);
+    console.log(updateSet);
+    if (!updateSet.has(top)) return;
+    console.log('STATE-TREE', 'root render caused by setState');
+    isRendering = top.key;
+    let result = $(
+      top.Component,
+      {...top.props, key: top.key},
+      top.globalState
+    );
+    isRendering = 0;
+    console.log('STATE-TREE', 'root render returned', result);
   });
 }
 
-function sameState(prevState, state) {
-  if (state === undefined) return true;
-  if (prevState === state) return true;
-  for (let key in state) {
-    if (!(key in prevState) || state[key] !== prevState[key]) return false;
+function useState(initial) {
+  if (current === root)
+    throw Error('useState can only be called during render');
+  let caller = current;
+  // console.log('STATE-TREE', 'useState', nUses, caller.uses);
+  let use = caller.uses[nUses];
+  if (use === undefined) {
+    use = [initial, null];
+    use[1] = value => {
+      if (value === use[0]) return;
+      // console.log('STATE-TREE', 'use setState', value, caller);
+      use[0] = value;
+      queueUpdate(caller);
+    };
+    caller.uses[nUses] = use;
+  }
+  nUses++;
+  return use;
+}
+
+function useMemo(func, deps) {
+  if (current === root) throw Error('useMemo can only be called during render');
+  let caller = current;
+  // console.log('STATE-TREE', 'useState', nUses, caller.uses);
+  let use = caller.uses[nUses];
+  if (use === undefined) use = [undefined, undefined];
+  if (use[1] === undefined || !arrayEqual(use[1], deps)) {
+    use[1] = deps;
+    use[0] = func(use[0]);
+    caller.uses[nUses] = use;
+  }
+  nUses++;
+  return use[0];
+}
+
+function arrayEqual(a, b) {
+  if (a === b) return true;
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
   }
   return true;
 }

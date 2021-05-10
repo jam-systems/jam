@@ -6,9 +6,48 @@ import {requestAudio, stopAudio} from './audio';
 import './reactions';
 import './room';
 import {is, on, set, update} from 'use-minimal-state';
-import {declare, declareStateRoot} from '../lib/state-tree';
+import {$, declareStateRoot, useMemo, useState} from '../lib/state-tree';
 
-declareStateRoot(StateRoot, state);
+declareStateRoot(Root, state);
+
+function Root({room, inRoom, iAmSpeaker, iAmModerator}) {
+  let {closed} = room;
+
+  if (closed && !iAmModerator) {
+    inRoom = false;
+  }
+
+  let {userInteracted, soundMuted} = $(EnterRoom, {inRoom, iAmSpeaker, swarm});
+
+  return {userInteracted, soundMuted, inRoom};
+}
+
+function EnterRoom({inRoom, iAmSpeaker, swarm}) {
+  is(swarm.myPeerState, 'inRoom', !!inRoom);
+
+  let [hasRequested, setRequested] = useState(false);
+  let userInteracted = useMemo(i => i || !!inRoom, [inRoom]);
+
+  if (!inRoom) stopAudio();
+  if (inRoom && iAmSpeaker)
+    requestAudio().then(() => {
+      setRequested(true);
+      setRequested(true);
+    });
+
+  return {
+    userInteracted,
+    soundMuted: inRoom ? iAmSpeaker && !hasRequested : true,
+  };
+}
+
+export function enterRoom(roomId) {
+  set(state, 'inRoom', roomId);
+}
+
+export function leaveRoom() {
+  set(state, 'inRoom', null);
+}
 
 function configSwarm() {
   swarm.config({
@@ -35,53 +74,6 @@ function configSwarm() {
 }
 configSwarm();
 on(staticConfig, () => configSwarm());
-
-function StateRoot({room, inRoom, iAmSpeaker, iAmModerator}) {
-  let {closed} = room;
-
-  if (closed && !iAmModerator) {
-    inRoom = false;
-  }
-
-  let {userInteracted, soundMuted} = declare(EnterRoom, {
-    inRoom,
-    iAmSpeaker,
-    swarm,
-  });
-
-  return {userInteracted, soundMuted, inRoom};
-}
-
-function EnterRoom(
-  {inRoom, iAmSpeaker, swarm},
-  {hasRequested},
-  setState,
-  {last}
-) {
-  is(swarm.myPeerState, 'inRoom', !!inRoom);
-
-  if (!inRoom) stopAudio();
-  if (inRoom && iAmSpeaker)
-    requestAudio().then(() => setState({hasRequested: true}));
-
-  return inRoom
-    ? {
-        userInteracted: true,
-        soundMuted: iAmSpeaker && !hasRequested,
-      }
-    : {
-        userInteracted: last?.userInteracted,
-        soundMuted: true,
-      };
-}
-
-export function enterRoom(roomId) {
-  set(state, 'inRoom', roomId);
-}
-
-export function leaveRoom() {
-  set(state, 'inRoom', null);
-}
 
 // leave room when same peer joins it from elsewhere and I'm in room
 // TODO: currentId() is called too early to react to any changes!
