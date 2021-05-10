@@ -6,7 +6,9 @@ import {requestAudio, stopAudio} from './audio';
 import './reactions';
 import './room';
 import {is, on, set, update} from 'use-minimal-state';
-import {declare, declareStateRoot} from '../lib/state-utils';
+import {declare, declareStateRoot} from '../lib/state-tree';
+
+declareStateRoot(StateRoot, state);
 
 function configSwarm() {
   swarm.config({
@@ -34,35 +36,44 @@ function configSwarm() {
 configSwarm();
 on(staticConfig, () => configSwarm());
 
-function StateRoot({inRoom, iAmSpeaker, myMic}) {
-  let {userInteracted, soundMuted} = declare(RoomState, {
-    swarm,
+function StateRoot({room, inRoom, iAmSpeaker, iAmModerator}) {
+  let {closed} = room;
+
+  if (closed && !iAmModerator) {
+    inRoom = false;
+  }
+
+  let {userInteracted, soundMuted} = declare(EnterRoom, {
     inRoom,
     iAmSpeaker,
-    myMic,
+    swarm,
   });
 
-  return {userInteracted, soundMuted, inRoom, iAmSpeaker, myMic};
+  return {userInteracted, soundMuted, inRoom};
 }
 
-function RoomState({inRoom, iAmSpeaker, myMic, swarm}, {last}) {
+function EnterRoom(
+  {inRoom, iAmSpeaker, swarm},
+  {hasRequested},
+  setState,
+  {last}
+) {
   is(swarm.myPeerState, 'inRoom', !!inRoom);
 
-  if (inRoom && iAmSpeaker) requestAudio();
   if (!inRoom) stopAudio();
+  if (inRoom && iAmSpeaker)
+    requestAudio().then(() => setState({hasRequested: true}));
 
   return inRoom
     ? {
         userInteracted: true,
-        soundMuted: iAmSpeaker && !myMic,
+        soundMuted: iAmSpeaker && !hasRequested,
       }
     : {
         userInteracted: last?.userInteracted,
         soundMuted: true,
       };
 }
-
-declareStateRoot(StateRoot, state);
 
 export function enterRoom(roomId) {
   set(state, 'inRoom', roomId);
@@ -72,13 +83,6 @@ export function leaveRoom() {
   set(state, 'inRoom', null);
 }
 
-// leave room when it gets closed
-on(state, 'room', room => {
-  let {moderators, closed} = room;
-  if (state.inRoom && closed && !moderators.includes(currentId())) {
-    leaveRoom();
-  }
-});
 // leave room when same peer joins it from elsewhere and I'm in room
 // TODO: currentId() is called too early to react to any changes!
 on(swarm.connectionState, currentId(), myConnState => {
