@@ -6,6 +6,8 @@ import {requestAudio, stopAudio} from './audio';
 import './reactions';
 import './room';
 import {is, on, set, update} from 'use-minimal-state';
+import React from 'react';
+import {declare, declareRoot} from '../lib/state-utils';
 
 function configSwarm() {
   swarm.config({
@@ -33,24 +35,46 @@ function configSwarm() {
 configSwarm();
 on(staticConfig, () => configSwarm());
 
-function RoomState({inRoom, iAmSpeaker}) {}
+function RoomState({inRoom, iAmSpeaker, myMic, swarm}) {
+  is(swarm.myPeerState, 'inRoom', !!inRoom);
+
+  if (inRoom && iAmSpeaker) requestAudio();
+  if (!inRoom) stopAudio();
+
+  return inRoom
+    ? {
+        userInteracted: true,
+        soundMuted: iAmSpeaker && !myMic,
+      }
+    : {
+        soundMuted: true,
+      };
+}
+
+declareRoot(
+  ({inRoom, iAmSpeaker, myMic}) => {
+    declare(RoomState, {swarm, inRoom, iAmSpeaker, myMic}, state);
+  },
+  {},
+  state
+);
 
 export function enterRoom(roomId) {
-  is(state, 'userInteracted', true);
+  // is(state, 'userInteracted', true);
   set(state, 'inRoom', roomId);
-  set(swarm.myPeerState, 'inRoom', true);
-  if (state.iAmSpeaker) {
-    requestAudio().then(() => is(state, 'soundMuted', false));
-  } else {
-    is(state, 'soundMuted', false);
-  }
+  // set(swarm.myPeerState, 'inRoom', true);
+  // if (state.iAmSpeaker) {
+  //   requestAudio().then(() => is(state, 'soundMuted', false));
+  // } else {
+  //   is(state, 'soundMuted', false);
+  // }
 }
 
 export function leaveRoom() {
   set(state, 'inRoom', null);
-  set(swarm.myPeerState, 'inRoom', false);
-  stopAudio();
-  set(state, 'soundMuted', true);
+  // set(swarm.myPeerState, 'inRoom', false);
+  // stopAudio();
+  // set(state, 'soundMuted', true);
 }
 
 // leave room when it gets closed
