@@ -1,4 +1,4 @@
-import State, {emit, on, is, clear} from 'use-minimal-state';
+import State, {emit, on, is, clear, set, update} from 'use-minimal-state';
 import signalws from './signalws';
 import {
   checkWsHealth,
@@ -36,7 +36,7 @@ function Swarm(initialConfig) {
     debug: false,
     hub: null,
     localStreams: {},
-    reduceState: (_states, _current, latest) => latest,
+    reduceState: (_states, _current, latest, _findLatest) => latest,
     sharedStateTime: Date.now(),
     connectState: INITIAL,
     // events
@@ -57,13 +57,13 @@ function Swarm(initialConfig) {
     config(swarm, initialConfig);
   }
 
-  swarm.on('sharedState', state => {
+  on(swarm, 'sharedState', state => {
     let time = Date.now();
     swarm.sharedStateTime = time;
     swarm.hub?.broadcast('all', {type: 'shared-state', state: {state, time}});
   });
 
-  swarm.on('failedConnection', c => {
+  on(swarm, 'failedConnection', c => {
     if (c === getConnection(swarm, c.peerId, c.connId)) removeConnection(c);
   });
 
@@ -87,7 +87,7 @@ function config(
   if (myPeerId) swarm.myPeerId = myPeerId;
   if (sign) swarm.sign = sign; // sign(state): string
   if (verify) swarm.verify = verify; // verify(signedState, peerId): state | undefined
-  if (reduceState) swarm.reduceState = reduceState; // reduceState([state], currentState, latestState): state
+  if (reduceState) swarm.reduceState = reduceState; // reduceState([state], currentState, latestState, findLatest): state
   if (pcConfig) swarm.pcConfig = pcConfig;
   if (debug) swarm.debug = debug;
 }
@@ -236,8 +236,8 @@ function initializePeer(swarm, peerId) {
   if (peerId === swarm.myPeerId) return;
   if (swarm.stickyPeers[peerId] === undefined) {
     swarm.stickyPeers[peerId] = {connections: {}};
-    swarm.update('stickyPeers');
-    swarm.emit('newPeer', peerId);
+    update(swarm, 'stickyPeers');
+    emit(swarm, 'newPeer', peerId);
   }
 }
 
@@ -278,13 +278,14 @@ function removeConnection({swarm, peerId, connId}) {
     delete swarm.stickyPeers[peerId];
     let {remoteStreams} = swarm;
     if (remoteStreams.find(streamObj => streamObj.peerId === peerId)) {
-      swarm.set(
+      set(
+        swarm,
         'remoteStreams',
         remoteStreams.filter(streamObj => streamObj.peerId !== peerId)
       );
     }
   }
-  swarm.update('stickyPeers');
+  update(swarm, 'stickyPeers');
   removePeerState({swarm, peerId, connId});
 }
 

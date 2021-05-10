@@ -1,5 +1,6 @@
 import SimplePeer from './simple-peer-light';
 import causalLog from './causal-log';
+import {emit, set, update} from 'minimal-state';
 
 const MAX_CONNECT_TIME = 10000;
 const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;
@@ -169,7 +170,7 @@ function createPeer(connection, initiator) {
 
   peer.on('data', rawData => {
     log('data (channel) from', s(peerId));
-    swarm.emit('data', rawData);
+    emit(swarm, 'data', rawData);
   });
 
   peer.on('track', (track, stream) => {
@@ -181,9 +182,9 @@ function createPeer(connection, initiator) {
     );
     if (i === -1) i = remoteStreams.length;
     remoteStreams[i] = {stream, name, peerId};
-    swarm.set('remoteStreams', remoteStreams);
-    swarm.emit('stream', stream, name, peer);
-    swarm.update('stickyPeers');
+    set(swarm, 'remoteStreams', remoteStreams);
+    emit(swarm, 'stream', stream, name, peer);
+    update(swarm, 'stickyPeers');
   });
 
   peer.on('error', err => {
@@ -262,7 +263,7 @@ function handlePeerFail(connection, forcedFail) {
   log('handle peer fail! time failing:', failTime);
 
   if (forcedFail === true || failTime > MAX_FAIL_TIME) {
-    connection.swarm.emit('failedConnection', connection);
+    emit(connection.swarm, 'failedConnection', connection);
   } else {
     connectPeer(connection);
   }

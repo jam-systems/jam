@@ -6,6 +6,7 @@ import {currentId} from '../logic/identity';
 import {navigate} from '../lib/use-location';
 import {enterRoom, state} from '../logic/main';
 import Container from './Container';
+import {is} from 'use-minimal-state';
 
 export default function Start({urlRoomId, roomFromURIError}) {
   let [name, setName] = useState('');
@@ -19,7 +20,7 @@ export default function Start({urlRoomId, roomFromURIError}) {
 
   let submit = e => {
     e.preventDefault();
-    state.set('userInteracted', true);
+    is(state, 'userInteracted', true);
     let roomId;
     if (name) {
       let slug = slugify(name, {lower: true, strict: true});

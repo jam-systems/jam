@@ -63,15 +63,15 @@ export function useApiQuery(
 }
 
 export function updateApiQuery(path, data, status = 200) {
-  state.set('queries', {...state.queries, [path]: data && {data, status}});
+  set(state, 'queries', {...state.queries, [path]: data && {data, status}});
 }
 
 export function forwardApiQuery(path, key, defaultQuery) {
-  state.set(key, state.queries[path]?.data || defaultQuery);
-  return state.on('queries', (queries, oldQueries) => {
+  set(state, key, state.queries[path]?.data || defaultQuery);
+  return on(state, 'queries', (queries, oldQueries) => {
     let data = queries[path]?.data || defaultQuery;
     let oldData = oldQueries[path]?.data || defaultQuery;
-    if (data !== oldData) state.set(key, data);
+    if (data !== oldData) set(state, key, data);
   });
 }
 

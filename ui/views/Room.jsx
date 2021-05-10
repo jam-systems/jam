@@ -196,7 +196,6 @@ export default function Room({room, roomId}) {
                   {...{speaking, moderators, reactions, room}}
                   peerState={sharedState}
                   info={myInfo}
-                  // onClick={() => openModal(EditIdentity)}
                   onClick={() => setEditSelf(true)}
                 />
               )}
@@ -224,7 +223,6 @@ export default function Room({room, roomId}) {
                 peerState={sharedState}
                 info={myInfo}
                 handRaised={myHandRaised}
-                // onClick={() => openModal(EditIdentity)}
                 onClick={() => setEditSelf(true)}
               />
             )}

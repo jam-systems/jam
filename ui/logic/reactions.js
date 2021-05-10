@@ -20,11 +20,11 @@ function showReaction(reaction, peerId) {
   if (!reactions[peerId]) reactions[peerId] = [];
   let reactionObj = [reaction, Math.random()];
   reactions[peerId].push(reactionObj);
-  state.update('reactions');
+  update(state, 'reactions');
   setTimeout(() => {
     let i = reactions[peerId].indexOf(reactionObj);
     if (i !== -1) reactions[peerId].splice(i, 1);
-    state.update('reactions');
+    update(state, 'reactions');
   }, 5000);
 }
 

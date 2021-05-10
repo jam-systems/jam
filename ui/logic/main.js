@@ -5,7 +5,7 @@ import {DEV, staticConfig} from './config';
 import {requestAudio, stopAudio} from './audio';
 import './reactions';
 import './room';
-import {is, on} from 'use-minimal-state';
+import {is, on, set, update} from 'use-minimal-state';
 
 if (DEV) {
   window.state = state; // for debugging
@@ -19,11 +19,9 @@ function configSwarm() {
     url: staticConfig.urls.pantry,
     sign: signData,
     verify: verifyData,
-    reduceState: (states, current, latest) => {
+    reduceState: (_states, _current, latest, findLatest) => {
       if (latest.inRoom) return latest;
-      // if latest is not inRoom, we probably want to ignore most props from it
-      // if not, add them here
-      return {...current, inRoom: states.some(s => s.inRoom)};
+      return findLatest(s => s.inRoom) ?? latest;
     },
     pcConfig: {
       iceTransportPolicy: 'all',
@@ -42,9 +40,9 @@ configSwarm();
 on(staticConfig, () => configSwarm());
 
 export function enterRoom(roomId) {
-  state.set('userInteracted', true);
-  state.set('inRoom', roomId);
-  swarm.set('sharedState', state => ({...state, inRoom: true}));
+  is(state, 'userInteracted', true);
+  set(state, 'inRoom', roomId);
+  set(swarm, 'sharedState', state => ({...state, inRoom: true}));
   if (state.iAmSpeaker) {
     requestAudio().then(() => is(state, 'soundMuted', false));
   } else {
@@ -54,10 +52,10 @@ export function enterRoom(roomId) {
 on(actions.ENTER, roomId => enterRoom(roomId));
 
 export function leaveRoom() {
-  state.set('inRoom', null);
-  swarm.set('sharedState', state => ({...state, inRoom: false}));
+  set(state, 'inRoom', null);
+  set(swarm, 'sharedState', state => ({...state, inRoom: false}));
   stopAudio();
-  state.set('soundMuted', true);
+  set(state, 'soundMuted', true);
 }
 
 // leave room when it gets closed
@@ -68,6 +66,7 @@ on(state, 'room', room => {
   }
 });
 // leave room when same peer joins it from elsewhere and I'm in room
+// TODO: currentId() is called too early to react to any changes!
 on(swarm.connectionState, currentId(), myConnState => {
   if (myConnState === undefined) {
     is(state, {otherDeviceInRoom: false});
@@ -86,13 +85,13 @@ on(swarm.connectionState, currentId(), myConnState => {
   is(state, {otherDeviceInRoom});
 });
 
-swarm.on('newPeer', async id => {
+on(swarm, 'newPeer', async id => {
   for (let i = 0; i < 5; i++) {
     // try multiple times to lose race with the first POST /identities
     let [data, ok] = await get(`/identities/${id}`);
     if (ok) {
       state.identities[id] = data;
-      state.update('identities');
+      update(state, 'identities');
       return;
     }
   }

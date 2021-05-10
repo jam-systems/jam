@@ -119,18 +119,14 @@ function joinStage() {
   update(swarm, 'sharedState');
 }
 // if somebody left stage, update speakers
-on(swarm, 'peerState', peerState => {
+on(swarm.peerState, (peerId, peerState) => {
   let {speakers} = state.room;
-  if (!state.roomId || !speakers.length) return;
-  for (let peerId in peerState) {
-    let leftStage = peerState[peerId]?.leftStage;
-    if (leftStage && speakers.includes(peerId)) {
-      if (state.iAmModerator) {
-        removeRole(peerId, 'speakers');
-      } else {
-        speakers = speakers.filter(id => id !== peerId);
-        updateApiQuery(`/rooms/${state.roomId}`, {...state.room, speakers});
-      }
+  if (peerState?.leftStage && state.roomId && speakers.includes(peerId)) {
+    if (state.iAmModerator) {
+      removeRole(peerId, 'speakers');
+    } else {
+      speakers = speakers.filter(id => id !== peerId);
+      updateApiQuery(`/rooms/${state.roomId}`, {...state.room, speakers});
     }
   }
 });

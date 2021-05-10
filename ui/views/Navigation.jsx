@@ -1,7 +1,7 @@
 import React, {useMemo, useState} from 'react';
 import {leaveRoom} from '../logic/main';
 import state from '../logic/state';
-import {use} from 'use-minimal-state';
+import {set, use} from 'use-minimal-state';
 import {currentId} from '../logic/identity';
 import {sendReaction, raiseHand} from '../logic/reactions';
 import EditRole, {EditSelf} from './EditRole';
@@ -63,7 +63,7 @@ export default function Navigation({
 
   let talk = () => {
     if (micOn) {
-      state.set('micMuted', !micMuted);
+      set(state, 'micMuted', !micMuted);
     } else {
       if (userAgent.browser?.name === 'Safari') {
         location.reload();
