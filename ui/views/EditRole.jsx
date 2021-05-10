@@ -2,13 +2,13 @@ import React from 'react';
 import {addRole, removeRole, leaveStage} from '../logic/room';
 import {addAdmin, removeAdmin, useIdentityAdminStatus} from '../logic/admin';
 import {currentId} from '../logic/identity';
-import {state} from '../logic/main';
 import {use} from 'use-minimal-state';
 import {openModal} from './Modal';
 import EditIdentity from './EditIdentity';
 import {useMqParser} from '../logic/tailwind-mqp';
 import {ButtonContainer, SecondaryButton} from './Button';
 import StreamingModal from './StreamingModal';
+import state from '../logic/state';
 
 export default function EditRole({peerId, speakers, moderators, onCancel}) {
   let mqp = useMqParser();

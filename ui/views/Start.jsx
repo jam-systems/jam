@@ -4,9 +4,10 @@ import slugify from 'slugify';
 import {createRoom, updateApiQuery} from '../logic/backend';
 import {currentId} from '../logic/identity';
 import {navigate} from '../lib/use-location';
-import {enterRoom, state} from '../logic/main';
+import {enterRoom} from '../logic/main';
 import Container from './Container';
 import {is} from 'use-minimal-state';
+import state from '../logic/state';
 
 export default function Start({urlRoomId, roomFromURIError}) {
   let [name, setName] = useState('');

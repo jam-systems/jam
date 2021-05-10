@@ -7,8 +7,6 @@ import './reactions';
 import './room';
 import {is, on, set, update} from 'use-minimal-state';
 
-export {state};
-
 function configSwarm() {
   swarm.config({
     debug: staticConfig.development,

@@ -1,6 +1,7 @@
 import React from 'react';
 import {use} from 'use-minimal-state';
-import {enterRoom, state} from '../logic/main';
+import {enterRoom} from '../logic/main';
+import state from '../logic/state';
 import {useMqParser} from '../logic/tailwind-mqp';
 import Container from './Container';
 import RoomHeader from './RoomHeader';
