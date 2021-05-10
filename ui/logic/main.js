@@ -33,6 +33,8 @@ function configSwarm() {
 configSwarm();
 on(staticConfig, () => configSwarm());
 
+function RoomState({inRoom}) {}
+
 export function enterRoom(roomId) {
   is(state, 'userInteracted', true);
   set(state, 'inRoom', roomId);

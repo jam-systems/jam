@@ -5,10 +5,11 @@ import state, {swarm} from './state';
 import {is, on, set, update} from 'use-minimal-state';
 import {currentId} from './identity';
 import log from '../lib/causal-log';
-import {domEvent, until} from './util';
+import {domEvent} from './util';
 import {openModal} from '../views/Modal';
 import InteractionModal from '../views/InteractionModal';
 import AudioPlayerToast from '../views/AudioPlayerToast';
+import {until} from '../lib/state-utils';
 
 var userAgent = UAParser();
 

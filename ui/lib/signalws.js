@@ -1,6 +1,6 @@
 import base64 from 'compact-base64';
 import {clear, emit, is, on} from 'use-minimal-state';
-import {until} from '../logic/util';
+import {until} from '../lib/state-utils';
 
 export default function signalws({
   url,
