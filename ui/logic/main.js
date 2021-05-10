@@ -6,39 +6,25 @@ import {requestAudio, stopAudio} from './audio';
 import './reactions';
 import './room';
 import {is, on, set, update} from 'use-minimal-state';
-import {S, declareStateRoot, useMemo, useState} from '../lib/state-tree';
+import {declareStateRoot, useMemo, useState} from '../lib/state-tree';
 
-declareStateRoot(Root, state);
+declareStateRoot(AppState, state);
 
-function Root({room, inRoom, iAmSpeaker, iAmModerator}) {
+function AppState({room, inRoom, iAmSpeaker, iAmModerator}) {
   let {closed} = room;
 
   if (closed && !iAmModerator) {
     inRoom = false;
   }
+  is(swarm.myPeerState, 'inRoom', !!inRoom);
+  let [hasRequested, setRequested] = useState(false);
+  if (!inRoom) stopAudio();
+  if (inRoom && iAmSpeaker) requestAudio().then(() => setRequested(true));
 
-  let {userInteracted, soundMuted} = S(EnterRoom, {inRoom, iAmSpeaker, swarm});
+  let userInteracted = useMemo(i => i || !!inRoom, [inRoom]);
+  let soundMuted = inRoom ? iAmSpeaker && !hasRequested : true;
 
   return {userInteracted, soundMuted, inRoom};
-}
-
-function EnterRoom({inRoom, iAmSpeaker, swarm}) {
-  is(swarm.myPeerState, 'inRoom', !!inRoom);
-
-  let [hasRequested, setRequested] = useState(false);
-  let userInteracted = useMemo(i => i || !!inRoom, [inRoom]);
-
-  if (!inRoom) stopAudio();
-  if (inRoom && iAmSpeaker)
-    requestAudio().then(() => {
-      setRequested(true);
-      setRequested(true);
-    });
-
-  return {
-    userInteracted,
-    soundMuted: inRoom ? iAmSpeaker && !hasRequested : true,
-  };
 }
 
 export function enterRoom(roomId) {
