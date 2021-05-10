@@ -1,6 +1,6 @@
 import SimplePeer from './simple-peer-light';
 import causalLog from './causal-log';
-import {emit, set, update} from 'minimal-state';
+import {emit, set, update} from 'use-minimal-state';
 
 const MAX_CONNECT_TIME = 10000;
 const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;
