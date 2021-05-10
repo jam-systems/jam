@@ -2,7 +2,7 @@ import {useEffect} from 'react';
 import {is, on} from 'use-minimal-state';
 import log from '../lib/causal-log';
 
-export {until, useSync, debug, declare, declareRoot};
+export {until, useSync, debug, declare, declareStateRoot};
 
 // a kind of "React for app state"
 
@@ -22,15 +22,11 @@ function declare(Component, props, state) {
   // return fast if we can avoid re-running
   if (sameProps(element?.props, props)) {
     console.log('STATE-TREE', 'early return');
-    if (state !== undefined) {
-      return state;
-    } else {
-      return element.result;
-    }
+    return element.last;
   }
 
   if (element === undefined) {
-    element = {Component, props, key, children: []};
+    element = {Component, props, key, children: [], last: null};
     console.log('STATE-TREE', 'mounting new element', element);
     siblings.push(element);
   } else {
@@ -40,34 +36,34 @@ function declare(Component, props, state) {
   // run component
   let parentChildren = siblings;
   siblings = element.children;
-  let result = Component(props);
-  element.result = result;
+  let result = Component(props, element);
+  element.last = result;
   siblings = parentChildren;
 
   // optionally use result to update state
   if (state !== undefined) {
     is(state, result);
-    return state;
-  } else {
-    return result;
   }
+  return result;
 }
 
 // for creating state obj at the top level & later rerun on update
-function declareRoot(Component, props, state) {
+function declareStateRoot(Component, state) {
   siblings = rootChildren;
   if (state === undefined) state = {};
   const key = rootKey++;
 
   let isRendering = true;
-  declare(Component, {...props, ...state, key}, state);
+  let result = declare(Component, {...state, key}, state);
+  console.log('STATE-TREE', 'root render returned', result);
   isRendering = false;
 
   on(state, (key_, value) => {
     if (!isRendering) {
       console.log('STATE-TREE', 'root render caused by', key_, value);
       isRendering = true;
-      declare(Component, {...props, ...state, key}, state);
+      let result = declare(Component, {...state, key}, state);
+      console.log('STATE-TREE', 'root render returned', result);
       isRendering = false;
     }
   });
