@@ -1,4 +1,4 @@
-import state, {actions, swarm} from './state';
+import state, {swarm} from './state';
 import {get} from './backend';
 import {currentId, signData, verifyData} from './identity';
 import {staticConfig} from './config';

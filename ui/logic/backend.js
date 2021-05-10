@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useState} from 'react';
-import {emit, on, set, use} from 'use-minimal-state';
-import state, {actions, modState, swarm} from './state';
+import {on, set, use} from 'use-minimal-state';
+import state, {modState, swarm} from './state';
 import {staticConfig} from './config';
 import {signedToken, signData, currentId, identities} from './identity';
 import {emptyRoom} from './room';
