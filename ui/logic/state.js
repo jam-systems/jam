@@ -1,8 +1,5 @@
-import State from 'use-minimal-state';
 import Swarm from '../lib/swarm';
-import {DEV} from './config';
-import {debug} from './util';
-const state = State({
+const state = {
   roomId: null,
   inRoom: null, // === roomId but only if entered
   room: {name: '', description: '', speakers: [], moderators: []},
@@ -26,7 +23,7 @@ const state = State({
   queries: {},
   modMessages: {},
   userInteracted: false,
-});
+};
 export default state;
 
 const swarm = Swarm();
@@ -38,8 +35,6 @@ export {swarm};
 export const actions = {
   ENTER: [],
 };
-
-if (DEV) debug(state);
 
 // mod visible state
 export const modState = {raiseHand: false};

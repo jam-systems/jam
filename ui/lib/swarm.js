@@ -1,4 +1,4 @@
-import State, {emit, on, is, clear, set, update} from 'use-minimal-state';
+import {emit, on, is, clear, set, update} from 'use-minimal-state';
 import signalws from './signalws';
 import {
   checkWsHealth,
@@ -20,7 +20,7 @@ import {removePeerState, updatePeerState} from './swarm-state';
 // public API starts here
 
 function Swarm(initialConfig) {
-  const swarm = State({
+  const swarm = {
     // state
     stickyPeers: {}, // {peerId: {connections: {connId: {lastFailure: number, pc: SimplePeer, timeout, peerId, connId}}}
     myPeer: {connections: {}}, // other sessions of same peer
@@ -48,7 +48,7 @@ function Swarm(initialConfig) {
     peerEvent: {},
     serverEvent: {},
     anonymous: null,
-  });
+  };
   swarm.config = (...args) => config(swarm, ...args);
   swarm.connect = (...args) => connect(swarm, ...args);
   swarm.disconnect = (...args) => disconnect(swarm, ...args);
@@ -68,10 +68,6 @@ function Swarm(initialConfig) {
   });
 
   checkWsHealth(swarm);
-
-  if (window.DEBUG) {
-    window.swarm = swarm;
-  }
 
   return swarm;
 }
