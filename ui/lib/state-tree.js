@@ -19,7 +19,7 @@ const updateSet = new Set();
 function S(Component, props, state) {
   let key = props?.key;
   let element = current.children.find(
-    c => c.Component === Component && c.key === key
+    c => c.component === Component && c.key === key
   );
   // console.log('STATE-TREE', 'rendering', Component, props);
 
@@ -32,15 +32,18 @@ function S(Component, props, state) {
     return element.last;
   }
 
+  let isMount = false;
   if (element === undefined) {
+    isMount = true;
     element = {
-      Component,
+      component: Component,
+      render: Component,
       props,
       key,
       children: [],
       last: null,
       uses: [],
-      globalState: state,
+      state,
       parent: current,
     };
     console.log('STATE-TREE', 'mounting new element', element);
@@ -53,13 +56,24 @@ function S(Component, props, state) {
   let tmp = [current, nUses];
   current = element;
   nUses = 0;
-  let result = Component(props, element);
+  let result;
+  if (isMount) {
+    // handle level-2 component
+    result = Component(props);
+    if (typeof result === 'function') {
+      console.log('STATE-TREE', 'new element returned a function', result);
+      element.render = result;
+      result = element.render(props);
+    }
+  } else {
+    result = element.render(props);
+  }
   element.last = result;
   [current, nUses] = tmp;
 
   // optionally use result to update state
-  if (state !== undefined) {
-    is(state, result);
+  if (element.state !== undefined) {
+    is(element.state, result);
   }
   return result;
 }
@@ -83,11 +97,10 @@ function declareStateRoot(Component, state) {
       console.log('STATE-TREE', 'root render caused by', key_);
       isRendering = key;
       let result = S(Component, {...state, key}, state);
-      console.log('STATE-TREE', 'root render returned', result);
       isRendering = 0;
+      console.log('STATE-TREE', 'root render returned', result);
     }
   });
-
   return state;
 }
 
@@ -112,21 +125,21 @@ function queueUpdate(caller) {
     parent = parent.parent;
     updateSet.add(parent);
   }
-  let top = parent;
   // rerender root
   queueMicrotask(() => {
     console.log(updateSet);
-    if (!updateSet.has(top)) return;
+    if (!updateSet.has(parent)) return;
     console.log('STATE-TREE', 'root render caused by setState');
-    isRendering = top.key;
-    let result = S(
-      top.Component,
-      {...top.props, key: top.key},
-      top.globalState
-    );
-    isRendering = 0;
+    let result = rerenderRoot(parent);
     console.log('STATE-TREE', 'root render returned', result);
   });
+}
+
+function rerenderRoot(element) {
+  isRendering = element.key;
+  let result = S(element.component, {...element.props, key: element.key});
+  isRendering = 0;
+  return result;
 }
 
 function useState(initial) {
@@ -136,7 +149,7 @@ function useState(initial) {
   // console.log('STATE-TREE', 'useState', nUses, caller.uses);
   let use = caller.uses[nUses];
   if (use === undefined) {
-    use = [initial, null];
+    use = [initial, undefined];
     use[1] = value => {
       if (value === use[0]) return;
       // console.log('STATE-TREE', 'use setState', value, caller);
