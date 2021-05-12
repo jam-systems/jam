@@ -6,7 +6,7 @@ import {is, on} from 'use-minimal-state';
 // children = [element]
 // result = Component(props) = partial state
 
-export {S, declareStateRoot, useState, useMemo};
+export {S, declareStateRoot, useUpdate, useState, useMemo};
 
 const root = {children: []};
 let current = root;
@@ -127,7 +127,6 @@ function queueUpdate(caller) {
   }
   // rerender root
   queueMicrotask(() => {
-    console.log(updateSet);
     if (!updateSet.has(parent)) return;
     console.log('STATE-TREE', 'root render caused by setState');
     let result = rerenderRoot(parent);
@@ -140,6 +139,13 @@ function rerenderRoot(element) {
   let result = S(element.component, {...element.props, key: element.key});
   isRendering = 0;
   return result;
+}
+
+function useUpdate() {
+  if (current === root)
+    throw Error('useUpdate can only be called during render');
+  let caller = current;
+  return () => queueUpdate(caller);
 }
 
 function useState(initial) {

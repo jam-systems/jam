@@ -10,10 +10,63 @@ import {openModal} from '../views/Modal';
 import InteractionModal from '../views/InteractionModal';
 import AudioPlayerToast from '../views/AudioPlayerToast';
 import {until} from '../lib/state-utils';
+import {useUpdate} from '../lib/state-tree';
 
 var userAgent = UAParser();
 
-export {requestAudio, stopAudio, requestMicPermissionOnly};
+export {Microphone, requestAudio, stopAudio};
+
+function Microphone() {
+  let micState = 'initial'; // 'requesting', 'active', 'failed'
+  let myMic = null;
+
+  return function Microphone({shouldHaveMic}) {
+    const update = useUpdate();
+    console.log('Microphone start', micState, shouldHaveMic);
+
+    switch (micState) {
+      case 'initial':
+        if (shouldHaveMic) {
+          micState = 'requesting';
+          navigator.mediaDevices
+            .getUserMedia({video: false, audio: true})
+            .then(stream => {
+              if (micState !== 'requesting') return;
+              micState = 'active';
+              myMic = stream;
+              update();
+            })
+            .catch(err => {
+              if (micState !== 'requesting') return;
+              console.error('error getting mic', err);
+              micState = 'failed';
+              myMic = null;
+              update();
+            });
+        }
+        break;
+      case 'requesting':
+        if (!shouldHaveMic) {
+          micState = 'initial';
+          myMic = null;
+        }
+        break;
+      case 'active':
+        if (!shouldHaveMic) {
+          myMic.getTracks().forEach(track => track.stop());
+          myMic = null;
+          micState = 'initial';
+        }
+        break;
+      case 'failed':
+        break;
+    }
+
+    let hasRequested = micState === 'active' || micState === 'failed';
+    console.log('Microphone end', micState);
+    return {myMic, hasRequested};
+  };
+}
 
 on(state, 'myAudio', myAudio => {
   // if i am speaker, send audio to peers
@@ -121,28 +174,12 @@ function play(audio) {
   }
 }
 
-let isRequestingAudio = false;
 async function requestAudio() {
-  if (state.myMic && state.myMic.active) return;
-  if (isRequestingAudio) return;
-  isRequestingAudio = true;
-  let stream = await navigator.mediaDevices
-    .getUserMedia({
-      video: false,
-      audio: true,
-    })
-    .catch(err => {
-      console.error('error getting mic');
-      console.error(err);
-      set(state, 'micMuted', true);
-      set(state, 'micAllowed', false);
-    });
-  isRequestingAudio = false;
-  if (!stream) return;
-  set(state, 'myMic', stream);
-  set(state, 'myAudio', stream);
-  set(state, 'micAllowed', true);
-  set(state, 'micMuted', false);
+  is(state, {mustRequestMic: true});
+}
+
+async function stopAudio() {
+  is(state, {mustRequestMic: false});
 }
 
 export async function streamAudioFromUrl(url, name) {
@@ -181,14 +218,6 @@ async function requestMicPermissionOnly() {
     stream.getTracks().forEach(track => track.stop());
   }
   return !!stream;
-}
-
-async function stopAudio() {
-  if (state.myMic) {
-    state.myMic.getTracks().forEach(track => track.stop());
-  }
-  is(state, 'myMic', null);
-  is(state, 'myAudio', null);
 }
 
 on(state, 'micMuted', micMuted => {
