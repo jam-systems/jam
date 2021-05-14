@@ -173,7 +173,7 @@ function TwitterHandle({info, divClass, fontClass}) {
         <span className={fontClass}>
           {/* <span className="text-gray-800">@</span> */}
           <a
-            className="text-gray-500 font-medium ml-1"
+            className={twitterIdentity.verificationInfo ? "text-blue-600 font-medium ml-1" : "text-gray-500 font-medium ml-1" }
             style={{textDecoration: 'none', fontWeight: 'normal'}}
             href={'https://twitter.com/' + twitterIdentity?.id.replace('@', '')}
             target="_blank"
