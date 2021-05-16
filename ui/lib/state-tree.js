@@ -1,4 +1,4 @@
-import {is, on} from 'use-minimal-state';
+import {is, on, emit} from 'use-minimal-state';
 
 // a kind of "React for app state"
 
@@ -6,13 +6,13 @@ import {is, on} from 'use-minimal-state';
 // children = [element]
 // result = Component(props) = partial state
 
-export {S, declareStateRoot, useUpdate, useState, useMemo};
+export {S, declareStateRoot, useAction, useUpdate, useState, useMemo, dispatch};
 
 const root = {children: []};
 let current = root;
-let rootKey = 1;
 let isRendering = 0;
 let nUses = 0;
+let currentAction = [undefined, undefined];
 
 const updateSet = new Set();
 
@@ -45,6 +45,7 @@ function S(Component, props, state) {
       uses: [],
       state,
       parent: current,
+      subs: new Map(),
     };
     console.log('STATE-TREE', 'mounting new element', element);
     current.children.push(element);
@@ -61,7 +62,7 @@ function S(Component, props, state) {
     // handle level-2 component
     result = Component(props);
     if (typeof result === 'function') {
-      console.log('STATE-TREE', 'new element returned a function', result);
+      // console.log('STATE-TREE', 'new element returned a function', result);
       element.render = result;
       result = element.render(props);
     }
@@ -82,26 +83,31 @@ function S(Component, props, state) {
 function declareStateRoot(Component, state) {
   current = root;
   if (state === undefined) state = {};
-  const key = rootKey++;
 
+  const key = {};
   isRendering = key;
   let result = S(Component, {...state, key}, state);
-  console.log('STATE-TREE', 'root render returned', result);
+  console.log('STATE-TREE', 'initial root render returned', result);
   isRendering = 0;
 
-  on(state, (key_, value, oldValue) => {
-    if (
-      isRendering !== key &&
-      !(oldValue !== undefined && value === oldValue)
-    ) {
-      console.log('STATE-TREE', 'root render caused by', key_);
+  const rootElement = root.children.find(c => c.key === key);
+
+  on(state, (_key, value, oldValue) => {
+    // TODO check components using state keys
+    if (isRendering !== key && (oldValue === undefined || value !== oldValue)) {
+      console.log('STATE-TREE', 'root render caused by', _key);
       isRendering = key;
-      let result = S(Component, {...state, key}, state);
+      let result = S(Component, {...state, key});
       isRendering = 0;
       console.log('STATE-TREE', 'root render returned', result);
     }
   });
-  return state;
+  const dispatch = (type, payload) => {
+    console.log('dispatching', type, payload);
+    dispatchFromRoot(rootElement, type, payload);
+  };
+  on(state, 'dispatch', dispatch);
+  return {state, dispatch};
 }
 
 function sameProps(prevProps, props) {
@@ -119,26 +125,77 @@ function sameProps(prevProps, props) {
 
 // rerendering
 function queueUpdate(caller) {
-  let parent = caller;
+  let rootElement = markForUpdate(caller);
+  // rerender root
+  queueMicrotask(() => {
+    if (!updateSet.has(rootElement)) return;
+    console.log('STATE-TREE', 'root render caused by setState');
+    let result = rerender(rootElement);
+    console.log('STATE-TREE', 'root render returned', result);
+  });
+}
+
+function markForUpdate(element) {
+  let parent = element;
   updateSet.add(parent);
   while (parent.parent !== root) {
     parent = parent.parent;
     updateSet.add(parent);
   }
-  // rerender root
-  queueMicrotask(() => {
-    if (!updateSet.has(parent)) return;
-    console.log('STATE-TREE', 'root render caused by setState');
-    let result = rerenderRoot(parent);
-    console.log('STATE-TREE', 'root render returned', result);
-  });
+  return parent;
 }
 
-function rerenderRoot(element) {
-  isRendering = element.key;
-  let result = S(element.component, {...element.props, key: element.key});
+function getRootElement() {
+  return root.children.find(c => c.key === isRendering);
+}
+
+function rerender(rootElement) {
+  isRendering = rootElement.key;
+  let result = S(rootElement.component, {
+    ...rootElement.props,
+    key: rootElement.key,
+  });
   isRendering = 0;
   return result;
+}
+
+function dispatch(state, type, payload) {
+  emit(state, 'dispatch', type, payload);
+}
+
+function dispatchFromRoot(rootElement, type, payload) {
+  let subscribers = rootElement.subs.get(type);
+  if (subscribers === undefined || subscribers.size === 0) return;
+
+  console.log('STATE-TREE', 'root render caused by dispatch');
+  isRendering = rootElement.key;
+  currentAction = [type, payload];
+  for (let element of subscribers) {
+    markForUpdate(element);
+  }
+  let result = S(rootElement.component, {
+    ...rootElement.props,
+    key: rootElement.key,
+  });
+  currentAction = [undefined, undefined];
+  isRendering = 0;
+  console.log('STATE-TREE', 'root render returned', result);
+}
+
+function useAction(type) {
+  if (current === root)
+    throw Error('useAction can only be called during render');
+  let rootElement = getRootElement();
+  let subscribers =
+    rootElement.subs.get(type) ??
+    rootElement.subs.set(type, new Set()).get(type);
+  subscribers.add(current);
+  const dispatchThis = p => dispatch(rootElement, type, p);
+  if (currentAction[0] === type) {
+    return [true, currentAction[1], dispatchThis];
+  } else {
+    return [false, undefined, dispatchThis];
+  }
 }
 
 function useUpdate() {
@@ -152,16 +209,17 @@ function useState(initial) {
   if (current === root)
     throw Error('useState can only be called during render');
   let caller = current;
-  // console.log('STATE-TREE', 'useState', nUses, caller.uses);
   let use = caller.uses[nUses];
   if (use === undefined) {
-    use = [initial, undefined];
-    use[1] = value => {
+    const setState = value => {
       if (value === use[0]) return;
-      // console.log('STATE-TREE', 'use setState', value, caller);
       use[0] = value;
-      queueUpdate(caller);
+      if (current !== caller) {
+        queueUpdate(caller);
+      }
+      return value;
     };
+    use = [initial, setState];
     caller.uses[nUses] = use;
   }
   nUses++;
@@ -171,7 +229,6 @@ function useState(initial) {
 function useMemo(func, deps) {
   if (current === root) throw Error('useMemo can only be called during render');
   let caller = current;
-  // console.log('STATE-TREE', 'useState', nUses, caller.uses);
   let use = caller.uses[nUses];
   if (use === undefined) use = [undefined, undefined];
   if (use[1] === undefined || !arrayEqual(use[1], deps)) {

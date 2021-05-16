@@ -10,7 +10,7 @@ import {openModal} from '../views/Modal';
 import InteractionModal from '../views/InteractionModal';
 import AudioPlayerToast from '../views/AudioPlayerToast';
 import {until} from '../lib/state-utils';
-import {useUpdate} from '../lib/state-tree';
+import {useUpdate, useAction, dispatch} from '../lib/state-tree';
 
 var userAgent = UAParser();
 
@@ -19,36 +19,40 @@ export {Microphone, requestAudio, stopAudio};
 function Microphone() {
   let micState = 'initial'; // 'requesting', 'active', 'failed'
   let myMic = null;
+  const update = useUpdate();
+
+  async function requestMic() {
+    try {
+      let stream = await navigator.mediaDevices.getUserMedia({
+        video: false,
+        audio: true,
+      });
+      if (micState !== 'requesting') return;
+      micState = 'active';
+      myMic = stream;
+    } catch (err) {
+      if (micState !== 'requesting') return;
+      console.error('error getting mic', err);
+      micState = 'failed';
+      myMic = null;
+    }
+    update();
+  }
 
   return function Microphone({shouldHaveMic}) {
-    const update = useUpdate();
-    console.log('Microphone start', micState, shouldHaveMic);
+    let [isRetry] = useAction('retry-mic');
+    console.log('Microphone start', micState, shouldHaveMic, isRetry);
 
     switch (micState) {
       case 'initial':
         if (shouldHaveMic) {
           micState = 'requesting';
-          navigator.mediaDevices
-            .getUserMedia({video: false, audio: true})
-            .then(stream => {
-              if (micState !== 'requesting') return;
-              micState = 'active';
-              myMic = stream;
-              update();
-            })
-            .catch(err => {
-              if (micState !== 'requesting') return;
-              console.error('error getting mic', err);
-              micState = 'failed';
-              myMic = null;
-              update();
-            });
+          requestMic();
         }
         break;
       case 'requesting':
         if (!shouldHaveMic) {
           micState = 'initial';
-          myMic = null;
         }
         break;
       case 'active':
@@ -59,6 +63,12 @@ function Microphone() {
         }
         break;
       case 'failed':
+        if (!shouldHaveMic) {
+          micState = 'initial';
+        } else if (isRetry) {
+          micState = 'requesting';
+          requestMic();
+        }
         break;
     }
 
@@ -176,6 +186,7 @@ function play(audio) {
 
 async function requestAudio() {
   is(state, {mustRequestMic: true});
+  dispatch(state, 'retry-mic');
 }
 
 async function stopAudio() {

@@ -37,9 +37,7 @@ function AppState() {
     }
     is(swarm.myPeerState, 'inRoom', !!inRoom);
 
-    let shouldHaveMic = !!(mustRequestMic || (inRoom && iAmSpeaker));
-    if (shouldHaveMic !== !!(inRoom && iAmSpeaker))
-      console.error('mustHaveMic not obsolete');
+    let shouldHaveMic = !!(inRoom && (mustRequestMic || iAmSpeaker));
     let {myMic, hasRequested} = S(Microphone, {shouldHaveMic});
     let myAudio = myMic;
 
