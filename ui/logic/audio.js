@@ -2,7 +2,7 @@ import {addLocalStream} from '../lib/swarm';
 import hark from '../lib/hark';
 import UAParser from 'ua-parser-js';
 import state, {swarm} from './state';
-import {is, on, set, update} from 'use-minimal-state';
+import {on, set, update} from 'use-minimal-state';
 import {currentId} from './identity';
 import log from '../lib/causal-log';
 import {domEvent} from './util';
@@ -14,11 +14,12 @@ import {useUpdate, useAction, dispatch} from '../lib/state-tree';
 
 var userAgent = UAParser();
 
-export {Microphone, requestAudio, stopAudio};
+export {Microphone, retryMic, Muted};
 
 function Microphone() {
   let micState = 'initial'; // 'requesting', 'active', 'failed'
   let myMic = null;
+  let hasRequestedOnce = false;
   const update = useUpdate();
 
   async function requestMic() {
@@ -27,6 +28,7 @@ function Microphone() {
         video: false,
         audio: true,
       });
+      hasRequestedOnce = true;
       if (micState !== 'requesting') return;
       micState = 'active';
       myMic = stream;
@@ -38,6 +40,18 @@ function Microphone() {
     }
     update();
   }
+
+  function forceRetryMic() {
+    // most reliable retry is reloading, but only Safari asks for Mic again
+    if (userAgent.browser?.name === 'Safari') {
+      location.reload();
+    } else {
+      micState = 'requesting';
+      requestMic();
+    }
+  }
+
+  // TODO poll/listen to myMic.active state, switch to failed if not active but should
 
   return function Microphone({shouldHaveMic}) {
     let [isRetry] = useAction('retry-mic');
@@ -60,22 +74,36 @@ function Microphone() {
           myMic.getTracks().forEach(track => track.stop());
           myMic = null;
           micState = 'initial';
+        } else if (isRetry && !myMic.active) {
+          forceRetryMic();
         }
         break;
       case 'failed':
         if (!shouldHaveMic) {
           micState = 'initial';
         } else if (isRetry) {
-          micState = 'requesting';
-          requestMic();
+          forceRetryMic();
         }
         break;
     }
 
-    let hasRequested = micState === 'active' || micState === 'failed';
     console.log('Microphone end', micState);
-    return {myMic, hasRequested};
+    return {myMic, hasRequestedOnce};
   };
+}
+
+function retryMic(state) {
+  dispatch(state, 'retry-mic');
+}
+
+function Muted({stream, micMuted}) {
+  if (stream) {
+    for (let track of stream.getTracks()) {
+      if (track.enabled !== !micMuted) {
+        track.enabled = !micMuted;
+      }
+    }
+  }
 }
 
 on(state, 'myAudio', myAudio => {
@@ -97,13 +125,7 @@ on(state, 'iAmSpeaker', iAmSpeaker => {
     if (myAudio) {
       connectVolumeMeter(currentId(), myAudio);
       addLocalStream(swarm, myAudio, 'audio');
-    } else {
-      // or request audio if not on yet
-      if (state.inRoom) requestAudio();
     }
-  } else {
-    // stop sending stream when I become audience member
-    stopAudio();
   }
 });
 
@@ -184,15 +206,6 @@ function play(audio) {
   }
 }
 
-async function requestAudio() {
-  is(state, {mustRequestMic: true});
-  dispatch(state, 'retry-mic');
-}
-
-async function stopAudio() {
-  is(state, {mustRequestMic: false});
-}
-
 export async function streamAudioFromUrl(url, name) {
   let audio = new Audio(url);
   audio.crossOrigin = 'anonymous';
@@ -230,25 +243,6 @@ async function requestMicPermissionOnly() {
   }
   return !!stream;
 }
-
-on(state, 'micMuted', micMuted => {
-  let {myAudio, myMic} = state;
-  if (!myAudio?.active && !micMuted) {
-    requestAudio();
-    return;
-  }
-  if (myAudio) {
-    for (let track of myAudio.getTracks()) {
-      track.enabled = !micMuted;
-    }
-  }
-  if (myMic && myMic !== myAudio) {
-    for (let track of myMic.getTracks()) {
-      track.enabled = !micMuted;
-    }
-  }
-  set(swarm.myPeerState, {micMuted});
-});
 
 let volumeMeters = {};
 async function connectVolumeMeter(peerId, stream) {

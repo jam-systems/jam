@@ -2,21 +2,30 @@ import state, {swarm} from './state';
 import {get} from './backend';
 import {currentId, signData, verifyData} from './identity';
 import {staticConfig} from './config';
-import {Microphone} from './audio';
+import {Microphone, Muted} from './audio';
 import './reactions';
 import './room';
 import {is, on, set, update} from 'use-minimal-state';
 import {use, declare, declareStateRoot} from '../lib/state-tree';
 
 declareStateRoot(
-  ({room, inRoom, iAmSpeaker, iAmModerator, userInteracted, mustRequestMic}) =>
+  ({
+    room,
+    inRoom,
+    iAmSpeaker,
+    iAmModerator,
+    raisedHands,
+    userInteracted,
+    micMuted,
+  }) =>
     declare(AppState, {
       room,
       inRoom,
       iAmSpeaker,
       iAmModerator,
+      raisedHands,
       userInteracted,
-      mustRequestMic,
+      micMuted,
     }),
   state
 );
@@ -26,25 +35,29 @@ function AppState({
   inRoom,
   iAmSpeaker,
   iAmModerator,
+  raisedHands,
   userInteracted,
-  mustRequestMic,
+  micMuted,
 }) {
   let {closed} = room;
 
   if (closed && !iAmModerator) {
     inRoom = false;
   }
-  is(swarm.myPeerState, 'inRoom', !!inRoom);
+  is(swarm.myPeerState, {micMuted, inRoom: !!inRoom});
+  let myPeerId = currentId();
+  let myHandRaised = raisedHands.has(myPeerId);
 
-  let shouldHaveMic = !!(inRoom && (mustRequestMic || iAmSpeaker));
-  let {myMic, hasRequested} = use(Microphone, {shouldHaveMic});
+  let shouldHaveMic = !!(inRoom && (iAmSpeaker || myHandRaised));
+  let {myMic, hasRequestedOnce} = use(Microphone, {shouldHaveMic});
 
-  let myAudio = myMic;
+  let myAudio = myMic; // TODO
+  declare(Muted, {stream: myAudio, micMuted});
 
   userInteracted = userInteracted || !!inRoom;
-  let soundMuted = inRoom ? iAmSpeaker && !hasRequested : true;
+  let soundMuted = inRoom ? iAmSpeaker && !hasRequestedOnce : true;
 
-  return {myMic, myAudio, mustRequestMic, userInteracted, soundMuted, inRoom};
+  return {myMic, myAudio, userInteracted, soundMuted, inRoom};
 }
 
 export function enterRoom(roomId) {

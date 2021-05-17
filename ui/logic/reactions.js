@@ -1,6 +1,5 @@
-import {set, update, on} from 'use-minimal-state';
+import {set, update, on, is} from 'use-minimal-state';
 import {sendPeerEvent} from '../lib/swarm';
-import {requestAudio, stopAudio} from './audio';
 import {currentId} from './identity';
 import state, {modState, swarm} from './state';
 
@@ -32,14 +31,12 @@ function raiseHand(raise) {
   // make visible to me
   if (raise) {
     state.raisedHands.add(currentId());
-    requestAudio();
   } else {
     state.raisedHands.delete(currentId());
-    stopAudio();
   }
   update(state, 'raisedHands');
   // make visible to mods
-  set(modState, 'raiseHand', !!raise);
+  is(modState, 'raiseHand', !!raise);
 }
 
 // listen for raised hands

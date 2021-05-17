@@ -51,7 +51,7 @@ export default function Jam({
   useEffect(() => {
     initializeIdentity();
     swarm.config({myPeerId: currentId()});
-    set(swarm.myPeerState, {inRoom: false});
+    set(swarm.myPeerState, {inRoom: false, micMuted: false});
   }, []);
 
   // toggle debugging

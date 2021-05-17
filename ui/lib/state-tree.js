@@ -8,7 +8,7 @@ import {is, on, emit, update, set} from 'use-minimal-state';
 
 /* TODOs:
 
-  -) isRendering is currently not used, remove
+  -) isRendering is currently only used for deduping state update renders which is not working
   -) find a solution for getRootElement
   -) enable more Component return values
   -) probably don't use minimal-state for internal update forwarding
@@ -169,7 +169,7 @@ function declareStateRoot(Component, state) {
   });
 
   on(state, (_key, value, oldValue) => {
-    // TODO check components using state keys // huh?
+    // TODO because isRendering is not working for child component updates, we are getting redundant renders
     if (isRendering !== key && (oldValue === undefined || value !== oldValue)) {
       console.log('STATE-TREE', 'root render caused by', _key);
       isRendering = key;
@@ -250,7 +250,7 @@ function rerender(element) {
   renderTime = Date.now();
   let result;
   if (element.declared) {
-    console.log('STATE-TREE', 'declared re-render!', element);
+    console.log('STATE-TREE', 'rerendering', element);
     // current = rootElement.parent;
     _declare(
       element.component,

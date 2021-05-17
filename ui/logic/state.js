@@ -11,9 +11,8 @@ const state = {
   reactions: {},
   raisedHands: new Set(),
 
-  mustRequestMic: false,
   soundMuted: true,
-  micMuted: true,
+  micMuted: false,
   myMic: null,
   myAudio: null,
 
