@@ -11,12 +11,8 @@ export default function StreamingModal({close}) {
   let submit = async e => {
     e.preventDefault();
     let file = getFile();
-    // TODO: createObjectURL takes long, show loading indicator
-    let url = file && URL.createObjectURL(file); // : urlValue;
-    if (url) {
-      set(state, 'audioFile', {url, name: file.name});
-      close();
-    }
+    set(state, 'audioFile', {file, name: file.name});
+    close();
   };
   return (
     <Modal close={close}>

@@ -129,51 +129,61 @@ function Microphone() {
 }
 
 function AudioFileStream({audioFile, audioContext: ctx}) {
-  let url = audioFile?.url;
+  let {file} = audioFile ?? {};
   let [audioState, setState] = useState('initial'); // 'starting', 'active'
-  let [activeUrl, setActiveUrl] = useState(null);
+  let useActiveFile = useState(null);
+  let [activeFile, setActiveFile] = useActiveFile;
   let [audioFileStream, setStream] = useState(null);
   let [audio, setAudio] = useState(null);
   const state = useRootState();
   const update = useUpdate();
-  let shouldStream = url && ctx;
+  let shouldStream = file && ctx;
 
   switch (audioState) {
     case 'initial':
       if (shouldStream) {
-        audio = setAudio(new Audio(url));
-        audio.crossOrigin = 'anonymous';
-        // let stream = audio.captureStream(); // not supported in Safari & Firefox
-        let streamDestination = ctx.createMediaStreamDestination();
-        let source = ctx.createMediaElementSource(audio);
-        source.connect(streamDestination);
-        source.connect(ctx.destination);
-        audioFileStream = setStream(streamDestination.stream);
+        // TODO: createObjectURL takes long, show loading indicator somewhere
         setState('starting');
+        (async () => {
+          let url = URL.createObjectURL(file);
+          audio = setAudio(new Audio(url));
+          audio.crossOrigin = 'anonymous';
+          // let stream = audio.captureStream(); // not supported in Safari & Firefox
+          let streamDestination = ctx.createMediaStreamDestination();
+          let source = ctx.createMediaElementSource(audio);
+          source.connect(streamDestination);
+          source.connect(ctx.destination);
+          audioFileStream = setStream(streamDestination.stream);
+          await audio.play();
 
-        audio.play().then(() => {
           setState('active');
-          setActiveUrl(url);
+          setActiveFile(file);
           set(state, 'audioFile', {...audioFile, audio});
 
           openModal(AudioPlayerToast, {}, 'player');
+
           domEvent(audio, 'ended').then(() => {
+            if (useActiveFile[0] !== file) return;
+            audio.src = null;
+            setAudio(null);
             setStream(null);
+            setActiveFile(null);
             setState('initial');
             set(state, 'audioFile', null);
           });
-        });
+        })();
       }
       break;
     case 'starting':
       break;
     case 'active':
-      if (!shouldStream || url !== activeUrl) {
+      if (!shouldStream || file !== activeFile) {
         audio.src = null;
         setAudio(null);
         audioFileStream = setStream(null);
+        setActiveFile(null);
         setState('initial');
-        if (url !== activeUrl) update();
+        if (file !== activeFile) update();
       }
       break;
   }

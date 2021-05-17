@@ -1,7 +1,6 @@
 import {set, use} from 'use-minimal-state';
 import React, {useEffect, useState} from 'react';
 import state from '../logic/state';
-import {domEvent} from '../logic/util';
 import {CloseSvg} from './Modal';
 
 export default function AudioPlayerToast({close}) {
@@ -12,9 +11,10 @@ export default function AudioPlayerToast({close}) {
       audio.controls = true;
       audio.style.width = '100%';
       element.appendChild(audio);
-      domEvent(audio, 'ended').then(close);
+      audio.addEventListener('ended', close);
       return () => {
         element.removeChild(audio);
+        audio.removeEventListener('ended', close);
       };
     }
   }, [element, audio, close]);
@@ -73,7 +73,7 @@ export default function AudioPlayerToast({close}) {
             <CloseSvg color="white" />
           </div>
         </div>
-        <div className="mb-3 text-gray-200 text-center">{name || ''}</div>
+        <div className="mb-3 text-gray-200 text-center">{name ?? ''}</div>
       </div>
     </div>
   );
