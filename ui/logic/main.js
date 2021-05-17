@@ -6,11 +6,11 @@ import {Microphone} from './audio';
 import './reactions';
 import './room';
 import {is, on, set, update} from 'use-minimal-state';
-import {S, declareStateRoot} from '../lib/state-tree';
+import {use, declare, declareStateRoot} from '../lib/state-tree';
 
 declareStateRoot(
   ({room, inRoom, iAmSpeaker, iAmModerator, userInteracted, mustRequestMic}) =>
-    S(AppState, {
+    declare(AppState, {
       room,
       inRoom,
       iAmSpeaker,
@@ -21,31 +21,30 @@ declareStateRoot(
   state
 );
 
-function AppState() {
-  return function AppState({
-    room,
-    inRoom,
-    iAmSpeaker,
-    iAmModerator,
-    userInteracted,
-    mustRequestMic,
-  }) {
-    let {closed} = room;
+function AppState({
+  room,
+  inRoom,
+  iAmSpeaker,
+  iAmModerator,
+  userInteracted,
+  mustRequestMic,
+}) {
+  let {closed} = room;
 
-    if (closed && !iAmModerator) {
-      inRoom = false;
-    }
-    is(swarm.myPeerState, 'inRoom', !!inRoom);
+  if (closed && !iAmModerator) {
+    inRoom = false;
+  }
+  is(swarm.myPeerState, 'inRoom', !!inRoom);
 
-    let shouldHaveMic = !!(inRoom && (mustRequestMic || iAmSpeaker));
-    let {myMic, hasRequested} = S(Microphone, {shouldHaveMic});
-    let myAudio = myMic;
+  let shouldHaveMic = !!(inRoom && (mustRequestMic || iAmSpeaker));
+  let {myMic, hasRequested} = use(Microphone, {shouldHaveMic});
 
-    userInteracted = userInteracted || !!inRoom;
-    let soundMuted = inRoom ? iAmSpeaker && !hasRequested : true;
+  let myAudio = myMic;
 
-    return {myMic, myAudio, mustRequestMic, userInteracted, soundMuted, inRoom};
-  };
+  userInteracted = userInteracted || !!inRoom;
+  let soundMuted = inRoom ? iAmSpeaker && !hasRequested : true;
+
+  return {myMic, myAudio, mustRequestMic, userInteracted, soundMuted, inRoom};
 }
 
 export function enterRoom(roomId) {
