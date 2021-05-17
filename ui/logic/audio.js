@@ -242,26 +242,6 @@ function play(audio) {
   }
 }
 
-async function requestMicPermissionOnly() {
-  if (state.micAllowed) {
-    return true;
-  }
-  let stream = await navigator.mediaDevices
-    .getUserMedia({
-      video: false,
-      audio: true,
-    })
-    .catch(err => {
-      console.error('error getting mic');
-      console.error(err);
-    });
-  set(state, 'micAllowed', !!stream);
-  if (stream) {
-    stream.getTracks().forEach(track => track.stop());
-  }
-  return !!stream;
-}
-
 let volumeMeters = {};
 async function connectVolumeMeter(peerId, stream) {
   if (!stream) {
