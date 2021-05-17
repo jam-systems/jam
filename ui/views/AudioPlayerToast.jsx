@@ -16,8 +16,7 @@ export default function AudioPlayerToast({close, audio, name}) {
   }, [element, audio, close]);
 
   let end = () => {
-    audio.src = null;
-    if (state.myMic) set(state, 'myAudio', state.myMic);
+    set(state, 'audioFile', null);
     close();
   };
   return (

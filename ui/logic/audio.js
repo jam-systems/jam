@@ -10,15 +10,15 @@ import {openModal} from '../views/Modal';
 import InteractionModal from '../views/InteractionModal';
 import AudioPlayerToast from '../views/AudioPlayerToast';
 import {until} from '../lib/state-utils';
-import {useUpdate, useAction} from '../lib/state-tree';
+import {useUpdate, useAction, useState} from '../lib/state-tree';
 
 var userAgent = UAParser();
 
-export {Microphone, Muted};
+export {Microphone, AudioFileStream, Muted, ConnectMyAudio};
 
 function Microphone() {
   let micState = 'initial'; // 'requesting', 'active', 'failed'
-  let myMic = null;
+  let micStream = null;
   let hasRequestedOnce = false;
   const update = useUpdate();
 
@@ -31,12 +31,12 @@ function Microphone() {
       hasRequestedOnce = true;
       if (micState !== 'requesting') return;
       micState = 'active';
-      myMic = stream;
+      micStream = stream;
     } catch (err) {
       if (micState !== 'requesting') return;
       console.error('error getting mic', err);
       micState = 'failed';
-      myMic = null;
+      micStream = null;
     }
     update();
   }
@@ -51,7 +51,7 @@ function Microphone() {
     }
   }
 
-  // TODO poll/listen to myMic.active state, switch to failed if not active but should
+  // TODO poll/listen to micStream.active state, switch to failed if not active but should
 
   return function Microphone({shouldHaveMic}) {
     let [isRetry] = useAction(actions.RETRY_MIC);
@@ -71,10 +71,10 @@ function Microphone() {
         break;
       case 'active':
         if (!shouldHaveMic) {
-          myMic.getTracks().forEach(track => track.stop());
-          myMic = null;
+          micStream.getTracks().forEach(track => track.stop());
+          micStream = null;
           micState = 'initial';
-        } else if (isRetry && !myMic.active) {
+        } else if (isRetry && !micStream.active) {
           forceRetryMic();
         }
         break;
@@ -88,13 +88,59 @@ function Microphone() {
     }
 
     console.log('Microphone end', micState);
-    return {myMic, hasRequestedOnce};
+    return {micStream, hasRequestedOnce};
   };
 }
 
-function Muted({stream, micMuted}) {
-  if (stream) {
-    for (let track of stream.getTracks()) {
+function AudioFileStream({audioFile, audioContext: ctx}) {
+  let {url, name} = audioFile ?? {};
+  let [audioState, setState] = useState('initial'); // 'starting', 'active'
+  let [audioFileStream, setStream] = useState(null);
+  let [audio, setAudio] = useState(null);
+  let shouldStream = url && ctx;
+
+  switch (audioState) {
+    case 'initial':
+      if (shouldStream) {
+        audio = setAudio(new Audio(url));
+        audio.crossOrigin = 'anonymous';
+        // let stream = audio.captureStream(); // not supported in Safari & Firefox
+        let streamDestination = ctx.createMediaStreamDestination();
+        let source = ctx.createMediaElementSource(audio);
+        source.connect(streamDestination);
+        source.connect(ctx.destination);
+        audioFileStream = setStream(streamDestination.stream);
+        setState('starting');
+
+        audio.play().then(() => {
+          setState('active');
+          openModal(AudioPlayerToast, {audio, name}, 'player');
+          domEvent(audio, 'ended').then(() => {
+            setStream(null);
+            setState('initial');
+            // TODO no global access
+            set(state, 'audioFile', null);
+          });
+        });
+      }
+      break;
+    case 'starting':
+      break;
+    case 'active':
+      if (!shouldStream) {
+        audio.src = null;
+        setAudio(null);
+        audioFileStream = setStream(null);
+        setState('initial');
+      }
+      break;
+  }
+  return {audioFileStream};
+}
+
+function Muted({myAudio, micMuted}) {
+  if (myAudio) {
+    for (let track of myAudio.getTracks()) {
       if (track.enabled !== !micMuted) {
         track.enabled = !micMuted;
       }
@@ -102,28 +148,22 @@ function Muted({stream, micMuted}) {
   }
 }
 
-on(state, 'myAudio', myAudio => {
-  // if i am speaker, send audio to peers
-  if (state.iAmSpeaker && myAudio) {
+function ConnectMyAudio({myAudio, iAmSpeaker}) {
+  let [connected, setConnected] = useState(null);
+  let shouldConnect = myAudio && iAmSpeaker;
+
+  if (connected !== myAudio && shouldConnect) {
+    console.log('CONNECTING AUDIO');
     connectVolumeMeter(currentId(), myAudio);
     addLocalStream(swarm, myAudio, 'audio');
-  }
-  if (!myAudio) {
+    setConnected(myAudio);
+  } else if (connected && !shouldConnect) {
+    console.log('DISCONNECTING AUDIO');
     disconnectVolumeMeter(currentId());
     addLocalStream(swarm, null, 'audio');
+    setConnected(null);
   }
-});
-
-on(state, 'iAmSpeaker', iAmSpeaker => {
-  if (iAmSpeaker) {
-    // send audio stream when I become speaker
-    let {myAudio} = state;
-    if (myAudio) {
-      connectVolumeMeter(currentId(), myAudio);
-      addLocalStream(swarm, myAudio, 'audio');
-    }
-  }
-});
+}
 
 const audios = {}; // {peerId: HTMLAudioElement}
 
@@ -200,24 +240,6 @@ function play(audio) {
   } else {
     return audio.play();
   }
-}
-
-export async function streamAudioFromUrl(url, name) {
-  let audio = new Audio(url);
-  audio.crossOrigin = 'anonymous';
-  // let stream = audio.captureStream(); // not supported in Safari & Firefox
-  let ctx = state.audioContext;
-  let streamDestination = ctx.createMediaStreamDestination();
-  let source = ctx.createMediaElementSource(audio);
-  source.connect(streamDestination);
-  source.connect(ctx.destination);
-  let stream = streamDestination.stream;
-
-  set(state, 'myAudio', stream);
-  await audio.play();
-  openModal(AudioPlayerToast, {audio, name}, 'player');
-  await domEvent(audio, 'ended');
-  if (state.myMic) set(state, 'myAudio', state.myMic);
 }
 
 async function requestMicPermissionOnly() {
