@@ -10,20 +10,37 @@ import {openModal} from '../views/Modal';
 import InteractionModal from '../views/InteractionModal';
 import AudioPlayerToast from '../views/AudioPlayerToast';
 import {until} from '../lib/state-utils';
-import {useUpdate, useAction, useState, declare, use} from '../lib/state-tree';
+import {
+  useUpdate,
+  useAction,
+  useState,
+  declare,
+  use,
+  useRootState,
+} from '../lib/state-tree';
 
 var userAgent = UAParser();
 
 export {AudioState};
 
-function AudioState({
-  inRoom,
-  iAmSpeaker,
-  myHandRaised,
-  audioContext,
-  micMuted,
-  audioFile,
-}) {
+function AudioState() {
+  let [
+    inRoom,
+    iAmSpeaker,
+    raisedHands,
+    audioContext,
+    micMuted,
+    audioFile,
+  ] = useRootState([
+    'inRoom',
+    'iAmSpeaker',
+    'raisedHands',
+    'audioContext',
+    'micMuted',
+    'audioFile',
+  ]);
+
+  let myHandRaised = raisedHands.has(currentId());
   let shouldHaveMic = !!(inRoom && (iAmSpeaker || myHandRaised));
   let {micStream, hasRequestedOnce} = use(Microphone, {shouldHaveMic});
 
@@ -114,11 +131,16 @@ function Microphone() {
 }
 
 function AudioFileStream({audioFile, audioContext: ctx}) {
-  let {url, name} = audioFile ?? {};
+  let url = audioFile?.url;
   let [audioState, setState] = useState('initial'); // 'starting', 'active'
+  let [activeUrl, setActiveUrl] = useState(null);
   let [audioFileStream, setStream] = useState(null);
   let [audio, setAudio] = useState(null);
+  const state = useRootState();
+  const update = useUpdate();
   let shouldStream = url && ctx;
+
+  console.log('AudioFileStream', audioState, shouldStream, url, activeUrl);
 
   switch (audioState) {
     case 'initial':
@@ -135,11 +157,13 @@ function AudioFileStream({audioFile, audioContext: ctx}) {
 
         audio.play().then(() => {
           setState('active');
-          openModal(AudioPlayerToast, {audio, name}, 'player');
+          setActiveUrl(url);
+          set(state, 'audioFile', {...audioFile, audio});
+
+          openModal(AudioPlayerToast, {}, 'player');
           domEvent(audio, 'ended').then(() => {
             setStream(null);
             setState('initial');
-            // TODO no global access
             set(state, 'audioFile', null);
           });
         });
@@ -148,11 +172,12 @@ function AudioFileStream({audioFile, audioContext: ctx}) {
     case 'starting':
       break;
     case 'active':
-      if (!shouldStream) {
+      if (!shouldStream || url !== activeUrl) {
         audio.src = null;
         setAudio(null);
         audioFileStream = setStream(null);
         setState('initial');
+        if (url !== activeUrl) update();
       }
       break;
   }

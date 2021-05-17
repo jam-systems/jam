@@ -1,10 +1,11 @@
-import {set} from 'use-minimal-state';
+import {set, use} from 'use-minimal-state';
 import React, {useEffect, useState} from 'react';
 import state from '../logic/state';
 import {domEvent} from '../logic/util';
 import {CloseSvg} from './Modal';
 
-export default function AudioPlayerToast({close, audio, name}) {
+export default function AudioPlayerToast({close}) {
+  let {audio, name} = use(state, 'audioFile') ?? {};
   let [element, setElement] = useState();
   useEffect(() => {
     if (element && audio) {
@@ -12,6 +13,9 @@ export default function AudioPlayerToast({close, audio, name}) {
       audio.style.width = '100%';
       element.appendChild(audio);
       domEvent(audio, 'ended').then(close);
+      return () => {
+        element.removeChild(audio);
+      };
     }
   }, [element, audio, close]);
 

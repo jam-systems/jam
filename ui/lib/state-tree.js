@@ -1,4 +1,5 @@
 import {is, on, emit, update, set} from 'use-minimal-state';
+import log from './causal-log';
 
 // a kind of "React for app state"
 
@@ -8,8 +9,6 @@ import {is, on, emit, update, set} from 'use-minimal-state';
 
 /* TODOs:
 
-  -) isRendering is currently only used for deduping state update renders which is not working
-  -) find a solution for getRootElement
   -) enable more Component return values
   -) probably don't use minimal-state for internal update forwarding
   -) test with larger & more complex element trees
@@ -21,23 +20,25 @@ export {
   use,
   declare,
   declareStateRoot,
+  dispatch,
   useAction,
+  useRootState,
   useUpdate,
   useState,
   useMemo,
-  dispatch,
   Fragment,
 };
 
 const root = {children: []};
 window.root = root;
 let current = root;
-let isRendering = 0;
+let renderRoot = null;
 let nUses = 0;
 let renderTime = 0;
 let currentAction = [undefined, undefined];
 
 const updateSet = new Set();
+const rootUpdateSet = new Set();
 
 function declare(Component, props) {
   let key = props?.key;
@@ -57,7 +58,7 @@ function use(Component, props) {
   return getAtom(newElement.atom);
 }
 
-function _declare(Component, props, element, used = false) {
+function _declare(Component, props = null, element, used = false) {
   let key = props?.key;
 
   let mustUpdate = updateSet.has(element);
@@ -67,6 +68,8 @@ function _declare(Component, props, element, used = false) {
     element.renderTime = renderTime;
     return element;
   }
+
+  // log('rendering', Component.name, 'updateSet', mustUpdate);
 
   let isMount = false;
   if (element === undefined) {
@@ -80,10 +83,11 @@ function _declare(Component, props, element, used = false) {
       uses: [],
       renderTime,
       parent: current,
+      root: renderRoot,
       declared: !used,
       atom: undefined,
     };
-    console.log('STATE-TREE', 'mounting new element', element);
+    log('STATE-TREE', 'mounting new element', element);
     current.children.push(element);
   } else {
     element.props = props;
@@ -112,9 +116,10 @@ function _declare(Component, props, element, used = false) {
   for (let i = children.length - 1; i >= 0; i--) {
     let child = children[i];
     if (child.renderTime !== renderTime) {
-      console.log('STATE-TREE', 'unmounting element', child);
+      log('STATE-TREE', 'unmounting element', child);
       children.splice(i, 1);
-      unsubscribeActions(getRootElement(), child);
+      unsubscribeAll(renderRoot.actionSubs, child);
+      unsubscribeAll(renderRoot.stateSubs, child);
     }
   }
 
@@ -130,7 +135,6 @@ function declareStateRoot(Component, state) {
   if (state === undefined) state = {};
 
   const key = {};
-  isRendering = key;
   renderTime = Date.now();
 
   const rootElement = {
@@ -142,54 +146,56 @@ function declareStateRoot(Component, state) {
     uses: [],
     renderTime,
     parent: current,
+    root: null,
     declared: true,
     atom: undefined,
-    subs: new Map(),
+    actionSubs: new Map(),
+    stateSubs: new Map(),
+    state,
   };
-  console.log('STATE-TREE', 'mounting ROOT element', rootElement);
+  rootElement.root = rootElement;
+  log('STATE-TREE', 'mounting ROOT element', rootElement);
   current.children.push(rootElement);
+
+  renderRoot = rootElement;
   _declare(Component, {...state, key}, rootElement);
 
   const rootAtom = rootElement.atom;
   let result = getAtom(rootAtom);
   is(state, result);
 
-  console.log(
+  log(
     'STATE-TREE',
     'initial root render returned',
     result,
     'after',
     Date.now() - renderTime
   );
-  isRendering = 0;
+  renderRoot = null;
 
   on(rootAtom, result => {
-    console.log('STATE-TREE', 'root atom update triggered!', result);
+    log('STATE-TREE', 'root atom update triggered!', result);
     is(state, result);
   });
 
   on(state, (_key, value, oldValue) => {
-    // TODO because isRendering is not working for child component updates, we are getting redundant renders
-    if (isRendering !== key && (oldValue === undefined || value !== oldValue)) {
-      console.log('STATE-TREE', 'root render caused by', _key);
-      isRendering = key;
-      renderTime = Date.now();
-      _declare(Component, {...state, key}, rootElement);
-      let result = getAtom(rootAtom);
-      is(state, result);
-      isRendering = 0;
-      console.log(
-        'STATE-TREE',
-        'root render returned',
-        result,
-        'after',
-        Date.now() - renderTime
-      );
+    if (oldValue !== undefined && value === oldValue) return;
+
+    if (renderRoot !== rootElement) {
+      queueRootUpdate(rootElement, _key);
+    }
+
+    // TODO: what updates should we queue on state updates during render?
+    let subscribers = rootElement.stateSubs.get(_key);
+    if (subscribers !== undefined) {
+      for (let element of subscribers) {
+        queueUpdate(element, 'state ' + _key);
+      }
     }
   });
 
   const dispatch = (type, payload) => {
-    console.log('dispatching', type, payload);
+    log('dispatching', type, payload);
     dispatchFromRoot(rootElement, type, payload);
   };
   on(state, 'dispatch', dispatch);
@@ -210,14 +216,44 @@ function sameProps(prevProps, props) {
 }
 
 // rerendering
-function queueUpdate(caller) {
+function queueUpdate(caller, reason = '') {
+  log('queuing update', caller.component.name, reason);
   let rootElement = markForUpdate(caller);
   // rerender root
   queueMicrotask(() => {
     if (!updateSet.has(rootElement)) return;
-    console.log('STATE-TREE', 'root render caused by setState');
+    log(
+      'STATE-TREE',
+      'render caused by queueUpdate',
+      caller.component.name,
+      reason
+    );
     let result = rerender(rootElement);
-    console.log(
+    log(
+      'STATE-TREE',
+      'render returned',
+      result,
+      'after',
+      Date.now() - renderTime
+    );
+  });
+}
+
+function queueRootUpdate(rootElement, _key) {
+  rootUpdateSet.add(rootElement);
+  queueMicrotask(() => {
+    if (!rootUpdateSet.has(rootElement)) return;
+    rootUpdateSet.delete(rootElement);
+
+    log('STATE-TREE', 'root render caused by state update', _key);
+    let {state, atom, component, key} = rootElement;
+    renderRoot = rootElement;
+    renderTime = Date.now();
+    _declare(component, {...state, key}, rootElement);
+    let result = getAtom(atom);
+    is(state, result);
+    renderRoot = null;
+    log(
       'STATE-TREE',
       'root render returned',
       result,
@@ -228,30 +264,26 @@ function queueUpdate(caller) {
 }
 
 function markForUpdate(element) {
+  // log('markForUpdate', element.component.name);
   let parent = element;
+  // log('adding updateSet', parent.component.name);
   updateSet.add(parent);
   if (parent.declared) return parent;
   while (parent.parent !== root) {
     parent = parent.parent;
+    // log('adding updateSet', parent.component.name);
     updateSet.add(parent);
     if (parent.declared) return parent;
   }
   return parent;
 }
 
-function getRootElement() {
-  // FIXME does not work anymore
-  // return root.children.find(c => c.key === isRendering);
-  return root.children[0]; // short term hack
-}
-
 function rerender(element) {
-  isRendering = element.key;
+  renderRoot = element.root;
   renderTime = Date.now();
   let result;
   if (element.declared) {
-    console.log('STATE-TREE', 'rerendering', element);
-    // current = rootElement.parent;
+    log('STATE-TREE', 'rerendering', element.component.name);
     _declare(
       element.component,
       {
@@ -262,13 +294,12 @@ function rerender(element) {
     );
     result = getAtom(element.atom);
     update(element.atom);
-    // current = root;
   } else {
     throw Error(
       'undeclared re-render! should not happen because used elements require update of parents'
     );
   }
-  isRendering = 0;
+  renderRoot = null;
   return result;
 }
 
@@ -277,7 +308,7 @@ function dispatch(state, type, payload) {
 }
 
 function dispatchFromRoot(rootElement, type, payload) {
-  let subscribers = rootElement.subs.get(type);
+  let subscribers = rootElement.actionSubs.get(type);
   if (subscribers === undefined || subscribers.size === 0) return;
 
   let actionRoots = new Set();
@@ -286,9 +317,9 @@ function dispatchFromRoot(rootElement, type, payload) {
   }
   currentAction = [type, payload];
   for (let rootElement of actionRoots) {
-    console.log('STATE-TREE', 'branch render caused by dispatch', rootElement);
+    log('STATE-TREE', 'branch render caused by dispatch', rootElement);
     let result = rerender(rootElement);
-    console.log(
+    log(
       'STATE-TREE',
       'branch render returned',
       result,
@@ -299,28 +330,27 @@ function dispatchFromRoot(rootElement, type, payload) {
   currentAction = [undefined, undefined];
 }
 
-function subscribeAction(rootElement, type, element) {
+function subscribe(subscriptions, type, element) {
   let subscribers =
-    rootElement.subs.get(type) ??
-    rootElement.subs.set(type, new Set()).get(type);
+    subscriptions.get(type) ?? subscriptions.set(type, new Set()).get(type);
   subscribers.add(element);
 }
-function unsubscribeActions(rootElement, element) {
-  for (let entry of rootElement.subs) {
+function unsubscribeAll(subscriptions, element) {
+  for (let entry of subscriptions) {
     let [key, set] = entry;
     set.delete(element);
     if (set.size === 0) {
-      rootElement.subs.delete(key);
+      subscriptions.delete(key);
     }
   }
 }
 
+// TODO maybe more efficient to memo the next 2-3 hooks, like useState (not sure though)
 function useAction(type) {
   if (current === root)
     throw Error('useAction can only be called during render');
-  let rootElement = getRootElement();
-  subscribeAction(rootElement, type, current);
-  const dispatchThis = p => dispatch(rootElement, type, p);
+  subscribe(renderRoot.actionSubs, type, current);
+  const dispatchThis = p => dispatch(renderRoot, type, p);
   if (currentAction[0] === type) {
     return [true, currentAction[1], dispatchThis];
   } else {
@@ -328,11 +358,29 @@ function useAction(type) {
   }
 }
 
+function useRootState(keys) {
+  if (current === root) throw Error('Hooks can only be called during render');
+  let {state} = renderRoot;
+  if (Array.isArray(keys)) {
+    let values = [];
+    for (let key of keys) {
+      subscribe(renderRoot.stateSubs, key, current);
+      values.push(state[key]);
+    }
+    return values;
+  } else if (keys !== undefined) {
+    subscribe(renderRoot.stateSubs, keys, current);
+    return state[keys];
+  } else {
+    return state;
+  }
+}
+
 function useUpdate() {
   if (current === root)
     throw Error('useUpdate can only be called during render');
   let caller = current;
-  return () => queueUpdate(caller);
+  return () => queueUpdate(caller, 'useUpdate');
 }
 
 function useState(initial) {
@@ -345,7 +393,7 @@ function useState(initial) {
       if (value === use[0]) return;
       use[0] = value;
       if (current !== caller) {
-        queueUpdate(caller);
+        queueUpdate(caller, 'useState ' + value);
       }
       return value;
     };

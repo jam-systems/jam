@@ -9,59 +9,20 @@ import {is, on, set, update} from 'use-minimal-state';
 import {use, declare, declareStateRoot} from '../lib/state-tree';
 
 declareStateRoot(
-  ({
-    room,
-    inRoom,
-    iAmSpeaker,
-    iAmModerator,
-    raisedHands,
-    userInteracted,
-    micMuted,
-    audioFile,
-    audioContext,
-  }) =>
-    declare(AppState, {
-      room,
-      inRoom,
-      iAmSpeaker,
-      iAmModerator,
-      raisedHands,
-      userInteracted,
-      micMuted,
-      audioFile,
-      audioContext,
-    }),
+  ({room, inRoom, iAmModerator, userInteracted, micMuted}) =>
+    declare(AppState, {room, inRoom, iAmModerator, userInteracted, micMuted}),
   state
 );
 
-function AppState({
-  room,
-  inRoom,
-  iAmSpeaker,
-  iAmModerator,
-  raisedHands,
-  userInteracted,
-  audioContext,
-  micMuted,
-  audioFile,
-}) {
+function AppState({room, inRoom, iAmModerator, userInteracted, micMuted}) {
   let {closed} = room;
 
   if (closed && !iAmModerator) {
     inRoom = false;
   }
   is(swarm.myPeerState, {micMuted, inRoom: !!inRoom});
-  let myPeerId = currentId();
-  let myHandRaised = raisedHands.has(myPeerId);
 
-  let {myAudio, soundMuted} = use(AudioState, {
-    inRoom,
-    iAmSpeaker,
-    myHandRaised,
-    audioContext,
-    micMuted,
-    audioFile,
-  });
+  let {myAudio, soundMuted} = use(AudioState);
 
   userInteracted = userInteracted || !!inRoom;
   return {myAudio, userInteracted, soundMuted, inRoom};
