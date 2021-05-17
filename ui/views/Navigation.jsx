@@ -1,15 +1,15 @@
 import React, {useMemo, useState} from 'react';
 import {leaveRoom} from '../logic/main';
-import state from '../logic/state';
+import state, {actions} from '../logic/state';
 import {is, use} from 'use-minimal-state';
 import {currentId} from '../logic/identity';
 import {sendReaction, raiseHand} from '../logic/reactions';
 import EditRole, {EditSelf} from './EditRole';
 import {breakpoints, useWidth} from '../logic/tailwind-mqp';
-import {retryMic} from '../logic/audio';
 import {openModal} from './Modal';
 import {InfoModal} from './InfoModal';
 import {MicOffSvg, MicOnSvg} from './Svg';
+import {dispatch} from '../lib/state-tree';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
@@ -62,7 +62,7 @@ export default function Navigation({
     if (micOn) {
       is(state, 'micMuted', !micMuted);
     } else {
-      retryMic(state);
+      dispatch(state, actions.RETRY_MIC);
     }
   };
 

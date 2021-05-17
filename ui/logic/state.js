@@ -24,6 +24,10 @@ const state = {
 };
 export default state;
 
+export const actions = {
+  RETRY_MIC: 'retry-mic',
+};
+
 const swarm = Swarm();
 export {swarm};
 

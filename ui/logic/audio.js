@@ -1,7 +1,7 @@
 import {addLocalStream} from '../lib/swarm';
 import hark from '../lib/hark';
 import UAParser from 'ua-parser-js';
-import state, {swarm} from './state';
+import state, {actions, swarm} from './state';
 import {on, set, update} from 'use-minimal-state';
 import {currentId} from './identity';
 import log from '../lib/causal-log';
@@ -10,11 +10,11 @@ import {openModal} from '../views/Modal';
 import InteractionModal from '../views/InteractionModal';
 import AudioPlayerToast from '../views/AudioPlayerToast';
 import {until} from '../lib/state-utils';
-import {useUpdate, useAction, dispatch} from '../lib/state-tree';
+import {useUpdate, useAction} from '../lib/state-tree';
 
 var userAgent = UAParser();
 
-export {Microphone, retryMic, Muted};
+export {Microphone, Muted};
 
 function Microphone() {
   let micState = 'initial'; // 'requesting', 'active', 'failed'
@@ -54,7 +54,7 @@ function Microphone() {
   // TODO poll/listen to myMic.active state, switch to failed if not active but should
 
   return function Microphone({shouldHaveMic}) {
-    let [isRetry] = useAction('retry-mic');
+    let [isRetry] = useAction(actions.RETRY_MIC);
     console.log('Microphone start', micState, shouldHaveMic, isRetry);
 
     switch (micState) {
@@ -90,10 +90,6 @@ function Microphone() {
     console.log('Microphone end', micState);
     return {myMic, hasRequestedOnce};
   };
-}
-
-function retryMic(state) {
-  dispatch(state, 'retry-mic');
 }
 
 function Muted({stream, micMuted}) {
