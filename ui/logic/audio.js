@@ -93,7 +93,6 @@ function Microphone() {
 
   return function Microphone({shouldHaveMic}) {
     let [isRetry] = useAction(actions.RETRY_MIC);
-    console.log('Microphone start', micState, shouldHaveMic, isRetry);
 
     switch (micState) {
       case 'initial':
@@ -125,7 +124,6 @@ function Microphone() {
         break;
     }
 
-    console.log('Microphone end', micState);
     return {micStream, hasRequestedOnce};
   };
 }
@@ -139,8 +137,6 @@ function AudioFileStream({audioFile, audioContext: ctx}) {
   const state = useRootState();
   const update = useUpdate();
   let shouldStream = url && ctx;
-
-  console.log('AudioFileStream', audioState, shouldStream, url, activeUrl);
 
   switch (audioState) {
     case 'initial':
@@ -199,12 +195,10 @@ function ConnectMyAudio({myAudio, iAmSpeaker}) {
   let shouldConnect = myAudio && iAmSpeaker;
 
   if (connected !== myAudio && shouldConnect) {
-    console.log('CONNECTING AUDIO');
     connectVolumeMeter(currentId(), myAudio);
     addLocalStream(swarm, myAudio, 'audio');
     setConnected(myAudio);
   } else if (connected && !shouldConnect) {
-    console.log('DISCONNECTING AUDIO');
     disconnectVolumeMeter(currentId());
     addLocalStream(swarm, null, 'audio');
     setConnected(null);

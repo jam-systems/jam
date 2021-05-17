@@ -27,6 +27,7 @@ export {
   useState,
   useMemo,
   Fragment,
+  Merged,
 };
 
 const root = {children: []};
@@ -69,7 +70,7 @@ function _declare(Component, props = null, element, used = false) {
     return element;
   }
 
-  // log('rendering', Component.name, 'updateSet', mustUpdate);
+  // log('rendering', Component.name);
 
   let isMount = false;
   if (element === undefined) {
@@ -87,7 +88,7 @@ function _declare(Component, props = null, element, used = false) {
       declared: !used,
       atom: undefined,
     };
-    log('STATE-TREE', 'mounting new element', element);
+    log('STATE-TREE', 'mounting new element', element.component.name);
     current.children.push(element);
   } else {
     element.props = props;
@@ -124,6 +125,7 @@ function _declare(Component, props = null, element, used = false) {
   }
 
   // process result (creates or updates element.atom)
+  log('rendered', Component.name, 'with result', result);
   resultToAtom(result, element);
 
   return element;
@@ -205,7 +207,7 @@ function declareStateRoot(Component, state) {
 function sameProps(prevProps, props) {
   if (prevProps === undefined) return false;
   if (prevProps === props) return true;
-  if (props === null || props === undefined) return false;
+  if (prevProps === null || props === null || props === undefined) return false;
   for (let key in prevProps) {
     if (!(key in props) || props[key] !== prevProps[key]) return false;
   }
@@ -240,6 +242,7 @@ function queueUpdate(caller, reason = '') {
 }
 
 function queueRootUpdate(rootElement, _key) {
+  log('queuing root update', _key);
   rootUpdateSet.add(rootElement);
   queueMicrotask(() => {
     if (!rootUpdateSet.has(rootElement)) return;
@@ -284,14 +287,7 @@ function rerender(element) {
   let result;
   if (element.declared) {
     log('STATE-TREE', 'rerendering', element.component.name);
-    _declare(
-      element.component,
-      {
-        ...element.props,
-        key: element.key,
-      },
-      element
-    );
+    _declare(element.component, element.props, element);
     result = getAtom(element.atom);
     update(element.atom);
   } else {
@@ -457,6 +453,8 @@ function isAtom(thing) {
   return Array.isArray(thing) && thing._atom;
 }
 
+// TODO we should probably forward atom updates only when value changed
+// (if didn't change nothing will be done in state root anyway)
 function resultToAtom(result, element) {
   if (element.atom === undefined) {
     element.atom = Atom();
@@ -466,6 +464,11 @@ function resultToAtom(result, element) {
   if (isAtom(result)) {
     setAtom(atom, getAtom(result));
     addAtomDep(result, atom, value => set(atom, value));
+    return;
+  }
+
+  if (result?._merged) {
+    setMergedAtom(atom, result);
     return;
   }
 
@@ -491,26 +494,25 @@ function setObjectAtom(objAtom, obj) {
   }
 }
 
-// TODO
 function Merged(...objAtomArray) {
+  objAtomArray._merged = true;
+  return objAtomArray;
+}
+
+function setMergedAtom(atom, objAtomArray) {
   let mergedObj = {};
 
   function updateValue() {
-    Object.assign(
-      mergedObj,
-      ...objAtomArray.map(oa => (isAtom(oa) ? getAtom(oa) : oa))
-    );
+    let objects = objAtomArray.map(oa => (isAtom(oa) ? getAtom(oa) : oa));
+    let value = Object.assign(mergedObj, ...objects);
+    return value;
   }
-  updateValue();
-
-  let mergedAtom = Atom(mergedObj);
+  setAtom(atom, updateValue());
 
   for (let objAtom of objAtomArray) {
     if (!isAtom(objAtom)) continue;
-    addAtomDep(objAtom, mergedAtom, () => {
-      updateValue();
-      update(mergedAtom);
+    addAtomDep(objAtom, atom, () => {
+      set(atom, updateValue());
     });
   }
-  return mergedAtom;
 }
