@@ -10,11 +10,32 @@ import {openModal} from '../views/Modal';
 import InteractionModal from '../views/InteractionModal';
 import AudioPlayerToast from '../views/AudioPlayerToast';
 import {until} from '../lib/state-utils';
-import {useUpdate, useAction, useState} from '../lib/state-tree';
+import {useUpdate, useAction, useState, declare, use} from '../lib/state-tree';
 
 var userAgent = UAParser();
 
-export {Microphone, AudioFileStream, Muted, ConnectMyAudio};
+export {AudioState};
+
+function AudioState({
+  inRoom,
+  iAmSpeaker,
+  myHandRaised,
+  audioContext,
+  micMuted,
+  audioFile,
+}) {
+  let shouldHaveMic = !!(inRoom && (iAmSpeaker || myHandRaised));
+  let {micStream, hasRequestedOnce} = use(Microphone, {shouldHaveMic});
+
+  let {audioFileStream} = use(AudioFileStream, {audioFile, audioContext});
+
+  let myAudio = audioFileStream ?? micStream;
+  declare(Muted, {myAudio, micMuted});
+  declare(ConnectMyAudio, {myAudio, iAmSpeaker});
+  let soundMuted = inRoom ? iAmSpeaker && !hasRequestedOnce : true;
+
+  return {myAudio, soundMuted};
+}
 
 function Microphone() {
   let micState = 'initial'; // 'requesting', 'active', 'failed'

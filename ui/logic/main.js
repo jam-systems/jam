@@ -2,7 +2,7 @@ import state, {swarm} from './state';
 import {get} from './backend';
 import {currentId, signData, verifyData} from './identity';
 import {staticConfig} from './config';
-import {ConnectMyAudio, Microphone, Muted, AudioFileStream} from './audio';
+import {AudioState} from './audio';
 import './reactions';
 import './room';
 import {is, on, set, update} from 'use-minimal-state';
@@ -54,18 +54,16 @@ function AppState({
   let myPeerId = currentId();
   let myHandRaised = raisedHands.has(myPeerId);
 
-  let shouldHaveMic = !!(inRoom && (iAmSpeaker || myHandRaised));
-  let {micStream, hasRequestedOnce} = use(Microphone, {shouldHaveMic});
-
-  let {audioFileStream} = use(AudioFileStream, {audioFile, audioContext});
-
-  let myAudio = audioFileStream ?? micStream;
-  declare(Muted, {myAudio, micMuted});
-  declare(ConnectMyAudio, {myAudio, iAmSpeaker});
+  let {myAudio, soundMuted} = use(AudioState, {
+    inRoom,
+    iAmSpeaker,
+    myHandRaised,
+    audioContext,
+    micMuted,
+    audioFile,
+  });
 
   userInteracted = userInteracted || !!inRoom;
-  let soundMuted = inRoom ? iAmSpeaker && !hasRequestedOnce : true;
-
   return {myAudio, userInteracted, soundMuted, inRoom};
 }
 
