@@ -1,6 +1,6 @@
-import {actions} from './state';
+import {actions} from '../state';
 import UAParser from 'ua-parser-js';
-import {useUpdate, useAction} from '../lib/state-tree';
+import {useUpdate, useAction} from '../../lib/state-tree';
 
 let userAgent = UAParser();
 

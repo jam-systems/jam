@@ -10,8 +10,8 @@ import log from './causal-log';
 /* TODOs:
 
   -) enable more Component return values
-  -) probably don't use minimal-state for internal update forwarding
-  -) test with larger & more complex element trees
+  -) let state root have a list of keys it listens to
+  -) probably don't use minimal-state for internal update forwarding, or at least don't forward non-changes
   -) add API for using state-tree inside React components
   -) understand performance & optimize where possible
 */
