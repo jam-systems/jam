@@ -8,15 +8,13 @@ import './room';
 import {is, on, set, update} from 'use-minimal-state';
 import {declare, declareStateRoot, merge} from '../lib/state-tree';
 
-declareStateRoot(({room, inRoom, iAmModerator, userInteracted, micMuted}) => {
-  return declare(AppState, {
-    room,
-    inRoom,
-    iAmModerator,
-    userInteracted,
-    micMuted,
-  });
-}, state);
+declareStateRoot(AppState, state, [
+  'room',
+  'inRoom',
+  'iAmModerator',
+  'userInteracted',
+  'micMuted',
+]);
 
 function AppState({room, inRoom, iAmModerator, userInteracted, micMuted}) {
   let {closed} = room;

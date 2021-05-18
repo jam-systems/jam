@@ -3,14 +3,13 @@ import log from './causal-log';
 
 // a kind of "React for app state"
 
-// element = {Component, key, props, result, children}
+// element = {component, key, props, children}
 // children = [element]
-// result = Component(props) = partial state
+// Component(props) = partial state
 
 /* TODOs:
 
   -) enable more Component return values
-  -) let state root have a list of keys it listens to
   -) probably don't use minimal-state for internal update forwarding, or at least don't forward non-changes
   -) add API for using state-tree inside React components
   -) understand performance & optimize where possible
@@ -60,8 +59,6 @@ function use(Component, props) {
 }
 
 function _declare(Component, props = null, element, used = false) {
-  let key = props?.key;
-
   let mustUpdate = updateSet.has(element);
   if (mustUpdate) updateSet.delete(element);
 
@@ -79,7 +76,7 @@ function _declare(Component, props = null, element, used = false) {
       component: Component,
       render: Component,
       props,
-      key,
+      key: props?.key,
       children: [],
       uses: [],
       renderTime,
@@ -132,18 +129,16 @@ function _declare(Component, props = null, element, used = false) {
 }
 
 // for creating state obj at the top level & later rerun on update
-function declareStateRoot(Component, state) {
+function declareStateRoot(Component, state, keys = []) {
   current = root;
   if (state === undefined) state = {};
-
-  const key = {};
   renderTime = Date.now();
 
   const rootElement = {
     component: Component,
     render: Component,
     props: undefined,
-    key,
+    key: {},
     children: [],
     uses: [],
     renderTime,
@@ -160,7 +155,7 @@ function declareStateRoot(Component, state) {
   current.children.push(rootElement);
 
   renderRoot = rootElement;
-  _declare(Component, {...state, key}, rootElement);
+  _declare(Component, {...state}, rootElement);
 
   const rootAtom = rootElement.atom;
   let result = getAtom(rootAtom);
@@ -180,18 +175,18 @@ function declareStateRoot(Component, state) {
     is(state, result);
   });
 
-  on(state, (_key, value, oldValue) => {
+  on(state, (key, value, oldValue) => {
     if (oldValue !== undefined && value === oldValue) return;
 
-    if (renderRoot !== rootElement) {
-      queueRootUpdate(rootElement, _key);
+    if (renderRoot !== rootElement && (keys === '*' || keys.includes(key))) {
+      queueRootUpdate(rootElement, key);
     }
 
     // TODO: what updates should we queue on state updates during render?
-    let subscribers = rootElement.stateSubs.get(_key);
+    let subscribers = rootElement.stateSubs.get(key);
     if (subscribers !== undefined) {
       for (let element of subscribers) {
-        queueUpdate(element, 'state ' + _key);
+        queueUpdate(element, 'state ' + key);
       }
     }
   });
@@ -241,18 +236,18 @@ function queueUpdate(caller, reason = '') {
   });
 }
 
-function queueRootUpdate(rootElement, _key) {
-  log('queuing root update', _key);
+function queueRootUpdate(rootElement, reason = '') {
+  log('queuing root update', reason);
   rootUpdateSet.add(rootElement);
   queueMicrotask(() => {
     if (!rootUpdateSet.has(rootElement)) return;
     rootUpdateSet.delete(rootElement);
 
-    log('STATE-TREE', 'root render caused by state update', _key);
-    let {state, atom, component, key} = rootElement;
+    log('STATE-TREE', 'root render caused by state update', reason);
+    let {state, atom, component} = rootElement;
     renderRoot = rootElement;
     renderTime = Date.now();
-    _declare(component, {...state, key}, rootElement);
+    _declare(component, {...state}, rootElement);
     let result = getAtom(atom);
     is(state, result);
     renderRoot = null;
