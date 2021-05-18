@@ -37,27 +37,32 @@ const defaultMetaInfo = {
   favIcon: '/img/jam-app-icon.jpg',
 };
 
-const getRoomMetaInfo = async roomPath => {
+const reservedRoutes = ['me', null];
+
+async function getRoomMetaInfo(route) {
+  if (reservedRoutes.includes(route)) return {};
   try {
     // remove .ics or other suffixes
-    roomPath = roomPath.split('.')[0];
-    const roomId = roomPath.substring(1);
-    const roomInfo = await (await fetch(pantryApiPrefix + roomPath)).json();
+    const [roomId] = route.split('.');
+    const roomInfo = await (await fetch(`${pantryApiPrefix}/${roomId}`)).json();
     return {
-      ogTitle: roomInfo['name'],
-      ogDescription: roomInfo['description'],
-      ogUrl: `${urls.jam}${roomPath}`,
-      ogImage: roomInfo['logoURI'] || `${urls.jam}/img/jam-app-icon.jpg`,
-      color: roomInfo['color'] || '',
-      id: roomId || '',
-      favIcon: roomInfo['logoURI'] || '/img/jam-app-icon.jpg',
-      schedule: roomInfo['schedule'],
+      meta: {
+        ogTitle: roomInfo.name,
+        ogDescription: roomInfo.description,
+        ogUrl: `${urls.jam}/${roomId}`,
+        ogImage: roomInfo.logoURI || `${urls.jam}/img/jam-app-icon.jpg`,
+        color: roomInfo.color || '',
+        id: roomId || '',
+        favIcon: roomInfo.logoURI || '/img/jam-app-icon.jpg',
+        schedule: roomInfo.schedule,
+      },
+      roomInfo,
     };
   } catch (e) {
-    console.log(`Error getting info for ${roomPath}`);
+    console.log(`Error getting info for ${route}`);
     return {};
   }
-};
+}
 
 let jamConfigFromFile = {};
 try {
@@ -80,7 +85,9 @@ app.use('/config.json', (_, res) => {
 });
 
 app.use(async (req, res) => {
-  if (req.path === '/new') {
+  let route = parsePath(req.path);
+  console.log(req.path, route);
+  if (route === 'new') {
     return res.redirect(
       302,
       `${urls.jam}/${Math.random().toString(36).substr(2, 6)}`
@@ -132,13 +139,8 @@ app.use(async (req, res) => {
     }
   }
 
-  const metaInfo =
-    req.path === '/'
-      ? defaultMetaInfo
-      : {
-          ...defaultMetaInfo,
-          ...(await getRoomMetaInfo(req.path)),
-        };
+  let {meta = null, roomInfo = null} = await getRoomMetaInfo(route);
+  const metaInfo = {...defaultMetaInfo, ...meta};
 
   if (req.path.includes('/_/integrations/oembed')) {
     if (!req.query.url?.startsWith(`${urls.jam}/`)) return res.json();
@@ -259,6 +261,7 @@ app.use(async (req, res) => {
     <div id="root"></div>
     <script>
         window.jamConfig = ${JSON.stringify(jamConfig)};
+        window.roomInfo = ${JSON.stringify(roomInfo)};
     </script>
     <script type="module" src="/bundle.js"></script>
   </body>
@@ -270,3 +273,11 @@ app.use(async (req, res) => {
 });
 
 module.exports = app;
+
+function parsePath(pathname) {
+  let [first = null, second] = pathname.split('/').filter(x => x);
+  let stageOnly = first === 's';
+  // other special configs go here
+  let route = stageOnly ? second : first;
+  return route;
+}

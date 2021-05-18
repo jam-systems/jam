@@ -1,16 +1,21 @@
 import React, {useMemo} from 'react';
 import {render} from 'react-dom';
-import {usePath} from './lib/use-location';
+import {useLocation} from './lib/use-location';
 import Jam from './Jam';
-import {parseUrlConfig} from './lib/url-utils';
+import {parsePath, parseUrlConfig} from './lib/url-utils';
 
 render(<App />, document.querySelector('#root'));
 
 function App() {
-  // detect roomId from URL
-  const [route = null] = usePath();
   // TODO: react on hash changes that don't affect route
-  const dynamicConfig = useMemo(parseUrlConfig, [route]);
+  let {pathname, hash, search} = useLocation();
+
+  const [route, dynamicConfig] = useMemo(() => {
+    let {route, room} = parsePath(pathname);
+    let config = parseUrlConfig(search, hash);
+    config.room = {...(config.room ?? null), ...room};
+    return [route, config];
+  }, [pathname, hash, search]);
 
   return (
     <Jam
