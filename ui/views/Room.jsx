@@ -70,6 +70,7 @@ export default function Room({room, roomId}) {
     speakers,
     moderators,
     closed,
+    stageOnly,
     shareUrl,
   } = room || {};
 
@@ -103,10 +104,13 @@ export default function Room({room, roomId}) {
   }
 
   let myPeerId = myInfo.id;
-  let stagePeers = (speakers || []).filter(id => id in peers);
-  let audiencePeers = Object.keys(peers || {}).filter(
-    id => !stagePeers.includes(id)
-  );
+  let allPeers = Object.keys(peers ?? {});
+  let stagePeers = stageOnly
+    ? allPeers
+    : (speakers ?? []).filter(id => id in peers);
+  let audiencePeers = stageOnly
+    ? []
+    : allPeers.filter(id => !stagePeers.includes(id));
 
   let myHandRaised = raisedHands.has(myPeerId);
 
@@ -212,29 +216,33 @@ export default function Room({room, roomId}) {
 
           <br />
           {/* Audience */}
-          <h3 className="text-gray-400 pl-4 pb-4">Audience</h3>
-          <ol className="flex flex-wrap">
-            {!iSpeak && (
-              <AudienceAvatar
-                {...{reactions, room}}
-                peerId={myPeerId}
-                peerState={myPeerState}
-                info={myInfo}
-                handRaised={myHandRaised}
-                onClick={() => setEditSelf(true)}
-              />
-            )}
-            {audiencePeers.map(peerId => (
-              <AudienceAvatar
-                key={peerId}
-                {...{peerId, peerState, reactions, room}}
-                peerState={peerState[peerId]}
-                info={identities[peerId]}
-                handRaised={iModerate && raisedHands.has(peerId)}
-                onClick={iModerate ? () => setEditRole(peerId) : undefined}
-              />
-            ))}
-          </ol>
+          {!stageOnly && (
+            <>
+              <h3 className="text-gray-400 pl-4 pb-4">Audience</h3>
+              <ol className="flex flex-wrap">
+                {!iSpeak && (
+                  <AudienceAvatar
+                    {...{reactions, room}}
+                    peerId={myPeerId}
+                    peerState={myPeerState}
+                    info={myInfo}
+                    handRaised={myHandRaised}
+                    onClick={() => setEditSelf(true)}
+                  />
+                )}
+                {audiencePeers.map(peerId => (
+                  <AudienceAvatar
+                    key={peerId}
+                    {...{peerId, peerState, reactions, room}}
+                    peerState={peerState[peerId]}
+                    info={identities[peerId]}
+                    handRaised={iModerate && raisedHands.has(peerId)}
+                    onClick={iModerate ? () => setEditRole(peerId) : undefined}
+                  />
+                ))}
+              </ol>
+            </>
+          )}
         </div>
 
         <div style={{height: '136px', flex: 'none'}} />

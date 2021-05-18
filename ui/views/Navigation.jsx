@@ -49,7 +49,7 @@ export default function Navigation({
 
   let [showReactions, setShowReactions] = useState(false);
 
-  let {color, speakers, moderators} = room || {};
+  let {color, speakers, moderators, stageOnly} = room ?? {};
 
   let isColorDark = useMemo(() => isDark(color), [color]);
 
@@ -80,6 +80,7 @@ export default function Navigation({
           peerId={editRole}
           speakers={speakers}
           moderators={moderators}
+          stageOnly={stageOnly}
           onCancel={() => setEditRole(null)}
         />
       )}

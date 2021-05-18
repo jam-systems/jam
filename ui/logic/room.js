@@ -6,7 +6,7 @@ import {
   useApiQuery,
   forwardApiQuery,
 } from './backend';
-import {on, set, update} from 'use-minimal-state';
+import {is, on, set, update} from 'use-minimal-state';
 import {currentId} from './identity';
 import log from '../lib/causal-log';
 import {staticConfig} from './config';
@@ -75,15 +75,20 @@ function disconnectRoom(roomId) {
 // watch changes in room
 on(state, 'room', (room, oldRoom) => {
   let {speakers: oldSpeakers, moderators: oldModerators} = oldRoom;
-  let {speakers, moderators} = room;
+  let {speakers, moderators, stageOnly} = room;
 
   let myId = currentId();
-  if (!oldSpeakers.includes(myId) && speakers.includes(myId)) {
-    set(state, 'iAmSpeaker', true);
+  if (stageOnly) {
+    is(state, 'iAmSpeaker', true);
     joinStage();
-  }
-  if (oldSpeakers.includes(myId) && !speakers.includes(myId)) {
-    set(state, 'iAmSpeaker', false);
+  } else {
+    if (!oldSpeakers.includes(myId) && speakers.includes(myId)) {
+      set(state, 'iAmSpeaker', true);
+      joinStage();
+    }
+    if (oldSpeakers.includes(myId) && !speakers.includes(myId)) {
+      set(state, 'iAmSpeaker', false);
+    }
   }
   if (!oldModerators.includes(myId) && moderators.includes(myId)) {
     set(state, 'iAmModerator', true);
@@ -122,7 +127,7 @@ function leaveStage(roomId) {
 }
 function joinStage() {
   if (!swarm.myPeerState.leftStage) return;
-  set(swarm.myPeerState, 'leftStage', false);
+  is(swarm.myPeerState, 'leftStage', false);
 }
 // if somebody left stage, update speakers
 on(swarm.peerState, (peerId, peerState) => {
