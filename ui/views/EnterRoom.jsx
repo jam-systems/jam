@@ -28,37 +28,6 @@ export default function EnterRoom({
     <Container>
       <div className={mqp('p-2 pt-60 md:p-10 md:pt-60')}>
         <RoomHeader {...{name, description, logoURI, buttonURI, buttonText}} />
-
-        {/*
-            a snapshot of current or nticipated speakers
-            (for scheduled (future) rooms)
-        */}
-        <ol className="hidden flex space-x-4 pt-6">
-          <li className="flex-shrink w-28 h-28 ring-yellow-500">
-            <img
-              className="human-radius border border-gray-300"
-              src="img/avatars/sonic.jpg"
-            />
-          </li>
-          <li className="flex-shrink w-28 h-28">
-            <img
-              className="human-radius border border-gray-300"
-              src="img/avatars/gregor.jpg"
-            />
-          </li>
-          <li className="flex-shrink w-28 h-28">
-            <img
-              className="human-radius border border-gray-300"
-              src="img/avatars/christoph.jpg"
-            />
-          </li>
-          <li className="flex-shrink w-28 h-28">
-            <img
-              className="human-radius border border-gray-300"
-              src="img/avatars/tosh.jpg"
-            />
-          </li>
-        </ol>
         {/*
             optional (for future events:)
             when is this event?
