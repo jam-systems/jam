@@ -11,7 +11,7 @@ import {set, use} from 'use-minimal-state';
 import Start from './views/Start';
 import Me from './views/Me';
 import PossibleRoom from './views/PossibleRoom';
-import {declare, declareStateRoot} from './lib/state-tree';
+import {debugStateTree, declare, declareStateRoot} from './lib/state-tree';
 import {ShowAudioPlayerToast} from './views/AudioPlayerToast';
 
 declareStateRoot(ShowModals, state);
@@ -68,6 +68,7 @@ export default function Jam({
       window.swarm = swarm;
       window.state = state;
       debug(state);
+      debugStateTree();
     }
   }, [dynamicConfig.debug]);
 

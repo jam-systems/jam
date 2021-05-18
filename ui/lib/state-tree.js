@@ -1,5 +1,5 @@
 import {is, on, emit, update, set} from 'use-minimal-state';
-import log from './causal-log';
+import causalLog from './causal-log';
 
 // a kind of "React for app state"
 
@@ -27,6 +27,7 @@ export {
   useMemo,
   Fragment,
   merge,
+  debugStateTree,
 };
 
 const root = {children: []};
@@ -511,4 +512,15 @@ function setMergedAtom(atom, objAtomArray) {
       set(atom, updateValue());
     });
   }
+}
+
+let doLog = false;
+function debugStateTree() {
+  window.root = root;
+  doLog = true;
+}
+
+function log(...args) {
+  if (doLog === false) return;
+  causalLog(...args);
 }
