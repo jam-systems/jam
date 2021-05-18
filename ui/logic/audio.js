@@ -8,16 +8,10 @@ import log from '../lib/causal-log';
 import {domEvent} from './util';
 import {openModal} from '../views/Modal';
 import InteractionModal from '../views/InteractionModal';
-import AudioPlayerToast from '../views/AudioPlayerToast';
 import {until} from '../lib/state-utils';
-import {
-  useUpdate,
-  useState,
-  declare,
-  use,
-  useRootState,
-} from '../lib/state-tree';
+import {useState, declare, use, useRootState} from '../lib/state-tree';
 import Microphone from './audio/Microphone';
+import AudioFile from './audio/AudioFile';
 
 let userAgent = UAParser();
 
@@ -43,77 +37,17 @@ function AudioState() {
   let myHandRaised = raisedHands.has(currentId());
   let shouldHaveMic = !!(inRoom && (iAmSpeaker || myHandRaised));
   let {micStream, hasRequestedOnce} = use(Microphone, {shouldHaveMic});
-
-  let {audioFileStream} = use(AudioFileStream, {audioFile, audioContext});
+  let {audioFileStream, audioFileElement} = use(AudioFile, {
+    audioFile,
+    audioContext,
+  });
 
   let myAudio = audioFileStream ?? micStream;
   declare(Muted, {myAudio, micMuted});
   declare(ConnectMyAudio, {myAudio, iAmSpeaker});
   let soundMuted = inRoom ? iAmSpeaker && !hasRequestedOnce : true;
 
-  return {myAudio, soundMuted};
-}
-
-function AudioFileStream({audioFile, audioContext: ctx}) {
-  let {file} = audioFile ?? {};
-  let [audioState, setState] = useState('initial'); // 'starting', 'active'
-  let useActiveFile = useState(null);
-  let [activeFile, setActiveFile] = useActiveFile;
-  let [audioFileStream, setStream] = useState(null);
-  let [audio, setAudio] = useState(null);
-  const state = useRootState();
-  const update = useUpdate();
-  let shouldStream = file && ctx;
-
-  switch (audioState) {
-    case 'initial':
-      if (shouldStream) {
-        // TODO: createObjectURL takes long, show loading indicator somewhere
-        setState('starting');
-        (async () => {
-          let url = URL.createObjectURL(file);
-          audio = setAudio(new Audio(url));
-          audio.crossOrigin = 'anonymous';
-          // let stream = audio.captureStream(); // not supported in Safari & Firefox
-          let streamDestination = ctx.createMediaStreamDestination();
-          let source = ctx.createMediaElementSource(audio);
-          source.connect(streamDestination);
-          source.connect(ctx.destination);
-          audioFileStream = setStream(streamDestination.stream);
-          await audio.play();
-
-          setState('active');
-          setActiveFile(file);
-          set(state, 'audioFile', {...audioFile, audio});
-
-          openModal(AudioPlayerToast, {}, 'player');
-
-          domEvent(audio, 'ended').then(() => {
-            if (useActiveFile[0] !== file) return;
-            audio.src = null;
-            setAudio(null);
-            setStream(null);
-            setActiveFile(null);
-            setState('initial');
-            set(state, 'audioFile', null);
-          });
-        })();
-      }
-      break;
-    case 'starting':
-      break;
-    case 'active':
-      if (!shouldStream || file !== activeFile) {
-        audio.src = null;
-        setAudio(null);
-        audioFileStream = setStream(null);
-        setActiveFile(null);
-        setState('initial');
-        if (file !== activeFile) update();
-      }
-      break;
-  }
-  return {audioFileStream};
+  return {myAudio, soundMuted, audioFileElement};
 }
 
 function Muted({myAudio, micMuted}) {
@@ -182,6 +116,7 @@ function onConfirmModal() {
   }
 }
 
+// FIXME: opening modals from state routines breaks UI / state separation
 function playOrShowModal(peerId, audio) {
   let stream = audio.srcObject;
   return play(audio).catch(err => {

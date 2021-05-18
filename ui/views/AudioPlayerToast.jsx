@@ -1,28 +1,37 @@
-import {set, use} from 'use-minimal-state';
+import {is, use} from 'use-minimal-state';
 import React, {useEffect, useState} from 'react';
 import state from '../logic/state';
-import {CloseSvg} from './Modal';
+import {CloseSvg, ShowModal} from './Modal';
+import {declare, useRootState} from '../lib/state-tree';
 
-export default function AudioPlayerToast({close}) {
-  let {audio, name} = use(state, 'audioFile') ?? {};
+export function ShowAudioPlayerToast() {
+  let audioFileElement = useRootState('audioFileElement');
+  declare(ShowModal, {
+    component: AudioPlayerToast,
+    show: !!audioFileElement,
+  });
+}
+
+function AudioPlayerToast({close}) {
+  let {name} = use(state, 'audioFile') ?? {};
+  let audio = use(state, 'audioFileElement');
   let [element, setElement] = useState();
   useEffect(() => {
     if (element && audio) {
       audio.controls = true;
       audio.style.width = '100%';
       element.appendChild(audio);
-      audio.addEventListener('ended', close);
       return () => {
         element.removeChild(audio);
-        audio.removeEventListener('ended', close);
       };
     }
   }, [element, audio, close]);
 
-  let end = () => {
-    set(state, 'audioFile', null);
+  function end() {
+    is(state, 'audioFile', null);
     close();
-  };
+  }
+
   return (
     <div
       className="mt-40 w-96"

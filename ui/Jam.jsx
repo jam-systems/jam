@@ -11,6 +11,10 @@ import {set, use} from 'use-minimal-state';
 import Start from './views/Start';
 import Me from './views/Me';
 import PossibleRoom from './views/PossibleRoom';
+import {declare, declareStateRoot} from './lib/state-tree';
+import {ShowAudioPlayerToast} from './views/AudioPlayerToast';
+
+declareStateRoot(ShowModals, state);
 
 export default function Jam({
   style,
@@ -106,4 +110,8 @@ function hexToRGB(hex, alpha) {
   } else {
     return `rgb(${r}, ${g}, ${b})`;
   }
+}
+
+function ShowModals() {
+  declare(ShowAudioPlayerToast);
 }

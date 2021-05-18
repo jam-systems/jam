@@ -27,7 +27,7 @@ export {
   useState,
   useMemo,
   Fragment,
-  Merged,
+  merge,
 };
 
 const root = {children: []};
@@ -455,6 +455,7 @@ function isAtom(thing) {
 
 // TODO we should probably forward atom updates only when value changed
 // (if didn't change nothing will be done in state root anyway)
+// hint: some Components return undefined, which results in an empty atom for now
 function resultToAtom(result, element) {
   if (element.atom === undefined) {
     element.atom = Atom();
@@ -494,7 +495,7 @@ function setObjectAtom(objAtom, obj) {
   }
 }
 
-function Merged(...objAtomArray) {
+function merge(...objAtomArray) {
   objAtomArray._merged = true;
   return objAtomArray;
 }

@@ -6,13 +6,17 @@ import {AudioState} from './audio';
 import './reactions';
 import './room';
 import {is, on, set, update} from 'use-minimal-state';
-import {declare, declareStateRoot, Merged} from '../lib/state-tree';
+import {declare, declareStateRoot, merge} from '../lib/state-tree';
 
-declareStateRoot(
-  ({room, inRoom, iAmModerator, userInteracted, micMuted}) =>
-    declare(AppState, {room, inRoom, iAmModerator, userInteracted, micMuted}),
-  state
-);
+declareStateRoot(({room, inRoom, iAmModerator, userInteracted, micMuted}) => {
+  return declare(AppState, {
+    room,
+    inRoom,
+    iAmModerator,
+    userInteracted,
+    micMuted,
+  });
+}, state);
 
 function AppState({room, inRoom, iAmModerator, userInteracted, micMuted}) {
   let {closed} = room;
@@ -23,7 +27,7 @@ function AppState({room, inRoom, iAmModerator, userInteracted, micMuted}) {
   is(swarm.myPeerState, {micMuted, inRoom: !!inRoom});
 
   userInteracted = userInteracted || !!inRoom;
-  return Merged({userInteracted, inRoom}, declare(AudioState));
+  return merge({userInteracted, inRoom}, declare(AudioState));
 }
 
 export function enterRoom(roomId) {
