@@ -17,8 +17,6 @@ const jamSchema = process.env.JAM_SCHEMA || 'https://';
 const urls = {
   jam: process.env.JAM_URL || `${jamSchema}${jamHost}`,
   pantry: process.env.JAM_PANTRY_URL || `${jamSchema}${jamHost}/_/pantry`,
-  signalHub:
-    process.env.JAM_SIGNALHUB_URL || `${jamSchema}${jamHost}/_/signalhub`,
   stun: process.env.JAM_STUN_SERVER || `stun:stun.${jamHost}:3478`,
   turn: process.env.JAM_TURN_SERVER || `turn:turn.${jamHost}:3478`,
   turnCredentials: {
@@ -262,7 +260,7 @@ app.use(async (req, res) => {
     <script>
         window.jamConfig = ${JSON.stringify(jamConfig)};
     </script>
-    <script type="module" src="./bundle.js"></script>
+    <script type="module" src="/bundle.js"></script>
   </body>
 </html>
 `,
