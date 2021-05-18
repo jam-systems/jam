@@ -31,7 +31,6 @@ export {
 };
 
 const root = {children: []};
-window.root = root;
 let current = root;
 let renderRoot = null;
 let nUses = 0;
