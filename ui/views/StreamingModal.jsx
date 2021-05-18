@@ -2,7 +2,8 @@ import React from 'react';
 import {Modal} from './Modal';
 import {PrimaryButton, SecondaryButton} from './Button';
 import {LabeledInput, useFileInput} from './Input';
-import {streamAudioFromUrl} from '../logic/audio';
+import state from '../logic/state';
+import {set} from 'use-minimal-state';
 
 export default function StreamingModal({close}) {
   // let [urlValue, urlInput] = useInput();
@@ -10,11 +11,8 @@ export default function StreamingModal({close}) {
   let submit = async e => {
     e.preventDefault();
     let file = getFile();
-    let url = file && URL.createObjectURL(file); // : urlValue;
-    if (url) {
-      streamAudioFromUrl(url, file.name);
-      close();
-    }
+    set(state, 'audioFile', {file, name: file.name});
+    close();
   };
   return (
     <Modal close={close}>

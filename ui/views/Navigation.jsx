@@ -1,20 +1,17 @@
 import React, {useMemo, useState} from 'react';
 import {leaveRoom} from '../logic/main';
-import state from '../logic/state';
-import {set, use} from 'use-minimal-state';
+import state, {actions} from '../logic/state';
+import {is, use} from 'use-minimal-state';
 import {currentId} from '../logic/identity';
 import {sendReaction, raiseHand} from '../logic/reactions';
 import EditRole, {EditSelf} from './EditRole';
 import {breakpoints, useWidth} from '../logic/tailwind-mqp';
-import UAParser from 'ua-parser-js';
-import {requestAudio} from '../logic/audio';
 import {openModal} from './Modal';
 import {InfoModal} from './InfoModal';
 import {MicOffSvg, MicOnSvg} from './Svg';
+import {dispatch} from '../lib/state-tree';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
-
-var userAgent = UAParser();
 
 let navigationStyle = {
   position: 'fixed',
@@ -63,13 +60,9 @@ export default function Navigation({
 
   let talk = () => {
     if (micOn) {
-      set(state, 'micMuted', !micMuted);
+      is(state, 'micMuted', !micMuted);
     } else {
-      if (userAgent.browser?.name === 'Safari') {
-        location.reload();
-      } else {
-        requestAudio();
-      }
+      dispatch(state, actions.RETRY_MIC);
     }
   };
 

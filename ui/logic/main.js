@@ -2,10 +2,39 @@ import state, {swarm} from './state';
 import {get} from './backend';
 import {currentId, signData, verifyData} from './identity';
 import {staticConfig} from './config';
-import {requestAudio, stopAudio} from './audio';
+import {AudioState} from './audio';
 import './reactions';
 import './room';
 import {is, on, set, update} from 'use-minimal-state';
+import {declare, declareStateRoot, merge} from '../lib/state-tree';
+
+declareStateRoot(AppState, state, [
+  'room',
+  'inRoom',
+  'iAmModerator',
+  'userInteracted',
+  'micMuted',
+]);
+
+function AppState({room, inRoom, iAmModerator, userInteracted, micMuted}) {
+  let {closed} = room;
+
+  if (closed && !iAmModerator) {
+    inRoom = false;
+  }
+  is(swarm.myPeerState, {micMuted, inRoom: !!inRoom});
+
+  userInteracted = userInteracted || !!inRoom;
+  return merge({userInteracted, inRoom}, declare(AudioState));
+}
+
+export function enterRoom(roomId) {
+  set(state, 'inRoom', roomId);
+}
+
+export function leaveRoom() {
+  set(state, 'inRoom', null);
+}
 
 function configSwarm() {
   swarm.config({
@@ -33,33 +62,6 @@ function configSwarm() {
 configSwarm();
 on(staticConfig, () => configSwarm());
 
-function RoomState({inRoom, iAmSpeaker}) {}
-
-export function enterRoom(roomId) {
-  is(state, 'userInteracted', true);
-  set(state, 'inRoom', roomId);
-  set(swarm.myPeerState, 'inRoom', true);
-  if (state.iAmSpeaker) {
-    requestAudio().then(() => is(state, 'soundMuted', false));
-  } else {
-    is(state, 'soundMuted', false);
-  }
-}
-
-export function leaveRoom() {
-  set(state, 'inRoom', null);
-  set(swarm.myPeerState, 'inRoom', false);
-  stopAudio();
-  set(state, 'soundMuted', true);
-}
-
-// leave room when it gets closed
-on(state, 'room', room => {
-  let {moderators, closed} = room;
-  if (state.inRoom && closed && !moderators.includes(currentId())) {
-    leaveRoom();
-  }
-});
 // leave room when same peer joins it from elsewhere and I'm in room
 // TODO: currentId() is called too early to react to any changes!
 on(swarm.connectionState, currentId(), myConnState => {

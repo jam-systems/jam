@@ -11,10 +11,10 @@ const state = {
   reactions: {},
   raisedHands: new Set(),
 
-  micAllowed: false,
   soundMuted: true,
-  micMuted: true,
-  myMic: null,
+  micMuted: false,
+  audioFile: null,
+  audioFileElement: null,
   myAudio: null,
 
   speaking: new Set(),
@@ -24,6 +24,10 @@ const state = {
   userInteracted: false,
 };
 export default state;
+
+export const actions = {
+  RETRY_MIC: 'retry-mic',
+};
 
 const swarm = Swarm();
 export {swarm};

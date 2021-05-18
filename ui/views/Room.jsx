@@ -14,7 +14,6 @@ import Navigation from './Navigation';
 import UAParser from 'ua-parser-js';
 import {usePushToTalk} from '../logic/hotkeys';
 import {disconnectRoom, maybeConnectRoom} from '../logic/room';
-import {stopAudio} from '../logic/audio';
 const userAgent = UAParser();
 const inWebView =
   userAgent.browser?.name === 'Chrome WebView' ||
@@ -23,7 +22,7 @@ const inWebView =
 export default function Room({room, roomId}) {
   // room = {name, description, moderators: [peerId], speakers: [peerId]}
   useWakeLock();
-  usePushToTalk();
+  usePushToTalk(state);
 
   // connect with signaling server
   useEffect(() => {
@@ -31,7 +30,6 @@ export default function Room({room, roomId}) {
     return () => {
       // clean up on unmount
       disconnectRoom(roomId);
-      stopAudio();
     };
   }, [roomId]);
 
