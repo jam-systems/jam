@@ -72,6 +72,9 @@ export default function Jam({
   }, [dynamicConfig.debug]);
 
   // global styling
+  // TODO: the color should depend on the loading state of GET /room, to not flash orange before being in the room color
+  // => color should be only set here if the route is not a room id, otherwise <PossibleRoom> should set it
+  // => pass a setColor prop to PossibleRoom
   let {color} = use(state, 'room');
   let [width, , setContainer, mqp] = useProvideWidth();
   let backgroundColor = useMemo(
