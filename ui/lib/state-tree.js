@@ -1,4 +1,5 @@
 import {is, on, emit, update, set} from 'use-minimal-state';
+import {staticConfig} from '../logic/config';
 import causalLog from './causal-log';
 
 // a kind of "React for app state"
@@ -10,6 +11,7 @@ import causalLog from './causal-log';
 /* TODOs:
 
   -) enable more Component return values
+  -) batch updates in a more deterministic / purposeful way / order
   -) probably don't use minimal-state for internal update forwarding, or at least don't forward non-changes
   -) add API for using state-tree inside React components
   -) understand performance & optimize where possible
@@ -159,8 +161,6 @@ function declareStateRoot(Component, state, keys = []) {
 
   const rootAtom = rootElement.atom;
   let result = getAtom(rootAtom);
-  is(state, result);
-
   log(
     'STATE-TREE',
     'initial root render returned',
@@ -168,6 +168,7 @@ function declareStateRoot(Component, state, keys = []) {
     'after',
     Date.now() - renderTime
   );
+  is(state, result);
   renderRoot = null;
 
   on(rootAtom, result => {
@@ -178,11 +179,11 @@ function declareStateRoot(Component, state, keys = []) {
   on(state, (key, value, oldValue) => {
     if (oldValue !== undefined && value === oldValue) return;
 
+    // TODO: what updates should we queue on state updates during render?
     if (renderRoot !== rootElement && (keys === '*' || keys.includes(key))) {
       queueRootUpdate(rootElement, key);
     }
 
-    // TODO: what updates should we queue on state updates during render?
     let subscribers = rootElement.stateSubs.get(key);
     if (subscribers !== undefined) {
       for (let element of subscribers) {
@@ -513,7 +514,7 @@ function setMergedAtom(atom, objAtomArray) {
   }
 }
 
-let doLog = false;
+let doLog = !!staticConfig.development;
 function debugStateTree() {
   window.root = root;
   doLog = true;

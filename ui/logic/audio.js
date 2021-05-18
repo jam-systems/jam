@@ -17,16 +17,14 @@ let userAgent = UAParser();
 
 export {AudioState};
 
-function AudioState() {
+function AudioState({inRoom}) {
   let [
-    inRoom,
     iAmSpeaker,
     raisedHands,
     audioContext,
     micMuted,
     audioFile,
   ] = useRootState([
-    'inRoom',
     'iAmSpeaker',
     'raisedHands',
     'audioContext',

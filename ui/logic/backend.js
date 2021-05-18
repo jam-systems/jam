@@ -119,11 +119,8 @@ export async function deleteRequest(path, payload = null) {
 
 export async function createRoom(
   roomId,
-  name,
-  description,
-  logoURI,
-  color,
-  peerId
+  peerId,
+  {name = '', description = '', logoURI, color, stageOnly} = {}
 ) {
   let room = {
     ...emptyRoom,
@@ -131,6 +128,7 @@ export async function createRoom(
     description,
     logoURI,
     color,
+    stageOnly: !!stageOnly,
     moderators: [peerId],
     speakers: [peerId],
   };
@@ -150,14 +148,8 @@ export function useCreateRoom({
   useEffect(() => {
     if (roomId && !room && !isRoomLoading) {
       (async () => {
-        let roomCreated = await createRoom(
-          roomId,
-          newRoom?.name || '',
-          newRoom?.description || '',
-          newRoom?.logoURI || '',
-          newRoom?.color || '',
-          currentId()
-        );
+        let roomCreated = await createRoom(roomId, currentId(), newRoom);
+        console.log(roomCreated);
         setLoading(false);
         if (roomCreated) {
           updateApiQuery(`/rooms/${roomId}`, roomCreated);

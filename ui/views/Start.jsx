@@ -31,14 +31,8 @@ export default function Start({urlRoomId, roomFromURIError}) {
     }
 
     (async () => {
-      let roomCreated = await createRoom(
-        roomId,
-        name,
-        description,
-        logoURI,
-        color,
-        currentId()
-      );
+      let newRoom = {name, description, logoURI, color};
+      let roomCreated = await createRoom(roomId, currentId(), newRoom);
       if (roomCreated) {
         updateApiQuery(`/rooms/${roomId}`, roomCreated, 200);
         if (urlRoomId !== roomId) navigate('/' + roomId);
