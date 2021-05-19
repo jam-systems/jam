@@ -12,9 +12,12 @@ import causalLog from './causal-log';
 
   -) enable more Component return values
   -) batch updates in a more deterministic / purposeful way / order
-  -) probably don't use minimal-state for internal update forwarding, or at least don't forward non-changes
+  -) use a dedicated class for Fragment for efficiency
   -) add API for using state-tree inside React components
   -) understand performance & optimize where possible
+  -) understand in what cases object identity of state properties must change, or,
+     when updates to root are sufficiently fine-grained, possibly don't block
+     non-changes to state in root (but first approach is cleaner)
 */
 
 export {
@@ -47,7 +50,7 @@ function declare(Component, props) {
   let element = current.children.find(
     c => c.component === Component && c.key === key
   );
-  let newElement = _declare(Component, props, element);
+  let [newElement] = _declare(Component, props, element);
   return newElement.fragment;
 }
 
@@ -56,7 +59,7 @@ function use(Component, props) {
   let element = current.children.find(
     c => c.component === Component && c.key === key
   );
-  let newElement = _declare(Component, props, element, true);
+  let [newElement] = _declare(Component, props, element, true);
   return newElement.fragment[0];
 }
 
@@ -66,7 +69,7 @@ function _declare(Component, props = null, element, used = false) {
 
   if (sameProps(element?.props, props) && !mustUpdate) {
     element.renderTime = renderTime;
-    return element;
+    return [element, undefined];
   }
 
   // log('rendering', Component.name);
@@ -127,9 +130,9 @@ function _declare(Component, props = null, element, used = false) {
   // process result (creates or updates element.fragment)
   log('rendered', Component.name, 'with result', result);
   // here we should obtain update info in case of re-renders!!!
-  resultToFragment(result, element.fragment);
+  let updateKeys = resultToFragment(result, element.fragment);
 
-  return element;
+  return [element, updateKeys];
 }
 
 // for creating state obj at the top level & later rerun on update
@@ -170,11 +173,13 @@ function declareStateRoot(Component, state, keys = []) {
     'after',
     Date.now() - renderTime
   );
+  // TODO: could it be problematic here that we don't update unchanged values, can there be stable sub-objects?
   is(state, result);
   renderRoot = null;
 
   on(rootFragment, (result, keys) => {
     log('STATE-TREE', 'root fragment update triggered!', result, keys);
+    // TODO: could it be problematic here that we don't update unchanged values, can there be stable sub-objects?
     if (keys === undefined) is(state, result);
     else {
       for (let key of keys) {
@@ -265,6 +270,7 @@ function queueRootUpdate(rootElement, reason = '') {
       'after',
       Date.now() - renderTime
     );
+    // TODO: could it be problematic here that we don't update unchanged values, can there be stable sub-objects?
     is(state, result);
   });
 }
@@ -290,10 +296,10 @@ function rerender(element) {
   let result;
   if (element.declared) {
     log('STATE-TREE', 'rerendering', element.component.name);
-    _declare(element.component, element.props, element);
+    let [, updateKeys] = _declare(element.component, element.props, element);
     result = element.fragment[0];
     // TODO: rerendered element should already provide fine-grained update info (keys)
-    emit(element.fragment, result, undefined);
+    emit(element.fragment, result, updateKeys);
   } else {
     throw Error(
       'undeclared re-render! should not happen because used elements require update of parents'
@@ -316,6 +322,7 @@ function dispatchFromRoot(rootElement, type, payload) {
     actionRoots.add(markForUpdate(element));
   }
   currentAction = [type, payload];
+  // TODO: should use queueUpdate instead of sync rendering here, like everywhere else!
   for (let rootElement of actionRoots) {
     log('STATE-TREE', 'branch render caused by dispatch', rootElement);
     let result = rerender(rootElement);
@@ -436,12 +443,13 @@ function Atom(value) {
 // TODO using classes for Fragments probably increases efficiency,
 // because the compiler has more static info & reuses methods
 
-// it may well be the case that putting the value in a .value prop is faster than in [0]
+// it may well be the case that putting the value in a .value class property is faster than in [0]
 
-function Fragment(value) {
-  let fragment = [value];
+function Fragment() {
+  let fragment = [undefined];
   fragment._frag = true;
   fragment._deps = new Map();
+  fragment._type = 'nullish'; // 'plain', 'merged', 'object'
   on(fragment, (...args) => {
     for (let e of fragment._deps) {
       e[1](...args);
@@ -457,12 +465,14 @@ function isFragment(thing) {
 // TODO we provide keys for fine-grained-update here if possible, like in child component updates
 function resultToFragment(result, fragment) {
   if (result === undefined || result === null) {
+    fragment._type = 'nullish';
     fragment[0] = result;
     return;
   }
 
   if (result._frag) {
     fragment[0] = result[0];
+    fragment._type = result._type;
     result._deps.set(fragment, (value, keys) => {
       fragment[0] = value;
       emit(fragment, value, keys);
@@ -472,25 +482,31 @@ function resultToFragment(result, fragment) {
 
   if (result._atom) {
     fragment[0] = result[0];
+    fragment._type = 'plain';
     return;
   }
 
   if (result._merged) {
     setMergedFragment(fragment, result);
+    fragment._type = 'merged';
     return;
   }
 
   if (typeof result === 'object') {
-    setObjectFragment(fragment, result);
-    return;
+    let updateKeys = setObjectFragment(fragment, result);
+    fragment._type = 'object';
+    return updateKeys;
   }
 
   // plain value
   fragment[0] = result;
+  fragment._type = 'plain';
 }
 
 function setObjectFragment(objFragment, obj) {
   let pureObj = {};
+  let keys = objFragment._type === 'object' ? [] : undefined;
+  let oldObj = objFragment[0];
   objFragment[0] = pureObj;
 
   for (let key in obj) {
@@ -500,13 +516,20 @@ function setObjectFragment(objFragment, obj) {
       // these listeners should be a class method on (Object)Fragment
       prop._deps.set(objFragment, (value, _keys) => {
         pureObj[key] = value;
+        // TODO: should object identity change?
         // TODO: forward deeply nested update info, i.e. use _keys?
         emit(objFragment, pureObj, [key]);
       });
     } else {
       pureObj[key] = prop;
     }
+    // if fragment already was an object fragment, we extract updates keys
+    if (keys !== undefined && oldObj[key] !== pureObj[key]) {
+      keys.push(key);
+    }
   }
+
+  return keys;
 }
 
 function merge(...objArray) {
@@ -514,6 +537,8 @@ function merge(...objArray) {
   return objArray;
 }
 
+// TODO: should sub-object identity change?
+// does current model break if it changes?
 function setMergedFragment(fragment, objArray) {
   let mergedObj = {};
   fragment[0] = mergedObj;
