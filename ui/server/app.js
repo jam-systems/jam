@@ -57,6 +57,7 @@ async function getRoomMetaInfo(route) {
         schedule: roomInfo.schedule,
       },
       roomInfo,
+      roomId,
     };
   } catch (e) {
     console.log(`Error getting info for ${route}`);
@@ -139,7 +140,7 @@ app.use(async (req, res) => {
     }
   }
 
-  let {meta = null, roomInfo = null} = await getRoomMetaInfo(route);
+  let {meta = null, roomInfo, roomId} = await getRoomMetaInfo(route);
   const metaInfo = {...defaultMetaInfo, ...meta};
 
   if (req.path.includes('/_/integrations/oembed')) {
@@ -261,7 +262,8 @@ app.use(async (req, res) => {
     <div id="root"></div>
     <script>
         window.jamConfig = ${JSON.stringify(jamConfig)};
-        window.roomInfo = ${JSON.stringify(roomInfo)};
+        window.existingRoomInfo = ${JSON.stringify(roomInfo ?? null)};
+        window.existingRoomId = ${JSON.stringify(roomId ?? null)};
     </script>
     <script type="module" src="/bundle.js"></script>
   </body>
@@ -275,9 +277,9 @@ app.use(async (req, res) => {
 module.exports = app;
 
 function parsePath(pathname) {
-  let [first = null, second] = pathname.split('/').filter(x => x);
+  let [first, second] = pathname.split('/').filter(x => x);
   let stageOnly = first === 's';
   // other special configs go here
   let route = stageOnly ? second : first;
-  return route;
+  return route ?? null;
 }
