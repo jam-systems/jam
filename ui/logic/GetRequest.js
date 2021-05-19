@@ -1,4 +1,5 @@
-import {useAction} from '../lib/state-tree';
+import {update} from 'use-minimal-state';
+import {useExternalState} from '../lib/state-tree';
 import {API} from './backend';
 import {signedToken} from './identity';
 
@@ -8,12 +9,7 @@ export default function GetRequest() {
   let ourState = 'idle'; // 'loading', 'success', 'error'
 
   return function GetRequest({path, dontFetch = false}) {
-    let [, , dispatch] = useAction(`query-${path}`); // ensure we get updated
-    // ^ this would be nicer with a useExternalState() function or useGlobalAction
-    // something that enables all GET requests in the app to sync on the same query cache
-    // and, importantly, would allow them to be updated on someone manually using getRequest(path)
-    // (or are we reinventing the Cache API here?)
-    let {state, data, status} = getCache(path);
+    let {state, data, status} = useExternalState(queryCache, path) ?? idleQuery;
     let shouldFetch = !!path && !dontFetch;
     let actionRequired = shouldFetch && state === 'idle';
 
@@ -25,7 +21,7 @@ export default function GetRequest() {
     if (actionRequired) {
       // console.log('GetRequest: action required!', path);
       ourState = 'loading';
-      getRequest(path, dispatch);
+      getRequest(path);
     } else {
       ourState = state;
     }
@@ -34,7 +30,7 @@ export default function GetRequest() {
   };
 }
 
-async function getRequest(path, onCacheUpdate) {
+async function getRequest(path) {
   setCache(path, {state: 'loading'});
 
   let res = await fetch(API + path, {
@@ -52,8 +48,7 @@ async function getRequest(path, onCacheUpdate) {
   if (res === undefined) {
     // TODO: probably no internet, we don't count that as an error for now to ensure it always tries refetching
     // but we eventually should have some global online monitoring / refetching and count as error
-    setCache(path, {state: 'idle', data: null, status: null});
-    onCacheUpdate?.();
+    setCache(path, idleQuery);
     return [null, false, null];
   }
   status = res.status;
@@ -66,21 +61,15 @@ async function getRequest(path, onCacheUpdate) {
     data = null;
   }
   setCache(path, {state, data, status});
-  onCacheUpdate?.();
   return [data, ok, status];
 }
 
 // TODO merge this cache w/ the one for useApiQuery
 const queryCache = {}; // path: {state, data, status}, state = 'idle', 'loading', 'success', 'error'
-window.queryCache = queryCache;
+const idleQuery = {state: 'idle', data: null, status: null};
 
 function getCache(path) {
-  let cached = queryCache[path];
-  if (cached === undefined) {
-    cached = {state: 'idle', data: null, status: null};
-    queryCache[path] = cached;
-  }
-  return cached;
+  return queryCache[path] ?? idleQuery;
 }
 
 function setCache(path, {state, data, status}) {
@@ -90,6 +79,7 @@ function setCache(path, {state, data, status}) {
   } else {
     merge(cached, {state, data, status});
   }
+  update(queryCache, path);
 }
 
 function populateCache(path, data) {

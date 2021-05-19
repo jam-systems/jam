@@ -1,4 +1,4 @@
-import {is, on, emit, clear} from 'use-minimal-state';
+import {is, on, emit, clear, off} from 'use-minimal-state';
 import {staticConfig} from '../logic/config';
 import causalLog from './causal-log';
 
@@ -10,8 +10,6 @@ import causalLog from './causal-log';
 
 /* TODOs:
 
-  -) implement useExternalState(state, key?) (compatible with minimal-state) to enable encapsulated modules that
-     manage their own reactive state objects, e.g. queryCache
   -) enable more Component return values
   -) batch updates in a more deterministic / purposeful way / order
   -) use a dedicated class for Fragment for efficiency
@@ -32,6 +30,7 @@ export {
   dispatch,
   useAction,
   useRootState,
+  useExternalState,
   useUpdate,
   useState,
   useMemo,
@@ -387,6 +386,32 @@ function useRootState(keys) {
   } else {
     return state;
   }
+}
+
+function useExternalState(state, key) {
+  if (current === root) throw Error('Hooks can only be called during render');
+  let caller = current;
+  let use = caller.uses[nUses];
+  if (use === undefined || use[0] !== key) {
+    if (use !== undefined) {
+      // cleaning up when key changed
+      off(state, key, use[1]);
+    }
+    const listener = () => {
+      // not sure whether we want this...
+      // I'd rather be able to force updates when I want and be careful about triggering them
+      // if (value === state[key]) return;
+      if (current !== caller) {
+        queueUpdate(caller, 'useExternalState ' + key);
+      }
+    };
+    // TODO: cleanup on onUnmount
+    on(state, key, listener);
+    use = [key, listener];
+    caller.uses[nUses] = use;
+  }
+  nUses++;
+  return state[key];
 }
 
 function useUpdate() {
