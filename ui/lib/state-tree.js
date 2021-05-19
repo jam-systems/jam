@@ -10,10 +10,15 @@ import causalLog from './causal-log';
 
 /* TODOs:
 
+  -) implement useExternalState(state, key?) (compatible with minimal-state) to enable encapsulated modules that
+     manage their own reactive state objects, e.g. queryCache
   -) enable more Component return values
   -) batch updates in a more deterministic / purposeful way / order
   -) use a dedicated class for Fragment for efficiency
-  -) add API for using state-tree inside React components
+  -) add API for using state-tree inside React components, i.e. useStateRoot(Component, props)
+     which maintains a reference to the same root element/key via useState & otherwise is like declareStateRoot.
+     To access the same state in downstream components we'll just use the Context API
+  -) possibly implement useGlobalAction / dispatchGlobalAction
   -) understand performance & optimize where possible
   -) understand in what cases object identity of state properties must change, or,
      when updates to root are sufficiently fine-grained, possibly don't block
@@ -324,7 +329,7 @@ function dispatchFromRoot(rootElement, type, payload) {
   currentAction = [type, payload];
   // TODO: should use queueUpdate instead of sync rendering here, like everywhere else!
   for (let rootElement of actionRoots) {
-    log('STATE-TREE', 'branch render caused by dispatch', rootElement);
+    log('STATE-TREE', 'branch render caused by dispatch', type);
     let result = rerender(rootElement);
     log(
       'STATE-TREE',
@@ -357,7 +362,8 @@ function useAction(type) {
   if (current === root)
     throw Error('useAction can only be called during render');
   subscribe(renderRoot.actionSubs, type, current);
-  const dispatchThis = p => dispatch(renderRoot, type, p);
+  let callerRoot = renderRoot;
+  const dispatchThis = p => dispatchFromRoot(callerRoot, type, p);
   if (currentAction[0] === type) {
     return [true, currentAction[1], dispatchThis];
   } else {
