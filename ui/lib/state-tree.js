@@ -1,4 +1,4 @@
-import {is, on, emit, update, set} from 'use-minimal-state';
+import {is, on, emit} from 'use-minimal-state';
 import {staticConfig} from '../logic/config';
 import causalLog from './causal-log';
 
@@ -27,7 +27,7 @@ export {
   useUpdate,
   useState,
   useMemo,
-  Fragment,
+  Atom,
   merge,
   debugStateTree,
 };
@@ -48,7 +48,7 @@ function declare(Component, props) {
     c => c.component === Component && c.key === key
   );
   let newElement = _declare(Component, props, element);
-  return newElement.atom;
+  return newElement.fragment;
 }
 
 function use(Component, props) {
@@ -57,7 +57,7 @@ function use(Component, props) {
     c => c.component === Component && c.key === key
   );
   let newElement = _declare(Component, props, element, true);
-  return getAtom(newElement.atom);
+  return newElement.fragment[0];
 }
 
 function _declare(Component, props = null, element, used = false) {
@@ -85,7 +85,7 @@ function _declare(Component, props = null, element, used = false) {
       parent: current,
       root: renderRoot,
       declared: !used,
-      atom: undefined,
+      fragment: Fragment(),
     };
     log('STATE-TREE', 'mounting new element', element.component.name);
     current.children.push(element);
@@ -123,9 +123,10 @@ function _declare(Component, props = null, element, used = false) {
     }
   }
 
-  // process result (creates or updates element.atom)
+  // process result (creates or updates element.fragment)
   log('rendered', Component.name, 'with result', result);
-  resultToAtom(result, element);
+  // here we should obtain update info in case of re-renders!!!
+  resultToFragment(result, element.fragment);
 
   return element;
 }
@@ -147,20 +148,20 @@ function declareStateRoot(Component, state, keys = []) {
     parent: current,
     root: null,
     declared: true,
-    atom: undefined,
+    fragment: Fragment(),
     actionSubs: new Map(),
     stateSubs: new Map(),
     state,
   };
   rootElement.root = rootElement;
+  const rootFragment = rootElement.fragment;
+
   log('STATE-TREE', 'mounting ROOT element', rootElement);
   current.children.push(rootElement);
 
   renderRoot = rootElement;
   _declare(Component, {...state}, rootElement);
-
-  const rootAtom = rootElement.atom;
-  let result = getAtom(rootAtom);
+  let result = rootFragment[0];
   log(
     'STATE-TREE',
     'initial root render returned',
@@ -171,9 +172,14 @@ function declareStateRoot(Component, state, keys = []) {
   is(state, result);
   renderRoot = null;
 
-  on(rootAtom, result => {
-    log('STATE-TREE', 'root atom update triggered!', result);
-    is(state, result);
+  on(rootFragment, (result, keys) => {
+    log('STATE-TREE', 'root fragment update triggered!', result, keys);
+    if (keys === undefined) is(state, result);
+    else {
+      for (let key of keys) {
+        is(state, key, result[key]);
+      }
+    }
   });
 
   on(state, (key, value, oldValue) => {
@@ -245,12 +251,11 @@ function queueRootUpdate(rootElement, reason = '') {
     rootUpdateSet.delete(rootElement);
 
     log('STATE-TREE', 'root render caused by state update', reason);
-    let {state, atom, component} = rootElement;
+    let {state, fragment, component} = rootElement;
     renderRoot = rootElement;
     renderTime = Date.now();
     _declare(component, {...state}, rootElement);
-    let result = getAtom(atom);
-    is(state, result);
+    let result = fragment[0];
     renderRoot = null;
     log(
       'STATE-TREE',
@@ -259,6 +264,7 @@ function queueRootUpdate(rootElement, reason = '') {
       'after',
       Date.now() - renderTime
     );
+    is(state, result);
   });
 }
 
@@ -284,8 +290,9 @@ function rerender(element) {
   if (element.declared) {
     log('STATE-TREE', 'rerendering', element.component.name);
     _declare(element.component, element.props, element);
-    result = getAtom(element.atom);
-    update(element.atom);
+    result = element.fragment[0];
+    // TODO: rerendered element should already provide fine-grained update info (keys)
+    emit(element.fragment, result, undefined);
   } else {
     throw Error(
       'undeclared re-render! should not happen because used elements require update of parents'
@@ -419,98 +426,110 @@ function arrayEqual(a, b) {
   return true;
 }
 
-function Fragment(value) {
-  return Atom(value);
-}
-
 function Atom(value) {
   let atom = [value];
   atom._atom = true;
-  atom._deps = new Map();
-  on(atom, value => {
-    for (let e of atom._deps) {
-      e[1](value);
-    }
-  });
   return atom;
 }
 
-function getAtom(atom) {
-  return atom[0];
-}
-function setAtom(atom, value) {
-  atom[0] = value;
-}
-function addAtomDep(atom, dep, listener) {
-  atom._deps.set(dep, listener);
+// TODO using classes for Fragments probably increases efficiency,
+// because the compiler has more static info & reuses methods
+
+// it may well be the case that putting the value in a .value prop is faster than in [0]
+
+function Fragment(value) {
+  let fragment = [value];
+  fragment._frag = true;
+  fragment._deps = new Map();
+  on(fragment, (...args) => {
+    for (let e of fragment._deps) {
+      e[1](...args);
+    }
+  });
+  return fragment;
 }
 
-function isAtom(thing) {
-  return Array.isArray(thing) && thing._atom;
+function isFragment(thing) {
+  return thing?._frag;
 }
 
-// TODO we should probably forward atom updates only when value changed
-// (if didn't change nothing will be done in state root anyway)
-// hint: some Components return undefined, which results in an empty atom for now
-function resultToAtom(result, element) {
-  if (element.atom === undefined) {
-    element.atom = Atom();
-  }
-  let atom = element.atom;
-
-  if (isAtom(result)) {
-    setAtom(atom, getAtom(result));
-    addAtomDep(result, atom, value => set(atom, value));
+// TODO we provide keys for fine-grained-update here if possible, like in child component updates
+function resultToFragment(result, fragment) {
+  if (result === undefined || result === null) {
+    fragment[0] = result;
     return;
   }
 
-  if (result?._merged) {
-    setMergedAtom(atom, result);
+  if (result._frag) {
+    fragment[0] = result[0];
+    result._deps.set(fragment, (value, keys) => {
+      fragment[0] = value;
+      emit(fragment, value, keys);
+    });
+    return;
+  }
+
+  if (result._atom) {
+    fragment[0] = result[0];
+    return;
+  }
+
+  if (result._merged) {
+    setMergedFragment(fragment, result);
     return;
   }
 
   if (typeof result === 'object') {
-    setObjectAtom(atom, result);
+    setObjectFragment(fragment, result);
+    return;
   }
+
+  // plain value
+  fragment[0] = result;
 }
 
-function setObjectAtom(objAtom, obj) {
+function setObjectFragment(objFragment, obj) {
   let pureObj = {};
-  setAtom(objAtom, pureObj);
+  objFragment[0] = pureObj;
+
   for (let key in obj) {
-    let atom = obj[key];
-    if (isAtom(atom)) {
-      pureObj[key] = getAtom(atom);
-      addAtomDep(atom, objAtom, value => {
+    let prop = obj[key];
+    if (isFragment(prop)) {
+      pureObj[key] = prop[0];
+      // these listeners should be a class method on (Object)Fragment
+      prop._deps.set(objFragment, (value, _keys) => {
         pureObj[key] = value;
-        update(objAtom);
+        // TODO: forward deeply nested update info, i.e. use _keys?
+        emit(objFragment, pureObj, [key]);
       });
     } else {
-      pureObj[key] = atom;
+      pureObj[key] = prop;
     }
   }
 }
 
-function merge(...objAtomArray) {
-  objAtomArray._merged = true;
-  return objAtomArray;
+function merge(...objArray) {
+  objArray._merged = true;
+  return objArray;
 }
 
-function setMergedAtom(atom, objAtomArray) {
+function setMergedFragment(fragment, objArray) {
   let mergedObj = {};
+  fragment[0] = mergedObj;
 
-  function updateValue() {
-    let objects = objAtomArray.map(oa => (isAtom(oa) ? getAtom(oa) : oa));
-    let value = Object.assign(mergedObj, ...objects);
-    return value;
+  function updateSelf(value, keys) {
+    let objects = objArray.map(oa => (oa._frag ? oa[0] : oa));
+    fragment[0] = Object.assign(mergedObj, ...objects);
+    emit(fragment, fragment[0], keys ?? Object.keys(value));
   }
-  setAtom(atom, updateValue());
 
-  for (let objAtom of objAtomArray) {
-    if (!isAtom(objAtom)) continue;
-    addAtomDep(objAtom, atom, () => {
-      set(atom, updateValue());
-    });
+  for (let objFragment of objArray) {
+    if (isFragment(objFragment)) {
+      Object.assign(mergedObj, objFragment[0]);
+      objFragment._deps.set(fragment, updateSelf);
+    } else {
+      Object.assign(mergedObj, objFragment);
+    }
   }
 }
 

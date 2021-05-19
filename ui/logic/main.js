@@ -10,16 +10,16 @@ import {declare, declareStateRoot, merge} from '../lib/state-tree';
 
 declareStateRoot(AppState, state, [
   'room',
-  'joinedRoom',
+  'inRoom',
   'iAmModerator',
   'userInteracted',
   'micMuted',
 ]);
 
-function AppState({room, joinedRoom, iAmModerator, userInteracted, micMuted}) {
+function AppState({room, inRoom, iAmModerator, userInteracted, micMuted}) {
   let {closed} = room;
 
-  let inRoom = closed && !iAmModerator ? null : joinedRoom;
+  inRoom = closed && !iAmModerator ? null : inRoom;
   is(swarm.myPeerState, {micMuted, inRoom: !!inRoom});
 
   userInteracted = userInteracted || !!inRoom;
@@ -27,11 +27,11 @@ function AppState({room, joinedRoom, iAmModerator, userInteracted, micMuted}) {
 }
 
 export function enterRoom(roomId) {
-  set(state, 'joinedRoom', roomId);
+  set(state, 'inRoom', roomId);
 }
 
 export function leaveRoom() {
-  set(state, 'joinedRoom', null);
+  set(state, 'inRoom', null);
 }
 
 function configSwarm() {
