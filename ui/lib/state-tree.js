@@ -1,4 +1,4 @@
-import {is, on, emit} from 'use-minimal-state';
+import {is, on, emit, clear} from 'use-minimal-state';
 import {staticConfig} from '../logic/config';
 import causalLog from './causal-log';
 
@@ -118,6 +118,7 @@ function _declare(Component, props = null, element, used = false) {
     if (child.renderTime !== renderTime) {
       log('STATE-TREE', 'unmounting element', child);
       children.splice(i, 1);
+      clear(child.fragment);
       unsubscribeAll(renderRoot.actionSubs, child);
       unsubscribeAll(renderRoot.stateSubs, child);
     }
