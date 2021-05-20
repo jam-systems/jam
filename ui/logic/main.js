@@ -16,20 +16,23 @@ if (window.existingRoomInfo) {
 declareStateRoot(AppState, state, [
   'roomId',
   'inRoom',
-  'iAmModerator',
   'userInteracted',
   'micMuted',
 ]);
 
-function AppState({roomId, inRoom, iAmModerator, userInteracted, micMuted}) {
-  let {room} = use(RoomState, {roomId});
+function AppState({roomId, inRoom, userInteracted, micMuted}) {
+  let myId = currentId();
+  let {room, iAmSpeaker, iAmModerator} = use(RoomState, {roomId, myId});
   let {closed} = room;
 
   inRoom = closed && !iAmModerator ? null : inRoom;
   is(swarm.myPeerState, {micMuted, inRoom: !!inRoom});
 
   userInteracted = userInteracted || !!inRoom;
-  return merge({userInteracted, inRoom, room}, declare(AudioState, {inRoom}));
+  return merge(
+    {userInteracted, inRoom, room, iAmSpeaker, iAmModerator},
+    declare(AudioState, {inRoom})
+  );
 }
 
 export function enterRoom(roomId) {

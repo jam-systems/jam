@@ -18,10 +18,17 @@ export {
   emptyRoom,
 };
 
-function RoomState({roomId}) {
+function RoomState({roomId, myId}) {
   const path = roomId && `/rooms/${roomId}`;
   let {data} = use(GetRequest, {path});
-  return {room: data ?? emptyRoom};
+  let room = data ?? emptyRoom;
+
+  let {speakers, moderators, stageOnly} = room;
+  let iAmSpeaker = !!stageOnly || speakers.includes(myId);
+  if (iAmSpeaker) joinStage();
+  let iAmModerator = moderators.includes(myId);
+
+  return {room, iAmSpeaker, iAmModerator};
 }
 
 function useRoom(roomId) {
@@ -69,32 +76,6 @@ const emptyRoom = {
   speakers: [],
   moderators: [],
 };
-
-// watch changes in room
-on(state, 'room', (room, oldRoom) => {
-  let {speakers: oldSpeakers, moderators: oldModerators} = oldRoom;
-  let {speakers, moderators, stageOnly} = room;
-
-  let myId = currentId();
-  if (stageOnly) {
-    is(state, 'iAmSpeaker', true);
-    joinStage();
-  } else {
-    if (!oldSpeakers.includes(myId) && speakers.includes(myId)) {
-      set(state, 'iAmSpeaker', true);
-      joinStage();
-    }
-    if (oldSpeakers.includes(myId) && !speakers.includes(myId)) {
-      set(state, 'iAmSpeaker', false);
-    }
-  }
-  if (!oldModerators.includes(myId) && moderators.includes(myId)) {
-    set(state, 'iAmModerator', true);
-  }
-  if (oldModerators.includes(myId) && !moderators.includes(myId)) {
-    set(state, 'iAmModerator', false);
-  }
-});
 
 async function addRole(id, role) {
   let {speakers, moderators} = state.room;

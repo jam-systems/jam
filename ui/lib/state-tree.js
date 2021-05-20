@@ -23,6 +23,7 @@ import causalLog from './causal-log';
      * something like declare() for self-contained effects which can take props but don't return anything
      * check whether declare / use could work w/ changing components, this works in state-tree but not in React bc
        we fix reference to fragment
+  -) enable any component tree to handle actions, not just the declareRootState variant
   -) possibly implement useGlobalAction / dispatchGlobalAction
   -) understand performance & optimize where possible
   -) stale update problem: understand in what cases object identity of state properties must change.
