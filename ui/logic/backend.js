@@ -1,64 +1,28 @@
-import {useCallback, useEffect, useState} from 'react';
-import {on, set, use} from 'use-minimal-state';
+import {useEffect, useState} from 'react';
+import {on, set} from 'use-minimal-state';
+import {use} from '../lib/state-tree';
 import state, {modState, swarm} from './state';
 import {staticConfig} from './config';
 import {signedToken, signData, currentId, identities} from './identity';
 import {emptyRoom} from './room';
-import {populateCache} from './GetRequest';
+import GetRequest, {populateCache} from './GetRequest';
 
 let API = `${staticConfig.urls.pantry}/api/v1`;
 on(staticConfig, () => {
   API = `${staticConfig.urls.pantry}/api/v1`;
 });
 
-const queries = {};
-
 export function useApiQuery(path, {dontFetch = false, fetchOnMount = false}) {
-  let cached = use(queries, path);
-  let shouldFetch = path && !dontFetch && !cached;
-  let [isLoading, setLoading] = useState(shouldFetch);
-  let [hasFetched, setHasFetched] = useState(false);
-
-  let refetch = useCallback(async () => {
-    let res = await fetch(API + path, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        Authorization: `Token ${signedToken()}`,
-      },
-    }).catch(console.warn);
-    if (!res) {
-      setLoading(false);
-      return;
-    }
-
-    let data;
-    if (res.status < 400) data = await res.json().catch(console.warn);
-    updateApiQuery(path, data, res.status);
-    setLoading(false);
-  }, [path]);
-
-  useEffect(() => {
-    if (shouldFetch || (fetchOnMount && !hasFetched)) {
-      refetch().then(() => setHasFetched(true));
-    } else setLoading(false);
-  }, [shouldFetch, refetch, hasFetched, fetchOnMount]);
-
-  let {data, status} = cached || {};
-  return [data, isLoading, status, refetch];
-}
-
-export function updateApiQuery(path, data, status = 200) {
-  set(queries, path, data && {data, status});
-}
-
-export function forwardApiQuery(state, path, key, defaultQuery) {
-  set(state, key, queries[path]?.data || defaultQuery);
-  return on(queries, path, (query, oldQuery) => {
-    let data = query?.data || defaultQuery;
-    let oldData = oldQuery?.data || defaultQuery;
-    if (data !== oldData) set(state, key, data);
+  let {data, isLoading, status} = use(GetRequest, {
+    path,
+    dontFetch,
+    fetchOnMount,
   });
+  return [data, isLoading, status];
+}
+
+export function updateApiQuery(path, data) {
+  populateCache(path, data);
 }
 
 async function authenticatedApiRequest(method, path, payload) {

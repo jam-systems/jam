@@ -11,10 +11,15 @@ on(staticConfig, () => {
 
 export {getRequest, populateCache, getCache, setCache};
 
-export default function GetRequest() {
+export default function GetRequest({path, dontFetch, fetchOnMount}) {
   let ourState = 'idle'; // 'loading', 'success', 'error'
+  let shouldFetch = !!path && !dontFetch;
+  if (shouldFetch && fetchOnMount) {
+    ourState = 'loading';
+    getRequest(path);
+  }
 
-  return function GetRequest({path, dontFetch = false}) {
+  return function GetRequest({path, dontFetch}) {
     let {state, data, status} = use(queryCache, path) ?? idleQuery;
     let shouldFetch = !!path && !dontFetch;
     let actionRequired = shouldFetch && state === 'idle';

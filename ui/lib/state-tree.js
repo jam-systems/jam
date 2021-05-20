@@ -35,6 +35,9 @@ import causalLog from './causal-log';
   -) stale update problem: understand in what cases object identity of state properties must change.
      or, if updates to root are made sufficiently fine-grained, possibly don't block
      non-changes to state in root (but first approach is cleaner)
+  -) improve cleanup mechanisms
+     * form-2 components could return a cleanup function
+     * on() in useExternalState should be cleaned up
 */
 
 export {
