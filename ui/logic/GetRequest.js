@@ -1,5 +1,5 @@
 import {update} from 'use-minimal-state';
-import {useExternalState} from '../lib/state-tree';
+import {use} from '../lib/state-tree';
 import {API} from './backend';
 import {signedToken} from './identity';
 
@@ -9,7 +9,7 @@ export default function GetRequest() {
   let ourState = 'idle'; // 'loading', 'success', 'error'
 
   return function GetRequest({path, dontFetch = false}) {
-    let {state, data, status} = useExternalState(queryCache, path) ?? idleQuery;
+    let {state, data, status} = use(queryCache, path) ?? idleQuery;
     let shouldFetch = !!path && !dontFetch;
     let actionRequired = shouldFetch && state === 'idle';
 

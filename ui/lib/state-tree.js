@@ -1,5 +1,12 @@
 import React, {useEffect} from 'react';
-import {is, on, emit, clear, off} from 'use-minimal-state';
+import {
+  is,
+  on,
+  emit,
+  clear,
+  off,
+  use as useMinimalState,
+} from 'use-minimal-state';
 import {staticConfig} from '../logic/config';
 import causalLog from './causal-log';
 
@@ -63,10 +70,20 @@ function declare(Component, props) {
 
 // this works equivalently in React & state-tree components
 function use(Component, props) {
-  if (renderRoot === null) {
-    // we are not in a state tree => assume inside React component
+  let isComponent = typeof Component === 'function';
+  if (current === root) {
+    // we are not in a state component => assume inside React component
+    if (isComponent) {
+      // eslint-disable-next-line
+      return useStateComponent(Component, props);
+    } else {
+      // eslint-disable-next-line
+      return useMinimalState(Component, props);
+    }
+  }
+  if (!isComponent) {
     // eslint-disable-next-line
-    return useStateComponent(Component, props);
+    return useExternalState(Component, props);
   }
 
   let key = props?.key;
