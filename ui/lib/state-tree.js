@@ -1,3 +1,4 @@
+import React, {useEffect} from 'react';
 import {is, on, emit, clear, off} from 'use-minimal-state';
 import {staticConfig} from '../logic/config';
 import causalLog from './causal-log';
@@ -13,9 +14,11 @@ import causalLog from './causal-log';
   -) enable more Component return values
   -) batch updates in a more deterministic / purposeful way / order
   -) use a dedicated class for Fragment for efficiency
-  -) add API for using state-tree inside React components, i.e. useStateRoot(Component, props)
-     which maintains a reference to the same root element/key via useState & otherwise is like declareStateRoot.
-     To access the same state in downstream components we'll just use the Context API
+  -) add more API for using state-tree inside React components, i.e.
+     * useStateRoot(Component, props) which is like declareStateRoot & updates component w/ state
+     * something like declare() for self-contained effects which can take props but don't return anything
+     * check whether declare / use could work w/ changing components, this works in state-tree but not in React bc
+       we fix reference to fragment
   -) possibly implement useGlobalAction / dispatchGlobalAction
   -) understand performance & optimize where possible
   -) understand in what cases object identity of state properties must change, or,
@@ -58,7 +61,14 @@ function declare(Component, props) {
   return newElement.fragment;
 }
 
+// this works equivalently in React & state-tree components
 function use(Component, props) {
+  if (renderRoot === null) {
+    // we are not in a state tree => assume inside React component
+    // eslint-disable-next-line
+    return useStateComponent(Component, props);
+  }
+
   let key = props?.key;
   let element = current.children.find(
     c => c.component === Component && c.key === key
@@ -126,8 +136,10 @@ function _declare(Component, props = null, element, used = false) {
       log('STATE-TREE', 'unmounting element', child);
       children.splice(i, 1);
       clear(child.fragment);
-      unsubscribeAll(renderRoot.actionSubs, child);
-      unsubscribeAll(renderRoot.stateSubs, child);
+      if (renderRoot !== null) {
+        unsubscribeAll(renderRoot.actionSubs, child);
+        unsubscribeAll(renderRoot.stateSubs, child);
+      }
     }
   }
 
@@ -327,12 +339,12 @@ function dispatchFromRoot(rootElement, type, payload) {
   }
   currentAction = [type, payload];
   // TODO: should use queueUpdate instead of sync rendering here, like everywhere else!
-  for (let rootElement of actionRoots) {
-    log('STATE-TREE', 'branch render caused by dispatch', type);
-    let result = rerender(rootElement);
+  for (let element of actionRoots) {
+    log('STATE-TREE', 'render caused by dispatch', type);
+    let result = rerender(element);
     log(
       'STATE-TREE',
-      'branch render returned',
+      'render returned',
       result,
       'after',
       Date.now() - renderTime
@@ -356,7 +368,38 @@ function unsubscribeAll(subscriptions, element) {
   }
 }
 
+// TODO: investigate whether the Component can be made changeable
+
+function useStateComponent(Component, props) {
+  // a stable object which we use as render key and to store mutable state
+  let [stable] = React.useState({
+    shouldRun: true,
+    fragment: null,
+    component: Component,
+  });
+  if (props) props.key = stable;
+  else props = {key: stable};
+
+  if (stable.shouldRun) {
+    stable.fragment = declare(stable.component, props);
+  }
+  stable.shouldRun = true;
+
+  // the old force-update trick
+  let [, forceUpdate] = React.useState(0);
+
+  useEffect(() => {
+    return on(stable.fragment, () => {
+      console.log('STATE-TREE React update', stable.component.name);
+      stable.shouldRun = false;
+      forceUpdate(n => n + 1);
+    });
+  }, [stable]);
+  return stable.fragment[0];
+}
+
 // TODO maybe more efficient to memo the next 2-3 hooks, like useState (not sure though)
+// note that the next two need to be rendered inside a state root
 function useAction(type) {
   if (current === root)
     throw Error('useAction can only be called during render');
