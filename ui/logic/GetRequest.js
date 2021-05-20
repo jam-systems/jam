@@ -1,7 +1,13 @@
-import {update} from 'use-minimal-state';
+import {on, update} from 'use-minimal-state';
 import {use} from '../lib/state-tree';
-import {API} from './backend';
+import {staticConfig} from './config';
 import {signedToken} from './identity';
+
+// TODO: make this module general & let auth header & API paths be part of function params
+let API = `${staticConfig.urls.pantry}/api/v1`;
+on(staticConfig, () => {
+  API = `${staticConfig.urls.pantry}/api/v1`;
+});
 
 export {getRequest, populateCache, getCache, setCache};
 
@@ -82,6 +88,7 @@ function setCache(path, {state, data, status}) {
   update(queryCache, path);
 }
 
+// TODO: this should also take a function to update only one prop of `data`
 function populateCache(path, data) {
   setCache(path, {data, state: 'success', status: 200});
 }

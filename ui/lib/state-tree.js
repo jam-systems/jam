@@ -21,6 +21,10 @@ import causalLog from './causal-log';
   -) enable more Component return values
   -) batch updates in a more deterministic / purposeful way / order
   -) use a dedicated class for Fragment for efficiency
+  -) core lib should not depend on React, be usable everywhere
+     => split out useStateComponent() & overloaded use()
+     => minimal-state instead of use-minimal-state => use-minimal-state has to *import* minimal-state
+        so they share the event book-keeping (otherwise useExternalState wouldn't work)
   -) add more API for using state-tree inside React components, i.e.
      * useStateRoot(Component, props) which is like declareStateRoot & updates component w/ state
      * something like declare() for self-contained effects which can take props but don't return anything
@@ -28,8 +32,8 @@ import causalLog from './causal-log';
        we fix reference to fragment
   -) possibly implement useGlobalAction / dispatchGlobalAction
   -) understand performance & optimize where possible
-  -) understand in what cases object identity of state properties must change, or,
-     when updates to root are sufficiently fine-grained, possibly don't block
+  -) stale update problem: understand in what cases object identity of state properties must change.
+     or, if updates to root are made sufficiently fine-grained, possibly don't block
      non-changes to state in root (but first approach is cleaner)
 */
 
@@ -216,6 +220,7 @@ function declareStateRoot(Component, state, keys = []) {
     if (keys === undefined) is(state, result);
     else {
       for (let key of keys) {
+        log(key, 'value changed?', state[key] !== result[key]);
         is(state, key, result[key]);
       }
     }
@@ -598,6 +603,10 @@ function setObjectFragment(objFragment, obj) {
   let pureObj = {};
   let keys = objFragment._type === 'object' ? [] : undefined;
   let oldObj = objFragment[0];
+  if (keys) {
+    pureObj = oldObj;
+    oldObj = {...oldObj};
+  }
   objFragment[0] = pureObj;
 
   for (let key in obj) {

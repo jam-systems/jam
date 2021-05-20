@@ -1,19 +1,15 @@
 import state, {swarm} from './state';
-import {
-  get,
-  updateApiQuery,
-  put,
-  useApiQuery,
-  forwardApiQuery,
-} from './backend';
+import {get, put} from './backend';
 import {is, on, set, update} from 'use-minimal-state';
 import {currentId} from './identity';
 import log from '../lib/causal-log';
 import {staticConfig} from './config';
-import {useEffect} from 'react';
+import {use} from '../lib/state-tree';
+import GetRequest, {populateCache} from './GetRequest';
 
 export {
   useRoom,
+  RoomState,
   maybeConnectRoom,
   disconnectRoom,
   addRole,
@@ -22,24 +18,16 @@ export {
   emptyRoom,
 };
 
-const emptyRoom = staticConfig.defaultRoom
-  ? {...staticConfig.defaultRoom, speakers: [], moderators: []}
-  : {
-      name: '',
-      description: '',
-      speakers: [],
-      moderators: [],
-    };
-
-let _disconnectRoom = {};
+function RoomState({roomId}) {
+  const path = roomId && `/rooms/${roomId}`;
+  let {data} = use(GetRequest, {path});
+  return {room: data ?? emptyRoom};
+}
 
 function useRoom(roomId) {
-  const path = `/rooms/${roomId}`;
-  let roomResult = useApiQuery(path, {
-    dontFetch: !roomId,
-  });
-  useEffect(() => forwardApiQuery(state, path, 'room', emptyRoom), [path]);
-  return roomResult;
+  const path = roomId && `/rooms/${roomId}`;
+  let {data, isLoading, status} = use(GetRequest, {path});
+  return [data ?? emptyRoom, isLoading, status];
 }
 
 function maybeConnectRoom(roomId) {
@@ -58,7 +46,7 @@ function maybeConnectRoom(roomId) {
   });
   on(swarm.serverEvent, 'room-info', data => {
     log('new room info', data);
-    updateApiQuery(`/rooms/${state.roomId}`, data);
+    populateCache(`/rooms/${state.roomId}`, data);
   });
   _disconnectRoom[roomId] = () => {
     log('disconnecting', roomId);
@@ -71,6 +59,16 @@ function disconnectRoom(roomId) {
   _disconnectRoom[roomId]?.();
   _disconnectRoom[roomId] = undefined;
 }
+
+const _disconnectRoom = {};
+
+const emptyRoom = {
+  name: '',
+  description: '',
+  ...(staticConfig.defaultRoom ?? null),
+  speakers: [],
+  moderators: [],
+};
 
 // watch changes in room
 on(state, 'room', (room, oldRoom) => {
@@ -137,7 +135,7 @@ on(swarm.peerState, (peerId, peerState) => {
       removeRole(peerId, 'speakers');
     } else {
       speakers = speakers.filter(id => id !== peerId);
-      updateApiQuery(`/rooms/${state.roomId}`, {...state.room, speakers});
+      populateCache(`/rooms/${state.roomId}`, {...state.room, speakers});
     }
   }
 });

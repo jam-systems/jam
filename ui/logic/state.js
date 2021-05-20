@@ -1,6 +1,6 @@
 import Swarm from '../lib/swarm';
 const state = {
-  roomId: null,
+  roomId: window.existingRoomId ?? null,
   inRoom: null, // === roomId but only if entered
   room: {name: '', description: '', speakers: [], moderators: []},
   iAmSpeaker: false,

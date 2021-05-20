@@ -4,26 +4,32 @@ import {currentId, signData, verifyData} from './identity';
 import {staticConfig} from './config';
 import {AudioState} from './audio';
 import './reactions';
-import './room';
+import {RoomState} from './room';
 import {is, on, set, update} from 'use-minimal-state';
-import {declare, declareStateRoot, merge} from '../lib/state-tree';
+import {declare, declareStateRoot, merge, use} from '../lib/state-tree';
+import {populateCache} from './GetRequest';
+
+if (window.existingRoomInfo) {
+  populateCache(`/rooms/${window.existingRoomId}`, window.existingRoomInfo);
+}
 
 declareStateRoot(AppState, state, [
-  'room',
+  'roomId',
   'inRoom',
   'iAmModerator',
   'userInteracted',
   'micMuted',
 ]);
 
-function AppState({room, inRoom, iAmModerator, userInteracted, micMuted}) {
+function AppState({roomId, inRoom, iAmModerator, userInteracted, micMuted}) {
+  let {room} = use(RoomState, {roomId});
   let {closed} = room;
 
   inRoom = closed && !iAmModerator ? null : inRoom;
   is(swarm.myPeerState, {micMuted, inRoom: !!inRoom});
 
   userInteracted = userInteracted || !!inRoom;
-  return merge({userInteracted, inRoom}, declare(AudioState, {inRoom}));
+  return merge({userInteracted, inRoom, room}, declare(AudioState, {inRoom}));
 }
 
 export function enterRoom(roomId) {

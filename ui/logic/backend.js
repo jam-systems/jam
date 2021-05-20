@@ -4,14 +4,7 @@ import state, {modState, swarm} from './state';
 import {staticConfig} from './config';
 import {signedToken, signData, currentId, identities} from './identity';
 import {emptyRoom} from './room';
-// POST https://jam.systems/_/pantry/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
-// Creates room, returns 409 conflict if room exists
-
-// GET https://jam.systems/_/pantry/api/v1/rooms/:roomId
-// returns {"moderators": [moderatorId], "speakers":[speakerid]}
-
-// PUT https://jam.systems/_/pantry/api/v1/rooms/:roomId {"moderators": [moderatorId], "speakers":[speakerid]}
-// updates room and broadcasts to roomId / channel room-info on signal hub
+import {populateCache} from './GetRequest';
 
 let API = `${staticConfig.urls.pantry}/api/v1`;
 on(staticConfig, () => {
@@ -149,10 +142,9 @@ export function useCreateRoom({
     if (roomId && !room && !isRoomLoading) {
       (async () => {
         let roomCreated = await createRoom(roomId, currentId(), newRoom);
-        console.log(roomCreated);
         setLoading(false);
         if (roomCreated) {
-          updateApiQuery(`/rooms/${roomId}`, roomCreated);
+          populateCache(`/rooms/${roomId}`, roomCreated);
           onSuccess?.();
         } else {
           setError(true);
