@@ -1,12 +1,5 @@
 import React, {useEffect} from 'react';
-import {
-  is,
-  on,
-  emit,
-  clear,
-  off,
-  use as useMinimalState,
-} from 'use-minimal-state';
+import {is, on, emit, clear, use as useMinimalState} from 'use-minimal-state';
 import {staticConfig} from '../logic/config';
 import causalLog from './causal-log';
 
@@ -36,8 +29,8 @@ import causalLog from './causal-log';
      or, if updates to root are made sufficiently fine-grained, possibly don't block
      non-changes to state in root (but first approach is cleaner)
   -) improve cleanup mechanisms
-     * form-2 components could return a cleanup function
-     * on() in useExternalState should be cleaned up
+     * existing cleanup / unmount should be recursive, clean up its children!
+     * form-2 components could return a custom cleanup function
 */
 
 export {
@@ -157,13 +150,8 @@ function _declare(Component, props = null, element, used = false) {
   for (let i = children.length - 1; i >= 0; i--) {
     let child = children[i];
     if (child.renderTime !== renderTime) {
-      log('STATE-TREE', 'unmounting element', child);
+      cleanup(child);
       children.splice(i, 1);
-      clear(child.fragment);
-      if (renderRoot !== null) {
-        unsubscribeAll(renderRoot.actionSubs, child);
-        unsubscribeAll(renderRoot.stateSubs, child);
-      }
     }
   }
 
@@ -173,6 +161,18 @@ function _declare(Component, props = null, element, used = false) {
   let updateKeys = resultToFragment(result, element.fragment);
 
   return [element, updateKeys];
+}
+
+function cleanup(element) {
+  log('STATE-TREE', 'unmounting element', element.component.name);
+  clear(element.fragment);
+  for (let use of element.uses) {
+    use?.cleanup?.();
+  }
+  if (renderRoot !== null) {
+    unsubscribeAll(renderRoot.actionSubs, element);
+    unsubscribeAll(renderRoot.stateSubs, element);
+  }
 }
 
 // for creating state obj at the top level & later rerun on update
@@ -399,14 +399,19 @@ function useStateComponent(Component, props) {
   // a stable object which we use as render key and to store mutable state
   let [stable] = React.useState({
     shouldRun: true,
-    fragment: null,
+    element: null,
     component: Component,
   });
   if (props) props.key = stable;
   else props = {key: stable};
 
   if (stable.shouldRun) {
-    stable.fragment = declare(stable.component, props);
+    let {component} = stable;
+    let element = root.children.find(
+      c => c.component === component && c.key === stable
+    );
+    [element] = _declare(component, props, element);
+    stable.element = element;
   }
   stable.shouldRun = true;
 
@@ -414,13 +419,19 @@ function useStateComponent(Component, props) {
   let [, forceUpdate] = React.useState(0);
 
   useEffect(() => {
-    return on(stable.fragment, () => {
-      console.log('STATE-TREE React update', stable.component.name);
+    let {element} = stable;
+    on(element.fragment, () => {
+      log('STATE-TREE React update', stable.component.name);
       stable.shouldRun = false;
       forceUpdate(n => n + 1);
     });
+    return () => {
+      cleanup(element);
+      let i = root.children.indexOf(element);
+      if (i !== -1) root.children.splice(i, 1);
+    };
   }, [stable]);
-  return stable.fragment[0];
+  return stable.element.fragment[0];
 }
 
 // TODO maybe more efficient to memo the next 2-3 hooks, like useState (not sure though)
@@ -460,10 +471,10 @@ function useExternalState(state, key) {
   if (current === root) throw Error('Hooks can only be called during render');
   let caller = current;
   let use = caller.uses[nUses];
-  if (use === undefined || use[0] !== key) {
+  if (use === undefined || use.key !== key) {
     if (use !== undefined) {
       // cleaning up when key changed
-      off(state, key, use[1]);
+      use.cleanup();
     }
     const listener = () => {
       // not sure whether we want this...
@@ -474,8 +485,8 @@ function useExternalState(state, key) {
       }
     };
     // TODO: cleanup on onUnmount
-    on(state, key, listener);
-    use = [key, listener];
+    let cleanup = on(state, key, listener);
+    use = {key, cleanup};
     caller.uses[nUses] = use;
   }
   nUses++;
