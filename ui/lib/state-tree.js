@@ -598,9 +598,9 @@ function resultToFragment(result, fragment) {
   }
 
   if (result._merged) {
-    setMergedFragment(fragment, result);
+    let updateKeys = setMergedFragment(fragment, result);
     fragment._type = 'merged';
-    return;
+    return updateKeys;
   }
 
   if (typeof result === 'object') {
@@ -614,31 +614,27 @@ function resultToFragment(result, fragment) {
   fragment._type = 'plain';
 }
 
-function setObjectFragment(objFragment, obj) {
+function setObjectFragment(fragment, obj) {
   let pureObj = {};
-  let keys = objFragment._type === 'object' ? [] : undefined;
-  let oldObj = objFragment[0];
-  if (keys) {
-    pureObj = oldObj;
-    oldObj = {...oldObj};
-  }
-  objFragment[0] = pureObj;
+  let keys = fragment._type === 'object' ? [] : undefined;
+  let oldObj = fragment[0];
+  fragment[0] = pureObj;
 
   for (let key in obj) {
     let prop = obj[key];
     if (isFragment(prop)) {
       pureObj[key] = prop[0];
       // these listeners should be a class method on (Object)Fragment
-      prop._deps.set(objFragment, (value, _keys) => {
+      prop._deps.set(fragment, (value, _keys) => {
         pureObj[key] = value;
         // TODO: should object identity change?
         // TODO: forward deeply nested update info, i.e. use _keys?
-        emit(objFragment, pureObj, [key]);
+        emit(fragment, pureObj, [key]);
       });
     } else {
       pureObj[key] = prop;
     }
-    // if fragment already was an object fragment, we extract updates keys
+    // if fragment already was an object fragment, we extract updated keys
     if (keys !== undefined && oldObj[key] !== pureObj[key]) {
       keys.push(key);
     }
@@ -656,6 +652,7 @@ function merge(...objArray) {
 // does current model break if it changes?
 function setMergedFragment(fragment, objArray) {
   let mergedObj = {};
+  let oldObj = fragment[0];
   fragment[0] = mergedObj;
 
   function updateSelf(value, keys) {
@@ -672,6 +669,18 @@ function setMergedFragment(fragment, objArray) {
       Object.assign(mergedObj, objFragment);
     }
   }
+
+  // if fragment already was a merged fragment, we extract updated keys
+  let keys;
+  if (fragment._type === 'merged') {
+    keys = [];
+    for (let key in mergedObj) {
+      if (oldObj[key] !== mergedObj[key]) {
+        keys.push(key);
+      }
+    }
+  }
+  return keys;
 }
 
 let doLog = !!staticConfig.development;

@@ -34,7 +34,7 @@ function RoomState({roomId, myId}) {
 function useRoom(roomId) {
   const path = roomId && `/rooms/${roomId}`;
   let {data, isLoading, status} = use(GetRequest, {path});
-  return [data ?? emptyRoom, isLoading, status];
+  return [data, isLoading, status];
 }
 
 function maybeConnectRoom(roomId) {
