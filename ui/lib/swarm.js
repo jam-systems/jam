@@ -112,7 +112,35 @@ function sendPeerEvent(swarm, event, payload) {
   });
 }
 
-export {config, connect, disconnect, addLocalStream, sendPeerEvent};
+// these two don't quite fit the original model of peer state but use its
+// nice infrastructure on the remote side to present something which can come from different connections
+// as one state of the "peer"
+function shareStateWithGroup(swarm, topic, state) {
+  let time = Date.now();
+  swarm.hub?.broadcast(topic, {
+    type: 'shared-state',
+    state: {state, time},
+  });
+}
+function shareStateWithPeer(swarm, peerId, state) {
+  let time = Date.now();
+  for (let connection of yieldConnectionsOfPeer(swarm, peerId)) {
+    swarm.hub?.sendDirect(connection, {
+      type: 'shared-state',
+      state: {state, time},
+    });
+  }
+}
+
+export {
+  config,
+  connect,
+  disconnect,
+  addLocalStream,
+  sendPeerEvent,
+  shareStateWithGroup,
+  shareStateWithPeer,
+};
 
 // public API ends here
 
@@ -302,6 +330,15 @@ function* yieldConnections(swarm) {
     for (let connId in connections) {
       yield connections[connId];
     }
+  }
+}
+
+function* yieldConnectionsOfPeer(swarm, peerId) {
+  let peer = getPeer(swarm, peerId);
+  if (peer === undefined) return;
+  let {connections} = peer;
+  for (let connId in connections) {
+    yield connections[connId];
   }
 }
 
