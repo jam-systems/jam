@@ -40,6 +40,7 @@ export {
   declareStateRoot,
   dispatch,
   useAction,
+  useDispatch,
   useRootState,
   useExternalState,
   useUpdate,
@@ -356,27 +357,35 @@ function dispatch(state, type, payload) {
 }
 
 function dispatchFromRoot(rootElement, type, payload) {
-  let subscribers = rootElement.actionSubs.get(type);
-  if (subscribers === undefined || subscribers.size === 0) return;
+  queueMicrotask(() => {
+    let subscribers = rootElement.actionSubs.get(type);
+    if (subscribers === undefined || subscribers.size === 0) return;
 
-  let actionRoots = new Set();
-  for (let element of subscribers) {
-    actionRoots.add(markForUpdate(element));
-  }
-  currentAction = [type, payload];
-  // TODO: should use queueUpdate instead of sync rendering here, like everywhere else!
-  for (let element of actionRoots) {
-    log('STATE-TREE', 'render caused by dispatch', type);
-    let result = rerender(element);
-    log(
-      'STATE-TREE',
-      'render returned',
-      result,
-      'after',
-      Date.now() - renderTime
-    );
-  }
-  currentAction = [undefined, undefined];
+    let actionRoots = new Set();
+    for (let element of subscribers) {
+      actionRoots.add(markForUpdate(element));
+    }
+    currentAction = [type, payload];
+    // TODO: we'd like to use a batched update here as well,
+    // but don't know yet how to ensure rendering of each subscribed component *with the currentAction context*
+    // in a way other updates can't interfere.
+    // a dispatched action must definitely show up in each subscribed component no matter what.
+
+    // instead of the global variable context we we need something more like hooks,
+    // where a value is saved to the component to be used for the next render, to then be removed
+    for (let element of actionRoots) {
+      log('STATE-TREE', 'render caused by dispatch', type);
+      let result = rerender(element);
+      log(
+        'STATE-TREE',
+        'render returned',
+        result,
+        'after',
+        Date.now() - renderTime
+      );
+    }
+    currentAction = [undefined, undefined];
+  });
 }
 
 function subscribe(subscriptions, type, element) {
@@ -448,6 +457,10 @@ function useAction(type) {
   } else {
     return [false, undefined, dispatchThis];
   }
+}
+function useDispatch() {
+  let callerRoot = renderRoot;
+  return (type, payload) => dispatchFromRoot(callerRoot, type, payload);
 }
 
 function useRootState(keys) {
