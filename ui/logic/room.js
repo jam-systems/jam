@@ -4,7 +4,7 @@ import {is, on, set, update} from 'use-minimal-state';
 import {currentId} from './identity';
 import log from '../lib/causal-log';
 import {staticConfig} from './config';
-import {use, declare, merge} from '../lib/state-tree';
+import {use, declare} from '../lib/state-tree';
 import GetRequest, {populateCache} from './GetRequest';
 import ModeratorState from './room/ModeratorState';
 

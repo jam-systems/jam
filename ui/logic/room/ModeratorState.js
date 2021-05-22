@@ -4,7 +4,6 @@ import {
   use,
   declare,
   useAction,
-  Atom,
   useState,
 } from '../../lib/state-tree';
 import {shareStateWithGroup, shareStateWithPeer} from '../../lib/swarm';
@@ -57,23 +56,6 @@ function useNewValue(value, initial) {
   } else {
     return [false, hasChanged];
   }
-}
-
-function NewValue({initial}) {
-  let _value = initial;
-  let hasChanged = false;
-
-  return function NewValue({value}) {
-    if (value !== _value) {
-      console.error('value changed', _value, '->', value);
-      _value = value;
-      hasChanged = true;
-
-      return Atom([true, hasChanged]);
-    } else {
-      return Atom([false, hasChanged]);
-    }
-  };
 }
 
 function newIntersection(arrA, arrB, AnB) {
