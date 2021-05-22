@@ -19,31 +19,22 @@ async function handleMessage(connection, roomId, msg) {
     subscribe(connection, roomId, subscribeTopics);
   }
 
-  // TODO: not yet sure about this...
-  // "send to all moderators" is not an action that can be easily used to maintain state,
-  // because new moderators can be added that already were new peers
-  // would need an extra "new moderator" event upon which we resend modState to close the loop
-  // (...which is possible fairly efficiently by comparing the sizes of old/new mod arrays,
-  // it just bothers me that the declarative version is much more cumbersome
-  // hmmm... maybe there should be a way to get last props / root state in components)
-  // would also be a reason to finally make proper direct messages that can't be subscribed by anyone
-
   if (topic === undefined || reservedTopics.includes(topic)) return;
 
   switch (topic) {
-    // special topics (not subscribable, but sendable -- server decides who gets them)
+    // special topics (not subscribable; sender decides who gets msg)
     case 'direct': {
       // send to one specific peer
       let {p: receiverId} = msg;
       let receiver = getConnections(roomId).find(c => c.peerId === receiverId);
       if (receiver !== undefined) {
-        sendMessage(receiver, {t: topic, d: data, p: senderId});
+        sendMessage(receiver, {t: 'direct', d: data, p: senderId});
       }
       break;
     }
     case 'moderator': {
       // send to all mods
-      let outgoingMsg = {t: topic, d: data, p: senderId};
+      let outgoingMsg = {t: 'direct', d: data, p: senderId};
       let {moderators = []} = (await get('rooms/' + roomId)) ?? {};
       for (let receiver of getConnections(roomId)) {
         if (moderators.includes(getPublicKey(receiver))) {

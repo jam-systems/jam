@@ -7,7 +7,7 @@ function updatePeerState({swarm, peerId, connId}, fullState) {
   let {state, time} = fullState;
   let peerStates = get(swarm.connectionState, peerId, {});
   let states = get(peerStates, 'states', {});
-  states[connId] = {state, time};
+  states[connId] = {state: {...(states[connId] ?? null), ...state}, time};
   reducePeerState(swarm, peerId);
   emit(swarm, 'rawPeerState', state, peerId, connId);
   update(swarm, 'connectionState');

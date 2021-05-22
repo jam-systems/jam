@@ -40,7 +40,7 @@ function connectPeer(connection) {
     createPeer(connection, true);
   } else {
     log('i dont initiate, wait for first signal');
-    swarm.hub.broadcast(`${peerId};${connId}`, {
+    swarm.hub.sendDirect(connection, {
       type: 'signal',
       state: {state: myPeerState, time: sharedStateTime},
       data: {youStart: true, type: 'you-start'},
@@ -161,7 +161,7 @@ function createPeer(connection, initiator) {
       peer.didSignal = true;
       state = {state: swarm.myPeerState, time: swarm.sharedStateTime};
     }
-    hub.broadcast(`${peerId};${connId}`, {type: 'signal', data, state});
+    hub.sendDirect(connection, {type: 'signal', data, state});
   });
   peer.on('connect', () => {
     log('connected peer', s(peerId), 'after', Date.now() - peer.connectStart);

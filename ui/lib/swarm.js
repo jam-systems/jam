@@ -151,7 +151,7 @@ function connect(swarm, room) {
     myConnId,
     sign,
     verify,
-    subscriptions: ['all', myCombinedPeerId],
+    subscriptions: ['all'],
   });
   on(hub, 'opened', () => {
     swarm.connectState = CONNECTED;
@@ -199,13 +199,17 @@ function connect(swarm, room) {
     }
   });
 
-  on(hub, myCombinedPeerId, ({type, peerId, data, connId, state}) => {
+  on(hub, 'direct', ({type, peerId, data, connId, state}) => {
+    initializePeer(swarm, peerId);
     if (type === 'signal') {
       log('signal received from', s(peerId), connId, data.type);
-      initializePeer(swarm, peerId);
       let connection = getConnection(swarm, peerId, connId);
       updatePeerState(connection, state);
       handleSignal(connection, {data});
+    }
+    if (type === 'shared-state') {
+      let connection = getConnection(swarm, peerId, connId);
+      updatePeerState(connection, state);
     }
   });
 
