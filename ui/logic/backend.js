@@ -1,7 +1,6 @@
 import {useEffect, useState} from 'react';
-import {on, set} from 'use-minimal-state';
+import {on} from 'use-minimal-state';
 import {use} from '../lib/state-tree';
-import state, {modState, swarm} from './state';
 import {staticConfig} from './config';
 import {signedToken, signData, currentId, identities} from './identity';
 import {emptyRoom} from './room';
@@ -137,38 +136,3 @@ export async function updateInfoServer(info) {
     (await post(`/identities/${currentId()}`, info))
   );
 }
-
-// mod message / mod state
-
-// post initial status on entering room
-on(state, 'inRoom', () => {
-  sendModMessage(modState);
-});
-// post on changes
-on(modState, () => {
-  sendModMessage(modState);
-});
-async function sendModMessage(msg) {
-  let {inRoom} = state;
-  if (inRoom) {
-    await post(`/rooms/${inRoom}/modMessage/${currentId()}`, msg);
-  }
-}
-// fetch mod messages when we become moderator
-on(state, 'iAmModerator', async iAmModerator => {
-  let {roomId} = state;
-  if (iAmModerator && roomId) {
-    let [msgs, ok] = await authedGet(`/rooms/${roomId}/modMessage`);
-    if (ok) set(state, 'modMessages', msgs);
-  } else {
-    set(state, 'modMessages', {}); // delete when we stop being moderator
-  }
-});
-// listen for mod message pings and fetch if we are moderator
-on(swarm.serverEvent, 'mod-message', async () => {
-  let {iAmModerator, roomId} = state;
-  if (iAmModerator && roomId) {
-    let [msgs, ok] = await authedGet(`/rooms/${roomId}/modMessage`);
-    if (ok) set(state, 'modMessages', msgs);
-  }
-});

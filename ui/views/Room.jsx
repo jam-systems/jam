@@ -36,14 +36,14 @@ export default function Room({room, roomId}) {
   let myInfo = useCurrentIdentity().info;
   let [
     reactions,
-    raisedHands,
+    handRaised,
     identities,
     speaking,
     iSpeak,
     iModerate,
   ] = use(state, [
     'reactions',
-    'raisedHands',
+    'handRaised',
     'identities',
     'speaking',
     'iAmSpeaker',
@@ -111,8 +111,6 @@ export default function Room({room, roomId}) {
   let audiencePeers = stageOnly
     ? []
     : allPeers.filter(id => !stagePeers.includes(id));
-
-  let myHandRaised = raisedHands.has(myPeerId);
 
   return (
     <Container style={{display: 'flex', flexDirection: 'column'}}>
@@ -226,7 +224,7 @@ export default function Room({room, roomId}) {
                     peerId={myPeerId}
                     peerState={myPeerState}
                     info={myInfo}
-                    handRaised={myHandRaised}
+                    handRaised={handRaised}
                     onClick={() => setEditSelf(true)}
                   />
                 )}
@@ -236,7 +234,7 @@ export default function Room({room, roomId}) {
                     {...{peerId, peerState, reactions, room}}
                     peerState={peerState[peerId]}
                     info={identities[peerId]}
-                    handRaised={iModerate && raisedHands.has(peerId)}
+                    handRaised={iModerate && peerState[peerId]?.handRaised}
                     onClick={iModerate ? () => setEditRole(peerId) : undefined}
                   />
                 ))}

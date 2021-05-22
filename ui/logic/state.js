@@ -9,7 +9,7 @@ const state = {
   otherDeviceInRoom: false,
 
   reactions: {},
-  raisedHands: new Set(),
+  handRaised: false,
 
   soundMuted: true,
   micMuted: false,
@@ -31,6 +31,3 @@ export const actions = {
 
 const swarm = Swarm();
 export {swarm};
-
-// mod visible state
-export const modState = {raiseHand: false};

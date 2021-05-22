@@ -1,9 +1,8 @@
-import {set, update, on, is} from 'use-minimal-state';
+import {update, on} from 'use-minimal-state';
 import {sendPeerEvent} from '../lib/swarm';
-import {currentId} from './identity';
-import state, {modState, swarm} from './state';
+import state, {swarm} from './state';
 
-export {sendReaction, raiseHand};
+export {sendReaction};
 
 function sendReaction(reaction) {
   sendPeerEvent(swarm, 'reaction', reaction);
@@ -26,24 +25,3 @@ function showReaction(reaction, peerId) {
     update(state, 'reactions');
   }, 5000);
 }
-
-function raiseHand(raise) {
-  // make visible to me
-  if (raise) {
-    state.raisedHands.add(currentId());
-  } else {
-    state.raisedHands.delete(currentId());
-  }
-  update(state, 'raisedHands');
-  // make visible to mods
-  is(modState, 'raiseHand', !!raise);
-}
-
-// listen for raised hands
-on(state, 'modMessages', modMessages => {
-  let hands = new Set();
-  for (let peerId in modMessages) {
-    if (modMessages[peerId].raiseHand) hands.add(peerId);
-  }
-  set(state, 'raisedHands', hands);
-});

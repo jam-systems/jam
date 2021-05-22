@@ -20,20 +20,19 @@ export {AudioState};
 function AudioState({inRoom}) {
   let [
     iAmSpeaker,
-    raisedHands,
+    handRaised,
     audioContext,
     micMuted,
     audioFile,
   ] = useRootState([
     'iAmSpeaker',
-    'raisedHands',
+    'handRaised',
     'audioContext',
     'micMuted',
     'audioFile',
   ]);
 
-  let myHandRaised = raisedHands.has(currentId());
-  let shouldHaveMic = !!(inRoom && (iAmSpeaker || myHandRaised));
+  let shouldHaveMic = !!(inRoom && (iAmSpeaker || handRaised));
   let {micStream, hasRequestedOnce} = use(Microphone, {shouldHaveMic});
   let {audioFileStream, audioFileElement} = use(AudioFile, {
     audioFile,

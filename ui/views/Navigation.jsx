@@ -2,8 +2,7 @@ import React, {useMemo, useState} from 'react';
 import {leaveRoom} from '../logic/main';
 import state, {actions} from '../logic/state';
 import {is, use} from 'use-minimal-state';
-import {currentId} from '../logic/identity';
-import {sendReaction, raiseHand} from '../logic/reactions';
+import {sendReaction} from '../logic/reactions';
 import EditRole, {EditSelf} from './EditRole';
 import {breakpoints, useWidth} from '../logic/tailwind-mqp';
 import {openModal} from './Modal';
@@ -38,10 +37,10 @@ export default function Navigation({
   editSelf,
   setEditSelf,
 }) {
-  let [myAudio, micMuted, raisedHands, iSpeak] = use(state, [
+  let [myAudio, micMuted, handRaised, iSpeak] = use(state, [
     'myAudio',
     'micMuted',
-    'raisedHands',
+    'handRaised',
     'iAmSpeaker',
   ]);
 
@@ -52,9 +51,6 @@ export default function Navigation({
   let {color, speakers, moderators, stageOnly} = room ?? {};
 
   let isColorDark = useMemo(() => isDark(color), [color]);
-
-  let myPeerId = currentId();
-  let myHandRaised = raisedHands.has(myPeerId);
 
   let width = useWidth();
 
@@ -89,7 +85,7 @@ export default function Navigation({
       {/* TODO: button content breaks between icon and text on small screens. fix by using flexbox & text-overflow */}
       <div className="flex">
         <button
-          onClick={iSpeak ? talk : () => raiseHand(!myHandRaised)}
+          onClick={iSpeak ? talk : () => is(state, 'handRaised', !handRaised)}
           onKeyUp={e => {
             // don't allow clicking mute button with space bar to prevent confusion with push-to-talk w/ space bar
             if (e.key === ' ') e.preventDefault();
@@ -125,7 +121,7 @@ export default function Navigation({
           )}
           {!iSpeak && (
             <>
-              {myHandRaised ? (
+              {handRaised ? (
                 <>Stop&nbsp;raising&nbsp;hand</>
               ) : (
                 <>✋🏽&nbsp;Raise&nbsp;hand&nbsp;to&nbsp;get&nbsp;on&nbsp;stage</>
