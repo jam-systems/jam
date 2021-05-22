@@ -12,7 +12,6 @@ const adminRouter = require('./routes/admin');
 
 const {roomAuthenticator, identityAuthenticator} = require('./auth');
 const {controller} = require('./routes/controller');
-const modMessageRouter = require('./routes/modMessage');
 const roomKeyRouter = require('./routes/roomKey');
 const app = express();
 
@@ -33,7 +32,6 @@ app.use(
     () => 'room-info'
   )
 );
-app.use('/api/v1/rooms/:id/modMessage', modMessageRouter);
 app.use('/api/v1/rooms/:id/roomKey', roomKeyRouter);
 
 app.use('/api/v1/', controller('identities', identityAuthenticator));

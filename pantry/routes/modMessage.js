@@ -1,3 +1,5 @@
+// TODO: This file is currently UNUSED but may contain code that's useful another time
+
 const express = require('express');
 const {isModerator} = require('../auth');
 const {set, get, del, list} = require('../services/redis');
