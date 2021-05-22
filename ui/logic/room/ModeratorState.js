@@ -15,15 +15,10 @@ export default function ModeratorState({moderators}) {
   let [isRaiseHand, hasRaisedHand] = useNewValue(handRaised, false);
 
   if (isRaiseHand) {
-    console.error(
-      'sending to moderator bc hand raised changed, new value',
-      handRaised
-    );
     shareStateWithGroup(swarm, 'moderator', {handRaised});
   }
 
   if (isNewMod && hasRaisedHand) {
-    console.error('sending to new moderator', peerId, handRaised);
     shareStateWithPeer(swarm, peerId, {handRaised});
   }
 
@@ -37,9 +32,7 @@ function NewModerator() {
   return function NewModerator({moderators}) {
     let peers = Object.keys(use(swarm, 'stickyPeers'));
     let newModPeers;
-    console.error(JSON.stringify(peers), JSON.stringify(moderators));
     [modPeers, newModPeers] = newIntersection(peers, moderators, modPeers);
-    console.error(JSON.stringify([...newModPeers]));
     for (let peerId of newModPeers) {
       dispatch('new-mod', peerId);
     }
