@@ -1,5 +1,6 @@
 const WebSocket = require('ws');
 const querystring = require('querystring');
+const {get} = require('../services/redis');
 const {ssrVerifyToken} = require('../ssr');
 
 // pub sub websocket
@@ -10,14 +11,50 @@ function broadcast(roomId, topic, message) {
   publish(roomId, 'server', {t: 'server', d: {t: topic, d: message}});
 }
 
-function handleMessage(ws, roomId, peerId, msg) {
+async function handleMessage(connection, roomId, msg) {
   // TODO: allow unsubscribe
   let {s: subscribeTopics, t: topic, d: data} = msg;
+  let senderId = connection.peerId;
   if (subscribeTopics !== undefined) {
-    subscribe(ws, roomId, subscribeTopics);
+    subscribe(connection, roomId, subscribeTopics);
   }
-  if (topic !== undefined && !reservedTopics.includes(topic)) {
-    publish(roomId, topic, {t: topic, d: data, p: peerId});
+
+  // TODO: not yet sure about this...
+  // "send to all moderators" is not an action that can be easily used to maintain state,
+  // because new moderators can be added that already were new peers
+  // would need an extra "new moderator" event upon which we resend modState to close the loop
+  // (...which is possible fairly efficiently by comparing the sizes of old/new mod arrays,
+  // it just bothers me that the declarative version is much more cumbersome
+  // hmmm... maybe there should be a way to get last props / root state in components)
+  // would also be a reason to finally make proper direct messages that can't be subscribed by anyone
+
+  if (topic === undefined || reservedTopics.includes(topic)) return;
+
+  switch (topic) {
+    // special topics (not subscribable, but sendable -- server decides who gets them)
+    case 'direct': {
+      // send to one specific peer
+      let {p: receiverId} = msg;
+      let receiver = getConnections(roomId).find(c => c.peerId === receiverId);
+      if (receiver !== undefined) {
+        sendMessage(receiver, {t: topic, d: data, p: senderId});
+      }
+      break;
+    }
+    case 'moderator': {
+      // send to all mods
+      let outgoingMsg = {t: topic, d: data, p: senderId};
+      let {moderators = []} = (await get('rooms/' + roomId)) ?? {};
+      for (let receiver of getConnections(roomId)) {
+        if (moderators.includes(getPublicKey(receiver))) {
+          sendMessage(receiver, outgoingMsg);
+        }
+      }
+      break;
+    }
+    default:
+      // normal topic that everyone can subscribe
+      publish(roomId, topic, {t: topic, d: data, p: senderId});
   }
 }
 
@@ -27,15 +64,17 @@ function handleConnection(ws, req) {
   let {roomId, peerId, subs} = req;
   console.log('ws open', roomId, peerId, subs);
 
-  addPeer(roomId, peerId);
+  const connection = {ws, peerId};
+
+  addPeer(roomId, connection);
   nConnections++;
 
   // inform every participant about new peer connection
   publish(roomId, 'add-peer', {t: 'add-peer', d: peerId});
 
   // auto subscribe to updates about connected peers
-  subscribe(ws, roomId, reservedTopics);
-  if (subs !== undefined) subscribe(ws, roomId, subs);
+  subscribe(connection, roomId, reservedTopics);
+  if (subs !== undefined) subscribe(connection, roomId, subs);
 
   // inform about peers immediately
   sendMessage(ws, {t: 'peers', d: getPeers(roomId)});
@@ -43,14 +82,14 @@ function handleConnection(ws, req) {
   ws.on('message', jsonMsg => {
     let msg = parseMessage(jsonMsg);
     // console.log('ws message', msg);
-    if (msg !== undefined) handleMessage(ws, roomId, peerId, msg);
+    if (msg !== undefined) handleMessage(connection, roomId, msg);
   });
 
   ws.on('close', (_code, _reason) => {
     // console.log('ws closed', code, reason);
     nConnections--;
     removePeer(roomId, peerId);
-    unsubscribeAll(ws);
+    unsubscribeAll(connection);
 
     publish(roomId, 'remove-peer', {t: 'remove-peer', d: peerId});
 
@@ -93,39 +132,49 @@ function addWebsocket(server) {
     req.roomId = roomId;
     req.subs = subs?.split(',').filter(t => t) ?? []; // custom encoding, don't use "," in topic names
 
-    wss.handleUpgrade(req, socket, head, socket => {
-      wss.emit('connection', socket, req);
+    wss.handleUpgrade(req, socket, head, ws => {
+      wss.emit('connection', ws, req);
     });
   });
 }
 
 module.exports = {addWebsocket, activeUserCount, broadcast};
 
+// connection = {ws, peerId}
+
+function getPublicKey({peerId}) {
+  return peerId.split(';')[0];
+}
+
 // peer connections per room
 
-const roomPeerIds = new Map(); // room => Set(peerId)
+const roomConnections = new Map(); // room => Set(connection)
 
-function addPeer(roomId, peerId) {
-  let peerIds =
-    roomPeerIds.get(roomId) ?? roomPeerIds.set(roomId, new Set()).get(roomId);
-  peerIds.add(peerId);
+function addPeer(roomId, connection) {
+  let connections =
+    roomConnections.get(roomId) ??
+    roomConnections.set(roomId, new Set()).get(roomId);
+  connections.add(connection);
 }
-function removePeer(roomId, peerId) {
-  let peerIds = roomPeerIds.get(roomId);
-  if (peerIds !== undefined) {
-    peerIds.delete(peerId);
-    if (peerIds.size === 0) roomPeerIds.delete(roomId);
+function removePeer(roomId, connection) {
+  let connections = roomConnections.get(roomId);
+  if (connections !== undefined) {
+    connections.delete(connection);
+    if (connections.size === 0) roomConnections.delete(roomId);
   }
 }
+function getConnections(roomId) {
+  let connections = roomConnections.get(roomId);
+  if (connections === undefined) return [];
+  return [...connections];
+}
 function getPeers(roomId) {
-  let peerIds = roomPeerIds.get(roomId);
-  if (peerIds === undefined) return [];
-  return [...peerIds];
+  return getConnections(roomId).map(c => c.peerId);
 }
 
 // pub sub
 
-const subscriptions = new Map(); // "roomId/topic" => Set(ws)
+const subscriptions = new Map(); // "roomId/topic" => Set(connection)
 
 function publish(room, topic, msg) {
   let key = `${room}/${topic}`;
@@ -135,19 +184,19 @@ function publish(room, topic, msg) {
     sendMessage(subscriber, msg);
   }
 }
-function subscribe(ws, room, topics) {
+function subscribe(connection, room, topics) {
   if (!(topics instanceof Array)) topics = [topics];
   for (let topic of topics) {
     let key = `${room}/${topic}`;
     let subscribers =
       subscriptions.get(key) ?? subscriptions.set(key, new Set()).get(key);
-    subscribers.add(ws);
+    subscribers.add(connection);
   }
 }
-function unsubscribeAll(ws) {
+function unsubscribeAll(connection) {
   for (let entry of subscriptions) {
     let [key, subscribers] = entry;
-    subscribers.delete(ws);
+    subscribers.delete(connection);
     if (subscribers.size === 0) subscriptions.delete(key);
   }
 }
@@ -164,7 +213,7 @@ function parseMessage(jsonMsg) {
   }
 }
 
-function sendMessage(ws, msg) {
+function sendMessage({ws}, msg) {
   let jsonMsg;
   try {
     jsonMsg = JSON.stringify(msg);
