@@ -68,7 +68,7 @@ function handleConnection(ws, req) {
   if (subs !== undefined) subscribe(connection, roomId, subs);
 
   // inform about peers immediately
-  sendMessage(ws, {t: 'peers', d: getPeers(roomId)});
+  sendMessage(connection, {t: 'peers', d: getPeers(roomId)});
 
   ws.on('message', jsonMsg => {
     let msg = parseMessage(jsonMsg);
@@ -79,7 +79,7 @@ function handleConnection(ws, req) {
   ws.on('close', (_code, _reason) => {
     // console.log('ws closed', code, reason);
     nConnections--;
-    removePeer(roomId, peerId);
+    removePeer(roomId, connection);
     unsubscribeAll(connection);
 
     publish(roomId, 'remove-peer', {t: 'remove-peer', d: peerId});
