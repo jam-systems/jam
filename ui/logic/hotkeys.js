@@ -1,9 +1,8 @@
 import {set} from 'use-minimal-state';
 import {useEffect} from 'react';
-import state from './state';
 
 // unmute on space bar if currently muted
-export function usePushToTalk() {
+export function usePushToTalk(state) {
   useEffect(() => {
     let keys = [' ', 'Spacebar'];
     let isPressingKey = false;
@@ -41,5 +40,5 @@ export function usePushToTalk() {
       document.removeEventListener('keydown', unmuteOnSpaceDown);
       document.removeEventListener('keyup', muteOnSpaceUp);
     };
-  }, []);
+  }, [state]);
 }

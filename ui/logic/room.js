@@ -1,12 +1,16 @@
 import state, {swarm} from './state';
-import {get, updateApiQuery, put, useApiQuery} from './backend';
-import {on, set, update} from 'use-minimal-state';
+import {get, put} from './backend';
+import {is, on, set, update} from 'use-minimal-state';
 import {currentId} from './identity';
 import log from '../lib/causal-log';
 import {staticConfig} from './config';
+import {use, declare} from '../lib/state-tree';
+import GetRequest, {populateCache} from './GetRequest';
+import ModeratorState from './room/ModeratorState';
 
 export {
   useRoom,
+  RoomState,
   maybeConnectRoom,
   disconnectRoom,
   addRole,
@@ -15,23 +19,25 @@ export {
   emptyRoom,
 };
 
-const emptyRoom = staticConfig.defaultRoom
-  ? {...staticConfig.defaultRoom, speakers: [], moderators: []}
-  : {
-      name: '',
-      description: '',
-      speakers: [],
-      moderators: [],
-    };
+function RoomState({roomId, myId}) {
+  const path = roomId && `/rooms/${roomId}`;
+  let {data} = use(GetRequest, {path});
+  let room = data ?? emptyRoom;
 
-let _disconnectRoom = {};
+  let {speakers, moderators, stageOnly} = room;
+  let iAmSpeaker = !!stageOnly || speakers.includes(myId);
+  if (iAmSpeaker) joinStage();
+  let iAmModerator = moderators.includes(myId);
+
+  declare(ModeratorState, {moderators});
+
+  return {room, iAmSpeaker, iAmModerator};
+}
 
 function useRoom(roomId) {
-  return useApiQuery(`/rooms/${roomId}`, {
-    dontFetch: !roomId,
-    key: 'room',
-    defaultQuery: emptyRoom,
-  });
+  const path = roomId && `/rooms/${roomId}`;
+  let {data, isLoading, status} = use(GetRequest, {path});
+  return [data, isLoading, status];
 }
 
 function maybeConnectRoom(roomId) {
@@ -50,7 +56,7 @@ function maybeConnectRoom(roomId) {
   });
   on(swarm.serverEvent, 'room-info', data => {
     log('new room info', data);
-    updateApiQuery(`/rooms/${state.roomId}`, data);
+    populateCache(`/rooms/${state.roomId}`, data);
   });
   _disconnectRoom[roomId] = () => {
     log('disconnecting', roomId);
@@ -64,26 +70,15 @@ function disconnectRoom(roomId) {
   _disconnectRoom[roomId] = undefined;
 }
 
-// watch changes in room
-on(state, 'room', (room, oldRoom) => {
-  let {speakers: oldSpeakers, moderators: oldModerators} = oldRoom;
-  let {speakers, moderators} = room;
+const _disconnectRoom = {};
 
-  let myId = currentId();
-  if (!oldSpeakers.includes(myId) && speakers.includes(myId)) {
-    set(state, 'iAmSpeaker', true);
-    joinStage();
-  }
-  if (oldSpeakers.includes(myId) && !speakers.includes(myId)) {
-    set(state, 'iAmSpeaker', false);
-  }
-  if (!oldModerators.includes(myId) && moderators.includes(myId)) {
-    set(state, 'iAmModerator', true);
-  }
-  if (oldModerators.includes(myId) && !moderators.includes(myId)) {
-    set(state, 'iAmModerator', false);
-  }
-});
+const emptyRoom = {
+  name: '',
+  description: '',
+  ...(staticConfig.defaultRoom ?? null),
+  speakers: [],
+  moderators: [],
+};
 
 async function addRole(id, role) {
   let {speakers, moderators} = state.room;
@@ -110,27 +105,21 @@ async function removeRole(id, role) {
 function leaveStage(roomId) {
   roomId = roomId || state.roomId;
   if (!state.iAmSpeaker || swarm.room !== roomId) return;
-  swarm.sharedState.leftStage = true;
-  update(swarm, 'sharedState');
+  set(swarm.myPeerState, 'leftStage', true);
 }
 function joinStage() {
-  if (!swarm.sharedState.leftStage) return;
-  swarm.sharedState.leftStage = false;
-  update(swarm, 'sharedState');
+  if (!swarm.myPeerState.leftStage) return;
+  is(swarm.myPeerState, 'leftStage', false);
 }
 // if somebody left stage, update speakers
-on(swarm, 'peerState', peerState => {
+on(swarm.peerState, (peerId, peerState) => {
   let {speakers} = state.room;
-  if (!state.roomId || !speakers.length) return;
-  for (let peerId in peerState) {
-    let leftStage = peerState[peerId]?.leftStage;
-    if (leftStage && speakers.includes(peerId)) {
-      if (state.iAmModerator) {
-        removeRole(peerId, 'speakers');
-      } else {
-        speakers = speakers.filter(id => id !== peerId);
-        updateApiQuery(`/rooms/${state.roomId}`, {...state.room, speakers});
-      }
+  if (peerState?.leftStage && state.roomId && speakers.includes(peerId)) {
+    if (state.iAmModerator) {
+      removeRole(peerId, 'speakers');
+    } else {
+      speakers = speakers.filter(id => id !== peerId);
+      populateCache(`/rooms/${state.roomId}`, {...state.room, speakers});
     }
   }
 });

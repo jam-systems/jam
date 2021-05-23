@@ -1,5 +1,6 @@
 import SimplePeer from './simple-peer-light';
 import causalLog from './causal-log';
+import {emit, set, update} from 'use-minimal-state';
 
 const MAX_CONNECT_TIME = 10000;
 const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;
@@ -32,16 +33,16 @@ function connectPeer(connection) {
   log('connecting peer', s(peerId), connId);
   if (swarm.hub === null) return;
 
-  let {myPeerId, myConnId, sharedState, sharedStateTime} = swarm;
+  let {myPeerId, myConnId, myPeerState, sharedStateTime} = swarm;
   timeoutPeer(connection, MAX_CONNECT_TIME);
   if (myPeerId > peerId || (myPeerId === peerId && myConnId > connId)) {
     log('i initiate, and override any previous peer!');
     createPeer(connection, true);
   } else {
     log('i dont initiate, wait for first signal');
-    swarm.hub.broadcast(`${peerId};${connId}`, {
+    swarm.hub.sendDirect(connection, {
       type: 'signal',
-      state: {state: sharedState, time: sharedStateTime},
+      state: {state: myPeerState, time: sharedStateTime},
       data: {youStart: true, type: 'you-start'},
     });
     let {pc} = connection;
@@ -158,9 +159,9 @@ function createPeer(connection, initiator) {
     if (!peer.didSignal) {
       data.first = true;
       peer.didSignal = true;
-      state = {state: swarm.sharedState, time: swarm.sharedStateTime};
+      state = {state: swarm.myPeerState, time: swarm.sharedStateTime};
     }
-    hub.broadcast(`${peerId};${connId}`, {type: 'signal', data, state});
+    hub.sendDirect(connection, {type: 'signal', data, state});
   });
   peer.on('connect', () => {
     log('connected peer', s(peerId), 'after', Date.now() - peer.connectStart);
@@ -169,7 +170,7 @@ function createPeer(connection, initiator) {
 
   peer.on('data', rawData => {
     log('data (channel) from', s(peerId));
-    swarm.emit('data', rawData);
+    emit(swarm, 'data', rawData);
   });
 
   peer.on('track', (track, stream) => {
@@ -181,9 +182,9 @@ function createPeer(connection, initiator) {
     );
     if (i === -1) i = remoteStreams.length;
     remoteStreams[i] = {stream, name, peerId};
-    swarm.set('remoteStreams', remoteStreams);
-    swarm.emit('stream', stream, name, peer);
-    swarm.update('stickyPeers');
+    set(swarm, 'remoteStreams', remoteStreams);
+    emit(swarm, 'stream', stream, name, peer);
+    update(swarm, 'stickyPeers');
   });
 
   peer.on('error', err => {
@@ -262,7 +263,7 @@ function handlePeerFail(connection, forcedFail) {
   log('handle peer fail! time failing:', failTime);
 
   if (forcedFail === true || failTime > MAX_FAIL_TIME) {
-    connection.swarm.emit('failedConnection', connection);
+    emit(connection.swarm, 'failedConnection', connection);
   } else {
     connectPeer(connection);
   }

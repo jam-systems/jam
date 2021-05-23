@@ -2,50 +2,79 @@ import {addLocalStream} from '../lib/swarm';
 import hark from '../lib/hark';
 import UAParser from 'ua-parser-js';
 import state, {swarm} from './state';
-import {is, set} from 'use-minimal-state';
+import {on, set, update} from 'use-minimal-state';
 import {currentId} from './identity';
 import log from '../lib/causal-log';
-import {domEvent, until} from './util';
+import {domEvent} from './util';
 import {openModal} from '../views/Modal';
 import InteractionModal from '../views/InteractionModal';
-import AudioPlayerToast from '../views/AudioPlayerToast';
+import {until} from '../lib/state-utils';
+import {useState, declare, use, useRootState} from '../lib/state-tree';
+import Microphone from './audio/Microphone';
+import AudioFile from './audio/AudioFile';
 
-var userAgent = UAParser();
+let userAgent = UAParser();
 
-export {requestAudio, stopAudio, requestMicPermissionOnly};
+export {AudioState};
 
-state.on('myAudio', myAudio => {
-  // if i am speaker, send audio to peers
-  if (state.iAmSpeaker && myAudio) {
+function AudioState({inRoom}) {
+  let [
+    iAmSpeaker,
+    handRaised,
+    audioContext,
+    micMuted,
+    audioFile,
+  ] = useRootState([
+    'iAmSpeaker',
+    'handRaised',
+    'audioContext',
+    'micMuted',
+    'audioFile',
+  ]);
+
+  let shouldHaveMic = !!(inRoom && (iAmSpeaker || handRaised));
+  let {micStream, hasRequestedOnce} = use(Microphone, {shouldHaveMic});
+  let {audioFileStream, audioFileElement} = use(AudioFile, {
+    audioFile,
+    audioContext,
+  });
+
+  let myAudio = audioFileStream ?? micStream;
+  declare(Muted, {myAudio, micMuted});
+  declare(ConnectMyAudio, {myAudio, iAmSpeaker});
+  let soundMuted = inRoom ? iAmSpeaker && !hasRequestedOnce : true;
+
+  return {myAudio, soundMuted, audioFileElement};
+}
+
+function Muted({myAudio, micMuted}) {
+  if (myAudio) {
+    for (let track of myAudio.getTracks()) {
+      if (track.enabled !== !micMuted) {
+        track.enabled = !micMuted;
+      }
+    }
+  }
+}
+
+function ConnectMyAudio({myAudio, iAmSpeaker}) {
+  let [connected, setConnected] = useState(null);
+  let shouldConnect = myAudio && iAmSpeaker;
+
+  if (connected !== myAudio && shouldConnect) {
     connectVolumeMeter(currentId(), myAudio);
     addLocalStream(swarm, myAudio, 'audio');
-  }
-  if (!myAudio) {
+    setConnected(myAudio);
+  } else if (connected && !shouldConnect) {
     disconnectVolumeMeter(currentId());
     addLocalStream(swarm, null, 'audio');
+    setConnected(null);
   }
-});
-
-state.on('iAmSpeaker', iAmSpeaker => {
-  if (iAmSpeaker) {
-    // send audio stream when I become speaker
-    let {myAudio} = state;
-    if (myAudio) {
-      connectVolumeMeter(currentId(), myAudio);
-      addLocalStream(swarm, myAudio, 'audio');
-    } else {
-      // or request audio if not on yet
-      if (state.inRoom) requestAudio();
-    }
-  } else {
-    // stop sending stream when I become audience member
-    stopAudio();
-  }
-});
+}
 
 const audios = {}; // {peerId: HTMLAudioElement}
 
-state.on('soundMuted', muted => {
+on(state, 'soundMuted', muted => {
   for (let peerId in audios) {
     let audio = audios[peerId];
     audio.muted = muted;
@@ -53,9 +82,9 @@ state.on('soundMuted', muted => {
   }
 });
 
-swarm.on('newPeer', peerId => getAudio(peerId));
+on(swarm, 'newPeer', peerId => getAudio(peerId));
 
-swarm.on('stream', (stream, name, peer) => {
+on(swarm, 'stream', (stream, name, peer) => {
   log('remote stream', name, stream);
   let peerId = peer.peerId;
   if (!stream) return;
@@ -84,6 +113,7 @@ function onConfirmModal() {
   }
 }
 
+// FIXME: opening modals from state routines breaks UI / state separation
 function playOrShowModal(peerId, audio) {
   let stream = audio.srcObject;
   return play(audio).catch(err => {
@@ -120,95 +150,6 @@ function play(audio) {
   }
 }
 
-let isRequestingAudio = false;
-async function requestAudio() {
-  if (state.myMic && state.myMic.active) return;
-  if (isRequestingAudio) return;
-  isRequestingAudio = true;
-  let stream = await navigator.mediaDevices
-    .getUserMedia({
-      video: false,
-      audio: true,
-    })
-    .catch(err => {
-      console.error('error getting mic');
-      console.error(err);
-      state.set('micMuted', true);
-      state.set('micAllowed', false);
-    });
-  isRequestingAudio = false;
-  if (!stream) return;
-  set(state, 'myMic', stream);
-  set(state, 'myAudio', stream);
-  set(state, 'micAllowed', true);
-  set(state, 'micMuted', false);
-}
-
-export async function streamAudioFromUrl(url, name) {
-  let audio = new Audio(url);
-  audio.crossOrigin = 'anonymous';
-  // let stream = audio.captureStream(); // not supported in Safari & Firefox
-  let ctx = state.audioContext;
-  let streamDestination = ctx.createMediaStreamDestination();
-  let source = ctx.createMediaElementSource(audio);
-  source.connect(streamDestination);
-  source.connect(ctx.destination);
-  let stream = streamDestination.stream;
-
-  set(state, 'myAudio', stream);
-  await audio.play();
-  openModal(AudioPlayerToast, {audio, name}, 'player');
-  await domEvent(audio, 'ended');
-  if (state.myMic) set(state, 'myAudio', state.myMic);
-}
-
-async function requestMicPermissionOnly() {
-  if (state.micAllowed) {
-    return true;
-  }
-  let stream = await navigator.mediaDevices
-    .getUserMedia({
-      video: false,
-      audio: true,
-    })
-    .catch(err => {
-      console.error('error getting mic');
-      console.error(err);
-    });
-  state.set('micAllowed', !!stream);
-  if (stream) {
-    stream.getTracks().forEach(track => track.stop());
-  }
-  return !!stream;
-}
-
-async function stopAudio() {
-  if (state.myMic) {
-    state.myMic.getTracks().forEach(track => track.stop());
-  }
-  is(state, 'myMic', null);
-  is(state, 'myAudio', null);
-}
-
-state.on('micMuted', micMuted => {
-  let {myAudio, myMic} = state;
-  if (!myAudio?.active && !micMuted) {
-    requestAudio();
-    return;
-  }
-  if (myAudio) {
-    for (let track of myAudio.getTracks()) {
-      track.enabled = !micMuted;
-    }
-  }
-  if (myMic && myMic !== myAudio) {
-    for (let track of myMic.getTracks()) {
-      track.enabled = !micMuted;
-    }
-  }
-  swarm.set('sharedState', state => ({...state, micMuted}));
-});
-
 let volumeMeters = {};
 async function connectVolumeMeter(peerId, stream) {
   if (!stream) {
@@ -223,12 +164,12 @@ async function connectVolumeMeter(peerId, stream) {
 
   volumeMeter.on('speaking', () => {
     state.speaking.add(peerId);
-    state.update('speaking');
+    update(state, 'speaking');
   });
 
   volumeMeter.on('stopped_speaking', () => {
     state.speaking.delete(peerId);
-    state.update('speaking');
+    update(state, 'speaking');
   });
 
   disconnectVolumeMeter(peerId);
@@ -241,11 +182,11 @@ function disconnectVolumeMeter(peerId) {
   volumeMeters[peerId] = null;
 }
 
-state.on('userInteracted', i => i && createAudioContext());
+on(state, 'userInteracted', i => i && createAudioContext());
 function createAudioContext() {
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   if (AudioContext && !state.audioContext) {
-    state.set('audioContext', new AudioContext());
+    set(state, 'audioContext', new AudioContext());
   } //  else {
   //   state.audioContext.resume();
   // }

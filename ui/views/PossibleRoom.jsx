@@ -3,8 +3,9 @@ import Room from './Room';
 import {initializeIdentity, useCreateRoom} from '../logic/backend';
 import {useRoom} from '../logic/room';
 import state from '../logic/state';
-import {useSync} from '../logic/util';
+import {useSync} from '../lib/state-utils';
 import {importRoomIdentity} from '../logic/identity';
+import {enterRoom} from '../logic/main';
 
 export default function PossibleRoom({
   roomId, // truthy
@@ -33,6 +34,7 @@ export default function PossibleRoom({
     room,
     isLoading,
     newRoom,
+    onSuccess: () => enterRoom(roomId),
   });
 
   if (isLoading) return null;

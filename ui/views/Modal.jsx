@@ -1,5 +1,6 @@
 import React from 'react';
 import {update, use} from 'use-minimal-state';
+import {useMemo} from '../lib/state-tree';
 import {useMediaQuery, useMqParser} from '../logic/tailwind-mqp';
 
 const modals = [new Set()];
@@ -7,8 +8,8 @@ const modals = [new Set()];
 export default function Modals() {
   let $modals = use(modals);
   if (!$modals) return null;
-  return [...$modals].map(([id, Modal, props]) => (
-    <Modal key={id} {...props} />
+  return [...$modals].map(([id, Component, props]) => (
+    <Component key={id} {...props} />
   ));
 }
 
@@ -69,7 +70,21 @@ export function Modal({close, children}) {
   );
 }
 
-export function openModal(Component, props, id) {
+// state component that handles both opening & closing declaratively
+export function ShowModal({id, component, props = {}, show = false, onClose}) {
+  id = useMemo(() => id ?? Math.random(), []);
+
+  let shouldOpen = show && component;
+  let isOpen = isModalOpen(id);
+
+  if (shouldOpen && !isOpen) {
+    openModal(component, props, id, onClose);
+  } else if (!shouldOpen && isOpen) {
+    closeModal(id);
+  }
+}
+
+export function openModal(Component, props, id, onClose) {
   let [$modals] = modals;
   if (id) {
     // don't show two modals with the same id
@@ -82,6 +97,7 @@ export function openModal(Component, props, id) {
   id = id || Math.random();
   let modal = [id, Component];
   let close = () => {
+    if (onClose) onClose();
     $modals.delete(modal);
     update(modals);
   };
@@ -101,6 +117,16 @@ export function closeModal(id) {
     }
   }
   update(modals);
+}
+
+export function isModalOpen(id) {
+  let [$modals] = modals;
+  for (let modal of $modals) {
+    if (modal[0] === id) {
+      return true;
+    }
+  }
+  return false;
 }
 
 export function CloseSvg({color = 'none', size = 24}) {

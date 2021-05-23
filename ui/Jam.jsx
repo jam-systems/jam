@@ -4,12 +4,17 @@ import {initializeIdentity} from './logic/backend';
 import Modals from './views/Modal';
 import state, {swarm} from './logic/state';
 import {mergeClasses} from './logic/util';
+import {debug} from './lib/state-utils';
 import {staticConfig} from './logic/config';
 import {useProvideWidth, WidthContext} from './logic/tailwind-mqp';
 import {set, use} from 'use-minimal-state';
 import Start from './views/Start';
 import Me from './views/Me';
 import PossibleRoom from './views/PossibleRoom';
+import {debugStateTree, declare, declareStateRoot} from './lib/state-tree';
+import {ShowAudioPlayerToast} from './views/AudioPlayerToast';
+
+declareStateRoot(ShowModals, state);
 
 export default function Jam({
   style,
@@ -50,17 +55,27 @@ export default function Jam({
   useEffect(() => {
     initializeIdentity();
     swarm.config({myPeerId: currentId()});
-    set(swarm, 'sharedState', {inRoom: false});
+    set(swarm.myPeerState, {inRoom: false, micMuted: false});
   }, []);
 
   // toggle debugging
   useEffect(() => {
     if (dynamicConfig.debug) {
       window.DEBUG = true;
+      debug(swarm);
+    }
+    if (dynamicConfig.debug || staticConfig.development) {
+      window.swarm = swarm;
+      window.state = state;
+      debug(state);
+      debugStateTree();
     }
   }, [dynamicConfig.debug]);
 
   // global styling
+  // TODO: the color should depend on the loading state of GET /room, to not flash orange before being in the room color
+  // => color should be only set here if the route is not a room id, otherwise <PossibleRoom> should set it
+  // => pass a setColor prop to PossibleRoom
   let {color} = use(state, 'room');
   let [width, , setContainer, mqp] = useProvideWidth();
   let backgroundColor = useMemo(
@@ -99,4 +114,8 @@ function hexToRGB(hex, alpha) {
   } else {
     return `rgb(${r}, ${g}, ${b})`;
   }
+}
+
+function ShowModals() {
+  declare(ShowAudioPlayerToast);
 }

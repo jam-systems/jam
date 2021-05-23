@@ -1,11 +1,14 @@
 import React, {useState, useMemo} from 'react';
 import slugify from 'slugify';
 
-import {createRoom, updateApiQuery} from '../logic/backend';
+import {createRoom} from '../logic/backend';
 import {currentId} from '../logic/identity';
 import {navigate} from '../lib/use-location';
-import {enterRoom, state} from '../logic/main';
+import {enterRoom} from '../logic/main';
 import Container from './Container';
+import {is} from 'use-minimal-state';
+import state from '../logic/state';
+import {populateCache} from '../logic/GetRequest';
 
 export default function Start({urlRoomId, roomFromURIError}) {
   let [name, setName] = useState('');
@@ -19,7 +22,7 @@ export default function Start({urlRoomId, roomFromURIError}) {
 
   let submit = e => {
     e.preventDefault();
-    state.set('userInteracted', true);
+    is(state, 'userInteracted', true);
     let roomId;
     if (name) {
       let slug = slugify(name, {lower: true, strict: true});
@@ -29,16 +32,10 @@ export default function Start({urlRoomId, roomFromURIError}) {
     }
 
     (async () => {
-      let roomCreated = await createRoom(
-        roomId,
-        name,
-        description,
-        logoURI,
-        color,
-        currentId()
-      );
+      let newRoom = {name, description, logoURI, color};
+      let roomCreated = await createRoom(roomId, currentId(), newRoom);
       if (roomCreated) {
-        updateApiQuery(`/rooms/${roomId}`, roomCreated, 200);
+        populateCache(`/rooms/${roomId}`, roomCreated);
         if (urlRoomId !== roomId) navigate('/' + roomId);
         enterRoom(roomId);
       }

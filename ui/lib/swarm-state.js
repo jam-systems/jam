@@ -1,4 +1,4 @@
-import {update} from 'use-minimal-state';
+import {emit, update} from 'use-minimal-state';
 
 export {updatePeerState, removePeerState};
 
@@ -7,9 +7,12 @@ function updatePeerState({swarm, peerId, connId}, fullState) {
   let {state, time} = fullState;
   let peerStates = get(swarm.connectionState, peerId, {});
   let states = get(peerStates, 'states', {});
-  states[connId] = {state, time};
+  states[connId] = {
+    state: {...(states[connId]?.state ?? null), ...state},
+    time,
+  };
   reducePeerState(swarm, peerId);
-  swarm.emit('rawPeerState', state, peerId, connId);
+  emit(swarm, 'rawPeerState', state, peerId, connId);
   update(swarm, 'connectionState');
   update(swarm.connectionState, peerId);
   update(swarm, 'peerState');
@@ -36,29 +39,34 @@ function removePeerState({swarm, peerId, connId}) {
 function reducePeerState(swarm, peerId) {
   let peerStates = swarm.connectionState[peerId];
   let {states} = peerStates;
-  let latest = findLatest(states);
-  peerStates.latest = latest;
+  let {latestId, latestState} = findLatest(states);
+  peerStates.latest = latestId;
   try {
     swarm.peerState[peerId] = swarm.reduceState(
       Object.values(states).map(s => s.state),
       swarm.peerState[peerId],
-      states[latest]?.state
+      latestState,
+      filter => findLatest(states, filter)?.latestState
     );
   } catch (err) {
     console.error(err);
   }
 }
 
-function findLatest(states) {
-  let latest, latestTime;
+function findLatest(states, filter) {
+  let latestId, latestTime, latestState;
   for (let connId in states) {
-    let {time} = states[connId];
-    if (latestTime === undefined || time > latestTime) {
+    let {state, time} = states[connId];
+    if (
+      (latestTime === undefined || time > latestTime) &&
+      (filter === undefined || filter(state))
+    ) {
       latestTime = time;
-      latest = connId;
+      latestState = state;
+      latestId = connId;
     }
   }
-  return latest;
+  return {latestId, latestState};
 }
 
 function get(object, key, init) {

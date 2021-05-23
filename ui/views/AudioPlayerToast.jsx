@@ -1,25 +1,37 @@
-import {set} from 'use-minimal-state';
+import {is, use} from 'use-minimal-state';
 import React, {useEffect, useState} from 'react';
 import state from '../logic/state';
-import {domEvent} from '../logic/util';
-import {CloseSvg} from './Modal';
+import {CloseSvg, ShowModal} from './Modal';
+import {declare, useRootState} from '../lib/state-tree';
 
-export default function AudioPlayerToast({close, audio, name}) {
+export function ShowAudioPlayerToast() {
+  let audioFileElement = useRootState('audioFileElement');
+  declare(ShowModal, {
+    component: AudioPlayerToast,
+    show: !!audioFileElement,
+  });
+}
+
+function AudioPlayerToast({close}) {
+  let {name} = use(state, 'audioFile') ?? {};
+  let audio = use(state, 'audioFileElement');
   let [element, setElement] = useState();
   useEffect(() => {
     if (element && audio) {
       audio.controls = true;
       audio.style.width = '100%';
       element.appendChild(audio);
-      domEvent(audio, 'ended').then(close);
+      return () => {
+        element.removeChild(audio);
+      };
     }
   }, [element, audio, close]);
 
-  let end = () => {
-    audio.src = null;
-    if (state.myMic) set(state, 'myAudio', state.myMic);
+  function end() {
+    is(state, 'audioFile', null);
     close();
-  };
+  }
+
   return (
     <div
       className="mt-40 w-96"
@@ -70,7 +82,7 @@ export default function AudioPlayerToast({close, audio, name}) {
             <CloseSvg color="white" />
           </div>
         </div>
-        <div className="mb-3 text-gray-200 text-center">{name || ''}</div>
+        <div className="mb-3 text-gray-200 text-center">{name ?? ''}</div>
       </div>
     </div>
   );

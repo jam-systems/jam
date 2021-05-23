@@ -127,8 +127,6 @@ Directory overview:
 
 `pantry`/ a lightweight server for handling authentication and coordination of Jam
 
-`signalhub`/ a simple server for managing WebRTC connections for Jam
-
 `ui`/ web based user interface based on the React framework
 
 

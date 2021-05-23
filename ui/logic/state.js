@@ -1,9 +1,6 @@
-import State from 'use-minimal-state';
 import Swarm from '../lib/swarm';
-import {DEV} from './config';
-import {debug} from './util';
-const state = State({
-  roomId: null,
+const state = {
+  roomId: window.existingRoomId ?? null,
   inRoom: null, // === roomId but only if entered
   room: {name: '', description: '', speakers: [], moderators: []},
   iAmSpeaker: false,
@@ -12,34 +9,25 @@ const state = State({
   otherDeviceInRoom: false,
 
   reactions: {},
-  raisedHands: new Set(),
+  handRaised: false,
 
-  micAllowed: false,
   soundMuted: true,
-  micMuted: true,
-  myMic: null,
+  micMuted: false,
+  audioFile: null,
+  audioFileElement: null,
   myAudio: null,
 
   speaking: new Set(),
   audioContext: null,
 
-  queries: {},
   modMessages: {},
   userInteracted: false,
-});
+};
 export default state;
+
+export const actions = {
+  RETRY_MIC: 'retry-mic',
+};
 
 const swarm = Swarm();
 export {swarm};
-
-// actions that can be emitted to trigger events
-// emit(action.NAME, payload)
-// on(action.NAME, payload => {})
-export const actions = {
-  ENTER: [],
-};
-
-if (DEV) debug(state);
-
-// mod visible state
-export const modState = {raiseHand: false};

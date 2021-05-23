@@ -5,11 +5,8 @@ import state from './state';
 import {set, use} from 'use-minimal-state';
 import {StoredState} from '../lib/local-storage';
 import {importLegacyIdentity} from '../lib/migrations';
-import {Buffer} from 'buffer';
 
 const MESSAGE_VALIDITY_SECONDS = 300;
-
-window.Buffer = Buffer; // ugh
 
 const createIdentityFromSecretKey = (info, privatekeyBase64) => {
   const keypair = nacl.sign.keyPair.fromSecretKey(decode(privatekeyBase64));

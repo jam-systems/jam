@@ -1,6 +1,6 @@
 import base64 from 'compact-base64';
 import {clear, emit, is, on} from 'use-minimal-state';
-import {until} from '../logic/util';
+import {until} from '../lib/state-utils';
 
 export default function signalws({
   url,
@@ -66,6 +66,9 @@ export default function signalws({
     broadcast(topic, message = {}) {
       return broadcast(hub, topic, message);
     },
+    sendDirect(receiverId, message = {}) {
+      return sendDirect(hub, receiverId, message);
+    },
     close() {
       close(hub);
     },
@@ -86,6 +89,11 @@ function subscribe(hub, topic, onMessage) {
 async function broadcast(hub, topic, message) {
   await until(hub, 'opened');
   return send(hub, {t: topic, d: message});
+}
+
+async function sendDirect(hub, {peerId, connId}, message) {
+  await until(hub, 'opened');
+  return send(hub, {t: 'direct', d: message, p: `${peerId};${connId}`});
 }
 
 function close({ws, closed}, code = 1000) {

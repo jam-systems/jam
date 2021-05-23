@@ -1,6 +1,6 @@
 import {set} from 'use-minimal-state';
 import {staticConfig} from '../logic/config';
-import {debug} from '../logic/util';
+import {debug} from '../lib/state-utils';
 import Jam from '../Jam';
 import css from '../css/main.css';
 
@@ -8,7 +8,6 @@ function prepareForComponent() {
   debug(staticConfig);
   set(staticConfig, {
     pantryUrl: 'https://beta.jam.systems/_/pantry',
-    signalHubUrl: 'https://beta.jam.systems/_/signalhub',
     isEmbedded: true,
   });
 

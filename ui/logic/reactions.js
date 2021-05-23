@@ -1,10 +1,8 @@
-import {set, update, on} from 'use-minimal-state';
+import {update, on} from 'use-minimal-state';
 import {sendPeerEvent} from '../lib/swarm';
-import {requestAudio, stopAudio} from './audio';
-import {currentId} from './identity';
-import state, {modState, swarm} from './state';
+import state, {swarm} from './state';
 
-export {sendReaction, raiseHand};
+export {sendReaction};
 
 function sendReaction(reaction) {
   sendPeerEvent(swarm, 'reaction', reaction);
@@ -20,33 +18,10 @@ function showReaction(reaction, peerId) {
   if (!reactions[peerId]) reactions[peerId] = [];
   let reactionObj = [reaction, Math.random()];
   reactions[peerId].push(reactionObj);
-  state.update('reactions');
+  update(state, 'reactions');
   setTimeout(() => {
     let i = reactions[peerId].indexOf(reactionObj);
     if (i !== -1) reactions[peerId].splice(i, 1);
-    state.update('reactions');
+    update(state, 'reactions');
   }, 5000);
 }
-
-function raiseHand(raise) {
-  // make visible to me
-  if (raise) {
-    state.raisedHands.add(currentId());
-    requestAudio();
-  } else {
-    state.raisedHands.delete(currentId());
-    stopAudio();
-  }
-  update(state, 'raisedHands');
-  // make visible to mods
-  set(modState, 'raiseHand', !!raise);
-}
-
-// listen for raised hands
-on(state, 'modMessages', modMessages => {
-  let hands = new Set();
-  for (let peerId in modMessages) {
-    if (modMessages[peerId].raiseHand) hands.add(peerId);
-  }
-  set(state, 'raisedHands', hands);
-});

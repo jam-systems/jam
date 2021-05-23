@@ -1,20 +1,16 @@
 import React, {useMemo, useState} from 'react';
 import {leaveRoom} from '../logic/main';
-import state from '../logic/state';
-import {use} from 'use-minimal-state';
-import {currentId} from '../logic/identity';
-import {sendReaction, raiseHand} from '../logic/reactions';
+import state, {actions} from '../logic/state';
+import {is, use} from 'use-minimal-state';
+import {sendReaction} from '../logic/reactions';
 import EditRole, {EditSelf} from './EditRole';
 import {breakpoints, useWidth} from '../logic/tailwind-mqp';
-import UAParser from 'ua-parser-js';
-import {requestAudio} from '../logic/audio';
 import {openModal} from './Modal';
 import {InfoModal} from './InfoModal';
 import {MicOffSvg, MicOnSvg} from './Svg';
+import {dispatch} from '../lib/state-tree';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
-
-var userAgent = UAParser();
 
 let navigationStyle = {
   position: 'fixed',
@@ -41,10 +37,10 @@ export default function Navigation({
   editSelf,
   setEditSelf,
 }) {
-  let [myAudio, micMuted, raisedHands, iSpeak] = use(state, [
+  let [myAudio, micMuted, handRaised, iSpeak] = use(state, [
     'myAudio',
     'micMuted',
-    'raisedHands',
+    'handRaised',
     'iAmSpeaker',
   ]);
 
@@ -52,24 +48,17 @@ export default function Navigation({
 
   let [showReactions, setShowReactions] = useState(false);
 
-  let {color, speakers, moderators} = room || {};
+  let {color, speakers, moderators, stageOnly} = room ?? {};
 
   let isColorDark = useMemo(() => isDark(color), [color]);
-
-  let myPeerId = currentId();
-  let myHandRaised = raisedHands.has(myPeerId);
 
   let width = useWidth();
 
   let talk = () => {
     if (micOn) {
-      state.set('micMuted', !micMuted);
+      is(state, 'micMuted', !micMuted);
     } else {
-      if (userAgent.browser?.name === 'Safari') {
-        location.reload();
-      } else {
-        requestAudio();
-      }
+      dispatch(state, actions.RETRY_MIC);
     }
   };
 
@@ -87,6 +76,7 @@ export default function Navigation({
           peerId={editRole}
           speakers={speakers}
           moderators={moderators}
+          stageOnly={stageOnly}
           onCancel={() => setEditRole(null)}
         />
       )}
@@ -95,7 +85,7 @@ export default function Navigation({
       {/* TODO: button content breaks between icon and text on small screens. fix by using flexbox & text-overflow */}
       <div className="flex">
         <button
-          onClick={iSpeak ? talk : () => raiseHand(!myHandRaised)}
+          onClick={iSpeak ? talk : () => is(state, 'handRaised', !handRaised)}
           onKeyUp={e => {
             // don't allow clicking mute button with space bar to prevent confusion with push-to-talk w/ space bar
             if (e.key === ' ') e.preventDefault();
@@ -131,7 +121,7 @@ export default function Navigation({
           )}
           {!iSpeak && (
             <>
-              {myHandRaised ? (
+              {handRaised ? (
                 <>Stop&nbsp;raising&nbsp;hand</>
               ) : (
                 <>✋🏽&nbsp;Raise&nbsp;hand&nbsp;to&nbsp;get&nbsp;on&nbsp;stage</>

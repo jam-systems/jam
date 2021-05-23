@@ -13,7 +13,6 @@ __pycache__
 .husky/
 deployment/
 examples/
-signalhub/
 resources/
 **/bundle.js
 **/dist/

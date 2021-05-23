@@ -2,7 +2,6 @@
     "urls": {
       "jam": "https://jam.systems",
       "pantry": "https://jam.systems/_/pantry",
-      "signalHub": "https://jam.systems/_/signalhub",
       "stun": "stun:stun.jam.systems:3478",
       "turn": "turn:turn.jam.systems:3478",
       "turnCredentials": {

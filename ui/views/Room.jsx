@@ -14,7 +14,6 @@ import Navigation from './Navigation';
 import UAParser from 'ua-parser-js';
 import {usePushToTalk} from '../logic/hotkeys';
 import {disconnectRoom, maybeConnectRoom} from '../logic/room';
-import {stopAudio} from '../logic/audio';
 const userAgent = UAParser();
 const inWebView =
   userAgent.browser?.name === 'Chrome WebView' ||
@@ -23,7 +22,7 @@ const inWebView =
 export default function Room({room, roomId}) {
   // room = {name, description, moderators: [peerId], speakers: [peerId]}
   useWakeLock();
-  usePushToTalk();
+  usePushToTalk(state);
 
   // connect with signaling server
   useEffect(() => {
@@ -31,33 +30,32 @@ export default function Room({room, roomId}) {
     return () => {
       // clean up on unmount
       disconnectRoom(roomId);
-      stopAudio();
     };
   }, [roomId]);
 
   let myInfo = useCurrentIdentity().info;
   let [
     reactions,
-    raisedHands,
+    handRaised,
     identities,
     speaking,
     iSpeak,
     iModerate,
   ] = use(state, [
     'reactions',
-    'raisedHands',
+    'handRaised',
     'identities',
     'speaking',
     'iAmSpeaker',
     'iAmModerator',
   ]);
-  let [peers, peerState, sharedState] = use(swarm, [
+  let [peers, peerState, myPeerState] = use(swarm, [
     'stickyPeers',
     'peerState',
-    'sharedState',
+    'myPeerState',
   ]);
 
-  let hasEnteredRoom = sharedState?.inRoom;
+  let hasEnteredRoom = myPeerState?.inRoom;
 
   let [editRole, setEditRole] = useState(null);
   let [editSelf, setEditSelf] = useState(false);
@@ -72,6 +70,7 @@ export default function Room({room, roomId}) {
     speakers,
     moderators,
     closed,
+    stageOnly,
     shareUrl,
   } = room || {};
 
@@ -105,12 +104,13 @@ export default function Room({room, roomId}) {
   }
 
   let myPeerId = myInfo.id;
-  let stagePeers = (speakers || []).filter(id => id in peers);
-  let audiencePeers = Object.keys(peers || {}).filter(
-    id => !stagePeers.includes(id)
-  );
-
-  let myHandRaised = raisedHands.has(myPeerId);
+  let allPeers = Object.keys(peers ?? {});
+  let stagePeers = stageOnly
+    ? allPeers
+    : (speakers ?? []).filter(id => id in peers);
+  let audiencePeers = stageOnly
+    ? []
+    : allPeers.filter(id => !stagePeers.includes(id));
 
   return (
     <Container style={{display: 'flex', flexDirection: 'column'}}>
@@ -194,9 +194,8 @@ export default function Room({room, roomId}) {
                   key={myPeerId}
                   peerId={myPeerId}
                   {...{speaking, moderators, reactions, room}}
-                  peerState={sharedState}
+                  peerState={myPeerState}
                   info={myInfo}
-                  // onClick={() => openModal(EditIdentity)}
                   onClick={() => setEditSelf(true)}
                 />
               )}
@@ -215,30 +214,33 @@ export default function Room({room, roomId}) {
 
           <br />
           {/* Audience */}
-          <h3 className="text-gray-400 pl-4 pb-4">Audience</h3>
-          <ol className="flex flex-wrap">
-            {!iSpeak && (
-              <AudienceAvatar
-                {...{reactions, room}}
-                peerId={myPeerId}
-                peerState={sharedState}
-                info={myInfo}
-                handRaised={myHandRaised}
-                // onClick={() => openModal(EditIdentity)}
-                onClick={() => setEditSelf(true)}
-              />
-            )}
-            {audiencePeers.map(peerId => (
-              <AudienceAvatar
-                key={peerId}
-                {...{peerId, peerState, reactions, room}}
-                peerState={peerState[peerId]}
-                info={identities[peerId]}
-                handRaised={iModerate && raisedHands.has(peerId)}
-                onClick={iModerate ? () => setEditRole(peerId) : undefined}
-              />
-            ))}
-          </ol>
+          {!stageOnly && (
+            <>
+              <h3 className="text-gray-400 pl-4 pb-4">Audience</h3>
+              <ol className="flex flex-wrap">
+                {!iSpeak && (
+                  <AudienceAvatar
+                    {...{reactions, room}}
+                    peerId={myPeerId}
+                    peerState={myPeerState}
+                    info={myInfo}
+                    handRaised={handRaised}
+                    onClick={() => setEditSelf(true)}
+                  />
+                )}
+                {audiencePeers.map(peerId => (
+                  <AudienceAvatar
+                    key={peerId}
+                    {...{peerId, peerState, reactions, room}}
+                    peerState={peerState[peerId]}
+                    info={identities[peerId]}
+                    handRaised={iModerate && peerState[peerId]?.handRaised}
+                    onClick={iModerate ? () => setEditRole(peerId) : undefined}
+                  />
+                ))}
+              </ol>
+            </>
+          )}
         </div>
 
         <div style={{height: '136px', flex: 'none'}} />

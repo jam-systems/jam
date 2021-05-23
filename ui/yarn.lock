@@ -2040,12 +2040,13 @@ signal-exit@^3.0.0:
   resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-3.0.3.tgz"
   integrity sha512-VUJ49FC8U1OxwZLxIbTTrDvLnf/6TDgxZcK8wxR8zs13xpx7xbG60ndBlhNrFi2EMuFRoeDoJO7wthSLq42EjA==
 
-simple-signed-records-engine@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/simple-signed-records-engine/-/simple-signed-records-engine-0.1.1.tgz#9aec1f7f3695126197ef583765559b08ad344e5f"
-  integrity sha512-P3iqCSTrPQ+mZgprE2R9y+GWLk7BQWqwtPWX+7QlwMQGiKRR+vyQSVltbCKqG9fr00VE59WZWM9pJVoHBY1oPQ==
+simple-signed-records-engine@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/simple-signed-records-engine/-/simple-signed-records-engine-0.1.2.tgz#e0d34702c37a3e6979f889de77244f1774057a94"
+  integrity sha512-WwuoaqiWkPym1xvlwKO7tkRHDS9CtMMr+i2igxMOYg3l71Gaaw8bCv46WvYoNwX9g5pCq46xTA5ejmsO6Z+dOg==
   dependencies:
     "@babel/polyfill" "^7.12.1"
+    buffer "^6.0.3"
     tweetnacl "^1.0.3"
     tweetnacl-util "^0.15.1"
 

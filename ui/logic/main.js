@@ -1,17 +1,47 @@
-import state, {actions, swarm} from './state';
+import state, {swarm} from './state';
 import {get} from './backend';
 import {currentId, signData, verifyData} from './identity';
-import {DEV, staticConfig} from './config';
-import {requestAudio, stopAudio} from './audio';
+import {staticConfig} from './config';
+import {AudioState} from './audio';
 import './reactions';
-import './room';
-import {is, on} from 'use-minimal-state';
+import {RoomState} from './room';
+import {is, on, set, update} from 'use-minimal-state';
+import {declare, declareStateRoot, merge, use} from '../lib/state-tree';
+import {populateCache} from './GetRequest';
 
-if (DEV) {
-  window.state = state; // for debugging
-  window.swarm = swarm;
+if (window.existingRoomInfo) {
+  populateCache(`/rooms/${window.existingRoomId}`, window.existingRoomInfo);
 }
-export {state};
+
+declareStateRoot(AppState, state, [
+  'roomId',
+  'inRoom',
+  'userInteracted',
+  'micMuted',
+]);
+
+function AppState({roomId, inRoom, userInteracted, micMuted}) {
+  let myId = currentId();
+  let {room, iAmSpeaker, iAmModerator} = use(RoomState, {roomId, myId});
+  let {closed} = room;
+
+  inRoom = closed && !iAmModerator ? null : inRoom;
+  is(swarm.myPeerState, {micMuted, inRoom: !!inRoom});
+
+  userInteracted = userInteracted || !!inRoom;
+  return merge(
+    {userInteracted, inRoom, room, iAmSpeaker, iAmModerator},
+    declare(AudioState, {inRoom})
+  );
+}
+
+export function enterRoom(roomId) {
+  set(state, 'inRoom', roomId);
+}
+
+export function leaveRoom() {
+  set(state, 'inRoom', null);
+}
 
 function configSwarm() {
   swarm.config({
@@ -19,11 +49,9 @@ function configSwarm() {
     url: staticConfig.urls.pantry,
     sign: signData,
     verify: verifyData,
-    reduceState: (states, current, latest) => {
+    reduceState: (_states, _current, latest, findLatest) => {
       if (latest.inRoom) return latest;
-      // if latest is not inRoom, we probably want to ignore most props from it
-      // if not, add them here
-      return {...current, inRoom: states.some(s => s.inRoom)};
+      return findLatest(s => s.inRoom) ?? latest;
     },
     pcConfig: {
       iceTransportPolicy: 'all',
@@ -41,33 +69,8 @@ function configSwarm() {
 configSwarm();
 on(staticConfig, () => configSwarm());
 
-export function enterRoom(roomId) {
-  state.set('userInteracted', true);
-  state.set('inRoom', roomId);
-  swarm.set('sharedState', state => ({...state, inRoom: true}));
-  if (state.iAmSpeaker) {
-    requestAudio().then(() => is(state, 'soundMuted', false));
-  } else {
-    is(state, 'soundMuted', false);
-  }
-}
-on(actions.ENTER, roomId => enterRoom(roomId));
-
-export function leaveRoom() {
-  state.set('inRoom', null);
-  swarm.set('sharedState', state => ({...state, inRoom: false}));
-  stopAudio();
-  state.set('soundMuted', true);
-}
-
-// leave room when it gets closed
-on(state, 'room', room => {
-  let {moderators, closed} = room;
-  if (state.inRoom && closed && !moderators.includes(currentId())) {
-    leaveRoom();
-  }
-});
 // leave room when same peer joins it from elsewhere and I'm in room
+// TODO: currentId() is called too early to react to any changes!
 on(swarm.connectionState, currentId(), myConnState => {
   if (myConnState === undefined) {
     is(state, {otherDeviceInRoom: false});
@@ -86,13 +89,13 @@ on(swarm.connectionState, currentId(), myConnState => {
   is(state, {otherDeviceInRoom});
 });
 
-swarm.on('newPeer', async id => {
+on(swarm, 'newPeer', async id => {
   for (let i = 0; i < 5; i++) {
     // try multiple times to lose race with the first POST /identities
     let [data, ok] = await get(`/identities/${id}`);
     if (ok) {
       state.identities[id] = data;
-      state.update('identities');
+      update(state, 'identities');
       return;
     }
   }
