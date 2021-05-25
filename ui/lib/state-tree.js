@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {is, on, emit, clear, use as useMinimalState} from 'use-minimal-state';
 import {staticConfig} from '../logic/config';
 import causalLog from './causal-log';
@@ -46,6 +46,8 @@ export {
   useUpdate,
   useState,
   useMemo,
+  useCallback,
+  useUnmount,
   Atom,
   merge,
   debugStateTree,
@@ -61,17 +63,17 @@ let currentAction = [undefined, undefined];
 const updateSet = new Set();
 const rootUpdateSet = new Set();
 
-function declare(Component, props) {
+function declare(Component, props, stableProps) {
   let key = props?.key;
   let element = current.children.find(
     c => c.component === Component && c.key === key
   );
-  let [newElement] = _declare(Component, props, element);
+  let [newElement] = _declare(Component, props, {element, stableProps});
   return newElement.fragment;
 }
 
 // this works equivalently in React & state-tree components
-function use(Component, props) {
+function use(Component, props, stableProps) {
   let isComponent = typeof Component === 'function';
   if (current === root) {
     // we are not in a state component => assume inside React component
@@ -92,11 +94,19 @@ function use(Component, props) {
   let element = current.children.find(
     c => c.component === Component && c.key === key
   );
-  let [newElement] = _declare(Component, props, element, true);
+  let [newElement] = _declare(Component, props, {
+    element,
+    used: true,
+    stableProps,
+  });
   return newElement.fragment[0];
 }
 
-function _declare(Component, props = null, element, used = false) {
+function _declare(
+  Component,
+  props = null,
+  {element, used = false, stableProps = null} = {}
+) {
   let mustUpdate = updateSet.has(element);
   if (mustUpdate) updateSet.delete(element);
 
@@ -114,6 +124,7 @@ function _declare(Component, props = null, element, used = false) {
       component: Component,
       render: Component,
       props,
+      stableProps,
       key: props?.key,
       children: [],
       uses: [],
@@ -126,9 +137,12 @@ function _declare(Component, props = null, element, used = false) {
     log('STATE-TREE', 'mounting new element', element.component.name);
     current.children.push(element);
   } else {
-    element.props = props;
+    if (props !== null) element.props = props;
+    if (stableProps !== null) element.stableProps = stableProps;
     element.renderTime = renderTime;
   }
+  console.error('props', element.props, 'stableProps', element.stableProps);
+  let renderProps = {...element.props, ...element.stableProps};
 
   // run component
   let tmp = [current, nUses];
@@ -137,13 +151,18 @@ function _declare(Component, props = null, element, used = false) {
   let result;
   if (isMount) {
     // handle level-2 component
-    result = Component(props);
+    result = Component(renderProps);
     if (typeof result === 'function') {
+      let mountUses = element.uses;
+      element.uses = [];
       element.render = result;
-      result = element.render(props);
+      result = element.render(renderProps);
+      // level-2 uses are simply put at the end so they don't interfere on re-renders
+      // and can still register unmount handlers
+      element.uses = [...element.uses, ...mountUses];
     }
   } else {
-    result = element.render(props);
+    result = element.render(renderProps);
   }
   [current, nUses] = tmp;
 
@@ -186,7 +205,8 @@ function declareStateRoot(Component, state, keys = []) {
   const rootElement = {
     component: Component,
     render: Component,
-    props: undefined,
+    props: null,
+    stableProps: null,
     key: {},
     children: [],
     uses: [],
@@ -206,7 +226,7 @@ function declareStateRoot(Component, state, keys = []) {
   current.children.push(rootElement);
 
   renderRoot = rootElement;
-  _declare(Component, {...state}, rootElement);
+  _declare(Component, {...state}, {element: rootElement});
   let result = rootFragment[0];
   log(
     'STATE-TREE',
@@ -303,7 +323,7 @@ function queueRootUpdate(rootElement, reason = '') {
     let {state, fragment, component} = rootElement;
     renderRoot = rootElement;
     renderTime = Date.now();
-    _declare(component, {...state}, rootElement);
+    _declare(component, {...state}, {element: rootElement});
     let result = fragment[0];
     renderRoot = null;
     log(
@@ -339,7 +359,7 @@ function rerender(element) {
   let result;
   if (element.declared) {
     log('STATE-TREE', 'rerendering', element.component.name);
-    let [, updateKeys] = _declare(element.component, element.props, element);
+    let [, updateKeys] = _declare(element.component, element.props, {element});
     result = element.fragment[0];
     // TODO: rerendered element should already provide fine-grained update info (keys)
     emit(element.fragment, result, updateKeys);
@@ -405,7 +425,7 @@ function unsubscribeAll(subscriptions, element) {
 
 // TODO: investigate whether the Component can be made changeable
 
-function useStateComponent(Component, props) {
+function useStateComponent(Component, props, stableProps) {
   // a stable object which we use as render key and to store mutable state
   let [stable] = React.useState({
     shouldRun: true,
@@ -420,7 +440,7 @@ function useStateComponent(Component, props) {
     let element = root.children.find(
       c => c.component === component && c.key === stable
     );
-    [element] = _declare(component, props, element);
+    [element] = _declare(component, props, {element, stableProps});
     stable.element = element;
   }
   stable.shouldRun = true;
@@ -428,7 +448,7 @@ function useStateComponent(Component, props) {
   // the old force-update trick
   let [, forceUpdate] = React.useState(0);
 
-  useEffect(() => {
+  React.useEffect(() => {
     let {element} = stable;
     on(element.fragment, () => {
       log('STATE-TREE React update', stable.component.name);
@@ -508,15 +528,13 @@ function useExternalState(state, key) {
 }
 
 function useUpdate() {
-  if (current === root)
-    throw Error('useUpdate can only be called during render');
+  if (current === root) throw Error('Hooks can only be called during render');
   let caller = current;
   return () => queueUpdate(caller, 'useUpdate');
 }
 
 function useState(initial) {
-  if (current === root)
-    throw Error('useState can only be called during render');
+  if (current === root) throw Error('Hooks can only be called during render');
   let caller = current;
   let use = caller.uses[nUses];
   if (use === undefined) {
@@ -536,7 +554,7 @@ function useState(initial) {
 }
 
 function useMemo(func, deps) {
-  if (current === root) throw Error('useMemo can only be called during render');
+  if (current === root) throw Error('Hooks can only be called during render');
   let caller = current;
   let use = caller.uses[nUses];
   if (use === undefined) use = [undefined, undefined];
@@ -548,6 +566,54 @@ function useMemo(func, deps) {
   nUses++;
   return use[0];
 }
+
+function useCallback(func, deps) {
+  if (current === root) throw Error('Hooks can only be called during render');
+  let caller = current;
+  let use = caller.uses[nUses];
+  if (use === undefined) use = [undefined, undefined];
+  if (use[1] === undefined || !arrayEqual(use[1], deps)) {
+    use[1] = deps;
+    use[0] = func;
+    caller.uses[nUses] = use;
+  }
+  nUses++;
+  return use[0];
+}
+
+function useUnmount(unmount) {
+  if (current === root) throw Error('Hooks can only be called during render');
+  if (current.uses[nUses] === undefined) {
+    current.uses[nUses] = {unmount};
+  }
+  nUses++;
+}
+
+// function useEffect(func, deps) {
+//   if (current === root) throw Error('Hooks can only be called during render');
+//   let caller = current;
+//   let use = caller.uses[nUses];
+//   if (use === undefined || use.key !== key) {
+//     if (use !== undefined) {
+//       // cleaning up when key changed
+//       use.cleanup();
+//     }
+//     const listener = () => {
+//       // not sure whether we want this...
+//       // I'd rather be able to force updates when I want and be careful about triggering them
+//       // if (value === state[key]) return;
+//       if (current !== caller) {
+//         queueUpdate(caller, 'useExternalState ' + key);
+//       }
+//     };
+//     // TODO: cleanup on onUnmount
+//     let cleanup = on(state, key, listener);
+//     use = {key, cleanup};
+//     caller.uses[nUses] = use;
+//   }
+//   nUses++;
+//   return state[key];
+// }
 
 function arrayEqual(a, b) {
   if (a === b) return true;
