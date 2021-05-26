@@ -9,22 +9,17 @@ export default function ModeratorState({moderators}) {
   let [isRaiseHand, hasRaisedHand] = useNewValue(handRaised, false);
 
   if (isRaiseHand) {
-    console.log('sharing state with moderators');
     shareStateWithGroup(swarm, 'moderator', {handRaised});
   }
 
   // if (isNewMod && hasRaisedHand) {
   //   shareStateWithPeer(swarm, peerId, {handRaised});
   // }
-
   let onNewModerator = useCallback(
-    peerId => {
-      if (hasRaisedHand) {
-        shareStateWithPeer(swarm, peerId, {handRaised});
-      }
-    },
+    peerId => hasRaisedHand && shareStateWithPeer(swarm, peerId, {handRaised}),
     [handRaised, hasRaisedHand]
   );
+
   declare(NewModerator, {moderators, onNewModerator});
 }
 
