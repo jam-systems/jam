@@ -128,6 +128,7 @@ function event(Component, props, stableProps) {
   let [newElement] = _run(Component, props, {
     element,
     isEvent: true,
+    isUsed: true,
     stableProps,
   });
   return newElement.fragment[0];
