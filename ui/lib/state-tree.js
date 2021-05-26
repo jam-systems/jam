@@ -18,27 +18,32 @@ import causalLog from './causal-log';
      => split out useStateComponent() & overloaded use()
      => minimal-state instead of use-minimal-state => use-minimal-state has to *import* minimal-state
         so they share the event book-keeping (otherwise useExternalState wouldn't work)
+
   - add more API for using state-tree inside React components, i.e.
     * useStateRoot(Component, props) which is like declareStateRoot & updates React component w/ state
     * something like declare() for self-contained effects which can take props but don't return anything
     * check whether declare / use could work w/ changing components, this works in state-tree but not in React bc
       we fix reference to fragment
+
   - improve actions/events as component input:
     * enable any component tree to handle actions, not just the declareRootState variant
     * dispatch() should queue an update which can be batched w/ other updates but *guarantees* that the component
       is called once w/ the action & payload.
     * multiple dispatches to the same action w/ different payloads should render the component multiple times
       e.g. queue of actions is stored in use array, useAction calls queueUpdate
+    * for the retry-mic use case / encapsulated events: actions should optionally be a unique object, Action(type), that can
+      be exported (to avoid global strings which always have latent potential for conflicts)
+
+  - actions/events as component output:
     * components should be able to act as event generators via their return value
       needs a third wrapper in addition to declare() & use(), e.g. event(Component, props).
       crucially, event() does NOT re-return the last result if it doesn't update, bc events are one-time things.
-      this could be another boolean flag in _declare.
+      this could be another boolean flag in _run.
       this pattern has same use case as callback-passing but is much cleaner
       => avoids generating functions that have to be memoized, avoids an additional execution scope
       should make most instances of dispatch from inside components unnecessary, then dispatch is still needed as a fallback
       for actions that just can't be triggered by stable state, like retry-mic
-    * for the retry-mic use case / encapsulated events: actions should optionally be a unique object, Action(type), that can
-      be exported (to avoid global strings which always have latent potential for conflicts)
+    
   - understand performance & optimize where possible
   - stale update problem: understand in what cases object identity of state properties must change.
     or, if updates to root are made sufficiently fine-grained, possibly don't block
@@ -49,6 +54,7 @@ import causalLog from './causal-log';
 export {
   use,
   declare,
+  event,
   declareStateRoot,
   dispatch,
   useAction,
@@ -80,7 +86,7 @@ function declare(Component, props, stableProps) {
   let element = current.children.find(
     c => c.component === Component && c.key === key
   );
-  let [newElement] = _declare(Component, props, {element, stableProps});
+  let [newElement] = _run(Component, props, {element, stableProps});
   return newElement.fragment;
 }
 
@@ -106,24 +112,41 @@ function use(Component, props, stableProps) {
   let element = current.children.find(
     c => c.component === Component && c.key === key
   );
-  let [newElement] = _declare(Component, props, {
+  let [newElement] = _run(Component, props, {
     element,
-    used: true,
+    isUsed: true,
     stableProps,
   });
   return newElement.fragment[0];
 }
 
-function _declare(
+function event(Component, props, stableProps) {
+  let key = props?.key;
+  let element = current.children.find(
+    c => c.component === Component && c.key === key
+  );
+  let [newElement] = _run(Component, props, {
+    element,
+    isEvent: true,
+    stableProps,
+  });
+  return newElement.fragment[0];
+}
+
+function _run(
   Component,
   props = null,
-  {element, used = false, stableProps = null} = {}
+  {element, stableProps = null, isUsed = false, isEvent = false} = {}
 ) {
   let mustUpdate = updateSet.has(element);
   if (mustUpdate) updateSet.delete(element);
 
   if (sameProps(element?.props, props) && !mustUpdate) {
     element.renderTime = renderTime;
+    if (element.isEvent) {
+      // an event component must return undefined if not rendered
+      resultToFragment(undefined, element.fragment);
+    }
     return [element, undefined];
   }
 
@@ -143,7 +166,8 @@ function _declare(
       renderTime,
       parent: current,
       root: renderRoot,
-      declared: !used,
+      isUsed,
+      isEvent,
       fragment: Fragment(),
     };
     log('STATE-TREE', 'mounting new element', element.component.name);
@@ -225,7 +249,8 @@ function declareStateRoot(Component, state, keys = []) {
     renderTime,
     parent: current,
     root: null,
-    declared: true,
+    isEvent: false,
+    isUsed: false,
     fragment: Fragment(),
     actionSubs: new Map(),
     stateSubs: new Map(),
@@ -238,7 +263,7 @@ function declareStateRoot(Component, state, keys = []) {
   current.children.push(rootElement);
 
   renderRoot = rootElement;
-  _declare(Component, {...state}, {element: rootElement});
+  _run(Component, {...state}, {element: rootElement});
   let result = rootFragment[0];
   log(
     'STATE-TREE',
@@ -335,7 +360,7 @@ function queueRootUpdate(rootElement, reason = '') {
     let {state, fragment, component} = rootElement;
     renderRoot = rootElement;
     renderTime = Date.now();
-    _declare(component, {...state}, {element: rootElement});
+    _run(component, {...state}, {element: rootElement});
     let result = fragment[0];
     renderRoot = null;
     log(
@@ -355,12 +380,12 @@ function markForUpdate(element) {
   let parent = element;
   // log('adding updateSet', parent.component.name);
   updateSet.add(parent);
-  if (parent.declared) return parent;
+  if (!parent.isUsed) return parent;
   while (parent.parent !== root) {
     parent = parent.parent;
     // log('adding updateSet', parent.component.name);
     updateSet.add(parent);
-    if (parent.declared) return parent;
+    if (!parent.isUsed) return parent;
   }
   return parent;
 }
@@ -369,15 +394,15 @@ function rerender(element) {
   renderRoot = element.root;
   renderTime = Date.now();
   let result;
-  if (element.declared) {
+  if (!element.isUsed) {
     log('STATE-TREE', 'rerendering', element.component.name);
-    let [, updateKeys] = _declare(element.component, element.props, {element});
+    let [, updateKeys] = _run(element.component, element.props, {element});
     result = element.fragment[0];
     // TODO: rerendered element should already provide fine-grained update info (keys)
     emit(element.fragment, result, updateKeys);
   } else {
     throw Error(
-      'undeclared re-render! should not happen because used elements require update of parents'
+      'used re-render! should not happen because used elements require update of parents'
     );
   }
   renderRoot = null;
@@ -452,7 +477,7 @@ function useStateComponent(Component, props, stableProps) {
     let element = root.children.find(
       c => c.component === component && c.key === stable
     );
-    [element] = _declare(component, props, {element, stableProps});
+    [element] = _run(component, props, {element, stableProps});
     stable.element = element;
   }
   stable.shouldRun = true;
