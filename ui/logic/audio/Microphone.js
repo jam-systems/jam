@@ -1,8 +1,6 @@
 import {actions} from '../state';
-import UAParser from 'ua-parser-js';
+import {userAgent} from '../../lib/user-agent';
 import {useUpdate, useAction, useUnmount} from '../../lib/state-tree';
-
-let userAgent = UAParser();
 
 export default function Microphone() {
   let micState = 'initial'; // 'requesting', 'active', 'failed'
