@@ -1,14 +1,16 @@
 import {actions} from '../state';
-import UAParser from 'ua-parser-js';
-import {useUpdate, useAction} from '../../lib/state-tree';
-
-let userAgent = UAParser();
+import {userAgent} from '../../lib/user-agent';
+import {useUpdate, useAction, useUnmount} from '../../lib/state-tree';
 
 export default function Microphone() {
   let micState = 'initial'; // 'requesting', 'active', 'failed'
   let micStream = null;
   let hasRequestedOnce = false;
   const update = useUpdate();
+
+  useUnmount(() => {
+    micStream?.getTracks().forEach(track => track.stop());
+  });
 
   async function requestMic() {
     try {
@@ -41,7 +43,7 @@ export default function Microphone() {
 
   // TODO poll/listen to micStream.active state, switch to failed if not active but should
 
-  return function Microphone({shouldHaveMic}) {
+  return function Microphone({shouldHaveMic = true}) {
     let [isRetry] = useAction(actions.RETRY_MIC);
 
     switch (micState) {

@@ -11,13 +11,15 @@ import {AudienceAvatar, StageAvatar} from './Avatar';
 import {useMqParser} from '../logic/tailwind-mqp';
 import Container from './Container';
 import Navigation from './Navigation';
-import UAParser from 'ua-parser-js';
+import {userAgent} from '../lib/user-agent';
 import {usePushToTalk} from '../logic/hotkeys';
 import {disconnectRoom, maybeConnectRoom} from '../logic/room';
-const userAgent = UAParser();
+
 const inWebView =
-  userAgent.browser?.name === 'Chrome WebView' ||
-  (userAgent.os?.name === 'iOS' && userAgent.browser?.name !== 'Mobile Safari');
+  userAgent.browser?.name !== 'JamWebView' &&
+  (userAgent.browser?.name === 'Chrome WebView' ||
+    (userAgent.os?.name === 'iOS' &&
+      userAgent.browser?.name !== 'Mobile Safari'));
 
 export default function Room({room, roomId}) {
   // room = {name, description, moderators: [peerId], speakers: [peerId]}

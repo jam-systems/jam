@@ -1,6 +1,5 @@
 import {addLocalStream} from '../lib/swarm';
 import hark from '../lib/hark';
-import UAParser from 'ua-parser-js';
 import state, {swarm} from './state';
 import {on, set, update} from 'use-minimal-state';
 import {currentId} from './identity';
@@ -10,10 +9,9 @@ import {openModal} from '../views/Modal';
 import InteractionModal from '../views/InteractionModal';
 import {until} from '../lib/state-utils';
 import {useState, declare, use, useRootState} from '../lib/state-tree';
+import {userAgent} from '../lib/user-agent';
 import Microphone from './audio/Microphone';
 import AudioFile from './audio/AudioFile';
-
-let userAgent = UAParser();
 
 export {AudioState};
 

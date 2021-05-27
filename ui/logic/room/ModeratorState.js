@@ -1,40 +1,32 @@
 import {swarm} from '../state';
-import {
-  useDispatch,
-  use,
-  declare,
-  useAction,
-  useState,
-} from '../../lib/state-tree';
+import {use, event, useState, useRootState, Atom} from '../../lib/state-tree';
 import {shareStateWithGroup, shareStateWithPeer} from '../../lib/swarm';
-import {useRootState} from '../../lib/state-tree';
 
 export default function ModeratorState({moderators}) {
-  let [isNewMod, peerId] = useAction('new-mod');
   let handRaised = useRootState('handRaised');
   let [isRaiseHand, hasRaisedHand] = useNewValue(handRaised, false);
+  let newModerators = event(NewModerators, {moderators});
 
   if (isRaiseHand) {
     shareStateWithGroup(swarm, 'moderator', {handRaised});
   }
 
-  if (isNewMod && hasRaisedHand) {
-    shareStateWithPeer(swarm, peerId, {handRaised});
+  if (hasRaisedHand && newModerators) {
+    for (let peerId of newModerators) {
+      shareStateWithPeer(swarm, peerId, {handRaised});
+    }
   }
-
-  declare(NewModerator, {moderators});
 }
 
-function NewModerator() {
+function NewModerators() {
   let modPeers = new Set();
-  let dispatch = useDispatch();
 
-  return function NewModerator({moderators}) {
+  return function NewModerators({moderators}) {
     let peers = Object.keys(use(swarm, 'stickyPeers'));
     let newModPeers;
     [modPeers, newModPeers] = newIntersection(peers, moderators, modPeers);
-    for (let peerId of newModPeers) {
-      dispatch('new-mod', peerId);
+    if (newModPeers.size > 0) {
+      return Atom(newModPeers);
     }
   };
 }

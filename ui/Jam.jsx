@@ -4,7 +4,7 @@ import {initializeIdentity} from './logic/backend';
 import Modals from './views/Modal';
 import state, {swarm} from './logic/state';
 import {mergeClasses} from './logic/util';
-import {debug} from './lib/state-utils';
+import {debug, useSync} from './lib/state-utils';
 import {staticConfig} from './logic/config';
 import {useProvideWidth, WidthContext} from './logic/tailwind-mqp';
 import {set, use} from 'use-minimal-state';
@@ -24,14 +24,17 @@ export default function Jam({
   staticConfig: staticConfig_,
   ...props
 }) {
+  let roomId = null;
+
   // routing
   const View = (() => {
     switch (route) {
       case null:
-        return <Start />;
+        return <Start newRoom={dynamicConfig.room} />;
       case 'me':
         return <Me />;
       default:
+        roomId = route;
         return (
           <PossibleRoom
             roomId={route}
@@ -45,6 +48,8 @@ export default function Jam({
         );
     }
   })();
+  // set/unset room id
+  useSync(state, {roomId}, [roomId]);
 
   // static config for cases where it can not be set by app server
   useMemo(() => {
