@@ -1,73 +1,93 @@
-import state, {swarm} from './state';
+import state, {actions, swarm} from './state';
 import {get} from './backend';
-import {currentId, signData, verifyData} from './identity';
-import {staticConfig} from './config';
+import {currentId} from './identity';
 import {AudioState} from './audio';
 import './reactions';
 import {RoomState} from './room';
-import {is, on, set, update} from 'use-minimal-state';
-import {declare, declareStateRoot, merge, use} from '../lib/state-tree';
+import {is, on, update} from 'use-minimal-state';
+import {
+  declare,
+  declareStateRoot,
+  merge,
+  use,
+  useAction,
+} from '../lib/state-tree';
 import {populateCache} from './GetRequest';
+import {ConnectRoom} from './connect';
+import ModeratorState from './room/ModeratorState';
+import {useDidChange} from '../lib/state-utils';
 
 if (window.existingRoomInfo) {
   populateCache(`/rooms/${window.existingRoomId}`, window.existingRoomInfo);
 }
 
-declareStateRoot(AppState, state, [
+let {dispatch} = declareStateRoot(AppState, state, [
   'roomId',
-  'inRoom',
   'userInteracted',
   'micMuted',
+  'leftStage',
 ]);
+export {enterRoom, leaveRoom, leaveStage, dispatch as dispatchAppState};
 
-function AppState({roomId, inRoom, userInteracted, micMuted}) {
-  let myId = currentId();
-  let {room, iAmSpeaker, iAmModerator} = use(RoomState, {roomId, myId});
-  let {closed} = room;
+function AppState() {
+  let inRoom = null;
+  let leftStage = false;
 
-  inRoom = !roomId || (closed && !iAmModerator) ? null : inRoom;
-  is(swarm.myPeerState, {micMuted, inRoom: !!inRoom});
+  return function AppState({roomId, userInteracted, micMuted}) {
+    let myId = currentId();
+    let {room, hasRoom, iAmSpeaker, iAmModerator} = use(RoomState, {
+      roomId,
+      myId,
+    });
+    let {closed, moderators} = room;
 
-  userInteracted = userInteracted || !!inRoom;
-  return merge(
-    {userInteracted, inRoom, room, iAmSpeaker, iAmModerator},
-    declare(AudioState, {inRoom})
-  );
+    // connect with signaling server
+    declare(ConnectRoom, {roomId, shouldConnect: hasRoom});
+    declare(ModeratorState, {moderators});
+
+    let [isJoinRoom, joinedRoomId] = useAction(actions.JOIN);
+    if (!roomId || (closed && !iAmModerator)) {
+      inRoom = null;
+    } else if (isJoinRoom) {
+      inRoom = joinedRoomId;
+    }
+
+    let [isLeaveStage] = useAction(actions.LEAVE_STAGE);
+    let iBecameSpeaker = useDidChange(iAmSpeaker) && iAmSpeaker;
+    if (iBecameSpeaker) {
+      leftStage = false;
+    }
+    if (isLeaveStage && iAmSpeaker) {
+      leftStage = true;
+    }
+
+    is(swarm.myPeerState, {
+      micMuted,
+      inRoom: !!inRoom,
+      leftStage,
+    });
+
+    userInteracted = userInteracted || !!inRoom;
+    return merge(
+      {userInteracted, inRoom, room, iAmSpeaker, iAmModerator, leftStage},
+      declare(AudioState, {inRoom})
+    );
+  };
 }
 
-export function enterRoom(roomId) {
-  set(state, 'inRoom', roomId);
+function enterRoom(roomId) {
+  dispatch(actions.JOIN, roomId);
+  // is(state, {roomId, inRoom: roomId});
 }
 
-export function leaveRoom() {
-  set(state, 'inRoom', null);
+function leaveRoom() {
+  dispatch(actions.JOIN, null);
+  // is(state, 'inRoom', null);
 }
 
-function configSwarm() {
-  swarm.config({
-    debug: staticConfig.development,
-    url: staticConfig.urls.pantry,
-    sign: signData,
-    verify: verifyData,
-    reduceState: (_states, _current, latest, findLatest) => {
-      if (latest.inRoom) return latest;
-      return findLatest(s => s.inRoom) ?? latest;
-    },
-    pcConfig: {
-      iceTransportPolicy: 'all',
-      iceServers: [
-        {urls: `stun:stun.jam.systems:3478`},
-        {urls: `${staticConfig.urls.stun}`},
-        {
-          ...staticConfig.urls.turnCredentials,
-          urls: `${staticConfig.urls.turn}`,
-        },
-      ],
-    },
-  });
+function leaveStage() {
+  dispatch(actions.LEAVE_STAGE);
 }
-configSwarm();
-on(staticConfig, () => configSwarm());
 
 // leave room when same peer joins it from elsewhere and I'm in room
 // TODO: currentId() is called too early to react to any changes!

@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import state, {swarm} from '../logic/state';
+import React, {useState} from 'react';
+import {swarm} from '../logic/state';
 import {use} from 'use-minimal-state';
 import EnterRoom from './EnterRoom';
 import RoomHeader from './RoomHeader';
@@ -13,7 +13,7 @@ import Container from './Container';
 import Navigation from './Navigation';
 import {userAgent} from '../lib/user-agent';
 import {usePushToTalk} from '../logic/hotkeys';
-import {disconnectRoom, maybeConnectRoom} from '../logic/room';
+import {useStateObject} from './StateContext';
 
 const inWebView =
   userAgent.browser?.name !== 'JamWebView' &&
@@ -22,18 +22,11 @@ const inWebView =
       userAgent.browser?.name !== 'Mobile Safari'));
 
 export default function Room({room, roomId}) {
+  const state = useStateObject();
+
   // room = {name, description, moderators: [peerId], speakers: [peerId]}
   useWakeLock();
   usePushToTalk(state);
-
-  // connect with signaling server
-  useEffect(() => {
-    maybeConnectRoom(roomId);
-    return () => {
-      // clean up on unmount
-      disconnectRoom(roomId);
-    };
-  }, [roomId]);
 
   let myInfo = useCurrentIdentity().info;
   let [

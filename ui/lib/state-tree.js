@@ -10,9 +10,11 @@ import causalLog from './causal-log';
 // Component(props) = partial state
 
 /* TODOs:
+  - when batching component updates we have to enforce a strict order from top to bottom in hierarchy.
+    if a child renders before a parent in a batched update, it can happen that the child misses an update to its props
+    and renders (e.g. after an action) with wrong props.
 
   - enable more Component return values
-  - batch updates in a more deterministic / purposeful way / order
   - use a dedicated class for Fragment for efficiency
   - core lib should not depend on React, be usable everywhere
      => split out useStateComponent() & overloaded use()
@@ -58,6 +60,7 @@ export {
   declareStateRoot,
   dispatch,
   useAction,
+  useActions,
   useDispatch,
   useRootState,
   useExternalState,
@@ -137,7 +140,13 @@ function event(Component, props, stableProps) {
 function _run(
   Component,
   props = null,
-  {element, stableProps = null, isUsed = false, isEvent = false} = {}
+  {
+    element,
+    stableProps = null,
+    isUsed = false,
+    isEvent = false,
+    isMount = false,
+  } = {}
 ) {
   let mustUpdate = updateSet.has(element);
   if (mustUpdate) updateSet.delete(element);
@@ -153,7 +162,6 @@ function _run(
 
   // log('rendering', Component.name);
 
-  let isMount = false;
   if (element === undefined) {
     isMount = true;
     element = {
@@ -264,7 +272,7 @@ function declareStateRoot(Component, state, keys = []) {
   current.children.push(rootElement);
 
   renderRoot = rootElement;
-  _run(Component, {...state}, {element: rootElement});
+  _run(Component, {...state}, {element: rootElement, isMount: true});
   let result = rootFragment[0];
   log(
     'STATE-TREE',
@@ -306,7 +314,6 @@ function declareStateRoot(Component, state, keys = []) {
   });
 
   const dispatch = (type, payload) => {
-    log('dispatching', type, payload);
     dispatchFromRoot(rootElement, type, payload);
   };
   on(state, 'dispatch', dispatch);
@@ -415,6 +422,7 @@ function dispatch(state, type, payload) {
 }
 
 function dispatchFromRoot(rootElement, type, payload) {
+  log('STATE-TREE', 'queuing dispatch', rootElement.component.name, type);
   queueMicrotask(() => {
     let subscribers = rootElement.actionSubs.get(type);
     if (subscribers === undefined || subscribers.size === 0) return;
@@ -507,14 +515,26 @@ function useAction(type) {
   if (current === root)
     throw Error('useAction can only be called during render');
   subscribe(renderRoot.actionSubs, type, current);
-  let callerRoot = renderRoot;
-  const dispatchThis = p => dispatchFromRoot(callerRoot, type, p);
   if (currentAction[0] === type) {
-    return [true, currentAction[1], dispatchThis];
+    return [true, currentAction[1]];
   } else {
-    return [false, undefined, dispatchThis];
+    return [false, undefined];
   }
 }
+
+function useActions(...types) {
+  if (current === root)
+    throw Error('useAction can only be called during render');
+  for (let type of types) {
+    subscribe(renderRoot.actionSubs, type, current);
+  }
+  if (types.includes(currentAction[0])) {
+    return [currentAction[0], currentAction[1]];
+  } else {
+    return [undefined, undefined];
+  }
+}
+
 function useDispatch() {
   let callerRoot = renderRoot;
   return (type, payload) => dispatchFromRoot(callerRoot, type, payload);

@@ -26,6 +26,8 @@ const state = {
 export default state;
 
 export const actions = {
+  JOIN: 'join',
+  LEAVE_STAGE: 'leave-stage',
   RETRY_MIC: 'retry-mic',
 };
 

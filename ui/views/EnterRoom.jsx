@@ -1,10 +1,10 @@
 import React from 'react';
 import {use} from 'use-minimal-state';
 import {enterRoom} from '../logic/main';
-import state from '../logic/state';
 import {useMqParser} from '../logic/tailwind-mqp';
 import Container from './Container';
 import RoomHeader from './RoomHeader';
+import {useStateObject} from './StateContext';
 
 const iOS =
   /^iP/.test(navigator.platform) ||
@@ -22,6 +22,7 @@ export default function EnterRoom({
   buttonText,
   logoURI,
 }) {
+  const state = useStateObject();
   let mqp = useMqParser();
   let otherDevice = use(state, 'otherDeviceInRoom');
   return (

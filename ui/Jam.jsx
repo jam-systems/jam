@@ -13,6 +13,8 @@ import Me from './views/Me';
 import PossibleRoom from './views/PossibleRoom';
 import {debugStateTree, declare, declareStateRoot} from './lib/state-tree';
 import {ShowAudioPlayerToast} from './views/AudioPlayerToast';
+import {ExistingStateProvider} from './views/StateContext';
+import {dispatchAppState} from './logic/main';
 
 declareStateRoot(ShowModals, state);
 
@@ -60,7 +62,6 @@ export default function Jam({
   useEffect(() => {
     initializeIdentity();
     swarm.config({myPeerId: currentId()});
-    set(swarm.myPeerState, {inRoom: false, micMuted: false});
   }, []);
 
   // toggle debugging
@@ -78,7 +79,7 @@ export default function Jam({
   }, [dynamicConfig.debug]);
 
   // global styling
-  // TODO: the color should depend on the loading state of GET /room, to not flash orange before being in the room color
+  // TODO: the color should depend on the loading state of GET /room, to not flash orange before being in the room
   // => color should be only set here if the route is not a room id, otherwise <PossibleRoom> should set it
   // => pass a setColor prop to PossibleRoom
   let {color} = use(state, 'room');
@@ -101,10 +102,12 @@ export default function Jam({
       }}
       {...props}
     >
-      <WidthContext.Provider value={width}>
-        {View}
-        <Modals />
-      </WidthContext.Provider>
+      <ExistingStateProvider state={state} dispatch={dispatchAppState}>
+        <WidthContext.Provider value={width}>
+          {View}
+          <Modals />
+        </WidthContext.Provider>
+      </ExistingStateProvider>
     </div>
   );
 }

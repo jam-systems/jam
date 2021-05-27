@@ -1,6 +1,6 @@
 import React, {useMemo, useState} from 'react';
 import {leaveRoom} from '../logic/main';
-import state, {actions} from '../logic/state';
+import {actions} from '../logic/state';
 import {is, use} from 'use-minimal-state';
 import {sendReaction} from '../logic/reactions';
 import EditRole, {EditSelf} from './EditRole';
@@ -9,6 +9,7 @@ import {openModal} from './Modal';
 import {InfoModal} from './InfoModal';
 import {MicOffSvg, MicOnSvg} from './Svg';
 import {dispatch} from '../lib/state-tree';
+import {useStateObject} from './StateContext';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
@@ -37,6 +38,7 @@ export default function Navigation({
   editSelf,
   setEditSelf,
 }) {
+  const state = useStateObject();
   let [myAudio, micMuted, handRaised, iSpeak] = use(state, [
     'myAudio',
     'micMuted',

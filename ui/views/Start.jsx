@@ -6,9 +6,8 @@ import {currentId} from '../logic/identity';
 import {navigate} from '../lib/use-location';
 import {enterRoom} from '../logic/main';
 import Container from './Container';
-import {is} from 'use-minimal-state';
-import state from '../logic/state';
 import {populateCache} from '../logic/GetRequest';
+import {useSetState} from './StateContext';
 
 export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
   // note: setters are currently unused because form is hidden
@@ -20,11 +19,12 @@ export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
   let [buttonURI, setButtonURI] = useState(newRoom.buttonURI ?? '');
   let {stageOnly = false} = newRoom;
 
-  const [showAdvanced, setShowAdvanced] = useState(false);
+  let [showAdvanced, setShowAdvanced] = useState(false);
+  let setState = useSetState();
 
   let submit = e => {
     e.preventDefault();
-    is(state, 'userInteracted', true);
+    setState('userInteracted', true);
     let roomId;
     if (name) {
       let slug = slugify(name, {lower: true, strict: true});

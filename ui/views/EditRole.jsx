@@ -1,5 +1,5 @@
 import React from 'react';
-import {addRole, removeRole, leaveStage} from '../logic/room';
+import {addRole, removeRole} from '../logic/room';
 import {addAdmin, removeAdmin, useIdentityAdminStatus} from '../logic/admin';
 import {currentId} from '../logic/identity';
 import {use} from 'use-minimal-state';
@@ -8,7 +8,8 @@ import EditIdentity from './EditIdentity';
 import {useMqParser} from '../logic/tailwind-mqp';
 import {ButtonContainer, SecondaryButton} from './Button';
 import StreamingModal from './StreamingModal';
-import state from '../logic/state';
+import {useStateObject} from './StateContext';
+import {leaveStage} from '../logic/main';
 
 export default function EditRole({
   peerId,
@@ -17,6 +18,7 @@ export default function EditRole({
   stageOnly = false,
   onCancel,
 }) {
+  const state = useStateObject();
   let mqp = useMqParser();
   let [myAdminStatus] = useIdentityAdminStatus(currentId());
   let [peerAdminStatus] = useIdentityAdminStatus(peerId);
@@ -60,14 +62,14 @@ export default function EditRole({
       {!stageOnly &&
         (isSpeaker ? (
           <button
-            onClick={() => removeRole(peerId, 'speakers').then(onCancel)}
+            onClick={() => removeRole(state, peerId, 'speakers').then(onCancel)}
             className="mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
           >
             ↓ Move to Audience
           </button>
         ) : (
           <button
-            onClick={() => addRole(peerId, 'speakers').then(onCancel)}
+            onClick={() => addRole(state, peerId, 'speakers').then(onCancel)}
             className="mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
           >
             ↑ Invite to Stage
@@ -75,7 +77,7 @@ export default function EditRole({
         ))}
       {isSpeaker && !isModerator && (
         <button
-          onClick={() => addRole(peerId, 'moderators').then(onCancel)}
+          onClick={() => addRole(state, peerId, 'moderators').then(onCancel)}
           className="mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
         >
           ✳️ Make Moderator
@@ -83,7 +85,7 @@ export default function EditRole({
       )}
       {isModerator && (
         <button
-          onClick={() => removeRole(peerId, 'moderators').then(onCancel)}
+          onClick={() => removeRole(state, peerId, 'moderators').then(onCancel)}
           className="mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
         >
           ❎ Demote Moderator
@@ -103,6 +105,7 @@ export default function EditRole({
 }
 
 export function EditSelf({onCancel}) {
+  const state = useStateObject();
   let mqp = useMqParser();
   let myPeerId = currentId();
   let [iSpeak, iModerate, room] = use(state, [
@@ -129,14 +132,16 @@ export function EditSelf({onCancel}) {
         )}
         {!stageOnly && iModerate && !iSpeak && (
           <SecondaryButton
-            onClick={() => addRole(myPeerId, 'speakers').then(onCancel)}
+            onClick={() => addRole(state, myPeerId, 'speakers').then(onCancel)}
           >
             ↑ Move to Stage
           </SecondaryButton>
         )}
         {!stageOnly && iModerate && iSpeak && (
           <SecondaryButton
-            onClick={() => removeRole(myPeerId, 'speakers').then(onCancel)}
+            onClick={() =>
+              removeRole(state, myPeerId, 'speakers').then(onCancel)
+            }
           >
             ↓ Leave Stage
           </SecondaryButton>
