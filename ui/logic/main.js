@@ -25,7 +25,7 @@ function AppState({roomId, inRoom, userInteracted, micMuted}) {
   let {room, iAmSpeaker, iAmModerator} = use(RoomState, {roomId, myId});
   let {closed} = room;
 
-  inRoom = closed && !iAmModerator ? null : inRoom;
+  inRoom = !roomId || (closed && !iAmModerator) ? null : inRoom;
   is(swarm.myPeerState, {micMuted, inRoom: !!inRoom});
 
   userInteracted = userInteracted || !!inRoom;

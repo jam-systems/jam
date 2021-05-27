@@ -2,8 +2,6 @@ import React, {createElement, useMemo} from 'react';
 import Room from './Room';
 import {initializeIdentity, useCreateRoom} from '../logic/backend';
 import {useRoom} from '../logic/room';
-import state from '../logic/state';
-import {useSync} from '../lib/state-utils';
 import {importRoomIdentity} from '../logic/identity';
 import {enterRoom} from '../logic/main';
 
@@ -14,8 +12,6 @@ export default function PossibleRoom({
   roomIdentityKeys,
   onError,
 }) {
-  useSync(state, {roomId}, [roomId]);
-
   // fetch room
   let [room, isLoading] = useRoom(roomId);
 
