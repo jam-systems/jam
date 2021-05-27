@@ -28,7 +28,7 @@ export default function Jam({
   const View = (() => {
     switch (route) {
       case null:
-        return <Start />;
+        return <Start newRoom={dynamicConfig.room} />;
       case 'me':
         return <Me />;
       default:

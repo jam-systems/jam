@@ -10,13 +10,15 @@ import {is} from 'use-minimal-state';
 import state from '../logic/state';
 import {populateCache} from '../logic/GetRequest';
 
-export default function Start({urlRoomId, roomFromURIError}) {
-  let [name, setName] = useState('');
-  let [description, setDescription] = useState('');
-  let [color, setColor] = useState('#4B5563');
-  let [logoURI, setLogoURI] = useState('');
-  let [buttonText, setButtonText] = useState('');
-  let [buttonURI, setButtonURI] = useState('');
+export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
+  // note: setters are currently unused because form is hidden
+  let [name, setName] = useState(newRoom.name ?? '');
+  let [description, setDescription] = useState(newRoom.description ?? '');
+  let [color, setColor] = useState(newRoom.color ?? '#4B5563');
+  let [logoURI, setLogoURI] = useState(newRoom.logoURI ?? '');
+  let [buttonText, setButtonText] = useState(newRoom.buttonText ?? '');
+  let [buttonURI, setButtonURI] = useState(newRoom.buttonURI ?? '');
+  let {stageOnly = false} = newRoom;
 
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -32,8 +34,8 @@ export default function Start({urlRoomId, roomFromURIError}) {
     }
 
     (async () => {
-      let newRoom = {name, description, logoURI, color};
-      let roomCreated = await createRoom(roomId, currentId(), newRoom);
+      let roomPosted = {name, description, logoURI, color, stageOnly};
+      let roomCreated = await createRoom(roomId, currentId(), roomPosted);
       if (roomCreated) {
         populateCache(`/rooms/${roomId}`, roomCreated);
         if (urlRoomId !== roomId) navigate('/' + roomId);
