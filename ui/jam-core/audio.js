@@ -1,6 +1,5 @@
 import {addLocalStream} from '../lib/swarm';
 import hark from '../lib/hark';
-import {swarm} from './state';
 import {set, update} from 'use-minimal-state';
 import log from '../lib/causal-log';
 import {domEvent} from '../lib/util';
@@ -14,7 +13,7 @@ import AudioFile from './audio/AudioFile';
 
 export {AudioState};
 
-function AudioState() {
+function AudioState({swarm}) {
   const state = useRootState();
   const audios = {}; // {peerId: HTMLAudioElement}
 
@@ -111,7 +110,7 @@ function AudioState() {
 
     let myAudio = audioFileStream ?? micStream;
     declare(Muted, {myAudio, micMuted});
-    declare(ConnectMyAudio, {myAudio, iAmSpeaker, myId});
+    declare(ConnectMyAudio, {myAudio, iAmSpeaker, myId, swarm});
     let soundMuted = inRoom ? iAmSpeaker && !hasRequestedOnce : true;
 
     return {myAudio, soundMuted, audioFileElement};
@@ -131,7 +130,7 @@ function Muted({myAudio, micMuted}) {
 function ConnectMyAudio() {
   const state = useRootState();
 
-  return function ConnectMyAudio({myAudio, iAmSpeaker, myId}) {
+  return function ConnectMyAudio({myAudio, iAmSpeaker, myId, swarm}) {
     let [connected, setConnected] = useState(null);
     let shouldConnect = myAudio && iAmSpeaker;
 

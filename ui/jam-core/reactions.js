@@ -1,11 +1,11 @@
 import {update} from 'use-minimal-state';
 import {useAction, useOn, useRootState} from '../lib/state-tree';
 import {sendPeerEvent} from '../lib/swarm';
-import {actions, swarm} from './state';
+import {actions} from './state';
 
 export {Reactions};
 
-function Reactions() {
+function Reactions({swarm}) {
   const state = useRootState();
 
   useOn(swarm.peerEvent, 'reaction', (peerId, reaction) => {

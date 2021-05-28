@@ -10,7 +10,7 @@ import {useMqParser} from '../lib/tailwind-mqp';
 import Container from './Container';
 import Navigation from './Navigation';
 import {userAgent} from '../lib/user-agent';
-import {usePushToTalk, swarm} from '../jam-core';
+import {usePushToTalk} from '../jam-core';
 import {useStateObject} from './StateContext';
 
 const inWebView =
@@ -43,7 +43,7 @@ export default function Room({room, roomId}) {
     'iAmModerator',
     'myIdentity',
   ]);
-  let [peers, peerState, myPeerState] = use(swarm, [
+  let [peers, peerState, myPeerState] = use(state.swarm, [
     'stickyPeers',
     'peerState',
     'myPeerState',

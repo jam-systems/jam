@@ -5,12 +5,12 @@ import {dispatch, useOn, useRootState} from '../lib/state-tree';
 import {get} from './backend';
 import {staticConfig} from './config';
 import {populateCache} from './GetRequest';
-import {actions, swarm} from './state';
+import {actions} from './state';
 
 // TODO this is an intermediary component to set up swarm that should be replaced w/ one that
 // properly integrates with swarm (knows connection state, returns remote streams etc)
 
-export function ConnectRoom({myId}) {
+export function ConnectRoom({myId, swarm}) {
   const state = useRootState();
   swarm.config({myPeerId: myId});
 

@@ -10,7 +10,7 @@ import PossibleRoom from './views/PossibleRoom';
 import {debugStateTree, declare, declareStateRoot} from './lib/state-tree';
 import {ShowAudioPlayerToast} from './views/AudioPlayerToast';
 import {ExistingStateProvider} from './views/StateContext';
-import {dispatch, jamState, swarm, staticConfig} from './jam-core';
+import {dispatch, jamState, staticConfig} from './jam-core';
 
 declareStateRoot(ShowModals, jamState);
 
@@ -52,10 +52,10 @@ export default function Jam({
   useEffect(() => {
     if (dynamicConfig.debug) {
       window.DEBUG = true;
-      debug(swarm);
+      debug(jamState.swarm);
     }
     if (dynamicConfig.debug || staticConfig.development) {
-      window.swarm = swarm;
+      window.swarm = jamState.swarm;
       window.state = jamState;
       debug(jamState);
       debugStateTree();

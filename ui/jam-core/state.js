@@ -1,5 +1,4 @@
-import Swarm from '../lib/swarm';
-export {defaultState, swarm};
+export {defaultState};
 
 const defaultState = {
   myIdentity: null,
@@ -35,5 +34,3 @@ export const actions = {
   RETRY_MIC: 'retry-mic',
   REACTION: 'reaction',
 };
-
-const swarm = Swarm();

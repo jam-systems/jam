@@ -1,4 +1,3 @@
-import {swarm} from './state';
 import {put} from './backend';
 import log from '../lib/causal-log';
 import {staticConfig} from './config';
@@ -7,7 +6,7 @@ import GetRequest, {populateCache} from './GetRequest';
 
 export {useRoom, RoomState, addRole, removeRole, emptyRoom};
 
-function RoomState() {
+function RoomState({swarm}) {
   const state = useRootState();
 
   // if somebody left stage, update speakers

@@ -1,12 +1,11 @@
-import {swarm} from '../state';
 import {use, event, useRootState, Atom} from '../../lib/state-tree';
 import {shareStateWithGroup, shareStateWithPeer} from '../../lib/swarm';
 import {useDidEverChange} from '../../lib/state-utils';
 
-export default function ModeratorState({moderators}) {
+export default function ModeratorState({moderators, swarm}) {
   let handRaised = useRootState('handRaised');
   let [isRaiseHand, hasRaisedHand] = useDidEverChange(handRaised, false);
-  let newModerators = event(NewModerators, {moderators});
+  let newModerators = event(NewModerators, {moderators, swarm});
 
   if (isRaiseHand) {
     shareStateWithGroup(swarm, 'moderator', {handRaised});
@@ -19,7 +18,7 @@ export default function ModeratorState({moderators}) {
   }
 }
 
-function NewModerators() {
+function NewModerators({swarm}) {
   let modPeers = new Set();
 
   return function NewModerators({moderators}) {

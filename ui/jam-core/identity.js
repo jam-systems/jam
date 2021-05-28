@@ -6,7 +6,6 @@ import {encode, decode} from '../lib/identity-utils';
 import {putOrPost} from './backend';
 import {use} from '../lib/state-tree';
 import {sendPeerEvent} from '../lib/swarm';
-import {swarm} from './state';
 
 export {Identity, importRoomIdentity, updateInfo};
 
@@ -44,7 +43,7 @@ function postInitialIdentity(identity) {
 }
 
 async function updateInfo(state, info) {
-  let {myIdentity, myId} = state;
+  let {myIdentity, myId, swarm} = state;
   info = {...myIdentity.info, ...info};
   console.warn('posting', info);
   let ok = await putOrPost(state, `/identities/${myId}`, info);

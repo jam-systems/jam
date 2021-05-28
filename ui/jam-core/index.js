@@ -1,4 +1,4 @@
-import {defaultState, actions, swarm} from './state';
+import {defaultState, actions} from './state';
 import {Identity} from './identity';
 import {AudioState} from './audio';
 import {Reactions} from './reactions';
@@ -16,8 +16,10 @@ import {ConnectRoom} from './connect';
 import ModeratorState from './room/ModeratorState';
 import {useDidChange} from '../lib/state-utils';
 import {staticConfig} from './config';
+import Swarm from '../lib/swarm';
 
 /* THE JAM API */
+// TODOs: reduce API, split out React-dependent stuff (hooks)
 export {
   jamState,
   jamSetup,
@@ -33,7 +35,7 @@ export {updateInfo, importRoomIdentity} from './identity';
 export {createRoom, updateRoom, useCreateRoom} from './backend';
 export {usePushToTalk} from './hotkeys';
 export {staticConfig} from './config';
-export {swarm, actions} from './state';
+export {actions} from './state';
 
 // TODO: this should be exposed as a function rather than happen at the top level
 const {state: jamState, dispatch} = declareStateRoot(
@@ -49,19 +51,21 @@ const {state: jamState, dispatch} = declareStateRoot(
 function AppState() {
   let inRoom = null;
   let leftStage = false;
+  const swarm = Swarm();
 
   return function AppState({roomId, userInteracted, micMuted}) {
     let {myId, myIdentity} = use(Identity, {roomId});
 
     let {room, hasRoom, iAmSpeaker, iAmModerator} = use(RoomState, {
+      swarm,
       roomId,
       myId,
     });
     let {closed, moderators} = room;
 
     // connect with signaling server
-    declare(ConnectRoom, {myId, roomId, shouldConnect: hasRoom});
-    declare(ModeratorState, {moderators});
+    declare(ConnectRoom, {swarm, myId, roomId, shouldConnect: hasRoom});
+    declare(ModeratorState, {swarm, moderators});
 
     let [isJoinRoom, joinedRoomId] = useAction(actions.JOIN);
     if (!roomId || (closed && !iAmModerator)) {
@@ -85,11 +89,12 @@ function AppState() {
       leftStage,
     });
 
-    declare(Reactions);
+    declare(Reactions, {swarm});
 
     userInteracted = userInteracted || !!inRoom;
     return merge(
       {
+        swarm,
         userInteracted,
         inRoom,
         room,
@@ -99,7 +104,7 @@ function AppState() {
         myId,
         myIdentity,
       },
-      declare(AudioState, {inRoom})
+      declare(AudioState, {inRoom, swarm})
     );
   };
 }
