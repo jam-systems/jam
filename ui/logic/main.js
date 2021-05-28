@@ -17,16 +17,12 @@ import ModeratorState from './room/ModeratorState';
 import {useDidChange} from '../lib/state-utils';
 import {staticConfig} from './config';
 
-export {
-  jamSetup,
-  enterRoom,
-  leaveRoom,
-  leaveStage,
-  sendReaction,
-  dispatch as dispatchAppState,
-};
+/* THE JAM API */
+export {jamSetup, enterRoom, leaveRoom, leaveStage, sendReaction, dispatch};
 export {addRole, removeRole} from './room';
 export {addAdmin, removeAdmin, useIdentityAdminStatus} from './admin';
+export {updateInfo} from './identity';
+export {createRoom, updateRoom} from './backend';
 
 // TODO: this should be exposed as a function rather than happen at the top level
 let {dispatch} = declareStateRoot(AppState, state, [

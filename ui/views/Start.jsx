@@ -1,11 +1,9 @@
 import React, {useState, useMemo} from 'react';
 import slugify from 'slugify';
 
-import {createRoom} from '../logic/backend';
 import {navigate} from '../lib/use-location';
-import {enterRoom} from '../logic/main';
+import {enterRoom, createRoom} from '../logic/main';
 import Container from './Container';
-import {populateCache} from '../logic/GetRequest';
 import {useSetState, useStateObject} from './StateContext';
 
 export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
@@ -36,9 +34,8 @@ export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
 
     (async () => {
       let roomPosted = {name, description, logoURI, color, stageOnly};
-      let roomCreated = await createRoom(state, roomId, roomPosted);
-      if (roomCreated) {
-        populateCache(`/rooms/${roomId}`, roomCreated);
+      let ok = await createRoom(state, roomId, roomPosted);
+      if (ok) {
         if (urlRoomId !== roomId) navigate('/' + roomId);
         enterRoom(roomId);
       }

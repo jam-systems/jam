@@ -100,7 +100,13 @@ export async function createRoom(
     speakers: [myId],
   };
   let ok = await post(state, `/rooms/${roomId}`, room);
-  if (ok) return room;
+  if (ok) populateCache(`/rooms/${roomId}`, room);
+  return ok;
+}
+
+export async function updateRoom(state, roomId, room) {
+  if (!roomId || !room) return;
+  return await put(state, `/rooms/${roomId}`, room);
 }
 
 export function useCreateRoom({
@@ -116,14 +122,10 @@ export function useCreateRoom({
   useEffect(() => {
     if (roomId && !room && !isRoomLoading) {
       (async () => {
-        let roomCreated = await createRoom(state, roomId, newRoom);
+        let ok = await createRoom(state, roomId, newRoom);
         setLoading(false);
-        if (roomCreated) {
-          populateCache(`/rooms/${roomId}`, roomCreated);
-          onSuccess?.();
-        } else {
-          setError(true);
-        }
+        if (ok) onSuccess?.();
+        else setError(true);
       })();
     }
   }, [room, roomId, isRoomLoading]);

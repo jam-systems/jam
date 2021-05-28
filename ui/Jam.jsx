@@ -12,7 +12,7 @@ import PossibleRoom from './views/PossibleRoom';
 import {debugStateTree, declare, declareStateRoot} from './lib/state-tree';
 import {ShowAudioPlayerToast} from './views/AudioPlayerToast';
 import {ExistingStateProvider} from './views/StateContext';
-import {dispatchAppState} from './logic/main';
+import {dispatch} from './logic/main';
 
 declareStateRoot(ShowModals, state);
 
@@ -88,7 +88,7 @@ export default function Jam({
       }}
       {...props}
     >
-      <ExistingStateProvider state={state} dispatch={dispatchAppState}>
+      <ExistingStateProvider state={state} dispatch={dispatch}>
         <WidthContext.Provider value={width}>
           {View}
           <Modals />

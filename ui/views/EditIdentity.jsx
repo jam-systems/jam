@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {Modal} from './Modal';
-import {updateInfo} from '../logic/identity';
+import {updateInfo} from '../logic/main';
 import {useMqParser} from '../lib/tailwind-mqp';
 import {useStateObject} from './StateContext';
 import {use} from 'use-minimal-state';
