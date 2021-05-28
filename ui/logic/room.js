@@ -1,24 +1,40 @@
-import state, {swarm} from './state';
+import {swarm} from './state';
 import {put} from './backend';
-import {on} from 'use-minimal-state';
 import log from '../lib/causal-log';
 import {staticConfig} from './config';
-import {use} from '../lib/state-tree';
+import {use, useOn, useRootState} from '../lib/state-tree';
 import GetRequest, {populateCache} from './GetRequest';
 
 export {useRoom, RoomState, addRole, removeRole, emptyRoom};
 
-function RoomState({roomId, myId}) {
-  const path = roomId && `/rooms/${roomId}`;
-  let {data} = use(GetRequest, {path});
-  let hasRoom = !!data;
-  let room = data ?? emptyRoom;
+function RoomState() {
+  const state = useRootState();
 
-  let {speakers, moderators, stageOnly} = room;
-  let iAmSpeaker = !!stageOnly || speakers.includes(myId);
-  let iAmModerator = moderators.includes(myId);
+  // if somebody left stage, update speakers
+  useOn(swarm.peerState, (peerId, peerState) => {
+    let {speakers} = state.room;
+    if (peerState?.leftStage && state.roomId && speakers.includes(peerId)) {
+      if (state.iAmModerator) {
+        removeRole(state, peerId, 'speakers');
+      } else {
+        speakers = speakers.filter(id => id !== peerId);
+        populateCache(`/rooms/${state.roomId}`, {...state.room, speakers});
+      }
+    }
+  });
 
-  return {room, hasRoom, iAmSpeaker, iAmModerator};
+  return function RoomState({roomId, myId}) {
+    const path = roomId && `/rooms/${roomId}`;
+    let {data} = use(GetRequest, {path});
+    let hasRoom = !!data;
+    let room = data ?? emptyRoom;
+
+    let {speakers, moderators, stageOnly} = room;
+    let iAmSpeaker = !!stageOnly || speakers.includes(myId);
+    let iAmModerator = moderators.includes(myId);
+
+    return {room, hasRoom, iAmSpeaker, iAmModerator};
+  };
 }
 
 function useRoom(roomId) {
@@ -52,16 +68,3 @@ async function removeRole({room, roomId}, id, role) {
   let newRoom = {...room, [role]: existing.filter(id_ => id_ !== id)};
   await put(`/rooms/${roomId}`, newRoom);
 }
-
-// if somebody left stage, update speakers
-on(swarm.peerState, (peerId, peerState) => {
-  let {speakers} = state.room;
-  if (peerState?.leftStage && state.roomId && speakers.includes(peerId)) {
-    if (state.iAmModerator) {
-      removeRole(state, peerId, 'speakers');
-    } else {
-      speakers = speakers.filter(id => id !== peerId);
-      populateCache(`/rooms/${state.roomId}`, {...state.room, speakers});
-    }
-  }
-});

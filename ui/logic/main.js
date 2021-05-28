@@ -32,7 +32,6 @@ let {dispatch} = declareStateRoot(AppState, state, [
   'roomId',
   'userInteracted',
   'micMuted',
-  'leftStage',
 ]);
 
 function AppState() {
