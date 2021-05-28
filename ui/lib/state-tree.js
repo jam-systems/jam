@@ -1,6 +1,5 @@
 import React from 'react';
 import {is, on, emit, clear, use as useMinimalState} from 'use-minimal-state';
-import {staticConfig} from '../logic/config';
 import causalLog from './causal-log';
 
 // a kind of "React for app state"
@@ -804,7 +803,7 @@ function setMergedFragment(fragment, objArray) {
   return keys;
 }
 
-let doLog = !!staticConfig.development;
+let doLog = !!window.jamConfig?.development;
 function debugStateTree() {
   window.root = root;
   doLog = true;

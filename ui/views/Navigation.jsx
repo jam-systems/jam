@@ -1,6 +1,5 @@
 import React, {useMemo, useState} from 'react';
-import {sendReaction, leaveRoom} from '../logic/main';
-import {actions} from '../logic/state';
+import {sendReaction, leaveRoom, actions} from '../logic/main';
 import {is, use} from 'use-minimal-state';
 import EditRole, {EditSelf} from './EditRole';
 import {breakpoints, useWidth} from '../lib/tailwind-mqp';

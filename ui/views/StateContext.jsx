@@ -6,7 +6,6 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import initialState from '../logic/state';
 
 export {
   ExistingStateProvider,
@@ -17,7 +16,7 @@ export {
   StateContext,
 };
 
-const StateContext = createContext({...initialState});
+const StateContext = createContext({});
 
 // TODO: default provider should also *create* the state & render state root
 

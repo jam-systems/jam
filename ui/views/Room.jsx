@@ -1,5 +1,4 @@
 import React, {useState} from 'react';
-import {swarm} from '../logic/state';
 import {use} from 'use-minimal-state';
 import EnterRoom from './EnterRoom';
 import RoomHeader from './RoomHeader';
@@ -11,7 +10,7 @@ import {useMqParser} from '../lib/tailwind-mqp';
 import Container from './Container';
 import Navigation from './Navigation';
 import {userAgent} from '../lib/user-agent';
-import {usePushToTalk} from '../logic/hotkeys';
+import {usePushToTalk, swarm} from '../logic/main';
 import {useStateObject} from './StateContext';
 
 const inWebView =

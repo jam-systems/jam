@@ -27,10 +27,13 @@ export {
   sendReaction,
   dispatch,
 };
-export {addRole, removeRole} from './room';
+export {addRole, removeRole, useRoom} from './room';
 export {addAdmin, removeAdmin, useIdentityAdminStatus} from './admin';
-export {updateInfo} from './identity';
-export {createRoom, updateRoom} from './backend';
+export {updateInfo, importRoomIdentity} from './identity';
+export {createRoom, updateRoom, useCreateRoom} from './backend';
+export {usePushToTalk} from './hotkeys';
+export {staticConfig} from './config';
+export {swarm, actions} from './state';
 
 // TODO: this should be exposed as a function rather than happen at the top level
 const {state: jamState, dispatch} = declareStateRoot(

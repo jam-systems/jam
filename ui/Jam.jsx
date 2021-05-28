@@ -1,9 +1,7 @@
 import React, {useEffect, useMemo} from 'react';
 import Modals from './views/Modal';
-import {swarm} from './logic/state';
 import {mergeClasses} from './lib/util';
 import {debug, useSync} from './lib/state-utils';
-import {staticConfig} from './logic/config';
 import {useProvideWidth, WidthContext} from './lib/tailwind-mqp';
 import {use} from 'use-minimal-state';
 import Start from './views/Start';
@@ -12,7 +10,7 @@ import PossibleRoom from './views/PossibleRoom';
 import {debugStateTree, declare, declareStateRoot} from './lib/state-tree';
 import {ShowAudioPlayerToast} from './views/AudioPlayerToast';
 import {ExistingStateProvider} from './views/StateContext';
-import {dispatch, jamState} from './logic/main';
+import {dispatch, jamState, swarm, staticConfig} from './logic/main';
 
 declareStateRoot(ShowModals, jamState);
 
