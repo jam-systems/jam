@@ -5,7 +5,7 @@ import {mergeClasses} from './lib/util';
 import {debug, useSync} from './lib/state-utils';
 import {staticConfig} from './logic/config';
 import {useProvideWidth, WidthContext} from './lib/tailwind-mqp';
-import {set, use} from 'use-minimal-state';
+import {use} from 'use-minimal-state';
 import Start from './views/Start';
 import Me from './views/Me';
 import PossibleRoom from './views/PossibleRoom';
@@ -21,7 +21,6 @@ export default function Jam({
   className,
   route = null,
   dynamicConfig = {},
-  staticConfig: staticConfig_,
   ...props
 }) {
   let roomId = null;
@@ -50,11 +49,6 @@ export default function Jam({
   })();
   // set/unset room id
   useSync(state, {roomId}, [roomId]);
-
-  // static config for cases where it can not be set by app server
-  useMemo(() => {
-    if (staticConfig_) set(staticConfig, staticConfig_);
-  }, []);
 
   // toggle debugging
   useEffect(() => {
