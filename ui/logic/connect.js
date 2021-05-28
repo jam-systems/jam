@@ -5,14 +5,14 @@ import {dispatch, useOn, useRootState} from '../lib/state-tree';
 import {get} from './backend';
 import {staticConfig} from './config';
 import {populateCache} from './GetRequest';
-import {currentId} from './identity';
 import {actions, swarm} from './state';
 
 // TODO this is an intermediary component to set up swarm that should be replaced w/ one that
 // properly integrates with swarm (knows connection state, returns remote streams etc)
 
-export function ConnectRoom() {
+export function ConnectRoom({myId}) {
   const state = useRootState();
+  swarm.config({myPeerId: myId});
 
   let connectedRoomId = null;
   configSwarm(state, swarm, staticConfig);
@@ -50,8 +50,8 @@ export function ConnectRoom() {
   });
 
   // leave room when same peer joins it from elsewhere and I'm in room
-  // TODO: currentId() is called too early to react to any changes!
-  useOn(swarm.connectionState, currentId(), myConnState => {
+  // FIXME: myId can not react to roomId changes here
+  useOn(swarm.connectionState, myId, myConnState => {
     if (myConnState === undefined) {
       is(state, {otherDeviceInRoom: false});
       return;
@@ -71,14 +71,14 @@ export function ConnectRoom() {
     is(state, {otherDeviceInRoom});
   });
 
-  return function ConnectRoom({roomId, shouldConnect}) {
+  return function ConnectRoom({roomId, shouldConnect, myId}) {
     if (shouldConnect && roomId && connectedRoomId !== roomId) {
       connectedRoomId = roomId;
       if (swarm.room === roomId && swarm.hub) return;
       log('connecting room', roomId);
       if (swarm.hub) swarm.disconnect();
       // make sure peerId is the current one
-      swarm.config({myPeerId: currentId()});
+      swarm.config({myPeerId: myId});
       swarm.connect(roomId);
     } else if ((!shouldConnect || !roomId) && connectedRoomId !== null) {
       connectedRoomId = null;

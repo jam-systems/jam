@@ -2,11 +2,7 @@ import React, {useState} from 'react';
 import SparkMD5 from 'spark-md5';
 import {swarm} from '../logic/state';
 import {Modal} from './Modal';
-import {
-  currentId,
-  setCurrentIdentity,
-  useCurrentIdentity,
-} from '../logic/identity';
+import {setCurrentIdentity} from '../logic/identity';
 import {updateInfoServer} from '../logic/backend';
 import {useMqParser} from '../lib/tailwind-mqp';
 import {sendPeerEvent} from '../lib/swarm';
@@ -38,10 +34,9 @@ async function updateInfo(state, info) {
 
 export default function EditIdentity({close}) {
   const state = useStateObject();
-  let roomId = use(state, 'roomId');
+  let [id, myIdentity] = use(state, ['myId', 'myIdentity']);
   let mqp = useMqParser();
-  let info = useCurrentIdentity(roomId).info;
-  let id = currentId();
+  let info = myIdentity?.info;
   let [displayName, setDisplayName] = useState(info?.displayName);
   let [email, setEmail] = useState(info?.email);
   let twitterIdentity = info?.identities?.find(i => i.type === 'twitter');

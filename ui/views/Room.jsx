@@ -3,7 +3,6 @@ import {swarm} from '../logic/state';
 import {use} from 'use-minimal-state';
 import EnterRoom from './EnterRoom';
 import RoomHeader from './RoomHeader';
-import {useCurrentIdentity} from '../logic/identity';
 import {openModal} from './Modal';
 import {EditRoomModal} from './EditRoom';
 import useWakeLock from '../lib/use-wake-lock';
@@ -28,7 +27,6 @@ export default function Room({room, roomId}) {
   useWakeLock();
   usePushToTalk(state);
 
-  let myInfo = useCurrentIdentity(roomId).info;
   let [
     reactions,
     handRaised,
@@ -36,6 +34,7 @@ export default function Room({room, roomId}) {
     speaking,
     iSpeak,
     iModerate,
+    myIdentity,
   ] = use(state, [
     'reactions',
     'handRaised',
@@ -43,6 +42,7 @@ export default function Room({room, roomId}) {
     'speaking',
     'iAmSpeaker',
     'iAmModerator',
+    'myIdentity',
   ]);
   let [peers, peerState, myPeerState] = use(swarm, [
     'stickyPeers',
@@ -50,6 +50,7 @@ export default function Room({room, roomId}) {
     'myPeerState',
   ]);
 
+  let myInfo = myIdentity.info;
   let hasEnteredRoom = myPeerState?.inRoom;
 
   let [editRole, setEditRole] = useState(null);

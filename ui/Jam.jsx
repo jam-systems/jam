@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo} from 'react';
-import {currentId, initializeIdentity} from './logic/identity';
+import {initializeIdentity} from './logic/identity';
 import Modals from './views/Modal';
 import state, {swarm} from './logic/state';
 import {mergeClasses} from './lib/util';
@@ -59,8 +59,7 @@ export default function Jam({
 
   // initialize identity, swarm
   useEffect(() => {
-    initializeIdentity(state);
-    swarm.config({myPeerId: currentId()});
+    initializeIdentity();
   }, []);
 
   // toggle debugging

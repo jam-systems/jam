@@ -2,7 +2,6 @@ import {addLocalStream} from '../lib/swarm';
 import hark from '../lib/hark';
 import {swarm} from './state';
 import {set, update} from 'use-minimal-state';
-import {currentId} from './identity';
 import log from '../lib/causal-log';
 import {domEvent} from '../lib/util';
 import {openModal} from '../views/Modal';
@@ -88,12 +87,14 @@ function AudioState() {
 
   return function AudioState({inRoom}) {
     let [
+      myId,
       iAmSpeaker,
       handRaised,
       audioContext,
       micMuted,
       audioFile,
     ] = useRootState([
+      'myId',
       'iAmSpeaker',
       'handRaised',
       'audioContext',
@@ -110,7 +111,7 @@ function AudioState() {
 
     let myAudio = audioFileStream ?? micStream;
     declare(Muted, {myAudio, micMuted});
-    declare(ConnectMyAudio, {myAudio, iAmSpeaker});
+    declare(ConnectMyAudio, {myAudio, iAmSpeaker, myId});
     let soundMuted = inRoom ? iAmSpeaker && !hasRequestedOnce : true;
 
     return {myAudio, soundMuted, audioFileElement};
@@ -130,16 +131,16 @@ function Muted({myAudio, micMuted}) {
 function ConnectMyAudio() {
   const state = useRootState();
 
-  return function ConnectMyAudio({myAudio, iAmSpeaker}) {
+  return function ConnectMyAudio({myAudio, iAmSpeaker, myId}) {
     let [connected, setConnected] = useState(null);
     let shouldConnect = myAudio && iAmSpeaker;
 
     if (connected !== myAudio && shouldConnect) {
-      connectVolumeMeter(state, currentId(), myAudio);
+      connectVolumeMeter(state, myId, myAudio);
       addLocalStream(swarm, myAudio, 'audio');
       setConnected(myAudio);
     } else if (connected && !shouldConnect) {
-      disconnectVolumeMeter(currentId());
+      disconnectVolumeMeter(myId);
       addLocalStream(swarm, null, 'audio');
       setConnected(null);
     }

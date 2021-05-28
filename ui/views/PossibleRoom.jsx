@@ -4,7 +4,6 @@ import {useCreateRoom} from '../logic/backend';
 import {useRoom} from '../logic/room';
 import {importRoomIdentity, initializeIdentity} from '../logic/identity';
 import {enterRoom} from '../logic/main';
-import {useStateObject} from './StateContext';
 
 export default function PossibleRoom({
   roomId, // truthy
@@ -13,17 +12,17 @@ export default function PossibleRoom({
   roomIdentityKeys,
   onError,
 }) {
-  const state = useStateObject();
-
   // fetch room
   let [room, isLoading] = useRoom(roomId);
 
   // import room identity
   // this has to be done BEFORE creating new room so that we can be moderator
+  // TODO: this does not re-post the room identity when the room is accessed a second time but the URL identity is not set
+  // in this case, when the server lost the identity data, the other peers never get it
   useMemo(() => {
     if (roomIdentity) {
       importRoomIdentity(roomId, roomIdentity, roomIdentityKeys);
-      initializeIdentity(state, roomId);
+      initializeIdentity(roomId);
     }
   }, [roomId, roomIdentity, roomIdentityKeys]);
 

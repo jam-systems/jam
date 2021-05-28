@@ -1,5 +1,5 @@
 import state, {actions, swarm} from './state';
-import {currentId, Identity} from './identity';
+import {Identity} from './identity';
 import {AudioState} from './audio';
 import {Reactions} from './reactions';
 import {RoomState} from './room';
@@ -53,7 +53,7 @@ function AppState() {
     let {closed, moderators} = room;
 
     // connect with signaling server
-    declare(ConnectRoom, {roomId, shouldConnect: hasRoom});
+    declare(ConnectRoom, {myId, roomId, shouldConnect: hasRoom});
     declare(ModeratorState, {moderators});
 
     let [isJoinRoom, joinedRoomId] = useAction(actions.JOIN);

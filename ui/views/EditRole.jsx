@@ -1,5 +1,4 @@
 import React from 'react';
-import {currentId} from '../logic/identity';
 import {use} from 'use-minimal-state';
 import {openModal} from './Modal';
 import EditIdentity from './EditIdentity';
@@ -24,8 +23,9 @@ export default function EditRole({
   onCancel,
 }) {
   const state = useStateObject();
+  let myId = use(state, 'myId');
   let mqp = useMqParser();
-  let [myAdminStatus] = useIdentityAdminStatus(currentId());
+  let [myAdminStatus] = useIdentityAdminStatus(myId);
   let [peerAdminStatus] = useIdentityAdminStatus(peerId);
 
   let isSpeaker = stageOnly || speakers.includes(peerId);
@@ -112,11 +112,11 @@ export default function EditRole({
 export function EditSelf({onCancel}) {
   const state = useStateObject();
   let mqp = useMqParser();
-  let myPeerId = currentId();
-  let [iSpeak, iModerate, room] = use(state, [
+  let [iSpeak, iModerate, room, myId] = use(state, [
     'iAmSpeaker',
     'iAmModerator',
     'room',
+    'myId',
   ]);
   let stageOnly = !!room?.stageOnly;
   iSpeak = stageOnly || iSpeak;
@@ -137,16 +137,14 @@ export function EditSelf({onCancel}) {
         )}
         {!stageOnly && iModerate && !iSpeak && (
           <SecondaryButton
-            onClick={() => addRole(state, myPeerId, 'speakers').then(onCancel)}
+            onClick={() => addRole(state, myId, 'speakers').then(onCancel)}
           >
             ↑ Move to Stage
           </SecondaryButton>
         )}
         {!stageOnly && iModerate && iSpeak && (
           <SecondaryButton
-            onClick={() =>
-              removeRole(state, myPeerId, 'speakers').then(onCancel)
-            }
+            onClick={() => removeRole(state, myId, 'speakers').then(onCancel)}
           >
             ↓ Leave Stage
           </SecondaryButton>
