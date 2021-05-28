@@ -4,7 +4,6 @@ import {swarm} from '../logic/state';
 import {Modal} from './Modal';
 import {
   currentId,
-  currentIdentity,
   setCurrentIdentity,
   useCurrentIdentity,
 } from '../logic/identity';
@@ -27,7 +26,7 @@ async function updateInfo(state, info) {
       twitterIdentity.id = twitterHandle;
     }
   }
-  let identity = currentIdentity(state);
+  let identity = state.myIdentity;
   let newInfo = {...identity.info, ...info};
   let ok = await updateInfoServer(state, newInfo);
   if (ok) {

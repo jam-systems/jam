@@ -1,5 +1,5 @@
 import state, {actions, swarm} from './state';
-import {currentId} from './identity';
+import {currentId, Identity} from './identity';
 import {AudioState} from './audio';
 import {Reactions} from './reactions';
 import {RoomState} from './room';
@@ -44,7 +44,8 @@ function AppState() {
   let leftStage = false;
 
   return function AppState({roomId, userInteracted, micMuted}) {
-    let myId = currentId();
+    let {myId, myIdentity} = use(Identity, {roomId});
+
     let {room, hasRoom, iAmSpeaker, iAmModerator} = use(RoomState, {
       roomId,
       myId,
@@ -81,7 +82,16 @@ function AppState() {
 
     userInteracted = userInteracted || !!inRoom;
     return merge(
-      {userInteracted, inRoom, room, iAmSpeaker, iAmModerator, leftStage},
+      {
+        userInteracted,
+        inRoom,
+        room,
+        iAmSpeaker,
+        iAmModerator,
+        leftStage,
+        myId,
+        myIdentity,
+      },
       declare(AudioState, {inRoom})
     );
   };

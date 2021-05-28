@@ -2,10 +2,11 @@ import {useCallback, useEffect, useState} from 'react';
 import {on} from 'use-minimal-state';
 import {use} from '../lib/state-tree';
 import {staticConfig} from './config';
-import {signedToken, signData, currentId, identities} from './identity';
+import {identities} from './identity';
 import {emptyRoom} from './room';
 import GetRequest, {populateCache} from './GetRequest';
 import {useStateObject} from '../views/StateContext';
+import {signData, signedToken} from '../lib/identity-utils';
 
 let API = `${staticConfig.urls.pantry}/api/v1`;
 on(staticConfig, () => {
@@ -14,7 +15,7 @@ on(staticConfig, () => {
 
 export function useApiQuery(path, {dontFetch = false, fetchOnMount = false}) {
   const state = useStateObject();
-  const getToken = useCallback(() => signedToken(state), []);
+  const getToken = useCallback(() => signedToken(state.myIdentity), []);
   let {data, isLoading, status} = use(GetRequest, {
     path,
     dontFetch,
@@ -28,14 +29,14 @@ export function updateApiQuery(path, data) {
   populateCache(path, data);
 }
 
-async function authenticatedApiRequest(state, method, path, payload) {
+async function authenticatedApiRequest({myIdentity}, method, path, payload) {
   let res = await fetch(API + path, {
     method: method.toUpperCase(),
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
     },
-    body: payload ? JSON.stringify(signData(state, payload)) : undefined,
+    body: payload ? JSON.stringify(signData(myIdentity, payload)) : undefined,
   });
   return res.ok;
 }
@@ -53,12 +54,12 @@ export async function get(path) {
 }
 
 // returns [data, ok, status]
-async function authedGet(state, path) {
+async function authedGet({myIdentity}, path) {
   let res = await fetch(API + path, {
     method: 'GET',
     headers: {
       Accept: 'application/json',
-      Authorization: `Token ${signedToken(state)}`,
+      Authorization: `Token ${signedToken(myIdentity)}`,
     },
   });
   if (res.status < 400) return [await res.json(), true, res.status];
@@ -80,9 +81,9 @@ export async function deleteRequest(state, path, payload = null) {
 export async function createRoom(
   state,
   roomId,
-  peerId,
   {name = '', description = '', logoURI, color, stageOnly} = {}
 ) {
+  let {myId} = state;
   let room = {
     ...emptyRoom,
     name,
@@ -90,8 +91,8 @@ export async function createRoom(
     logoURI,
     color,
     stageOnly: !!stageOnly,
-    moderators: [peerId],
-    speakers: [peerId],
+    moderators: [myId],
+    speakers: [myId],
   };
   let ok = await post(state, `/rooms/${roomId}`, room);
   if (ok) return room;
@@ -110,7 +111,7 @@ export function useCreateRoom({
   useEffect(() => {
     if (roomId && !room && !isRoomLoading) {
       (async () => {
-        let roomCreated = await createRoom(state, roomId, currentId(), newRoom);
+        let roomCreated = await createRoom(state, roomId, newRoom);
         setLoading(false);
         if (roomCreated) {
           populateCache(`/rooms/${roomId}`, roomCreated);
@@ -137,8 +138,9 @@ export async function initializeIdentity(state, roomId) {
 }
 
 export async function updateInfoServer(state, info) {
+  let {myId} = state;
   return (
-    (await put(state, `/identities/${currentId()}`, info)) ||
-    (await post(state, `/identities/${currentId()}`, info))
+    (await put(state, `/identities/${myId}`, info)) ||
+    (await post(state, `/identities/${myId}`, info))
   );
 }
