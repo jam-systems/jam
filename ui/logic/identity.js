@@ -1,7 +1,7 @@
 import nacl from 'tweetnacl';
 import {set} from 'use-minimal-state';
 import {StoredState} from '../lib/local-storage';
-import {importLegacyIdentity} from '../lib/migrations';
+import {importLegacyIdentity, migrateDisplayName} from '../lib/migrations';
 import {encode, decode} from '../lib/identity-utils';
 import {putOrPost} from './backend';
 import {use} from '../lib/state-tree';
@@ -14,6 +14,7 @@ const identities = StoredState('identities', () => {
   const _default = importLegacyIdentity() || createIdentity();
   return {_default};
 });
+migrateDisplayName(identities);
 
 function Identity() {
   postInitialIdentity(identities._default);
