@@ -4,6 +4,7 @@ import {StoredState} from '../lib/local-storage';
 import {importLegacyIdentity} from '../lib/migrations';
 import {encode, decode} from '../lib/identity-utils';
 import {post, put} from './backend';
+import {use} from '../lib/state-tree';
 
 export {Identity, setCurrentIdentity, importRoomIdentity, initializeIdentity};
 
@@ -14,7 +15,9 @@ const identities = StoredState('identities', () => {
 
 function Identity() {
   return function Identity({roomId}) {
-    let myIdentity = identities[roomId] || identities['_default'];
+    let defaultIdentity = use(identities, '_default');
+    let roomIdentity = use(identities, roomId);
+    let myIdentity = roomIdentity ?? defaultIdentity;
     let myId = myIdentity.publicKey;
     return {myId, myIdentity};
   };
