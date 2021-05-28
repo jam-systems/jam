@@ -64,6 +64,7 @@ export {
   useDispatch,
   useRootState,
   useExternalState,
+  useOn,
   useUpdate,
   useState,
   useMemo,
@@ -564,24 +565,31 @@ function useExternalState(state, key) {
   let use = caller.uses[nUses];
   if (use === undefined || use.key !== key) {
     if (use !== undefined) {
-      // cleaning up when key changed
       use.cleanup();
     }
     const listener = () => {
-      // not sure whether we want this...
-      // I'd rather be able to force updates when I want and be careful about triggering them
-      // if (value === state[key]) return;
       if (current !== caller) {
         queueUpdate(caller, 'useExternalState ' + key);
       }
     };
-    // TODO: cleanup on onUnmount
     let cleanup = on(state, key, listener);
     use = {key, cleanup};
     caller.uses[nUses] = use;
   }
   nUses++;
   return state[key];
+}
+
+function useOn(...args) {
+  if (current === root) throw Error('Hooks can only be called during render');
+  let caller = current;
+  let use = caller.uses[nUses];
+  if (use !== undefined) {
+    use.cleanup();
+  }
+  let cleanup = on(...args);
+  caller.uses[nUses] = {cleanup};
+  nUses++;
 }
 
 function useUpdate() {

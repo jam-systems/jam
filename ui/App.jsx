@@ -3,6 +3,13 @@ import {render} from 'react-dom';
 import {useLocation} from './lib/use-location';
 import Jam from './Jam';
 import {parsePath, parseUrlConfig} from './lib/url-utils';
+import {jamSetup} from './logic/main';
+
+jamSetup({
+  cachedRooms: window.existingRoomInfo && {
+    [window.existingRoomId]: window.existingRoomInfo,
+  },
+});
 
 render(<App />, document.querySelector('#root'));
 

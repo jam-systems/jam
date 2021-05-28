@@ -1,34 +1,73 @@
-import {is, on, update} from 'use-minimal-state';
+import {is, update} from 'use-minimal-state';
 import log from '../lib/causal-log';
-import {useRootState} from '../lib/state-tree';
+import {dispatch, useOn, useRootState} from '../lib/state-tree';
 import {get} from './backend';
 import {staticConfig} from './config';
 import {populateCache} from './GetRequest';
 import {currentId, signData, verifyData} from './identity';
-import {swarm} from './state';
+import {actions, swarm} from './state';
 
 // TODO this is an intermediary component to set up swarm that should be replaced w/ one that
 // properly integrates with swarm (knows connection state, returns remote streams etc)
 
 export function ConnectRoom() {
   let connectedRoomId = null;
-  configSwarm(staticConfig);
+  configSwarm(swarm, staticConfig);
+  useOn(staticConfig, conf => configSwarm(swarm, conf));
+
   is(swarm.myPeerState, {inRoom: false, micMuted: false, leftStage: false});
 
   const state = useRootState();
 
-  on(swarm.peerEvent, 'identity-update', async peerId => {
+  useOn(swarm, 'newPeer', async id => {
+    for (let i = 0; i < 5; i++) {
+      // try multiple times to lose race with the first POST /identities
+      let [data, ok] = await get(`/identities/${id}`);
+      if (ok) {
+        state.identities[id] = data;
+        update(state, 'identities');
+        return;
+      } else {
+        await new Promise(r => setTimeout(r, 1000));
+      }
+    }
+  });
+
+  useOn(swarm.peerEvent, 'identity-update', async peerId => {
     let [data, ok] = await get(`/identities/${peerId}`);
     if (ok) {
       state.identities[peerId] = data;
       update(state, 'identities');
     }
   });
-  on(swarm.serverEvent, 'room-info', data => {
+
+  useOn(swarm.serverEvent, 'room-info', data => {
     log('new room info', data);
     if (connectedRoomId !== null) {
       populateCache(`/rooms/${connectedRoomId}`, data);
     }
+  });
+
+  // leave room when same peer joins it from elsewhere and I'm in room
+  // TODO: currentId() is called too early to react to any changes!
+  useOn(swarm.connectionState, currentId(), myConnState => {
+    if (myConnState === undefined) {
+      is(state, {otherDeviceInRoom: false});
+      return;
+    }
+    let {states, latest} = myConnState;
+    let {myConnId} = swarm;
+    let otherDeviceInRoom = false;
+    for (let connId in states) {
+      if (connId !== myConnId && states[connId].state.inRoom) {
+        otherDeviceInRoom = true;
+        if (connId === latest && state.inRoom) {
+          dispatch(state, actions.JOIN, null);
+        }
+        break;
+      }
+    }
+    is(state, {otherDeviceInRoom});
   });
 
   return function ConnectRoom({roomId, shouldConnect}) {
@@ -47,7 +86,7 @@ export function ConnectRoom() {
   };
 }
 
-function configSwarm(staticConfig) {
+function configSwarm(swarm, staticConfig) {
   swarm.config({
     debug: staticConfig.development,
     url: staticConfig.urls.pantry,
@@ -70,4 +109,3 @@ function configSwarm(staticConfig) {
     },
   });
 }
-on(staticConfig, conf => configSwarm(conf));
