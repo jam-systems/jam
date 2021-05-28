@@ -1,6 +1,6 @@
 import React, {useEffect, useMemo} from 'react';
 import Modals from './views/Modal';
-import state, {swarm} from './logic/state';
+import {swarm} from './logic/state';
 import {mergeClasses} from './lib/util';
 import {debug, useSync} from './lib/state-utils';
 import {staticConfig} from './logic/config';
@@ -12,9 +12,9 @@ import PossibleRoom from './views/PossibleRoom';
 import {debugStateTree, declare, declareStateRoot} from './lib/state-tree';
 import {ShowAudioPlayerToast} from './views/AudioPlayerToast';
 import {ExistingStateProvider} from './views/StateContext';
-import {dispatch} from './logic/main';
+import {dispatch, jamState} from './logic/main';
 
-declareStateRoot(ShowModals, state);
+declareStateRoot(ShowModals, jamState);
 
 export default function Jam({
   style,
@@ -48,7 +48,7 @@ export default function Jam({
     }
   })();
   // set/unset room id
-  useSync(state, {roomId}, [roomId]);
+  useSync(jamState, {roomId}, [roomId]);
 
   // toggle debugging
   useEffect(() => {
@@ -58,8 +58,8 @@ export default function Jam({
     }
     if (dynamicConfig.debug || staticConfig.development) {
       window.swarm = swarm;
-      window.state = state;
-      debug(state);
+      window.state = jamState;
+      debug(jamState);
       debugStateTree();
     }
   }, [dynamicConfig.debug]);
@@ -68,7 +68,7 @@ export default function Jam({
   // TODO: the color should depend on the loading state of GET /room, to not flash orange before being in the room
   // => color should be only set here if the route is not a room id, otherwise <PossibleRoom> should set it
   // => pass a setColor prop to PossibleRoom
-  let {color} = use(state, 'room');
+  let {color} = use(jamState, 'room');
   let [width, , setContainer, mqp] = useProvideWidth();
   let backgroundColor = useMemo(
     () => (color && color !== '#4B5563' ? hexToRGB(color, '0.123') : undefined),
@@ -88,7 +88,7 @@ export default function Jam({
       }}
       {...props}
     >
-      <ExistingStateProvider state={state} dispatch={dispatch}>
+      <ExistingStateProvider state={jamState} dispatch={dispatch}>
         <WidthContext.Provider value={width}>
           {View}
           <Modals />

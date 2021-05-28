@@ -1,5 +1,7 @@
 import Swarm from '../lib/swarm';
-const state = {
+export {defaultState, swarm};
+
+const defaultState = {
   myIdentity: null,
   myId: null,
 
@@ -26,7 +28,6 @@ const state = {
   modMessages: {},
   userInteracted: false,
 };
-export default state;
 
 export const actions = {
   JOIN: 'join',
@@ -36,4 +37,3 @@ export const actions = {
 };
 
 const swarm = Swarm();
-export {swarm};
