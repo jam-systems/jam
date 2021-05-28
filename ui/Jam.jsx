@@ -1,5 +1,4 @@
 import React, {useEffect, useMemo} from 'react';
-import {initializeIdentity} from './logic/identity';
 import Modals from './views/Modal';
 import state, {swarm} from './logic/state';
 import {mergeClasses} from './lib/util';
@@ -55,11 +54,6 @@ export default function Jam({
   // static config for cases where it can not be set by app server
   useMemo(() => {
     if (staticConfig_) set(staticConfig, staticConfig_);
-  }, []);
-
-  // initialize identity, swarm
-  useEffect(() => {
-    initializeIdentity();
   }, []);
 
   // toggle debugging

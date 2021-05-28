@@ -3,10 +3,10 @@ import {set} from 'use-minimal-state';
 import {StoredState} from '../lib/local-storage';
 import {importLegacyIdentity} from '../lib/migrations';
 import {encode, decode} from '../lib/identity-utils';
-import {post, put} from './backend';
+import {putOrPost} from './backend';
 import {use} from '../lib/state-tree';
 
-export {Identity, setCurrentIdentity, importRoomIdentity, initializeIdentity};
+export {Identity, setCurrentIdentity, importRoomIdentity};
 
 const identities = StoredState('identities', () => {
   const _default = importLegacyIdentity() || createIdentity();
@@ -14,31 +14,56 @@ const identities = StoredState('identities', () => {
 });
 
 function Identity() {
+  postInitialIdentity(identities._default);
+  const hasPosted = new Set();
+
   return function Identity({roomId}) {
     let defaultIdentity = use(identities, '_default');
     let roomIdentity = use(identities, roomId);
+
+    if (roomIdentity !== undefined && !hasPosted.has(roomId)) {
+      hasPosted.add(roomId);
+      postInitialIdentity(roomIdentity);
+    }
+
     let myIdentity = roomIdentity ?? defaultIdentity;
     let myId = myIdentity.publicKey;
     return {myId, myIdentity};
   };
 }
 
-async function initializeIdentity(roomId) {
-  const identity = roomId
-    ? identities[roomId] || identities['_default']
-    : identities['_default'];
-  return (
-    (await put(
-      {myIdentity: identity},
-      `/identities/${identity.publicKey}`,
-      identity.info
-    )) ||
-    (await post(
-      {myIdentity: identity},
-      `/identities/${identity.publicKey}`,
-      identity.info
-    ))
+function postInitialIdentity(identity) {
+  return putOrPost(
+    {myIdentity: identity},
+    `/identities/${identity.publicKey}`,
+    identity.info
   );
+}
+
+function setCurrentIdentity({roomId}, valueOrFunction) {
+  let identityKey = identities[roomId] ? roomId : '_default';
+  set(identities, identityKey, valueOrFunction);
+}
+
+function importRoomIdentity(roomId, roomIdentity, keys) {
+  if (identities[roomId]) return;
+  if (roomIdentity) {
+    if (keys && keys[roomIdentity.id]) {
+      if (keys[roomIdentity.id].seed) {
+        addIdentity(
+          roomId,
+          createIdentityFromSeed(roomIdentity, keys[roomIdentity.id].seed)
+        );
+      } else {
+        addIdentity(
+          roomId,
+          createIdentityFromSeed(roomIdentity, keys[roomIdentity.id].secretKey)
+        );
+      }
+    } else {
+      addIdentity(roomId, createIdentity(roomIdentity));
+    }
+  }
 }
 
 function createIdentityFromSecretKey(info, privatekeyBase64) {
@@ -69,33 +94,6 @@ function createIdentityFromKeypair(info, keypair) {
       id: publicKey,
     },
   };
-}
-
-// TODO: this does not update the identity in state !!! (but everywhere else - server, localStorage)
-function setCurrentIdentity({roomId}, valueOrFunction) {
-  let identKey = identities[roomId] ? roomId : '_default';
-  set(identities, identKey, valueOrFunction);
-}
-
-function importRoomIdentity(roomId, roomIdentity, keys) {
-  if (identities[roomId]) return;
-  if (roomIdentity) {
-    if (keys && keys[roomIdentity.id]) {
-      if (keys[roomIdentity.id].seed) {
-        addIdentity(
-          roomId,
-          createIdentityFromSeed(roomIdentity, keys[roomIdentity.id].seed)
-        );
-      } else {
-        addIdentity(
-          roomId,
-          createIdentityFromSeed(roomIdentity, keys[roomIdentity.id].secretKey)
-        );
-      }
-    } else {
-      addIdentity(roomId, createIdentity(roomIdentity));
-    }
-  }
 }
 
 function addIdentity(key, identity) {

@@ -73,6 +73,12 @@ export async function put(state, path, payload) {
   return authenticatedApiRequest(state, 'PUT', path, payload);
 }
 
+export async function putOrPost(state, path, payload) {
+  return (
+    (await put(state, path, payload)) || (await post(state, path, payload))
+  );
+}
+
 export async function deleteRequest(state, path, payload = null) {
   return authenticatedApiRequest(state, 'DELETE', path, payload);
 }
