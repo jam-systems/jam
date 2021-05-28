@@ -3,11 +3,14 @@ import {put} from '../logic/backend';
 import {useMqParser} from '../lib/tailwind-mqp';
 import {Modal} from './Modal';
 import {rawTimeZones} from '@vvo/tzdb';
+import {useStateObject} from './StateContext';
 
 export function EditRoomModal({roomId, room, close}) {
+  const state = useStateObject();
+
   let updateRoom = async room_ => {
     if (!roomId || !room_) return;
-    await put(`/rooms/${roomId}`, room_);
+    await put(state, `/rooms/${roomId}`, room_);
   };
 
   let [name, setName] = useState(room.name || '');

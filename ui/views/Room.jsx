@@ -28,7 +28,7 @@ export default function Room({room, roomId}) {
   useWakeLock();
   usePushToTalk(state);
 
-  let myInfo = useCurrentIdentity().info;
+  let myInfo = useCurrentIdentity(roomId).info;
   let [
     reactions,
     handRaised,

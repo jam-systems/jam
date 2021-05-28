@@ -1,7 +1,6 @@
 import {on, update} from 'use-minimal-state';
 import {use} from '../lib/state-tree';
 import {staticConfig} from './config';
-import {signedToken} from './identity';
 
 // TODO: make this module general & let auth header & API paths be part of function params
 let API = `${staticConfig.urls.pantry}/api/v1`;
@@ -11,15 +10,15 @@ on(staticConfig, () => {
 
 export {getRequest, populateCache, getCache, setCache};
 
-export default function GetRequest({path, dontFetch, fetchOnMount}) {
+export default function GetRequest({path, dontFetch, fetchOnMount, getToken}) {
   let ourState = 'idle'; // 'loading', 'success', 'error'
   let shouldFetch = !!path && !dontFetch;
   if (shouldFetch && fetchOnMount) {
     ourState = 'loading';
-    getRequest(path);
+    getRequest(path, getToken);
   }
 
-  return function GetRequest({path, dontFetch}) {
+  return function GetRequest({path, dontFetch, getToken}) {
     let {state, data, status} = use(queryCache, path) ?? idleQuery;
     let shouldFetch = !!path && !dontFetch;
     let actionRequired = shouldFetch && state === 'idle';
@@ -32,7 +31,7 @@ export default function GetRequest({path, dontFetch, fetchOnMount}) {
     if (actionRequired) {
       // console.log('GetRequest: action required!', path);
       ourState = 'loading';
-      getRequest(path);
+      getRequest(path, getToken);
     } else {
       ourState = state;
     }
@@ -41,16 +40,12 @@ export default function GetRequest({path, dontFetch, fetchOnMount}) {
   };
 }
 
-async function getRequest(path) {
+async function getRequest(path, getToken) {
   setCache(path, {state: 'loading'});
+  let headers = {Accept: 'application/json'};
+  if (getToken) headers.Authorization = `Token ${getToken()}`;
 
-  let res = await fetch(API + path, {
-    method: 'GET',
-    headers: {
-      Accept: 'application/json',
-      Authorization: `Token ${signedToken()}`,
-    },
-  }).catch(console.warn);
+  let res = await fetch(API + path, {headers}).catch(console.warn);
   let {state, data, status} = getCache(path);
   if (state !== 'loading') {
     // someone else already reset the cache, use it

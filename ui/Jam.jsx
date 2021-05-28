@@ -60,7 +60,7 @@ export default function Jam({
 
   // initialize identity, swarm
   useEffect(() => {
-    initializeIdentity();
+    initializeIdentity(state);
     swarm.config({myPeerId: currentId()});
   }, []);
 

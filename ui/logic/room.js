@@ -51,20 +51,22 @@ const emptyRoom = {
   moderators: [],
 };
 
-async function addRole({room, roomId}, id, role) {
+async function addRole(state, id, role) {
+  let {room, roomId} = state;
   let {speakers, moderators} = room;
   let existing = role === 'speakers' ? speakers : moderators;
   if (existing.includes(id)) return;
   log('adding to', role, id);
   let newRoom = {...room, [role]: [...existing, id]};
-  await put(`/rooms/${roomId}`, newRoom);
+  await put(state, `/rooms/${roomId}`, newRoom);
 }
 
-async function removeRole({room, roomId}, id, role) {
+async function removeRole(state, id, role) {
+  let {room, roomId} = state;
   let {speakers, moderators} = room;
   let existing = role === 'speakers' ? speakers : moderators;
   if (!existing.includes(id)) return;
   log('removing from', role, id);
   let newRoom = {...room, [role]: existing.filter(id_ => id_ !== id)};
-  await put(`/rooms/${roomId}`, newRoom);
+  await put(state, `/rooms/${roomId}`, newRoom);
 }

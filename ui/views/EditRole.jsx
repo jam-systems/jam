@@ -39,7 +39,7 @@ export default function EditRole({
           <br />
           {(peerAdminStatus?.admin && (
             <button
-              onClick={() => removeAdmin(peerId).then(onCancel)}
+              onClick={() => removeAdmin(state, peerId).then(onCancel)}
               className={
                 'mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2'
               }
@@ -48,7 +48,7 @@ export default function EditRole({
             </button>
           )) || (
             <button
-              onClick={() => addAdmin(peerId).then(onCancel)}
+              onClick={() => addAdmin(state, peerId).then(onCancel)}
               className={
                 'mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2'
               }

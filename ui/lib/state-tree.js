@@ -108,7 +108,7 @@ function use(Component, props, stableProps) {
     // we are not in a state component => assume inside React component
     if (isComponent) {
       // eslint-disable-next-line
-      return useStateComponent(Component, props);
+      return useStateComponent(Component, props, stableProps);
     } else {
       // eslint-disable-next-line
       return useMinimalState(Component, props);

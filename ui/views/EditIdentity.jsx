@@ -11,8 +11,10 @@ import {
 import {updateInfoServer} from '../logic/backend';
 import {useMqParser} from '../lib/tailwind-mqp';
 import {sendPeerEvent} from '../lib/swarm';
+import {useStateObject} from './StateContext';
+import {use} from 'use-minimal-state';
 
-let updateInfo = async info => {
+async function updateInfo(state, info) {
   if (info.identities) {
     let twitterIdentity = info?.identities?.find(i => i.type === 'twitter');
     if (twitterIdentity && twitterIdentity.id) {
@@ -25,19 +27,21 @@ let updateInfo = async info => {
       twitterIdentity.id = twitterHandle;
     }
   }
-  let identity = currentIdentity();
+  let identity = currentIdentity(state);
   let newInfo = {...identity.info, ...info};
-  let ok = await updateInfoServer(newInfo);
+  let ok = await updateInfoServer(state, newInfo);
   if (ok) {
-    setCurrentIdentity(i => ({...i, info: newInfo}));
+    setCurrentIdentity(state, i => ({...i, info: newInfo}));
     sendPeerEvent(swarm, 'identity-update');
   }
   return ok;
-};
+}
 
 export default function EditIdentity({close}) {
+  const state = useStateObject();
+  let roomId = use(state, 'roomId');
   let mqp = useMqParser();
-  let info = useCurrentIdentity().info;
+  let info = useCurrentIdentity(roomId).info;
   let id = currentId();
   let [displayName, setDisplayName] = useState(info?.displayName);
   let [email, setEmail] = useState(info?.email);
@@ -83,7 +87,7 @@ export default function EditIdentity({close}) {
         if (ok) close();
       };
     } else {
-      let ok = await updateInfo({displayName, identities, emailHash});
+      let ok = await updateInfo(state, {displayName, identities, emailHash});
       if (ok) close();
     }
   };

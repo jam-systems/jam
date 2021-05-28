@@ -28,11 +28,16 @@ export {
 export {addRole, removeRole} from './room';
 export {addAdmin, removeAdmin, useIdentityAdminStatus} from './admin';
 
+// TODO: this should be exposed as a function rather than happen at the top level
 let {dispatch} = declareStateRoot(AppState, state, [
   'roomId',
   'userInteracted',
   'micMuted',
 ]);
+
+// FIXME: there is no user interaction before playing audio in /s rooms
+// also, the code below has the wrong assumption that being in a room implies a previous user interaction
+// => audio context fails to start, no speaking rings or sound
 
 function AppState() {
   let inRoom = null;

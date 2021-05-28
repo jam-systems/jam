@@ -7,9 +7,11 @@ import {navigate} from '../lib/use-location';
 import {enterRoom} from '../logic/main';
 import Container from './Container';
 import {populateCache} from '../logic/GetRequest';
-import {useSetState} from './StateContext';
+import {useSetState, useStateObject} from './StateContext';
 
 export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
+  const state = useStateObject();
+
   // note: setters are currently unused because form is hidden
   let [name, setName] = useState(newRoom.name ?? '');
   let [description, setDescription] = useState(newRoom.description ?? '');
@@ -35,7 +37,12 @@ export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
 
     (async () => {
       let roomPosted = {name, description, logoURI, color, stageOnly};
-      let roomCreated = await createRoom(roomId, currentId(), roomPosted);
+      let roomCreated = await createRoom(
+        state,
+        roomId,
+        currentId(),
+        roomPosted
+      );
       if (roomCreated) {
         populateCache(`/rooms/${roomId}`, roomCreated);
         if (urlRoomId !== roomId) navigate('/' + roomId);

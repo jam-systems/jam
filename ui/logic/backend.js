@@ -1,10 +1,11 @@
-import {useEffect, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {on} from 'use-minimal-state';
 import {use} from '../lib/state-tree';
 import {staticConfig} from './config';
 import {signedToken, signData, currentId, identities} from './identity';
 import {emptyRoom} from './room';
 import GetRequest, {populateCache} from './GetRequest';
+import {useStateObject} from '../views/StateContext';
 
 let API = `${staticConfig.urls.pantry}/api/v1`;
 on(staticConfig, () => {
@@ -12,10 +13,13 @@ on(staticConfig, () => {
 });
 
 export function useApiQuery(path, {dontFetch = false, fetchOnMount = false}) {
+  const state = useStateObject();
+  const getToken = useCallback(() => signedToken(state), []);
   let {data, isLoading, status} = use(GetRequest, {
     path,
     dontFetch,
     fetchOnMount,
+    getToken,
   });
   return [data, isLoading, status];
 }
@@ -24,14 +28,14 @@ export function updateApiQuery(path, data) {
   populateCache(path, data);
 }
 
-async function authenticatedApiRequest(method, path, payload) {
+async function authenticatedApiRequest(state, method, path, payload) {
   let res = await fetch(API + path, {
     method: method.toUpperCase(),
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
     },
-    body: payload ? JSON.stringify(signData(payload)) : undefined,
+    body: payload ? JSON.stringify(signData(state, payload)) : undefined,
   });
   return res.ok;
 }
@@ -49,31 +53,32 @@ export async function get(path) {
 }
 
 // returns [data, ok, status]
-export async function authedGet(path) {
+async function authedGet(state, path) {
   let res = await fetch(API + path, {
     method: 'GET',
     headers: {
       Accept: 'application/json',
-      Authorization: `Token ${signedToken()}`,
+      Authorization: `Token ${signedToken(state)}`,
     },
   });
   if (res.status < 400) return [await res.json(), true, res.status];
   else return [undefined, false, res.status];
 }
 
-export async function post(path, payload) {
-  return authenticatedApiRequest('POST', path, payload);
+export async function post(state, path, payload) {
+  return authenticatedApiRequest(state, 'POST', path, payload);
 }
 
-export async function put(path, payload) {
-  return authenticatedApiRequest('PUT', path, payload);
+export async function put(state, path, payload) {
+  return authenticatedApiRequest(state, 'PUT', path, payload);
 }
 
-export async function deleteRequest(path, payload = null) {
-  return authenticatedApiRequest('DELETE', path, payload);
+export async function deleteRequest(state, path, payload = null) {
+  return authenticatedApiRequest(state, 'DELETE', path, payload);
 }
 
 export async function createRoom(
+  state,
   roomId,
   peerId,
   {name = '', description = '', logoURI, color, stageOnly} = {}
@@ -88,7 +93,7 @@ export async function createRoom(
     moderators: [peerId],
     speakers: [peerId],
   };
-  let ok = await post(`/rooms/${roomId}`, room);
+  let ok = await post(state, `/rooms/${roomId}`, room);
   if (ok) return room;
 }
 
@@ -99,12 +104,13 @@ export function useCreateRoom({
   newRoom,
   onSuccess,
 }) {
+  const state = useStateObject();
   let [isError, setError] = useState(false);
   let [isLoading, setLoading] = useState(true);
   useEffect(() => {
     if (roomId && !room && !isRoomLoading) {
       (async () => {
-        let roomCreated = await createRoom(roomId, currentId(), newRoom);
+        let roomCreated = await createRoom(state, roomId, currentId(), newRoom);
         setLoading(false);
         if (roomCreated) {
           populateCache(`/rooms/${roomId}`, roomCreated);
@@ -120,19 +126,19 @@ export function useCreateRoom({
 
 // identity
 
-export async function initializeIdentity(roomId) {
+export async function initializeIdentity(state, roomId) {
   const identity = roomId
     ? identities[roomId] || identities['_default']
     : identities['_default'];
   return (
-    (await put(`/identities/${identity.publicKey}`, identity.info)) ||
-    (await post(`/identities/${identity.publicKey}`, identity.info))
+    (await put(state, `/identities/${identity.publicKey}`, identity.info)) ||
+    (await post(state, `/identities/${identity.publicKey}`, identity.info))
   );
 }
 
-export async function updateInfoServer(info) {
+export async function updateInfoServer(state, info) {
   return (
-    (await put(`/identities/${currentId()}`, info)) ||
-    (await post(`/identities/${currentId()}`, info))
+    (await put(state, `/identities/${currentId()}`, info)) ||
+    (await post(state, `/identities/${currentId()}`, info))
   );
 }

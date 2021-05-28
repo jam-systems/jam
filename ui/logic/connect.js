@@ -11,13 +11,13 @@ import {actions, swarm} from './state';
 // properly integrates with swarm (knows connection state, returns remote streams etc)
 
 export function ConnectRoom() {
+  const state = useRootState();
+
   let connectedRoomId = null;
-  configSwarm(swarm, staticConfig);
-  useOn(staticConfig, conf => configSwarm(swarm, conf));
+  configSwarm(state, swarm, staticConfig);
+  useOn(staticConfig, conf => configSwarm(state, swarm, conf));
 
   is(swarm.myPeerState, {inRoom: false, micMuted: false, leftStage: false});
-
-  const state = useRootState();
 
   useOn(swarm, 'newPeer', async id => {
     for (let i = 0; i < 5; i++) {
@@ -86,11 +86,11 @@ export function ConnectRoom() {
   };
 }
 
-function configSwarm(swarm, staticConfig) {
+function configSwarm(state, swarm, staticConfig) {
   swarm.config({
     debug: staticConfig.development,
     url: staticConfig.urls.pantry,
-    sign: signData,
+    sign: data => signData(state, data),
     verify: verifyData,
     reduceState: (_states, _current, latest, findLatest) => {
       if (latest.inRoom) return latest;
