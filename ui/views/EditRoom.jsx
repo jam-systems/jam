@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {put} from '../logic/backend';
-import {useMqParser} from '../logic/tailwind-mqp';
+import {useMqParser} from '../lib/tailwind-mqp';
 import {Modal} from './Modal';
 import {rawTimeZones} from '@vvo/tzdb';
 

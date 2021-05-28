@@ -9,7 +9,7 @@ import {
   useCurrentIdentity,
 } from '../logic/identity';
 import {updateInfoServer} from '../logic/backend';
-import {useMqParser} from '../logic/tailwind-mqp';
+import {useMqParser} from '../lib/tailwind-mqp';
 import {sendPeerEvent} from '../lib/swarm';
 
 let updateInfo = async info => {

@@ -4,7 +4,7 @@ import {actions} from '../logic/state';
 import {is, use} from 'use-minimal-state';
 import {sendReaction} from '../logic/reactions';
 import EditRole, {EditSelf} from './EditRole';
-import {breakpoints, useWidth} from '../logic/tailwind-mqp';
+import {breakpoints, useWidth} from '../lib/tailwind-mqp';
 import {openModal} from './Modal';
 import {InfoModal} from './InfoModal';
 import {MicOffSvg, MicOnSvg} from './Svg';

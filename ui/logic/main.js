@@ -17,6 +17,11 @@ import {ConnectRoom} from './connect';
 import ModeratorState from './room/ModeratorState';
 import {useDidChange} from '../lib/state-utils';
 
+export {enterRoom, leaveRoom, leaveStage, dispatch as dispatchAppState};
+export {addRole, removeRole} from './room';
+export {addAdmin, removeAdmin, useIdentityAdminStatus} from './admin';
+
+// TODO: this could be exposed as part of a setup function
 if (window.existingRoomInfo) {
   populateCache(`/rooms/${window.existingRoomId}`, window.existingRoomInfo);
 }
@@ -27,7 +32,6 @@ let {dispatch} = declareStateRoot(AppState, state, [
   'micMuted',
   'leftStage',
 ]);
-export {enterRoom, leaveRoom, leaveStage, dispatch as dispatchAppState};
 
 function AppState() {
   let inRoom = null;

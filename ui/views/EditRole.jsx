@@ -1,15 +1,20 @@
 import React from 'react';
-import {addRole, removeRole} from '../logic/room';
-import {addAdmin, removeAdmin, useIdentityAdminStatus} from '../logic/admin';
 import {currentId} from '../logic/identity';
 import {use} from 'use-minimal-state';
 import {openModal} from './Modal';
 import EditIdentity from './EditIdentity';
-import {useMqParser} from '../logic/tailwind-mqp';
+import {useMqParser} from '../lib/tailwind-mqp';
 import {ButtonContainer, SecondaryButton} from './Button';
 import StreamingModal from './StreamingModal';
 import {useStateObject} from './StateContext';
-import {leaveStage} from '../logic/main';
+import {
+  leaveStage,
+  addRole,
+  removeRole,
+  addAdmin,
+  removeAdmin,
+  useIdentityAdminStatus,
+} from '../logic/main';
 
 export default function EditRole({
   peerId,

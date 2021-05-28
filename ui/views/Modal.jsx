@@ -1,7 +1,7 @@
 import React from 'react';
 import {update, use} from 'use-minimal-state';
 import {useMemo} from '../lib/state-tree';
-import {useMediaQuery, useMqParser} from '../logic/tailwind-mqp';
+import {useMediaQuery, useMqParser} from '../lib/tailwind-mqp';
 
 const modals = [new Set()];
 

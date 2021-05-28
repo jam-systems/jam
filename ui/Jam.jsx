@@ -6,7 +6,7 @@ import state, {swarm} from './logic/state';
 import {mergeClasses} from './logic/util';
 import {debug, useSync} from './lib/state-utils';
 import {staticConfig} from './logic/config';
-import {useProvideWidth, WidthContext} from './logic/tailwind-mqp';
+import {useProvideWidth, WidthContext} from './lib/tailwind-mqp';
 import {set, use} from 'use-minimal-state';
 import Start from './views/Start';
 import Me from './views/Me';
