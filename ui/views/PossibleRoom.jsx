@@ -1,6 +1,11 @@
 import React, {createElement, useMemo} from 'react';
 import Room from './Room';
-import {useRoom, useCreateRoom, enterRoom, importRoomIdentity} from '../logic';
+import {
+  useRoom,
+  useCreateRoom,
+  enterRoom,
+  importRoomIdentity,
+} from '../jam-core';
 
 export default function PossibleRoom({
   roomId, // truthy

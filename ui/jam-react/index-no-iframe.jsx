@@ -1,5 +1,5 @@
 import {set} from 'use-minimal-state';
-import {staticConfig} from '../logic';
+import {staticConfig} from '../jam-core';
 import {debug} from '../lib/state-utils';
 import Jam from '../Jam';
 import css from '../css/main.css';

@@ -10,7 +10,7 @@ import PossibleRoom from './views/PossibleRoom';
 import {debugStateTree, declare, declareStateRoot} from './lib/state-tree';
 import {ShowAudioPlayerToast} from './views/AudioPlayerToast';
 import {ExistingStateProvider} from './views/StateContext';
-import {dispatch, jamState, swarm, staticConfig} from './logic';
+import {dispatch, jamState, swarm, staticConfig} from './jam-core';
 
 declareStateRoot(ShowModals, jamState);
 

@@ -13,7 +13,7 @@ import {
   addAdmin,
   removeAdmin,
   useIdentityAdminStatus,
-} from '../logic';
+} from '../jam-core';
 
 export default function EditRole({
   peerId,

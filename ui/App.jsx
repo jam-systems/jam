@@ -3,7 +3,7 @@ import {render} from 'react-dom';
 import {useLocation} from './lib/use-location';
 import Jam from './Jam';
 import {parsePath, parseUrlConfig} from './lib/url-utils';
-import {jamSetup} from './logic';
+import {jamSetup} from './jam-core';
 
 jamSetup({
   cachedRooms: window.existingRoomInfo && {
