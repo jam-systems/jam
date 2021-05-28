@@ -3,7 +3,7 @@ import {currentId} from './logic/identity';
 import {initializeIdentity} from './logic/backend';
 import Modals from './views/Modal';
 import state, {swarm} from './logic/state';
-import {mergeClasses} from './logic/util';
+import {mergeClasses} from './lib/util';
 import {debug, useSync} from './lib/state-utils';
 import {staticConfig} from './logic/config';
 import {useProvideWidth, WidthContext} from './lib/tailwind-mqp';

@@ -1,5 +1,5 @@
 import React from 'react';
-import {mergeClasses} from '../logic/util';
+import {mergeClasses} from '../lib/util';
 
 export function PrimaryButton({className, ...props}) {
   className = mergeClasses(

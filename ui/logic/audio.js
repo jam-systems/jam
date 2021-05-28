@@ -4,7 +4,7 @@ import state, {swarm} from './state';
 import {on, set, update} from 'use-minimal-state';
 import {currentId} from './identity';
 import log from '../lib/causal-log';
-import {domEvent} from './util';
+import {domEvent} from '../lib/util';
 import {openModal} from '../views/Modal';
 import InteractionModal from '../views/InteractionModal';
 import {until} from '../lib/state-utils';

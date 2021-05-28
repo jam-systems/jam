@@ -1,5 +1,5 @@
 import {is} from 'use-minimal-state';
-import {domEvent} from '../util';
+import {domEvent} from '../../lib/util';
 import {useUpdate, useRootState} from '../../lib/state-tree';
 
 export default function AudioFile() {
