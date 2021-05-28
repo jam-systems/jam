@@ -1,12 +1,11 @@
 import React, {useMemo, useState} from 'react';
-import {sendReaction, leaveRoom, actions} from '../jam-core';
+import {sendReaction, leaveRoom, retryMic} from '../jam-core';
 import {is, use} from 'use-minimal-state';
 import EditRole, {EditSelf} from './EditRole';
 import {breakpoints, useWidth} from '../lib/tailwind-mqp';
 import {openModal} from './Modal';
 import {InfoModal} from './InfoModal';
 import {MicOffSvg, MicOnSvg} from './Svg';
-import {dispatch} from '../lib/state-tree';
 import {useStateObject} from './StateContext';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
@@ -58,7 +57,7 @@ export default function Navigation({
     if (micOn) {
       is(state, 'micMuted', !micMuted);
     } else {
-      dispatch(state, actions.RETRY_MIC);
+      retryMic();
     }
   };
 

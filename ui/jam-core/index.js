@@ -27,15 +27,13 @@ export {
   leaveRoom,
   leaveStage,
   sendReaction,
-  dispatch,
+  retryMic,
 };
 export {addRole, removeRole, useRoom} from './room';
 export {addAdmin, removeAdmin, useIdentityAdminStatus} from './admin';
 export {updateInfo, importRoomIdentity} from './identity';
 export {createRoom, updateRoom, useCreateRoom} from './backend';
 export {usePushToTalk} from './hotkeys';
-export {staticConfig} from './config';
-export {actions} from './state';
 
 // TODO: this should be exposed as a function rather than happen at the top level
 const {state: jamState, dispatch} = declareStateRoot(
@@ -130,6 +128,10 @@ function leaveStage() {
 
 function sendReaction(reaction) {
   dispatch(actions.REACTION, reaction);
+}
+
+function retryMic() {
+  dispatch(actions.RETRY_MIC);
 }
 
 function jamSetup({jamConfig, cachedRooms}) {
