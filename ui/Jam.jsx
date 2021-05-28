@@ -1,6 +1,5 @@
 import React, {useEffect, useMemo} from 'react';
-import {currentId} from './logic/identity';
-import {initializeIdentity} from './logic/backend';
+import {currentId, initializeIdentity} from './logic/identity';
 import Modals from './views/Modal';
 import state, {swarm} from './logic/state';
 import {mergeClasses} from './lib/util';

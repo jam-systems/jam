@@ -4,6 +4,7 @@ import {set, use} from 'use-minimal-state';
 import {StoredState} from '../lib/local-storage';
 import {importLegacyIdentity} from '../lib/migrations';
 import {encode, decode} from '../lib/identity-utils';
+import {post, put} from './backend';
 
 export {
   Identity,
@@ -12,6 +13,7 @@ export {
   setCurrentIdentity,
   useCurrentIdentity,
   importRoomIdentity,
+  initializeIdentity,
 };
 
 const identities = StoredState('identities', () => {
@@ -25,6 +27,16 @@ function Identity() {
     let myId = myIdentity.publicKey;
     return {myId, myIdentity};
   };
+}
+
+async function initializeIdentity(state, roomId) {
+  const identity = roomId
+    ? identities[roomId] || identities['_default']
+    : identities['_default'];
+  return (
+    (await put(state, `/identities/${identity.publicKey}`, identity.info)) ||
+    (await post(state, `/identities/${identity.publicKey}`, identity.info))
+  );
 }
 
 const createIdentityFromSecretKey = (info, privatekeyBase64) => {

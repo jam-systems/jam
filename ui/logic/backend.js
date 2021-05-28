@@ -2,7 +2,6 @@ import {useCallback, useEffect, useState} from 'react';
 import {on} from 'use-minimal-state';
 import {use} from '../lib/state-tree';
 import {staticConfig} from './config';
-import {identities} from './identity';
 import {emptyRoom} from './room';
 import GetRequest, {populateCache} from './GetRequest';
 import {useStateObject} from '../views/StateContext';
@@ -123,18 +122,6 @@ export function useCreateRoom({
     }
   }, [room, roomId, isRoomLoading]);
   return [isLoading, isError];
-}
-
-// identity
-
-export async function initializeIdentity(state, roomId) {
-  const identity = roomId
-    ? identities[roomId] || identities['_default']
-    : identities['_default'];
-  return (
-    (await put(state, `/identities/${identity.publicKey}`, identity.info)) ||
-    (await post(state, `/identities/${identity.publicKey}`, identity.info))
-  );
 }
 
 export async function updateInfoServer(state, info) {

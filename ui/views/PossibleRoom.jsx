@@ -1,9 +1,10 @@
 import React, {createElement, useMemo} from 'react';
 import Room from './Room';
-import {initializeIdentity, useCreateRoom} from '../logic/backend';
+import {useCreateRoom} from '../logic/backend';
 import {useRoom} from '../logic/room';
-import {importRoomIdentity} from '../logic/identity';
+import {importRoomIdentity, initializeIdentity} from '../logic/identity';
 import {enterRoom} from '../logic/main';
+import {useStateObject} from './StateContext';
 
 export default function PossibleRoom({
   roomId, // truthy
@@ -12,6 +13,8 @@ export default function PossibleRoom({
   roomIdentityKeys,
   onError,
 }) {
+  const state = useStateObject();
+
   // fetch room
   let [room, isLoading] = useRoom(roomId);
 
@@ -20,7 +23,7 @@ export default function PossibleRoom({
   useMemo(() => {
     if (roomIdentity) {
       importRoomIdentity(roomId, roomIdentity, roomIdentityKeys);
-      initializeIdentity(roomId);
+      initializeIdentity(state, roomId);
     }
   }, [roomId, roomIdentity, roomIdentityKeys]);
 
