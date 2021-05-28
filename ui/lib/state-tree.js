@@ -10,6 +10,13 @@ import causalLog from './causal-log';
 // Component(props) = partial state
 
 /* TODOs:
+  - components could be able to register methods which can update their state
+    the root component should return these methods in their own object (not mixed with state)
+    this enables prettier APIs than ones driven by dispatch / set
+    declareMethods({name: function}) / declareAPI / useMethods
+    ideally throw error if two components try to register same method name...
+    + useRootMethods to get at all these methods
+
   - when batching component updates we have to enforce a strict order from top to bottom in hierarchy.
     if a child renders before a parent in a batched update, it can happen that the child misses an update to its props
     and renders (e.g. after an action) with wrong props.
