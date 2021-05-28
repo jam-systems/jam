@@ -1,7 +1,7 @@
 import state, {actions, swarm} from './state';
 import {currentId} from './identity';
 import {AudioState} from './audio';
-import './reactions';
+import {Reactions} from './reactions';
 import {RoomState} from './room';
 import {is, set} from 'use-minimal-state';
 import {
@@ -22,6 +22,7 @@ export {
   enterRoom,
   leaveRoom,
   leaveStage,
+  sendReaction,
   dispatch as dispatchAppState,
 };
 export {addRole, removeRole} from './room';
@@ -72,6 +73,8 @@ function AppState() {
       leftStage,
     });
 
+    declare(Reactions);
+
     userInteracted = userInteracted || !!inRoom;
     return merge(
       {userInteracted, inRoom, room, iAmSpeaker, iAmModerator, leftStage},
@@ -80,6 +83,11 @@ function AppState() {
   };
 }
 
+// TODO: these shouldn't have global access to `dispatch`
+// could have a function that returns the Jam API, e.g.
+// 1.) () => [state, {enterRoom, leaveRoom, ...}]
+// 2.) () => [state, dispatch] and only state/dispatch are used to call into Jam
+// I prefer 1., and to err on the side of passing around `state` to achieve most things (via set(state, ...), dispatch(state, ...))
 function enterRoom(roomId) {
   dispatch(actions.JOIN, roomId);
   // is(state, {roomId, inRoom: roomId});
@@ -94,8 +102,12 @@ function leaveStage() {
   dispatch(actions.LEAVE_STAGE);
 }
 
-function jamSetup({staticConfig: config, cachedRooms}) {
-  if (config) set(staticConfig, config);
+function sendReaction(reaction) {
+  dispatch(actions.REACTION, reaction);
+}
+
+function jamSetup({jamConfig, cachedRooms}) {
+  if (jamConfig) set(staticConfig, jamConfig);
   if (cachedRooms) {
     for (let roomId in cachedRooms) {
       populateCache(`/rooms/${roomId}`, cachedRooms[roomId]);
