@@ -10,7 +10,7 @@ import {useMqParser} from '../lib/tailwind-mqp';
 import Container from './Container';
 import Navigation from './Navigation';
 import {userAgent} from '../lib/user-agent';
-import {usePushToTalk, swarm} from '../logic/main';
+import {usePushToTalk, swarm} from '../logic';
 import {useStateObject} from './StateContext';
 
 const inWebView =

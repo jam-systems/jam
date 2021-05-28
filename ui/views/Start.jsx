@@ -2,7 +2,7 @@ import React, {useState, useMemo} from 'react';
 import slugify from 'slugify';
 
 import {navigate} from '../lib/use-location';
-import {enterRoom, createRoom} from '../logic/main';
+import {enterRoom, createRoom} from '../logic';
 import Container from './Container';
 import {useSetState, useStateObject} from './StateContext';
 

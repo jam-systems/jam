@@ -3,7 +3,7 @@ import {useMqParser} from '../lib/tailwind-mqp';
 import {Modal} from './Modal';
 import {rawTimeZones} from '@vvo/tzdb';
 import {useStateObject} from './StateContext';
-import {updateRoom} from '../logic/main';
+import {updateRoom} from '../logic';
 
 export function EditRoomModal({roomId, room, close}) {
   const state = useStateObject();

@@ -13,7 +13,7 @@ import {
   addAdmin,
   removeAdmin,
   useIdentityAdminStatus,
-} from '../logic/main';
+} from '../logic';
 
 export default function EditRole({
   peerId,

@@ -1,11 +1,6 @@
 import React, {createElement, useMemo} from 'react';
 import Room from './Room';
-import {
-  useRoom,
-  useCreateRoom,
-  enterRoom,
-  importRoomIdentity,
-} from '../logic/main';
+import {useRoom, useCreateRoom, enterRoom, importRoomIdentity} from '../logic';
 
 export default function PossibleRoom({
   roomId, // truthy
