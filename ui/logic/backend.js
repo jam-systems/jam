@@ -129,11 +129,3 @@ export function useCreateRoom({
   }, [room, roomId, isRoomLoading]);
   return [isLoading, isError];
 }
-
-export async function updateInfoServer(state, info) {
-  let {myId} = state;
-  return (
-    (await put(state, `/identities/${myId}`, info)) ||
-    (await post(state, `/identities/${myId}`, info))
-  );
-}

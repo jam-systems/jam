@@ -34,12 +34,9 @@ export function ConnectRoom({myId}) {
     }
   });
 
-  useOn(swarm.peerEvent, 'identity-update', async peerId => {
-    let [data, ok] = await get(`/identities/${peerId}`);
-    if (ok) {
-      state.identities[peerId] = data;
-      update(state, 'identities');
-    }
+  useOn(swarm.peerEvent, 'identity-update', (peerId, data) => {
+    state.identities[peerId] = data;
+    update(state, 'identities');
   });
 
   useOn(swarm.serverEvent, 'room-info', data => {

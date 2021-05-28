@@ -5,8 +5,10 @@ import {importLegacyIdentity} from '../lib/migrations';
 import {encode, decode} from '../lib/identity-utils';
 import {putOrPost} from './backend';
 import {use} from '../lib/state-tree';
+import {sendPeerEvent} from '../lib/swarm';
+import {swarm} from './state';
 
-export {Identity, setCurrentIdentity, importRoomIdentity};
+export {Identity, importRoomIdentity, updateInfo};
 
 const identities = StoredState('identities', () => {
   const _default = importLegacyIdentity() || createIdentity();
@@ -38,6 +40,18 @@ function postInitialIdentity(identity) {
     `/identities/${identity.publicKey}`,
     identity.info
   );
+}
+
+async function updateInfo(state, info) {
+  let {myIdentity, myId} = state;
+  info = {...myIdentity.info, ...info};
+  console.warn('posting', info);
+  let ok = await putOrPost(state, `/identities/${myId}`, info);
+  if (ok) {
+    setCurrentIdentity(state, i => ({...i, info}));
+    sendPeerEvent(swarm, 'identity-update', info);
+  }
+  return ok;
 }
 
 function setCurrentIdentity({roomId}, valueOrFunction) {

@@ -1,35 +1,15 @@
 import React, {useState} from 'react';
-import SparkMD5 from 'spark-md5';
-import {swarm} from '../logic/state';
 import {Modal} from './Modal';
-import {setCurrentIdentity} from '../logic/identity';
-import {updateInfoServer} from '../logic/backend';
+import {updateInfo} from '../logic/identity';
 import {useMqParser} from '../lib/tailwind-mqp';
-import {sendPeerEvent} from '../lib/swarm';
 import {useStateObject} from './StateContext';
 import {use} from 'use-minimal-state';
 
-async function updateInfo(state, info) {
-  if (info.identities) {
-    let twitterIdentity = info?.identities?.find(i => i.type === 'twitter');
-    if (twitterIdentity && twitterIdentity.id) {
-      // console.log(twitterIdentity)
-      let twitterHandle = twitterIdentity.id;
-      if (twitterHandle.includes('/')) {
-        twitterHandle = twitterHandle.split('/').pop();
-      }
-      twitterHandle = twitterHandle.replace(/[^0-9a-z-A-Z_]/g, '');
-      twitterIdentity.id = twitterHandle;
-    }
-  }
-  let identity = state.myIdentity;
-  let newInfo = {...identity.info, ...info};
-  let ok = await updateInfoServer(state, newInfo);
-  if (ok) {
-    setCurrentIdentity(state, i => ({...i, info: newInfo}));
-    sendPeerEvent(swarm, 'identity-update');
-  }
-  return ok;
+function addTwitter(identities, handle, tweet) {
+  if (!handle) return;
+  if (handle.includes('/')) handle = handle.split('/').pop();
+  handle = handle.replace(/[^0-9a-z-A-Z_]/g, '');
+  identities.push({type: 'twitter', id: handle, verificationInfo: tweet});
 }
 
 export default function EditIdentity({close}) {
@@ -37,31 +17,20 @@ export default function EditIdentity({close}) {
   let [id, myIdentity] = use(state, ['myId', 'myIdentity']);
   let mqp = useMqParser();
   let info = myIdentity?.info;
-  let [displayName, setDisplayName] = useState(info?.displayName);
-  let [email, setEmail] = useState(info?.email);
+  let [name, setName] = useState(info?.name ?? info?.displayName);
   let twitterIdentity = info?.identities?.find(i => i.type === 'twitter');
   let [twitter, setTwitter] = useState(twitterIdentity?.id);
   let [tweetInput, setTweetInput] = useState(twitterIdentity?.verificationInfo);
 
   let tweet = twitterIdentity?.verificationInfo;
 
-  let emailHash = email ? SparkMD5.hash(email) : info?.emailHash;
-
   const [showTwitterVerify, setShowTwitterVerify] = useState(false);
-
-  // console.log(twitterIdentity);
 
   let submit = async e => {
     e.preventDefault();
-    let tweet = tweetInput;
 
-    let identities = [
-      {
-        type: 'twitter',
-        id: twitter,
-        verificationInfo: tweet,
-      },
-    ];
+    let identities = [];
+    addTwitter(identities, twitter, tweetInput);
 
     let selectedFile = document.querySelector('.edit-profile-file-input')
       .files[0];
@@ -72,16 +41,11 @@ export default function EditIdentity({close}) {
       reader.onloadend = async () => {
         e.preventDefault();
         let avatar = reader.result;
-        let ok = await updateInfo({
-          displayName,
-          emailHash,
-          avatar,
-          identities,
-        });
+        let ok = await updateInfo(state, {name, avatar, identities});
         if (ok) close();
       };
     } else {
-      let ok = await updateInfo(state, {displayName, identities, emailHash});
+      let ok = await updateInfo(state, {name, identities});
       if (ok) close();
     }
   };
@@ -98,10 +62,10 @@ export default function EditIdentity({close}) {
           className="rounded placeholder-gray-400 bg-gray-50 w-48"
           type="text"
           placeholder="Display name"
-          value={displayName || ''}
+          value={name ?? ''}
           name="display-name"
           onChange={e => {
-            setDisplayName(e.target.value);
+            setName(e.target.value);
           }}
         />
         <div className="p-2 text-gray-500 italic">
@@ -123,7 +87,7 @@ export default function EditIdentity({close}) {
           className="rounded placeholder-gray-400 bg-gray-50 w-48"
           type="text"
           placeholder="@twitter"
-          value={twitter || ''}
+          value={twitter ?? ''}
           name="twitter"
           onChange={e => {
             setTwitter(e.target.value);
@@ -206,7 +170,7 @@ export default function EditIdentity({close}) {
             type="text"
             placeholder="Tweet URL"
             name="tweet"
-            value={tweetInput}
+            value={tweetInput ?? ''}
             onChange={e => setTweetInput(e.target.value)}
           />
         </div>
@@ -214,22 +178,6 @@ export default function EditIdentity({close}) {
         <br />
         <hr />
         <br />
-        <div className="hidden">
-          <input
-            className="rounded placeholder-gray-400 bg-gray-50 w-72"
-            type="email"
-            placeholder="email@example.com"
-            value={email || ''}
-            name="email"
-            onChange={e => {
-              setEmail(e.target.value);
-            }}
-          />
-          <div className="p-2 text-gray-500 italic">
-            {`What's your email?`}
-            <span className="text-gray-300"> (used for Gravatar)</span>
-          </div>
-        </div>
         <div className="flex">
           <button
             onClick={submit}
