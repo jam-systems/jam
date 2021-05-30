@@ -11,6 +11,7 @@ import {debugStateTree, declare, declareStateRoot} from './lib/state-tree';
 import {ShowAudioPlayerToast} from './views/AudioPlayerToast';
 import {ExistingStateProvider} from './views/StateContext';
 import {jamState} from './jam-core';
+import {ShowInteractionModal} from './views/InteractionModal';
 
 declareStateRoot(ShowModals, jamState);
 
@@ -110,4 +111,5 @@ function hexToRGB(hex, alpha) {
 
 function ShowModals() {
   declare(ShowAudioPlayerToast);
+  declare(ShowInteractionModal);
 }

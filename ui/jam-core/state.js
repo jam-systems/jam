@@ -20,6 +20,7 @@ const defaultState = {
   audioFile: null,
   audioFileElement: null,
   myAudio: null,
+  audioPlayError: false,
 
   speaking: new Set(),
   audioContext: null,

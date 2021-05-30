@@ -3,35 +3,25 @@ import hark from '../lib/hark';
 import {set, update} from 'use-minimal-state';
 import log from '../lib/causal-log';
 import {domEvent} from '../lib/util';
-import {openModal} from '../views/Modal';
-import InteractionModal from '../views/InteractionModal';
 import {until} from '../lib/state-utils';
 import {useState, declare, use, useRootState, useOn} from '../lib/state-tree';
 import {userAgent} from '../lib/user-agent';
 import Microphone from './audio/Microphone';
 import AudioFile from './audio/AudioFile';
+const AudioContext = window.AudioContext || window.webkitAudioContext;
 
 export {AudioState};
 
 function AudioState({swarm}) {
   const state = useRootState();
   const audios = {}; // {peerId: HTMLAudioElement}
-
-  useOn(state, 'userInteracted', i => i && createAudioContext());
-  function createAudioContext() {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (AudioContext && !state.audioContext) {
-      set(state, 'audioContext', new AudioContext());
-    } //  else {
-    //   state.audioContext.resume();
-    // }
-  }
+  let audioContext = null;
 
   useOn(state, 'soundMuted', muted => {
     for (let peerId in audios) {
       let audio = audios[peerId];
       audio.muted = muted;
-      if (!muted && audio.paused) playOrShowModal(peerId, audio);
+      if (!muted && audio.paused) playOrSetError(peerId, audio);
     }
   });
 
@@ -47,7 +37,8 @@ function AudioState({swarm}) {
     audio.removeAttribute('srcObject');
     audio.load(); // this can cause a previous play() to reject
     audio.srcObject = stream;
-    if (state.inRoom) playOrShowModal(peerId, audio);
+    if (state.inRoom) playOrSetError(peerId, audio);
+    // playOrSetError(peerId, audio);
   });
 
   function getAudio(peerId) {
@@ -59,47 +50,44 @@ function AudioState({swarm}) {
     return audios[peerId];
   }
 
-  function onConfirmModal() {
-    for (let peerId in audios) {
-      let audio = audios[peerId];
-      if (audio.paused) play(audio).catch(console.warn);
+  useOn(state, 'dispatch', type => {
+    if (type === 'retry-audio-play') {
+      for (let peerId in audios) {
+        let audio = audios[peerId];
+        if (audio.paused) play(audio).catch(console.warn);
+      }
     }
-  }
+  });
 
-  // FIXME: opening modals from state routines breaks UI / state separation
-  function playOrShowModal(peerId, audio) {
+  function playOrSetError(peerId, audio) {
     let stream = audio.srcObject;
     return play(audio).catch(err => {
       let currentStream = swarm.remoteStreams.find(s => s.peerId === peerId)
         ?.stream;
       if (stream !== currentStream) {
         // call to play() was for a an older stream, error caused by racing new stream
-        // => all good, don't show modal!
+        // => all good, don't set error!
         return;
       }
       console.warn(err);
       if (state.inRoom) {
-        openModal(InteractionModal, {submit: onConfirmModal}, 'interaction');
+        set(state, 'audioPlayError', true);
       }
     });
   }
 
-  return function AudioState({inRoom}) {
-    let [
-      myId,
-      iAmSpeaker,
-      handRaised,
-      audioContext,
-      micMuted,
-      audioFile,
-    ] = useRootState([
+  return function AudioState({inRoom, userInteracted}) {
+    let [myId, iAmSpeaker, handRaised, micMuted, audioFile] = useRootState([
       'myId',
       'iAmSpeaker',
       'handRaised',
-      'audioContext',
       'micMuted',
       'audioFile',
     ]);
+
+    if (userInteracted && audioContext === null && AudioContext) {
+      audioContext = new AudioContext();
+    }
 
     let shouldHaveMic = !!(inRoom && (iAmSpeaker || handRaised));
     let {micStream, hasRequestedOnce} = use(Microphone, {shouldHaveMic});
@@ -113,7 +101,7 @@ function AudioState({swarm}) {
     declare(ConnectMyAudio, {myAudio, iAmSpeaker, myId, swarm});
     let soundMuted = inRoom ? iAmSpeaker && !hasRequestedOnce : true;
 
-    return {myAudio, soundMuted, audioFileElement};
+    return {myAudio, soundMuted, audioFileElement, audioContext};
   };
 }
 
