@@ -1,4 +1,4 @@
-import {on, update} from 'use-minimal-state';
+import {on, update} from 'minimal-state';
 import {use} from '../lib/state-tree';
 import {staticConfig} from './config';
 

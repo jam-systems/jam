@@ -1,4 +1,4 @@
-import {is} from 'use-minimal-state';
+import {is} from 'minimal-state';
 import log from '../../lib/causal-log';
 import {domEvent} from '../../lib/util';
 import {useDidChange} from '../../lib/state-utils';

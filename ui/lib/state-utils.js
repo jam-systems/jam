@@ -1,9 +1,8 @@
-import {useEffect} from 'react';
-import {is, on} from 'use-minimal-state';
+import {on} from 'minimal-state';
 import log from '../lib/causal-log';
 import {useState} from './state-tree';
 
-export {until, useSync, debug, useDidChange, useDidEverChange};
+export {until, debug, useDidChange, useDidEverChange};
 
 async function until(state, key, condition) {
   let value = state[key];
@@ -41,13 +40,6 @@ function useDidEverChange(value, initial) {
   } else {
     return [false, hasChanged];
   }
-}
-
-async function useSync(...args) {
-  let deps = args.pop();
-  useEffect(() => {
-    is(...args);
-  }, deps);
 }
 
 function debug(state) {

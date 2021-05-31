@@ -3,7 +3,7 @@ import {defaultState, actions} from './state';
 import {AudioState} from './audio';
 import {Reactions} from './reactions';
 import {RoomState} from './room';
-import {is, set} from 'use-minimal-state';
+import {is, set} from 'minimal-state';
 import {
   declare,
   declareStateRoot,

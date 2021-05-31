@@ -1,4 +1,4 @@
-import {set} from 'use-minimal-state';
+import {set} from 'minimal-state';
 import {useEffect} from 'react';
 import {useJamState} from './JamContext';
 

@@ -1,4 +1,4 @@
-import {on, pure, set} from 'use-minimal-state';
+import {on, pure, set} from 'minimal-state';
 
 export function StoredState(name, initialize = () => ({})) {
   let state = getStorage(localStorage, name);

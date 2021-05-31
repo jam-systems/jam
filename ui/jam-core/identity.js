@@ -1,5 +1,5 @@
 import nacl from 'tweetnacl';
-import {set} from 'use-minimal-state';
+import {set} from 'minimal-state';
 import {StoredState} from '../lib/local-storage';
 import {importLegacyIdentity, migrateDisplayName} from '../lib/migrations';
 import {encode, decode} from '../lib/identity-utils';

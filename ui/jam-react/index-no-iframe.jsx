@@ -1,4 +1,4 @@
-import {set} from 'use-minimal-state';
+import {set} from 'minimal-state';
 import {staticConfig} from '../jam-core/config';
 import {debug} from '../lib/state-utils';
 import Jam from '../Jam';

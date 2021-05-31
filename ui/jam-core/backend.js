@@ -1,4 +1,4 @@
-import {on} from 'use-minimal-state';
+import {on} from 'minimal-state';
 import {staticConfig} from './config';
 import {emptyRoom} from './room';
 import {populateCache} from './GetRequest';

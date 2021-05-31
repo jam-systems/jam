@@ -1,4 +1,4 @@
-import {update} from 'use-minimal-state';
+import {update} from 'minimal-state';
 import {useAction, useOn, useRootState} from '../lib/state-tree';
 import {sendPeerEvent} from '../lib/swarm';
 import {actions} from './state';

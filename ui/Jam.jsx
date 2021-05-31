@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo} from 'react';
 import Modals from './views/Modal';
 import {mergeClasses} from './lib/util';
-import {debug, useSync} from './lib/state-utils';
+import {debug} from './lib/state-utils';
 import {useProvideWidth, WidthContext} from './lib/tailwind-mqp';
 import {use} from 'use-minimal-state';
 import Start from './views/Start';
@@ -12,6 +12,7 @@ import {ShowAudioPlayerToast} from './views/AudioPlayerToast';
 import {ExistingStateProvider, useJamState} from './jam-core-react';
 import {jamSetup, createJamState} from './jam-core';
 import {ShowInteractionModal} from './views/InteractionModal';
+import {useSync} from './lib/state-utils-react';
 
 jamSetup({
   cachedRooms: window.existingRoomInfo && {
@@ -32,7 +33,7 @@ export default function Jam(props) {
 }
 
 function JamUI({style, className, route = null, dynamicConfig = {}, ...props}) {
-  const jamState = useJamState();
+  const state = useJamState();
 
   let roomId = null;
 
@@ -59,18 +60,18 @@ function JamUI({style, className, route = null, dynamicConfig = {}, ...props}) {
     }
   })();
   // set/unset room id
-  useSync(jamState, {roomId}, [roomId]);
+  useSync(state, {roomId}, [roomId]);
 
   // toggle debugging
   useEffect(() => {
     if (dynamicConfig.debug) {
       window.DEBUG = true;
-      debug(jamState.swarm);
+      debug(state.swarm);
     }
     if (dynamicConfig.debug || window.jamConfig?.development) {
-      window.swarm = jamState.swarm;
-      window.state = jamState;
-      debug(jamState);
+      window.swarm = state.swarm;
+      window.state = state;
+      debug(state);
       debugStateTree();
     }
   }, [dynamicConfig.debug]);
@@ -79,7 +80,7 @@ function JamUI({style, className, route = null, dynamicConfig = {}, ...props}) {
   // TODO: the color should depend on the loading state of GET /room, to not flash orange before being in the room
   // => color should be only set here if the route is not a room id, otherwise <PossibleRoom> should set it
   // => pass a setColor prop to PossibleRoom
-  let {color} = use(jamState, 'room');
+  let {color} = use(state, 'room');
   let [width, , setContainer, mqp] = useProvideWidth();
   let backgroundColor = useMemo(
     () => (color && color !== '#4B5563' ? hexToRGB(color, '0.123') : undefined),

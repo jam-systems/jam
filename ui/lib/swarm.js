@@ -1,4 +1,4 @@
-import {emit, on, is, clear, set, update} from 'use-minimal-state';
+import {emit, on, is, clear, set, update} from 'minimal-state';
 import signalws from './signalws';
 import {
   checkWsHealth,

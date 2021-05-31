@@ -1,4 +1,4 @@
-import {emit, update} from 'use-minimal-state';
+import {emit, update} from 'minimal-state';
 
 export {updatePeerState, removePeerState};
 

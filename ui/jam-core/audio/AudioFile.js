@@ -1,4 +1,4 @@
-import {is} from 'use-minimal-state';
+import {is} from 'minimal-state';
 import {domEvent} from '../../lib/util';
 import {useUpdate, useRootState} from '../../lib/state-tree';
 

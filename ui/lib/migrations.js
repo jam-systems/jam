@@ -1,5 +1,5 @@
 import {getStorage} from './local-storage';
-import {set, update} from 'use-minimal-state';
+import {set, update} from 'minimal-state';
 
 export {importLegacyIdentity, migrateDisplayName};
 

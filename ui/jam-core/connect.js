@@ -1,4 +1,4 @@
-import {is, update} from 'use-minimal-state';
+import {is, update} from 'minimal-state';
 import log from '../lib/causal-log';
 import {signData, verifyData} from '../lib/identity-utils';
 import {dispatch, useOn, useRootState} from '../lib/state-tree';
