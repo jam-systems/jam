@@ -1,4 +1,4 @@
-import {on, update, clear, emit} from 'use-minimal-state';
+import {on, update, clear, emit} from 'minimal-state';
 import {useRootState, useUnmount} from '../../lib/state-tree';
 
 export default function VolumeMeter() {

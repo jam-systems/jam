@@ -22,10 +22,10 @@ import causalLog from './causal-log';
 
   - enable more Component return values
   - use a dedicated class for Fragment for efficiency
+
   - core lib should not depend on React, be usable everywhere
      => split out useStateComponent() & overloaded use()
-     => minimal-state instead of use-minimal-state => use-minimal-state has to *import* minimal-state
-        so they share the event book-keeping (otherwise useExternalState wouldn't work)
+     => minimal-state instead of use-minimal-state
 
   - add more API for using state-tree inside React components, i.e.
     * useStateRoot(Component, props) which is like declareStateRoot & updates React component w/ state
