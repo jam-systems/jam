@@ -102,7 +102,7 @@ function AppState() {
         myId,
         myIdentity,
       },
-      declare(AudioState, {inRoom, swarm, userInteracted})
+      declare(AudioState, {myId, inRoom, iAmSpeaker, swarm, userInteracted})
     );
   };
 }
