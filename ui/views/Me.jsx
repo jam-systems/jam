@@ -1,7 +1,7 @@
 import React from 'react';
 import {use} from 'use-minimal-state';
 import Container from './Container';
-import {useStateObject} from './StateContext';
+import {useStateObject} from '../jam-core-react';
 
 export default function Me() {
   const state = useStateObject();

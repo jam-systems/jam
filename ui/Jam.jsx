@@ -9,19 +9,31 @@ import Me from './views/Me';
 import PossibleRoom from './views/PossibleRoom';
 import {debugStateTree, declare, declareStateRoot} from './lib/state-tree';
 import {ShowAudioPlayerToast} from './views/AudioPlayerToast';
-import {ExistingStateProvider} from './views/StateContext';
-import {jamState} from './jam-core';
+import {ExistingStateProvider, useStateObject} from './jam-core-react';
+import {jamSetup, createJamState} from './jam-core';
 import {ShowInteractionModal} from './views/InteractionModal';
+
+jamSetup({
+  cachedRooms: window.existingRoomInfo && {
+    [window.existingRoomId]: window.existingRoomInfo,
+  },
+});
+
+const [jamState, jamApi] = createJamState();
 
 declareStateRoot(ShowModals, jamState);
 
-export default function Jam({
-  style,
-  className,
-  route = null,
-  dynamicConfig = {},
-  ...props
-}) {
+export default function Jam(props) {
+  return (
+    <ExistingStateProvider state={jamState} api={jamApi}>
+      <JamUI {...props} />
+    </ExistingStateProvider>
+  );
+}
+
+function JamUI({style, className, route = null, dynamicConfig = {}, ...props}) {
+  const jamState = useStateObject();
+
   let roomId = null;
 
   // routing
@@ -87,12 +99,10 @@ export default function Jam({
       }}
       {...props}
     >
-      <ExistingStateProvider state={jamState}>
-        <WidthContext.Provider value={width}>
-          {View}
-          <Modals />
-        </WidthContext.Provider>
-      </ExistingStateProvider>
+      <WidthContext.Provider value={width}>
+        {View}
+        <Modals />
+      </WidthContext.Provider>
     </div>
   );
 }

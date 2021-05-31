@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {useMqParser} from '../lib/tailwind-mqp';
 import {Modal} from './Modal';
 import {rawTimeZones} from '@vvo/tzdb';
-import {useStateObject} from './StateContext';
+import {useStateObject} from '../jam-core-react';
 import {updateRoom} from '../jam-core';
 
 export function EditRoomModal({roomId, room, close}) {

@@ -11,7 +11,7 @@ import Container from './Container';
 import Navigation from './Navigation';
 import {userAgent} from '../lib/user-agent';
 import {usePushToTalk} from '../jam-core-react';
-import {useStateObject} from './StateContext';
+import {useStateObject} from '../jam-core-react';
 
 const inWebView =
   userAgent.browser?.name !== 'JamWebView' &&

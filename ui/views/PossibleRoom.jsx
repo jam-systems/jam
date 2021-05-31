@@ -1,7 +1,7 @@
 import React, {createElement, useMemo} from 'react';
 import Room from './Room';
-import {enterRoom, importRoomIdentity} from '../jam-core';
-import {useCreateRoom, useRoom} from '../jam-core-react';
+import {importRoomIdentity} from '../jam-core';
+import {useCreateRoom, useJam, useRoom} from '../jam-core-react';
 
 export default function PossibleRoom({
   roomId, // truthy
@@ -10,6 +10,8 @@ export default function PossibleRoom({
   roomIdentityKeys,
   onError,
 }) {
+  let [, {enterRoom}] = useJam();
+
   // fetch room
   let [room, isLoading] = useRoom(roomId);
 

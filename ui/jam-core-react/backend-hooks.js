@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useState} from 'react';
 import {use} from '../lib/state-tree-react';
-import {useStateObject} from '../views/StateContext';
+import {useStateObject} from './JamContext';
 import {signedToken} from '../lib/identity-utils';
 import {GetRequest, createRoom} from '../jam-core';
 

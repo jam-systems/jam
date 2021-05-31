@@ -2,12 +2,12 @@ import React, {useState, useMemo} from 'react';
 import slugify from 'slugify';
 
 import {navigate} from '../lib/use-location';
-import {enterRoom, createRoom} from '../jam-core';
+import {createRoom} from '../jam-core';
 import Container from './Container';
-import {useSetState, useStateObject} from './StateContext';
+import {useJam, useSetState} from '../jam-core-react';
 
 export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
-  const state = useStateObject();
+  const [state, {enterRoom}] = useJam();
 
   // note: setters are currently unused because form is hidden
   let [name, setName] = useState(newRoom.name ?? '');

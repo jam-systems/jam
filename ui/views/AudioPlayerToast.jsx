@@ -2,7 +2,7 @@ import {is, use} from 'use-minimal-state';
 import React, {useEffect, useState} from 'react';
 import {CloseSvg, ShowModal} from './Modal';
 import {declare, useRootState} from '../lib/state-tree';
-import {useStateObject} from './StateContext';
+import {useStateObject} from '../jam-core-react';
 
 export function ShowAudioPlayerToast() {
   let audioFileElement = useRootState('audioFileElement');

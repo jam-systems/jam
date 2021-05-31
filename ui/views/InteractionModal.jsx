@@ -2,7 +2,7 @@ import React from 'react';
 import {Modal, ShowModal} from './Modal';
 import {PrimaryButton} from './Button';
 import {useRootState, declare, dispatch} from '../lib/state-tree';
-import {useStateObject} from './StateContext';
+import {useStateObject} from '../jam-core-react';
 import {set} from 'use-minimal-state';
 
 export function ShowInteractionModal() {

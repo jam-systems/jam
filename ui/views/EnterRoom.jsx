@@ -1,10 +1,9 @@
 import React from 'react';
 import {use} from 'use-minimal-state';
-import {enterRoom} from '../jam-core';
 import {useMqParser} from '../lib/tailwind-mqp';
 import Container from './Container';
 import RoomHeader from './RoomHeader';
-import {useStateObject} from './StateContext';
+import {useJam} from '../jam-core-react';
 
 const iOS =
   /^iP/.test(navigator.platform) ||
@@ -22,7 +21,7 @@ export default function EnterRoom({
   buttonText,
   logoURI,
 }) {
-  const state = useStateObject();
+  const [state, {enterRoom}] = useJam();
   let mqp = useMqParser();
   let otherDevice = use(state, 'otherDeviceInRoom');
   return (

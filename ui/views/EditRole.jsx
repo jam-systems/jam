@@ -5,14 +5,8 @@ import EditIdentity from './EditIdentity';
 import {useMqParser} from '../lib/tailwind-mqp';
 import {ButtonContainer, SecondaryButton} from './Button';
 import StreamingModal from './StreamingModal';
-import {useStateObject} from './StateContext';
-import {
-  leaveStage,
-  addRole,
-  removeRole,
-  addAdmin,
-  removeAdmin,
-} from '../jam-core';
+import {useJam, useStateObject} from '../jam-core-react';
+import {addRole, removeRole, addAdmin, removeAdmin} from '../jam-core';
 import {useIdentityAdminStatus} from '../jam-core-react';
 
 export default function EditRole({
@@ -110,7 +104,7 @@ export default function EditRole({
 }
 
 export function EditSelf({onCancel}) {
-  const state = useStateObject();
+  const [state, {leaveStage}] = useJam();
   let mqp = useMqParser();
   let [iSpeak, iModerate, room, myId] = use(state, [
     'iAmSpeaker',
