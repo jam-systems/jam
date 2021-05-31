@@ -1,5 +1,4 @@
-import React from 'react';
-import {is, on, emit, clear, use as useMinimalState} from 'use-minimal-state';
+import {is, on, emit, clear} from 'minimal-state';
 import causalLog from './causal-log';
 
 // a kind of "React for app state"
@@ -22,16 +21,6 @@ import causalLog from './causal-log';
 
   - enable more Component return values
   - use a dedicated class for Fragment for efficiency
-
-  - core lib should not depend on React, be usable everywhere
-     => split out useStateComponent() & overloaded use()
-     => minimal-state instead of use-minimal-state
-
-  - add more API for using state-tree inside React components, i.e.
-    * useStateRoot(Component, props) which is like declareStateRoot & updates React component w/ state
-    * something like declare() for self-contained effects which can take props but don't return anything
-    * check whether declare / use could work w/ changing components, this works in state-tree but not in React bc
-      we fix reference to fragment
 
   - improve actions/events as component input:
     * enable any component tree to handle actions, not just the declareRootState variant
@@ -81,6 +70,9 @@ export {
   debugStateTree,
 };
 
+// INTERNAL exports for state-tree-react
+export {root, _run, log, cleanup};
+
 const root = {children: []};
 let current = root;
 let renderRoot = null;
@@ -100,19 +92,8 @@ function declare(Component, props, stableProps) {
   return newElement.fragment;
 }
 
-// this works equivalently in React & state-tree components
 function use(Component, props, stableProps) {
   let isComponent = typeof Component === 'function';
-  if (current === root) {
-    // we are not in a state component => assume inside React component
-    if (isComponent) {
-      // eslint-disable-next-line
-      return useStateComponent(Component, props, stableProps);
-    } else {
-      // eslint-disable-next-line
-      return useMinimalState(Component, props);
-    }
-  }
   if (!isComponent) {
     // eslint-disable-next-line
     return useExternalState(Component, props);
@@ -474,46 +455,6 @@ function unsubscribeAll(subscriptions, element) {
       subscriptions.delete(key);
     }
   }
-}
-
-// TODO: investigate whether the Component can be made changeable
-
-function useStateComponent(Component, props, stableProps) {
-  // a stable object which we use as render key and to store mutable state
-  let [stable] = React.useState({
-    shouldRun: true,
-    element: null,
-    component: Component,
-  });
-  if (props) props.key = stable;
-  else props = {key: stable};
-
-  if (stable.shouldRun) {
-    let {component} = stable;
-    let element = root.children.find(
-      c => c.component === component && c.key === stable
-    );
-    [element] = _run(component, props, {element, stableProps});
-    stable.element = element;
-  }
-  stable.shouldRun = true;
-
-  let [, forceUpdate] = React.useState(0);
-
-  React.useEffect(() => {
-    let {element} = stable;
-    on(element.fragment, () => {
-      log('STATE-TREE React update', stable.component.name);
-      stable.shouldRun = false;
-      forceUpdate(n => n + 1);
-    });
-    return () => {
-      cleanup(element);
-      let i = root.children.indexOf(element);
-      if (i !== -1) root.children.splice(i, 1);
-    };
-  }, [stable]);
-  return stable.element.fragment[0];
 }
 
 // TODO maybe more efficient to memo the next 2-3 hooks, like useState (not sure though)

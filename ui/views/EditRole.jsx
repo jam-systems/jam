@@ -12,8 +12,8 @@ import {
   removeRole,
   addAdmin,
   removeAdmin,
-  useIdentityAdminStatus,
 } from '../jam-core';
+import {useIdentityAdminStatus} from '../jam-core-react';
 
 export default function EditRole({
   peerId,

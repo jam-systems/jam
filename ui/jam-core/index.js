@@ -29,11 +29,11 @@ export {
   sendReaction,
   retryMic,
 };
-export {addRole, removeRole, useRoom} from './room';
-export {addAdmin, removeAdmin, useIdentityAdminStatus} from './admin';
+export {addRole, removeRole} from './room';
+export {addAdmin, removeAdmin} from './admin';
 export {updateInfo, importRoomIdentity} from './identity';
-export {createRoom, updateRoom, useCreateRoom} from './backend';
-export {usePushToTalk} from './hotkeys';
+export {createRoom, updateRoom} from './backend';
+export {default as GetRequest} from './GetRequest';
 
 // TODO: this should be exposed as a function rather than happen at the top level
 const {state: jamState, dispatch} = declareStateRoot(

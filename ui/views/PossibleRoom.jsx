@@ -1,11 +1,7 @@
 import React, {createElement, useMemo} from 'react';
 import Room from './Room';
-import {
-  useRoom,
-  useCreateRoom,
-  enterRoom,
-  importRoomIdentity,
-} from '../jam-core';
+import {enterRoom, importRoomIdentity} from '../jam-core';
+import {useCreateRoom, useRoom} from '../jam-core-react';
 
 export default function PossibleRoom({
   roomId, // truthy

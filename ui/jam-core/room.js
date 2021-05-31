@@ -4,7 +4,7 @@ import {staticConfig} from './config';
 import {use, useOn, useRootState} from '../lib/state-tree';
 import GetRequest, {populateCache} from './GetRequest';
 
-export {useRoom, RoomState, addRole, removeRole, emptyRoom};
+export {RoomState, addRole, removeRole, emptyRoom};
 
 function RoomState({swarm}) {
   const state = useRootState();
@@ -34,12 +34,6 @@ function RoomState({swarm}) {
 
     return {room, hasRoom, iAmSpeaker, iAmModerator};
   };
-}
-
-function useRoom(roomId) {
-  const path = roomId && `/rooms/${roomId}`;
-  let {data, isLoading, status} = use(GetRequest, {path});
-  return [data, isLoading, status];
 }
 
 const emptyRoom = {

@@ -1,8 +1,4 @@
-import {post, deleteRequest, useApiQuery} from './backend';
-
-export const useIdentityAdminStatus = id => {
-  return useApiQuery(`/admin/${id}`, {fetchOnMount: true});
-};
+import {post, deleteRequest} from './backend';
 
 export const addAdmin = async (state, id) => {
   await post(state, `/admin/${id}`, {});
