@@ -9,7 +9,7 @@ import Me from './views/Me';
 import PossibleRoom from './views/PossibleRoom';
 import {debugStateTree, declare, declareStateRoot} from './lib/state-tree';
 import {ShowAudioPlayerToast} from './views/AudioPlayerToast';
-import {ExistingStateProvider, useStateObject} from './jam-core-react';
+import {ExistingStateProvider, useJamState} from './jam-core-react';
 import {jamSetup, createJamState} from './jam-core';
 import {ShowInteractionModal} from './views/InteractionModal';
 
@@ -32,7 +32,7 @@ export default function Jam(props) {
 }
 
 function JamUI({style, className, route = null, dynamicConfig = {}, ...props}) {
-  const jamState = useStateObject();
+  const jamState = useJamState();
 
   let roomId = null;
 

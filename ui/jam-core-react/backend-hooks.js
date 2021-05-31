@@ -1,13 +1,13 @@
 import {useCallback, useEffect, useState} from 'react';
 import {use} from '../lib/state-tree-react';
-import {useStateObject} from './JamContext';
+import {useJamState} from './JamContext';
 import {signedToken} from '../lib/identity-utils';
 import {GetRequest, createRoom} from '../jam-core';
 
 export {useApiQuery, useCreateRoom, useRoom, useIdentityAdminStatus};
 
 function useApiQuery(path, {dontFetch = false, fetchOnMount = false}) {
-  const state = useStateObject();
+  const state = useJamState();
   const getToken = useCallback(() => signedToken(state.myIdentity), []);
   let {data, isLoading, status} = use(GetRequest, {
     path,
@@ -25,7 +25,7 @@ function useCreateRoom({
   newRoom,
   onSuccess,
 }) {
-  const state = useStateObject();
+  const state = useJamState();
   let [isError, setError] = useState(false);
   let [isLoading, setLoading] = useState(true);
   useEffect(() => {

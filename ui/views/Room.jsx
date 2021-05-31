@@ -10,8 +10,7 @@ import {useMqParser} from '../lib/tailwind-mqp';
 import Container from './Container';
 import Navigation from './Navigation';
 import {userAgent} from '../lib/user-agent';
-import {usePushToTalk} from '../jam-core-react';
-import {useStateObject} from '../jam-core-react';
+import {usePushToTalk, useJamState} from '../jam-core-react';
 
 const inWebView =
   userAgent.browser?.name !== 'JamWebView' &&
@@ -20,11 +19,10 @@ const inWebView =
       userAgent.browser?.name !== 'Mobile Safari'));
 
 export default function Room({room, roomId}) {
-  const state = useStateObject();
-
   // room = {name, description, moderators: [peerId], speakers: [peerId]}
+  const state = useJamState();
   useWakeLock();
-  usePushToTalk(state);
+  usePushToTalk();
 
   let [
     reactions,

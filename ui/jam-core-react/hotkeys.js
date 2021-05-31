@@ -1,8 +1,10 @@
 import {set} from 'use-minimal-state';
 import {useEffect} from 'react';
+import {useJamState} from './JamContext';
 
 // unmute on space bar if currently muted
-export function usePushToTalk(state) {
+export function usePushToTalk() {
+  const state = useJamState();
   useEffect(() => {
     let keys = [' ', 'Spacebar'];
     let isPressingKey = false;

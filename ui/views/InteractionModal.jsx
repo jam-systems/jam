@@ -2,7 +2,7 @@ import React from 'react';
 import {Modal, ShowModal} from './Modal';
 import {PrimaryButton} from './Button';
 import {useRootState, declare, dispatch} from '../lib/state-tree';
-import {useStateObject} from '../jam-core-react';
+import {useJamState} from '../jam-core-react';
 import {set} from 'use-minimal-state';
 
 export function ShowInteractionModal() {
@@ -14,7 +14,7 @@ export function ShowInteractionModal() {
 }
 
 export default function InteractionModal({close}) {
-  const state = useStateObject();
+  const state = useJamState();
   return (
     <Modal close={close}>
       <h1>Allow playing sound</h1>

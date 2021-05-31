@@ -5,9 +5,8 @@ import EditIdentity from './EditIdentity';
 import {useMqParser} from '../lib/tailwind-mqp';
 import {ButtonContainer, SecondaryButton} from './Button';
 import StreamingModal from './StreamingModal';
-import {useJam, useStateObject} from '../jam-core-react';
+import {useJam, useJamState, useIdentityAdminStatus} from '../jam-core-react';
 import {addRole, removeRole, addAdmin, removeAdmin} from '../jam-core';
-import {useIdentityAdminStatus} from '../jam-core-react';
 
 export default function EditRole({
   peerId,
@@ -16,7 +15,7 @@ export default function EditRole({
   stageOnly = false,
   onCancel,
 }) {
-  const state = useStateObject();
+  const state = useJamState();
   let myId = use(state, 'myId');
   let mqp = useMqParser();
   let [myAdminStatus] = useIdentityAdminStatus(myId);

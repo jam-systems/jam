@@ -1,7 +1,7 @@
-import {use, is} from 'use-minimal-state';
-import React, {createContext, useCallback, useContext, useState} from 'react';
+import {use} from 'use-minimal-state';
+import React, {createContext, useContext, useState} from 'react';
 
-export {ExistingStateProvider, useStateObject, useSetState, useJam};
+export {ExistingStateProvider, useJamState, useJam};
 
 const StateContext = createContext({});
 
@@ -19,18 +19,7 @@ function useJam() {
   return [state, api];
 }
 
-function useAppState(keys) {
+function useJamState(keys) {
   let {state} = useContext(StateContext);
-  return use(state, keys);
-}
-
-function useStateObject() {
-  let {state} = useContext(StateContext);
-  return state;
-}
-
-function useSetState() {
-  let {state} = useContext(StateContext);
-  const setState = useCallback((...args) => is(state, ...args), [state]);
-  return setState;
+  return keys ? use(state, keys) : state;
 }

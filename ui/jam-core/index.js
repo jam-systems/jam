@@ -34,6 +34,9 @@ function createJamState() {
   ]);
 
   const api = {
+    setState(...args) {
+      is(state, ...args);
+    },
     enterRoom(roomId) {
       dispatch(actions.JOIN, roomId);
     },

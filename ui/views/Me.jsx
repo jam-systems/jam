@@ -1,10 +1,10 @@
 import React from 'react';
 import {use} from 'use-minimal-state';
 import Container from './Container';
-import {useStateObject} from '../jam-core-react';
+import {useJamState} from '../jam-core-react';
 
 export default function Me() {
-  const state = useStateObject();
+  const state = useJamState();
   let myId = use(state, 'myId');
 
   return (

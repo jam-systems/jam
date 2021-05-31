@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {Modal} from './Modal';
 import {updateInfo} from '../jam-core';
 import {useMqParser} from '../lib/tailwind-mqp';
-import {useStateObject} from '../jam-core-react';
+import {useJamState} from '../jam-core-react';
 import {use} from 'use-minimal-state';
 
 function addTwitter(identities, handle, tweet) {
@@ -13,7 +13,7 @@ function addTwitter(identities, handle, tweet) {
 }
 
 export default function EditIdentity({close}) {
-  const state = useStateObject();
+  const state = useJamState();
   let [id, myIdentity] = use(state, ['myId', 'myIdentity']);
   let mqp = useMqParser();
   let info = myIdentity?.info;
