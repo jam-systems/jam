@@ -2,7 +2,7 @@ import {on, update} from 'use-minimal-state';
 import {use} from '../lib/state-tree';
 import {staticConfig} from './config';
 
-// TODO: make this module general & let auth header & API paths be part of function params
+// TODO: make this module general & let API paths be part of function params
 let API = `${staticConfig.urls.pantry}/api/v1`;
 on(staticConfig, () => {
   API = `${staticConfig.urls.pantry}/api/v1`;
@@ -70,7 +70,6 @@ async function getRequest(path, getToken) {
   return [data, ok, status];
 }
 
-// TODO merge this cache w/ the one for useApiQuery
 const queryCache = {}; // path: {state, data, status}, state = 'idle', 'loading', 'success', 'error'
 const idleQuery = {state: 'idle', data: null, status: null};
 

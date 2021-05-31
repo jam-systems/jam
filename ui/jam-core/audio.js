@@ -1,10 +1,17 @@
 import {addLocalStream} from '../lib/swarm';
 import hark from '../lib/hark';
-import {set, update} from 'use-minimal-state';
+import {is, update} from 'use-minimal-state';
 import log from '../lib/causal-log';
 import {domEvent} from '../lib/util';
-import {until} from '../lib/state-utils';
-import {useState, declare, use, useRootState, useOn} from '../lib/state-tree';
+import {until, useDidChange} from '../lib/state-utils';
+import {
+  useState,
+  declare,
+  use,
+  useRootState,
+  useOn,
+  useAction,
+} from '../lib/state-tree';
 import {userAgent} from '../lib/user-agent';
 import Microphone from './audio/Microphone';
 import AudioFile from './audio/AudioFile';
@@ -17,64 +24,13 @@ function AudioState({swarm}) {
   const audios = {}; // {peerId: HTMLAudioElement}
   let audioContext = null;
 
-  useOn(state, 'soundMuted', muted => {
-    for (let peerId in audios) {
-      let audio = audios[peerId];
-      audio.muted = muted;
-      if (!muted && audio.paused) playOrSetError(peerId, audio);
-    }
-  });
-
-  useOn(swarm, 'newPeer', peerId => getAudio(peerId));
-
-  useOn(swarm, 'stream', (stream, name, peer) => {
-    log('remote stream', name, stream);
-    let peerId = peer.peerId;
-    if (!stream) return;
-    connectVolumeMeter(state, peerId, stream.clone());
-    let audio = getAudio(peerId);
-
-    audio.removeAttribute('srcObject');
-    audio.load(); // this can cause a previous play() to reject
-    audio.srcObject = stream;
-    if (state.inRoom) playOrSetError(peerId, audio);
-    // playOrSetError(peerId, audio);
-  });
-
-  function getAudio(peerId) {
+  // not clear whether this improves anything for Safari, could try to remove
+  useOn(swarm, 'newPeer', peerId => {
     if (!audios[peerId]) {
-      let audio = new Audio();
-      audios[peerId] = audio;
-      audio.muted = state.soundMuted;
-    }
-    return audios[peerId];
-  }
-
-  useOn(state, 'dispatch', type => {
-    if (type === 'retry-audio-play') {
-      for (let peerId in audios) {
-        let audio = audios[peerId];
-        if (audio.paused) play(audio).catch(console.warn);
-      }
+      audios[peerId] = new Audio();
+      audios[peerId].muted = state.soundMuted;
     }
   });
-
-  function playOrSetError(peerId, audio) {
-    let stream = audio.srcObject;
-    return play(audio).catch(err => {
-      let currentStream = swarm.remoteStreams.find(s => s.peerId === peerId)
-        ?.stream;
-      if (stream !== currentStream) {
-        // call to play() was for a an older stream, error caused by racing new stream
-        // => all good, don't set error!
-        return;
-      }
-      console.warn(err);
-      if (state.inRoom) {
-        set(state, 'audioPlayError', true);
-      }
-    });
-  }
 
   return function AudioState({inRoom, userInteracted}) {
     let [myId, iAmSpeaker, handRaised, micMuted, audioFile] = useRootState([
@@ -99,9 +55,80 @@ function AudioState({swarm}) {
     let myAudio = audioFileStream ?? micStream;
     declare(Muted, {myAudio, micMuted});
     declare(ConnectMyAudio, {myAudio, iAmSpeaker, myId, swarm});
-    let soundMuted = inRoom ? iAmSpeaker && !hasRequestedOnce : true;
+    let soundMuted = !inRoom || (iAmSpeaker && !hasRequestedOnce);
+
+    let remoteStreams = use(swarm, 'remoteStreams');
+    remoteStreams.map(({peerId, stream}) =>
+      declare(AudioElement, {
+        key: peerId,
+        audioContext,
+        audios,
+        stream,
+        soundMuted,
+        inRoom,
+      })
+    );
 
     return {myAudio, soundMuted, audioFileElement, audioContext};
+  };
+}
+
+function AudioElement({audios, key, soundMuted}) {
+  const state = useRootState();
+  let activeStream = null;
+
+  let audio = audios[key];
+  if (!audio) {
+    audio = new Audio();
+    audios[key] = audio;
+    audio.muted = soundMuted;
+  }
+
+  return function AudioElement({stream, audioContext, soundMuted, inRoom}) {
+    let shouldPlay = false;
+    let newStream = activeStream !== stream && stream;
+    let newAudioContext = useDidChange(audioContext);
+
+    if (newStream) {
+      activeStream = stream;
+
+      audio.removeAttribute('srcObject');
+      audio.load(); // this can cause a previous play() to reject
+      audio.srcObject = stream;
+
+      if (inRoom) {
+        shouldPlay = true;
+      }
+    }
+    if ((newStream || newAudioContext) && audioContext) {
+      connectVolumeMeter(state, key, stream.clone());
+    }
+
+    if (useDidChange(soundMuted)) {
+      audio.muted = soundMuted;
+      if (!soundMuted && audio.paused) {
+        shouldPlay = true;
+      }
+    }
+
+    if (shouldPlay) {
+      play(audio).catch(err => {
+        if (stream === activeStream) {
+          console.warn(err);
+          if (inRoom) {
+            is(state, 'audioPlayError', true);
+          }
+        } else {
+          // call to play() was for a an older stream, error caused by racing new stream
+          // => all good, don't set error!
+        }
+      });
+    }
+
+    let [isRetrySound] = useAction('retry-audio-play');
+    if (isRetrySound) {
+      if (audio.paused) play(audio).catch(console.warn);
+    }
   };
 }
 
