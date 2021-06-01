@@ -3,7 +3,7 @@ import {defaultState, actions} from './state';
 import {AudioState} from './audio';
 import {Reactions} from './reactions';
 import {RoomState} from './room';
-import {is, set} from 'minimal-state';
+import {is, set, on, update} from 'minimal-state';
 import {
   declare,
   declareStateRoot,
@@ -25,6 +25,8 @@ export {addAdmin, removeAdmin} from './admin';
 export {updateInfo, importRoomIdentity} from './identity';
 export {createRoom, updateRoom} from './backend';
 
+export {is, set, on, update};
+
 function createJam({jamConfig, cachedRooms} = {}) {
   // setup stuff
   if (jamConfig) set(staticConfig, jamConfig);
@@ -43,6 +45,9 @@ function createJam({jamConfig, cachedRooms} = {}) {
   const api = {
     setState(...args) {
       is(state, ...args);
+    },
+    onState(...args) {
+      return on(state, ...args);
     },
     enterRoom(roomId) {
       dispatch(actions.JOIN, roomId);

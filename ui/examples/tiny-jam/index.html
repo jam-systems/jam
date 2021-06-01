@@ -1,0 +1,70 @@
+<html>
+  <head>
+    <title>tiny jam demo</title>
+    <link rel="icon" href="data:," />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      import {
+        createJam,
+        createRoom,
+        on,
+      } from 'https://cdn.jsdelivr.net/npm/jam-core@0.1.3/dist/bundle.js';
+
+      const roomId = 'tiny-jam-1234';
+      const jamConfig = {
+        urls: {
+          jam: 'https://jam.systems',
+          pantry: `https://jam.systems/_/pantry`,
+          stun: `stun:stun.jam.systems:3478`,
+          turn: `turn:turn.jam.systems:3478`,
+          turnCredentials: {username: 'test', credential: 'yieChoi0PeoKo8ni'},
+        },
+      };
+
+      const [state, {onState, setState, enterRoom, leaveRoom}] = createJam({
+        jamConfig,
+      });
+      createRoom(state, roomId, {stageOnly: true});
+      setState('roomId', roomId);
+
+      window.join = () => enterRoom(roomId);
+      window.leave = () => leaveRoom();
+
+      renderUI(state);
+
+      onState((key, value) => {
+        console.log('update', key, value);
+        renderUI(state);
+      });
+      on(state.swarm, (key, value) => {
+        renderUI(state);
+      });
+
+      function renderUI({roomId, speaking, myId, inRoom, swarm}) {
+        let iAmSpeaking = speaking.has(myId);
+        let speakingStyle = iAmSpeaking ? 'color: green;' : '';
+        let speakingText = inRoom ? 'Speaking' : 'Not speaking';
+
+        let {stickyPeers, peerState} = swarm;
+        let nJoinedPeers = Object.keys(stickyPeers).filter(
+          id => peerState[id]?.inRoom
+        ).length;
+
+        let button = inRoom
+          ? `<button onclick="leave()">Leave</button>`
+          : `<button onclick="join()">Join</button>`;
+
+        document.querySelector('#root').innerHTML = `
+        <div>
+          ${button} <code>${roomId}</code>
+          <br />
+            <b style="${speakingStyle}">${speakingText}</b>
+            with <b>${nJoinedPeers}</b>
+            other peer${nJoinedPeers === 1 ? '' : 's'}.
+        <div/>`;
+      }
+    </script>
+  </body>
+</html>
