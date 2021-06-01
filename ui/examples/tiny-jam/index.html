@@ -4,7 +4,19 @@
     <link rel="icon" href="data:," />
   </head>
   <body>
-    <div id="root"></div>
+    <form id="form" style="margin-bottom: 4px">
+      <input
+        type="text"
+        id="input"
+        placeholder="Room ID"
+        style="width: 145px"
+      />
+      <button id="button" disabled>Join</button>
+    </form>
+    <div id="description" />
+    <!-- <script>
+      window.jamConfig = {urls: {}, development: true};
+    </script> -->
     <script type="module">
       import {
         createJam,
@@ -12,7 +24,6 @@
         on,
       } from 'https://cdn.jsdelivr.net/npm/jam-core@0.1.3/dist/bundle.js';
 
-      const roomId = 'tiny-jam-1234';
       const jamConfig = {
         urls: {
           jam: 'https://jam.systems',
@@ -21,49 +32,84 @@
           turn: `turn:turn.jam.systems:3478`,
           turnCredentials: {username: 'test', credential: 'yieChoi0PeoKo8ni'},
         },
+        development: false,
       };
 
       const [state, {onState, setState, enterRoom, leaveRoom}] = createJam({
         jamConfig,
       });
-      createRoom(state, roomId, {stageOnly: true});
-      setState('roomId', roomId);
+      window.state = state;
 
-      window.join = () => enterRoom(roomId);
-      window.leave = () => leaveRoom();
+      let input = document.querySelector('#input');
+      let button = document.querySelector('#button');
+      let description = document.querySelector('#description');
+
+      let potentialRoomId = location.hash.slice(1) ?? null;
+      input.value = potentialRoomId ?? '';
+
+      window.addEventListener(
+        'hashchange',
+        () => {
+          potentialRoomId = location.hash.slice(1) ?? null;
+          if (potentialRoomId !== state.roomId) {
+            setState('roomId', null);
+            input.value = potentialRoomId ?? '';
+            renderUI(state);
+          }
+        },
+        false
+      );
+
+      input.addEventListener('input', e => {
+        potentialRoomId = e.target.value ?? null;
+        renderUI(state);
+      });
+
+      function submit(e) {
+        e.preventDefault();
+        if (state.inRoom) {
+          leaveRoom();
+          setState('roomId', null);
+        } else {
+          createRoom(state, potentialRoomId, {stageOnly: true});
+          setState('roomId', potentialRoomId);
+          enterRoom(potentialRoomId);
+          location.hash = potentialRoomId;
+        }
+      }
+      button.addEventListener('click', submit);
+      form.addEventListener('submit', submit);
 
       renderUI(state);
 
       onState((key, value) => {
-        console.log('update', key, value);
+        // console.log('update', key, value);
         renderUI(state);
       });
       on(state.swarm, (key, value) => {
         renderUI(state);
       });
 
-      function renderUI({roomId, speaking, myId, inRoom, swarm}) {
-        let iAmSpeaking = speaking.has(myId);
-        let speakingStyle = iAmSpeaking ? 'color: green;' : '';
-        let speakingText = inRoom ? 'Speaking' : 'Not speaking';
+      function renderUI({roomId, speaking, myId, inRoom, swarm, iAmSpeaker}) {
+        let speakingText = iAmSpeaker ? 'Speaking' : 'Not speaking';
+        let speakingStyle = speaking.has(myId) ? 'color: green;' : '';
 
         let {stickyPeers, peerState} = swarm;
         let nJoinedPeers = Object.keys(stickyPeers).filter(
           id => peerState[id]?.inRoom
         ).length;
 
-        let button = inRoom
-          ? `<button onclick="leave()">Leave</button>`
-          : `<button onclick="join()">Join</button>`;
+        button.disabled = !(potentialRoomId?.length > 3);
+        button.innerText = inRoom ? 'Leave' : 'Join';
 
-        document.querySelector('#root').innerHTML = `
-        <div>
-          ${button} <code>${roomId}</code>
-          <br />
-            <b style="${speakingStyle}">${speakingText}</b>
-            with <b>${nJoinedPeers}</b>
-            other peer${nJoinedPeers === 1 ? '' : 's'}.
-        <div/>`;
+        input.disabled = !!roomId;
+
+        description.innerHTML = inRoom
+          ? `
+          <b style="${speakingStyle}">${speakingText}</b>
+          with <b>${nJoinedPeers}</b>
+          other peer${nJoinedPeers === 1 ? '' : 's'}.`
+          : '';
       }
     </script>
   </body>
