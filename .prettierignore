@@ -12,7 +12,7 @@ __pycache__
 
 .husky/
 deployment/
-examples/
+examples/*.py
 resources/
 **/bundle.js
 **/dist/

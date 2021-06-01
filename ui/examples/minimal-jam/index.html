@@ -1,0 +1,30 @@
+<html>
+  <head>
+    <title>minimal jam demo</title>
+    <link rel="icon" href="data:," />
+  </head>
+  <body>
+    <div id="root" />
+    <script type="module">
+      // TODO: use CDN to make this servable from any folder
+      import {createJam, createRoom} from '../../jam-core/dist/bundle.js';
+
+      const roomId = 'minimal-jam-1234';
+      main();
+
+      async function main() {
+        // mount Jam
+        const [state, {setState, enterRoom}] = createJam();
+
+        // try to create room
+        createRoom(state, roomId, {stageOnly: true});
+
+        // set room id
+        setState('roomId', roomId);
+
+        // enter room
+        enterRoom(roomId);
+      }
+    </script>
+  </body>
+</html>

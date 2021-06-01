@@ -1,0 +1,12 @@
+{
+  "name": "minimal-jam",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "esbuild --bundle ./index.js --outfile=./bundle.js --format=esm"
+  },
+  "dependencies": {
+    "jam-core": "0.1.0"
+  }
+}

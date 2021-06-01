@@ -8,7 +8,6 @@ function prepareForComponent() {
   debug(staticConfig);
   set(staticConfig, {
     pantryUrl: 'https://beta.jam.systems/_/pantry',
-    isEmbedded: true,
   });
 
   // TODO: CSS injection should be done on component mount
