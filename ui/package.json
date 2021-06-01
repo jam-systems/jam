@@ -24,7 +24,7 @@
     "node-fetch": "^2.6.1",
     "serve": "^11.3.2"
   },
-  "license": "MIT",
+  "license": "AGPL-3.0",
   "dependencies": {
     "@vvo/tzdb": "^6.5.1",
     "compact-base64": "^2.1.2",

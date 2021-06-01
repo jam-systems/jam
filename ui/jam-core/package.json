@@ -2,7 +2,7 @@
   "name": "jam-core",
   "version": "0.1.0",
   "main": "dist/index.js",
-  "license": "MIT",
+  "license": "AGPL-3.0",
   "scripts": {
     "build": "esbuild --bundle ./index.js --outfile=./dist/index.js --format=esm --target=es2020 --external:compact-base64 --external:minimal-state --external:simple-signed-records-engine --external:tweetnacl --external:ua-parser-js",
     "bundle": "esbuild --bundle ./index.js --minify --outfile=./dist/bundle.js --format=esm --target=es6",
