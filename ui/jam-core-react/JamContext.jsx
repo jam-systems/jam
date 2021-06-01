@@ -1,25 +1,23 @@
 import {use} from 'use-minimal-state';
 import React, {createContext, useContext, useState} from 'react';
 
-export {ExistingStateProvider, useJamState, useJam};
+export {JamProvider, useJamState, useJam};
 
-const StateContext = createContext({});
+const JamContext = createContext([]);
 
-// TODO: default provider should also *create* the state & render state root
+// TODO: provider could also be able to create the state & render state root
+// but more flexible is to create it outside somewhere
 
-function ExistingStateProvider({children, state, api}) {
-  let [value] = useState({state, api});
-  return (
-    <StateContext.Provider value={value}>{children}</StateContext.Provider>
-  );
+function JamProvider({children, state, api}) {
+  let [value] = useState([state, api]);
+  return <JamContext.Provider value={value}>{children}</JamContext.Provider>;
 }
 
 function useJam() {
-  let {state, api} = useContext(StateContext);
-  return [state, api];
+  return useContext(JamContext);
 }
 
 function useJamState(keys) {
-  let {state} = useContext(StateContext);
+  let [state] = useContext(JamContext);
   return keys ? use(state, keys) : state;
 }

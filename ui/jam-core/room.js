@@ -1,8 +1,8 @@
-import {put} from './backend';
+import {put, populateApiCache, apiUrl} from './backend';
 import log from '../lib/causal-log';
 import {staticConfig} from './config';
 import {use, useOn, useRootState} from '../lib/state-tree';
-import GetRequest, {populateCache} from './GetRequest';
+import GetRequest from '../lib/GetRequest';
 
 export {RoomState, addRole, removeRole, emptyRoom};
 
@@ -17,13 +17,16 @@ function RoomState({swarm}) {
         removeRole(state, peerId, 'speakers');
       } else {
         speakers = speakers.filter(id => id !== peerId);
-        populateCache(`/rooms/${state.roomId}`, {...state.room, speakers});
+        populateApiCache(`/rooms/${state.roomId}`, {
+          ...state.room,
+          speakers,
+        });
       }
     }
   });
 
   return function RoomState({roomId, myId}) {
-    const path = roomId && `/rooms/${roomId}`;
+    const path = roomId && apiUrl() + `/rooms/${roomId}`;
     let {data} = use(GetRequest, {path});
     let hasRoom = !!data;
     let room = data ?? emptyRoom;

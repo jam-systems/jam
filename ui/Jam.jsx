@@ -9,26 +9,25 @@ import Me from './views/Me';
 import PossibleRoom from './views/PossibleRoom';
 import {debugStateTree, declare, declareStateRoot} from './lib/state-tree';
 import {ShowAudioPlayerToast} from './views/AudioPlayerToast';
-import {ExistingStateProvider, useJamState} from './jam-core-react';
-import {jamSetup, createJamState} from './jam-core';
+import {JamProvider, useJamState} from './jam-core-react';
+import {createJam} from './jam-core';
 import {ShowInteractionModal} from './views/InteractionModal';
 import {useSync} from './lib/state-utils-react';
 
-jamSetup({
+const [state, api] = createJam({
+  jamConfig: window.jamConfig,
   cachedRooms: window.existingRoomInfo && {
     [window.existingRoomId]: window.existingRoomInfo,
   },
 });
 
-const [jamState, jamApi] = createJamState();
-
-declareStateRoot(ShowModals, jamState);
+declareStateRoot(ShowModals, state);
 
 export default function Jam(props) {
   return (
-    <ExistingStateProvider state={jamState} api={jamApi}>
+    <JamProvider state={state} api={api}>
       <JamUI {...props} />
-    </ExistingStateProvider>
+    </JamProvider>
   );
 }
 

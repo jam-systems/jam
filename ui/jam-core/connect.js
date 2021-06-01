@@ -2,9 +2,8 @@ import {is, update} from 'minimal-state';
 import log from '../lib/causal-log';
 import {signData, verifyData} from '../lib/identity-utils';
 import {dispatch, useOn, useRootState} from '../lib/state-tree';
-import {get} from './backend';
+import {get, populateApiCache} from './backend';
 import {staticConfig} from './config';
-import {populateCache} from './GetRequest';
 import {actions} from './state';
 
 // TODO this is an intermediary component to set up swarm that should be replaced w/ one that
@@ -42,7 +41,7 @@ export function ConnectRoom({myId, myIdentity, swarm}) {
   useOn(swarm.serverEvent, 'room-info', data => {
     log('new room info', data);
     if (connectedRoomId !== null) {
-      populateCache(`/rooms/${connectedRoomId}`, data);
+      populateApiCache(`/rooms/${connectedRoomId}`, data);
     }
   });
 

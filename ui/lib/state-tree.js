@@ -8,19 +8,12 @@ import causalLog from './causal-log';
 // Component(props) = partial state
 
 /* TODOs:
-  - components could be able to register methods which can update their state
-    the root component should return these methods in their own object (not mixed with state)
-    this enables prettier APIs than ones driven by dispatch / set
-    declareMethods({name: function}) / declareAPI / useMethods
-    ideally throw error if two components try to register same method name...
-    + useRootMethods to get at all these methods
 
   - when batching component updates we have to enforce a strict order from top to bottom in hierarchy.
     if a child renders before a parent in a batched update, it can happen that the child misses an update to its props
     and renders (e.g. after an action) with wrong props.
 
   - enable more Component return values
-  - use a dedicated class for Fragment for efficiency
 
   - improve actions/events as component input:
     * enable any component tree to handle actions, not just the declareRootState variant
@@ -30,22 +23,24 @@ import causalLog from './causal-log';
       e.g. queue of actions is stored in use array, useAction calls queueUpdate
     * for the retry-mic use case / encapsulated events: actions should optionally be a unique object, Action(type), that can
       be exported (to avoid global strings which always have latent potential for conflicts)
-
-  - actions/events as component output:
-    * components should be able to act as event generators via their return value
-      needs a third wrapper in addition to declare() & use(), e.g. event(Component, props).
-      crucially, event() does NOT re-return the last result if it doesn't update, bc events are one-time things.
-      this could be another boolean flag in _run.
-      this pattern has same use case as callback-passing but is much cleaner
-      => avoids generating functions that have to be memoized, avoids an additional execution scope
-      should make most instances of dispatch from inside components unnecessary, then dispatch is still needed as a fallback
-      for actions that just can't be triggered by stable state, like retry-mic
     
   - understand performance & optimize where possible
+
   - stale update problem: understand in what cases object identity of state properties must change.
     or, if updates to root are made sufficiently fine-grained, possibly don't block
     non-changes to state in root (but first approach is cleaner)
+
   - element unmount should be recursive, clean up its children
+
+  - use a dedicated class for Fragment for efficiency (low priority, because a mid-sized full initial render
+    without side effects turns out to only take a couple of ms)
+
+  - NOT SURE ABOUT THIS: components could be able to register methods which can update their state
+    the root component should return these methods in their own object (not mixed with state)
+    this enables prettier APIs than ones driven by dispatch / set
+    declareMethods({name: function}) / declareAPI / useMethods
+    ideally throw error if two components try to register same method name...
+    + useRootMethods to get at all these methods
 */
 
 export {

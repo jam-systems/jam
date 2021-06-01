@@ -7,4 +7,4 @@ export {
 
 export {usePushToTalk} from './hotkeys';
 
-export {useJam, useJamState, ExistingStateProvider} from './JamContext';
+export {useJam, useJamState, JamProvider} from './JamContext';

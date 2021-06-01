@@ -1,12 +1,5 @@
-import {on, update} from 'minimal-state';
-import {use} from '../lib/state-tree';
-import {staticConfig} from './config';
-
-// TODO: make this module general & let API paths be part of function params
-let API = `${staticConfig.urls.pantry}/api/v1`;
-on(staticConfig, () => {
-  API = `${staticConfig.urls.pantry}/api/v1`;
-});
+import {update} from 'minimal-state';
+import {use} from './state-tree';
 
 export {getRequest, populateCache, getCache, setCache};
 
@@ -45,7 +38,7 @@ async function getRequest(path, getToken) {
   let headers = {Accept: 'application/json'};
   if (getToken) headers.Authorization = `Token ${getToken()}`;
 
-  let res = await fetch(API + path, {headers}).catch(console.warn);
+  let res = await fetch(path, {headers}).catch(console.warn);
   let {state, data, status} = getCache(path);
   if (state !== 'loading') {
     // someone else already reset the cache, use it

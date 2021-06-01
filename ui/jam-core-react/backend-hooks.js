@@ -2,7 +2,9 @@ import {useCallback, useEffect, useState} from 'react';
 import {use} from '../lib/state-tree-react';
 import {useJamState} from './JamContext';
 import {signedToken} from '../lib/identity-utils';
-import {GetRequest, createRoom} from '../jam-core';
+import {createRoom} from '../jam-core';
+import {apiUrl} from '../jam-core/backend';
+import GetRequest from '../lib/GetRequest';
 
 export {useApiQuery, useCreateRoom, useRoom, useIdentityAdminStatus};
 
@@ -10,7 +12,7 @@ function useApiQuery(path, {dontFetch = false, fetchOnMount = false}) {
   const state = useJamState();
   const getToken = useCallback(() => signedToken(state.myIdentity), []);
   let {data, isLoading, status} = use(GetRequest, {
-    path,
+    path: apiUrl() + path,
     dontFetch,
     fetchOnMount,
     getToken,
@@ -42,7 +44,7 @@ function useCreateRoom({
 }
 
 function useRoom(roomId) {
-  const path = roomId && `/rooms/${roomId}`;
+  const path = roomId && apiUrl() + `/rooms/${roomId}`;
   let {data, isLoading, status} = use(GetRequest, {path});
   return [data, isLoading, status];
 }

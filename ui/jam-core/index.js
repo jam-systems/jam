@@ -11,22 +11,29 @@ import {
   use,
   useAction,
 } from '../lib/state-tree';
-import {populateCache} from './GetRequest';
 import {ConnectRoom} from './connect';
 import ModeratorState from './room/ModeratorState';
 import {useDidChange} from '../lib/state-utils';
 import {staticConfig} from './config';
 import Swarm from '../lib/swarm';
+import {populateApiCache} from './backend';
 
 /* THE JAM API */
-export {createJamState, jamSetup};
+export {createJam};
 export {addRole, removeRole} from './room';
 export {addAdmin, removeAdmin} from './admin';
 export {updateInfo, importRoomIdentity} from './identity';
 export {createRoom, updateRoom} from './backend';
-export {default as GetRequest} from './GetRequest';
 
-function createJamState() {
+function createJam({jamConfig, cachedRooms} = {}) {
+  // setup stuff
+  if (jamConfig) set(staticConfig, jamConfig);
+  if (cachedRooms) {
+    for (let roomId in cachedRooms) {
+      populateApiCache(`/rooms/${roomId}`, cachedRooms[roomId]);
+    }
+  }
+
   const {state, dispatch} = declareStateRoot(AppState, {...defaultState}, [
     'roomId',
     'userInteracted',
@@ -126,13 +133,4 @@ function AppState() {
       declare(AudioState, {myId, inRoom, iAmSpeaker, swarm, userInteracted})
     );
   };
-}
-
-function jamSetup({jamConfig, cachedRooms}) {
-  if (jamConfig) set(staticConfig, jamConfig);
-  if (cachedRooms) {
-    for (let roomId in cachedRooms) {
-      populateCache(`/rooms/${roomId}`, cachedRooms[roomId]);
-    }
-  }
 }
