@@ -1,0 +1,21 @@
+{
+  "name": "jam-core",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "esbuild --bundle ./index.js --outfile=./dist/index.js --format=esm --target=es2020 --external:compact-base64 --external:minimal-state --external:simple-signed-records-engine --external:tweetnacl --external:ua-parser-js",
+    "bundle": "esbuild --bundle ./index.js --minify --outfile=./dist/bundle.js --format=esm --target=es6",
+    "size": "cat dist/index.js | esbuild --minify | gzip | wc -c"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "compact-base64": "^2.1.2",
+    "minimal-state": "^5.5.0",
+    "simple-signed-records-engine": "^0.1.2",
+    "tweetnacl": "^1.0.3",
+    "ua-parser-js": "^0.7.24"
+  }
+}

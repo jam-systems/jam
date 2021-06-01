@@ -381,7 +381,7 @@ color-name@~1.1.4:
 
 compact-base64@^2.1.2:
   version "2.1.2"
-  resolved "https://registry.yarnpkg.com/compact-base64/-/compact-base64-2.1.2.tgz"
+  resolved "https://registry.yarnpkg.com/compact-base64/-/compact-base64-2.1.2.tgz#257d1f341a0f42163f0fb296b625f2e15b3d4f26"
   integrity sha512-3C8Zy85/a6T7jRs7ETg6CHBZHjAu5M7PPA6uskx1IXOaeagnkkiecaMeLBpXta2jN/Rmwk6Q+c1OAaCfPf7eAQ==
 
 compressible@~2.0.14:
@@ -614,10 +614,10 @@ es-to-primitive@^1.2.1:
     is-date-object "^1.0.1"
     is-symbol "^1.0.2"
 
-esbuild@^0.9.1:
-  version "0.9.1"
-  resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.9.1.tgz"
-  integrity sha512-2A0lJxpkV9tvwz+tCD6Ww1bvbZKvH4zBz8G8Dx/MhLwmJ23p8XRIz44ObWt8dpDpZARzhiahacQ+b/V1GJbx0A==
+esbuild@^0.12.5:
+  version "0.12.5"
+  resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.12.5.tgz#36076a6bc1966ba2741981d30512e95e8aaff495"
+  integrity sha512-vcuP53pA5XiwUU4FnlXM+2PnVjTfHGthM7uP1gtp+9yfheGvFFbq/KyuESThmtoHPUrfZH5JpxGVJIFDVD1Egw==
 
 escape-html@~1.0.3:
   version "1.0.3"
@@ -2207,7 +2207,7 @@ tweetnacl-util@^0.15.1:
 
 tweetnacl@^1.0.3:
   version "1.0.3"
-  resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-1.0.3.tgz"
+  resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-1.0.3.tgz#ac0af71680458d8a6378d0d0d050ab1407d35596"
   integrity sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw==
 
 type-check@^0.4.0, type-check@~0.4.0:
