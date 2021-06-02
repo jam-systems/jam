@@ -106,6 +106,9 @@ async function createRoom(
 }
 
 async function updateRoom(state, roomId, room) {
-  if (!roomId || !room) return;
+  if (!roomId || !room) return false;
+  // don't accept updates that delete the moderator/speaker array
+  // (=> explicitly set to [] if that is the intention)
+  if (!room?.moderators || !room?.speakers) return false;
   return await put(state, `/rooms/${roomId}`, room);
 }

@@ -20,7 +20,6 @@
     <script type="module">
       import {
         createJam,
-        createRoom,
         on,
       } from 'https://cdn.jsdelivr.net/npm/jam-core@0.1.3/dist/bundle.js';
 
@@ -35,9 +34,8 @@
         development: false,
       };
 
-      const [state, {onState, setState, enterRoom, leaveRoom}] = createJam({
-        jamConfig,
-      });
+      const [state, api] = createJam({jamConfig});
+      const {onState, setState, enterRoom, leaveRoom, createRoom} = api;
       window.state = state;
 
       let input = document.querySelector('#input');
@@ -71,7 +69,7 @@
           leaveRoom();
           setState('roomId', null);
         } else {
-          createRoom(state, potentialRoomId, {stageOnly: true});
+          createRoom(potentialRoomId, {stageOnly: true});
           setState('roomId', potentialRoomId);
           enterRoom(potentialRoomId);
           location.hash = potentialRoomId;

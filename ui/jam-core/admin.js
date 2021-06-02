@@ -1,9 +1,9 @@
 import {post, deleteRequest} from './backend';
 
 export const addAdmin = async (state, id) => {
-  await post(state, `/admin/${id}`, {});
+  return await post(state, `/admin/${id}`, {});
 };
 
 export const removeAdmin = async (state, id) => {
-  await deleteRequest(state, `/admin/${id}`, {});
+  return await deleteRequest(state, `/admin/${id}`, {});
 };

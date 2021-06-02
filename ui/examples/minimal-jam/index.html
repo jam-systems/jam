@@ -5,18 +5,15 @@
   </head>
   <body>
     <script type="module">
-      import {
-        createJam,
-        createRoom,
-      } from 'https://cdn.jsdelivr.net/npm/jam-core/dist/bundle.js';
+      import {createJam} from 'https://cdn.jsdelivr.net/npm/jam-core/dist/bundle.js';
 
       const roomId = 'minimal-jam-1234';
 
       // mount Jam
-      const [state, {setState, enterRoom}] = createJam();
+      const [state, {setState, enterRoom, createRoom}] = createJam();
 
       // try to create room
-      createRoom(state, roomId, {stageOnly: true});
+      createRoom(roomId, {stageOnly: true});
 
       // set room id
       setState('roomId', roomId);

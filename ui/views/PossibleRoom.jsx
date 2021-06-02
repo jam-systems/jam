@@ -10,7 +10,7 @@ export default function PossibleRoom({
   roomIdentityKeys,
   onError,
 }) {
-  let [, {enterRoom}] = useJam();
+  const [, {enterRoom}] = useJam();
 
   // fetch room
   let [room, isLoading] = useRoom(roomId);

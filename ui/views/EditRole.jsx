@@ -5,8 +5,7 @@ import EditIdentity from './EditIdentity';
 import {useMqParser} from '../lib/tailwind-mqp';
 import {ButtonContainer, SecondaryButton} from './Button';
 import StreamingModal from './StreamingModal';
-import {useJam, useJamState, useIdentityAdminStatus} from '../jam-core-react';
-import {addRole, removeRole, addAdmin, removeAdmin} from '../jam-core';
+import {useJam, useIdentityAdminStatus} from '../jam-core-react';
 
 export default function EditRole({
   peerId,
@@ -15,8 +14,16 @@ export default function EditRole({
   stageOnly = false,
   onCancel,
 }) {
-  const state = useJamState();
-  let myId = use(state, 'myId');
+  const [state, api] = useJam();
+  const {
+    addSpeaker,
+    addModerator,
+    removeSpeaker,
+    removeModerator,
+    addAdmin,
+    removeAdmin,
+  } = api;
+  let [myId, roomId] = use(state, ['myId', 'roomId']);
   let mqp = useMqParser();
   let [myAdminStatus] = useIdentityAdminStatus(myId);
   let [peerAdminStatus] = useIdentityAdminStatus(peerId);
@@ -32,7 +39,7 @@ export default function EditRole({
           <br />
           {(peerAdminStatus?.admin && (
             <button
-              onClick={() => removeAdmin(state, peerId).then(onCancel)}
+              onClick={() => removeAdmin(peerId).then(onCancel)}
               className={
                 'mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2'
               }
@@ -41,7 +48,7 @@ export default function EditRole({
             </button>
           )) || (
             <button
-              onClick={() => addAdmin(state, peerId).then(onCancel)}
+              onClick={() => addAdmin(peerId).then(onCancel)}
               className={
                 'mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2'
               }
@@ -60,14 +67,14 @@ export default function EditRole({
       {!stageOnly &&
         (isSpeaker ? (
           <button
-            onClick={() => removeRole(state, peerId, 'speakers').then(onCancel)}
+            onClick={() => removeSpeaker(roomId, peerId).then(onCancel)}
             className="mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
           >
             ↓ Move to Audience
           </button>
         ) : (
           <button
-            onClick={() => addRole(state, peerId, 'speakers').then(onCancel)}
+            onClick={() => addSpeaker(roomId, peerId).then(onCancel)}
             className="mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
           >
             ↑ Invite to Stage
@@ -75,7 +82,7 @@ export default function EditRole({
         ))}
       {isSpeaker && !isModerator && (
         <button
-          onClick={() => addRole(state, peerId, 'moderators').then(onCancel)}
+          onClick={() => addModerator(roomId, peerId).then(onCancel)}
           className="mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
         >
           ✳️ Make Moderator
@@ -83,7 +90,7 @@ export default function EditRole({
       )}
       {isModerator && (
         <button
-          onClick={() => removeRole(state, peerId, 'moderators').then(onCancel)}
+          onClick={() => removeModerator(roomId, peerId).then(onCancel)}
           className="mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
         >
           ❎ Demote Moderator
@@ -103,13 +110,14 @@ export default function EditRole({
 }
 
 export function EditSelf({onCancel}) {
-  const [state, {leaveStage}] = useJam();
+  const [state, {leaveStage, addSpeaker, removeSpeaker}] = useJam();
   let mqp = useMqParser();
-  let [iSpeak, iModerate, room, myId] = use(state, [
+  let [iSpeak, iModerate, room, myId, roomId] = use(state, [
     'iAmSpeaker',
     'iAmModerator',
     'room',
     'myId',
+    'roomId',
   ]);
   let stageOnly = !!room?.stageOnly;
   iSpeak = stageOnly || iSpeak;
@@ -130,14 +138,14 @@ export function EditSelf({onCancel}) {
         )}
         {!stageOnly && iModerate && !iSpeak && (
           <SecondaryButton
-            onClick={() => addRole(state, myId, 'speakers').then(onCancel)}
+            onClick={() => addSpeaker(roomId, myId).then(onCancel)}
           >
             ↑ Move to Stage
           </SecondaryButton>
         )}
         {!stageOnly && iModerate && iSpeak && (
           <SecondaryButton
-            onClick={() => removeRole(state, myId, 'speakers').then(onCancel)}
+            onClick={() => removeSpeaker(roomId, myId).then(onCancel)}
           >
             ↓ Leave Stage
           </SecondaryButton>

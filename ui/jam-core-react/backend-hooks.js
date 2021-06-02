@@ -1,8 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import {use} from '../lib/state-tree-react';
-import {useJamState} from './JamContext';
+import {useJam, useJamState} from './JamContext';
 import {signedToken} from '../lib/identity-utils';
-import {createRoom} from '../jam-core';
 import {apiUrl} from '../jam-core/backend';
 import GetRequest from '../lib/GetRequest';
 
@@ -27,13 +26,13 @@ function useCreateRoom({
   newRoom,
   onSuccess,
 }) {
-  const state = useJamState();
+  const [, {createRoom}] = useJam();
   let [isError, setError] = useState(false);
   let [isLoading, setLoading] = useState(true);
   useEffect(() => {
     if (roomId && !room && !isRoomLoading) {
       (async () => {
-        let ok = await createRoom(state, roomId, newRoom);
+        let ok = await createRoom(roomId, newRoom);
         setLoading(false);
         if (ok) onSuccess?.();
         else setError(true);

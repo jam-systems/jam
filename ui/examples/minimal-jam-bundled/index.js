@@ -1,14 +1,14 @@
-import {createJam, createRoom} from 'jam-core';
+import {createJam} from 'jam-core';
 
 const roomId = 'minimal-jam-1234';
 main();
 
 async function main() {
   // mount Jam
-  const [state, {setState, enterRoom}] = createJam();
+  const [state, {setState, enterRoom, createRoom}] = createJam();
 
   // try to create room
-  createRoom(state, roomId, {stageOnly: true});
+  createRoom(roomId, {stageOnly: true});
 
   // set room id
   setState({roomId});

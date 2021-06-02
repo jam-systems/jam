@@ -2,12 +2,11 @@ import React, {useState, useMemo} from 'react';
 import slugify from 'slugify';
 
 import {navigate} from '../lib/use-location';
-import {createRoom} from '../jam-core';
 import Container from './Container';
 import {useJam} from '../jam-core-react';
 
 export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
-  const [state, {enterRoom, setState}] = useJam();
+  const [, {enterRoom, setState, createRoom}] = useJam();
 
   // note: setters are currently unused because form is hidden
   let [name, setName] = useState(newRoom.name ?? '');
@@ -33,7 +32,7 @@ export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
 
     (async () => {
       let roomPosted = {name, description, logoURI, color, stageOnly};
-      let ok = await createRoom(state, roomId, roomPosted);
+      let ok = await createRoom(roomId, roomPosted);
       if (ok) {
         if (urlRoomId !== roomId) navigate('/' + roomId);
         enterRoom(roomId);

@@ -1,9 +1,8 @@
 import React, {useState} from 'react';
 import {Modal} from './Modal';
-import {updateInfo} from '../jam-core';
 import {useMqParser} from '../lib/tailwind-mqp';
-import {useJamState} from '../jam-core-react';
 import {use} from 'use-minimal-state';
+import {useJam} from '../jam-core-react';
 
 function addTwitter(identities, handle, tweet) {
   if (!handle) return;
@@ -13,7 +12,7 @@ function addTwitter(identities, handle, tweet) {
 }
 
 export default function EditIdentity({close}) {
-  const state = useJamState();
+  const [state, {updateInfo}] = useJam();
   let [id, myIdentity] = use(state, ['myId', 'myIdentity']);
   let mqp = useMqParser();
   let info = myIdentity?.info;
@@ -41,11 +40,11 @@ export default function EditIdentity({close}) {
       reader.onloadend = async () => {
         e.preventDefault();
         let avatar = reader.result;
-        let ok = await updateInfo(state, {name, avatar, identities});
+        let ok = await updateInfo({name, avatar, identities});
         if (ok) close();
       };
     } else {
-      let ok = await updateInfo(state, {name, identities});
+      let ok = await updateInfo({name, identities});
       if (ok) close();
     }
   };

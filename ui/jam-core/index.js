@@ -1,8 +1,14 @@
-import {Identity} from './identity';
+import {Identity, updateInfo} from './identity';
 import {defaultState, actions} from './state';
 import {AudioState} from './audio';
 import {Reactions} from './reactions';
-import {RoomState} from './room';
+import {
+  RoomState,
+  addSpeaker,
+  addModerator,
+  removeSpeaker,
+  removeModerator,
+} from './room';
 import {is, set, on, update} from 'minimal-state';
 import {
   declare,
@@ -16,39 +22,44 @@ import ModeratorState from './room/ModeratorState';
 import {useDidChange} from '../lib/state-utils';
 import {staticConfig} from './config';
 import Swarm from '../lib/swarm';
-import {populateApiCache} from './backend';
+import {populateApiCache, createRoom, updateRoom} from './backend';
+import {addAdmin, removeAdmin} from './admin';
 
 /* THE JAM API */
-export {createJam};
-export {addRole, removeRole} from './room';
-export {addAdmin, removeAdmin} from './admin';
-export {updateInfo, importRoomIdentity} from './identity';
-export {createRoom, updateRoom} from './backend';
+// TODO: it would be nice to be able to await some of these actions
+// with the promise resolving as soon as state-tree ran with the updated params
+// because otherwise it is hard to handle some of our API functions that assume existing state
+// e.g. setState('roomId', ...) -> wait until next tick when state.roomId has updated -> addSpeaker(peerId)
+// not waiting would potentially add a speaker to a different room
 
+export {createJam};
+export {importRoomIdentity} from './identity';
 export {is, set, on, update};
 
-function createJam({jamConfig, cachedRooms} = {}) {
-  // setup stuff
-  if (jamConfig) set(staticConfig, jamConfig);
-  if (cachedRooms) {
-    for (let roomId in cachedRooms) {
-      populateApiCache(`/rooms/${roomId}`, cachedRooms[roomId]);
-    }
-  }
-
-  const {state, dispatch} = declareStateRoot(AppState, {...defaultState}, [
-    'roomId',
-    'userInteracted',
-    'micMuted',
-  ]);
-
-  const api = {
+function createApi(state, dispatch) {
+  return {
     setState(...args) {
       is(state, ...args);
     },
     onState(...args) {
       return on(state, ...args);
     },
+    // create room with the own identity as the only moderator and speaker
+    createRoom: (roomId, partialRoom) => createRoom(state, roomId, partialRoom),
+
+    // completely replaces the room, rejects if moderator/speaker array is not set
+    // only possible for moderators
+    updateRoom: (roomId, room) => updateRoom(state, roomId, room),
+
+    addSpeaker: (roomId, peerId) => addSpeaker(state, roomId, peerId),
+    addModerator: (roomId, peerId) => addModerator(state, roomId, peerId),
+    removeSpeaker: (roomId, peerId) => removeSpeaker(state, roomId, peerId),
+    removeModerator: (roomId, peerId) => removeModerator(state, roomId, peerId),
+    addAdmin: peerId => addAdmin(state, peerId),
+    removeAdmin: peerId => removeAdmin(state, peerId),
+
+    updateInfo: info => updateInfo(state, info),
+
     enterRoom(roomId) {
       dispatch(actions.JOIN, roomId);
     },
@@ -65,6 +76,23 @@ function createJam({jamConfig, cachedRooms} = {}) {
       dispatch(actions.RETRY_MIC);
     },
   };
+}
+
+function createJam({jamConfig, cachedRooms} = {}) {
+  // setup stuff
+  if (jamConfig) set(staticConfig, jamConfig);
+  if (cachedRooms) {
+    for (let roomId in cachedRooms) {
+      populateApiCache(`/rooms/${roomId}`, cachedRooms[roomId]);
+    }
+  }
+
+  const {state, dispatch} = declareStateRoot(AppState, {...defaultState}, [
+    'roomId',
+    'userInteracted',
+    'micMuted',
+  ]);
+  const api = createApi(state, dispatch);
 
   return [state, api];
 }
