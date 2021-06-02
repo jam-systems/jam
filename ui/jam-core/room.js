@@ -93,23 +93,3 @@ async function removeModerator(state, roomId, peerId) {
   let newRoom = {...room, moderators: moderators.filter(id => id !== peerId)};
   return await put(state, `/rooms/${roomId}`, newRoom);
 }
-
-// async function addRole(state, id, role) {
-//   let {room, roomId} = state;
-//   let {speakers, moderators} = room;
-//   let existing = role === 'speakers' ? speakers : moderators;
-//   if (existing.includes(id)) return;
-//   log('adding to', role, id);
-//   let newRoom = {...room, [role]: [...existing, id]};
-//   await put(state, `/rooms/${roomId}`, newRoom);
-// }
-
-// async function removeRole(state, id, role) {
-//   let {room, roomId} = state;
-//   let {speakers, moderators} = room;
-//   let existing = role === 'speakers' ? speakers : moderators;
-//   if (!existing.includes(id)) return;
-//   log('removing from', role, id);
-//   let newRoom = {...room, [role]: existing.filter(id_ => id_ !== id)};
-//   await put(state, `/rooms/${roomId}`, newRoom);
-// }

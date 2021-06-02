@@ -7,6 +7,6 @@
     "build": "esbuild --bundle ./index.js --outfile=./bundle.js --format=esm"
   },
   "dependencies": {
-    "jam-core": "0.1.0"
+    "jam-core": "0.2.0"
   }
 }

@@ -35,6 +35,7 @@ import {addAdmin, removeAdmin} from './admin';
 export {createJam};
 export {importRoomIdentity} from './identity';
 export {is, set, on, update};
+export {until} from '../lib/state-utils';
 
 function createApi(state, dispatch) {
   return {
@@ -86,14 +87,12 @@ function createJam({jamConfig, cachedRooms} = {}) {
       populateApiCache(`/rooms/${roomId}`, cachedRooms[roomId]);
     }
   }
-
   const {state, dispatch} = declareStateRoot(AppState, {...defaultState}, [
     'roomId',
     'userInteracted',
     'micMuted',
   ]);
   const api = createApi(state, dispatch);
-
   return [state, api];
 }
 

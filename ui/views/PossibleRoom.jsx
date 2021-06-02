@@ -2,6 +2,7 @@ import React, {createElement, useMemo} from 'react';
 import Room from './Room';
 import {importRoomIdentity} from '../jam-core';
 import {useCreateRoom, useJam, useRoom} from '../jam-core-react';
+import StartFromURL from './StartFromURL';
 
 export default function PossibleRoom({
   roomId, // truthy
@@ -24,26 +25,27 @@ export default function PossibleRoom({
   }, [roomId, roomIdentity, roomIdentityKeys]);
 
   // if room does not exist, try to create new one
-  let [roomFromURILoading, roomFromURIError] = useCreateRoom({
-    roomId,
-    room,
-    isLoading,
-    newRoom,
-    onSuccess: () => enterRoom(roomId),
-  });
+  // let [roomFromURILoading, roomFromURIError] = useCreateRoom({
+  //   roomId,
+  //   room,
+  //   isLoading,
+  //   newRoom,
+  //   onSuccess: () => enterRoom(roomId),
+  // });
 
   if (isLoading) return null;
   if (room)
     return (
       <Room key={roomId} {...{room, roomId, roomIdentity, roomIdentityKeys}} />
     );
-  if (roomFromURILoading) return null;
 
-  // TODO: could be nice to document possible errors
-  let error = roomFromURIError ? {createRoom: true} : {};
-  return typeof onError === 'function'
-    ? createElement(onError, {roomId, error})
-    : onError || <Error />;
+  if (roomId.length < 4) {
+    return typeof onError === 'function'
+      ? createElement(onError, {roomId, error: {createRoom: true}})
+      : onError || <Error />;
+  }
+
+  return <StartFromURL {...{roomId, newRoom}} />;
 }
 
 // TODO
