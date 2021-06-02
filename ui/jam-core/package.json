@@ -1,7 +1,7 @@
 {
   "name": "jam-core",
   "version": "0.2.0",
-  "main": "dist/index.js",
+  "main": "index.js",
   "license": "AGPL-3.0",
   "scripts": {
     "build": "esbuild --bundle ./index.js --outfile=./dist/index.js --format=esm --target=es2020 --external:compact-base64 --external:minimal-state --external:simple-signed-records-engine --external:tweetnacl --external:ua-parser-js",
