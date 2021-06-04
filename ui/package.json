@@ -10,7 +10,7 @@
   },
   "private": true,
   "workspaces": [
-    "jam-core",
+    "packages/jam-core",
     "examples/minimal-jam-bundled"
   ],
   "devDependencies": {
