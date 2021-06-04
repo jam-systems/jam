@@ -56,10 +56,8 @@ export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
           }
         >
           The Room ID{' '}
-          <code className="text-gray-900 bg-yellow-200">
-            {window.location.pathname.substring(1)}
-          </code>{' '}
-          is not valid.
+          <code className="text-gray-900 bg-yellow-200">{urlRoomId}</code> is
+          not valid.
           <br />
           <a
             href="https://gitlab.com/jam-systems/jam"

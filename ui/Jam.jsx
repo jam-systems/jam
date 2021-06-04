@@ -52,7 +52,11 @@ function JamUI({style, className, route = null, dynamicConfig = {}, ...props}) {
             roomIdentity={dynamicConfig.identity}
             roomIdentityKeys={dynamicConfig.keys}
             onError={({error}) => (
-              <Start urlRoomId={route} roomFromURIError={!!error.createRoom} />
+              <Start
+                urlRoomId={route}
+                roomFromURIError={!!error.createRoom}
+                newRoom={dynamicConfig.room}
+              />
             )}
           />
         );
