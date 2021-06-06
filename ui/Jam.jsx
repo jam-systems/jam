@@ -9,10 +9,9 @@ import Me from './views/Me';
 import PossibleRoom from './views/PossibleRoom';
 import {debugStateTree, declare, declareStateRoot} from './lib/state-tree';
 import {ShowAudioPlayerToast} from './views/AudioPlayerToast';
-import {JamProvider, useJamState} from './jam-core-react';
+import {JamProvider, useJam} from './jam-core-react';
 import {createJam} from './jam-core';
 import {ShowInteractionModal} from './views/InteractionModal';
-import {useSync} from './lib/state-utils-react';
 
 const [state, api] = createJam({
   jamConfig: window.jamConfig,
@@ -21,7 +20,7 @@ const [state, api] = createJam({
   },
 });
 
-declareStateRoot(ShowModals, state);
+declareStateRoot(ShowModals, null, {state});
 
 export default function Jam(props) {
   return (
@@ -32,7 +31,7 @@ export default function Jam(props) {
 }
 
 function JamUI({style, className, route = null, dynamicConfig = {}, ...props}) {
-  const state = useJamState();
+  const [state, {setProps}] = useJam();
 
   let roomId = null;
 
@@ -63,7 +62,9 @@ function JamUI({style, className, route = null, dynamicConfig = {}, ...props}) {
     }
   })();
   // set/unset room id
-  useSync(state, {roomId}, [roomId]);
+  useEffect(() => {
+    setProps('roomId', roomId);
+  }, [roomId]);
 
   // toggle debugging
   useEffect(() => {

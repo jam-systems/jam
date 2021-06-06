@@ -10,12 +10,12 @@ const iOS =
 const macOS = /^Mac/.test(navigator.platform) && navigator.maxTouchPoints === 0;
 
 export default function StartFromURL({roomId, newRoom}) {
-  const [, {setState, enterRoom, createRoom}] = useJam();
+  const [, {setProps, enterRoom, createRoom}] = useJam();
   let mqp = useMqParser();
 
   let submit = e => {
     e.preventDefault();
-    setState('userInteracted', true);
+    setProps('userInteracted', true);
 
     (async () => {
       let ok = await createRoom(roomId, newRoom);

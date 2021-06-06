@@ -24,12 +24,14 @@ function AudioState({swarm}) {
     }
   });
 
-  return function AudioState({myId, inRoom, iAmSpeaker, userInteracted}) {
-    let [handRaised, micMuted, audioFile] = useRootState([
-      'handRaised',
-      'micMuted',
-      'audioFile',
-    ]);
+  return function AudioState({
+    myId,
+    inRoom,
+    iAmSpeaker,
+    userInteracted,
+    micMuted,
+  }) {
+    let [handRaised, audioFile] = useRootState(['handRaised', 'audioFile']);
 
     if (userInteracted && audioContext === null && AudioContext) {
       audioContext = new AudioContext();

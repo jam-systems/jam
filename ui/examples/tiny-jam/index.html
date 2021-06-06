@@ -35,7 +35,7 @@
       };
 
       const [state, api] = createJam({jamConfig});
-      const {onState, setState, enterRoom, leaveRoom, createRoom} = api;
+      const {onState, setProps, enterRoom, leaveRoom, createRoom} = api;
       window.state = state;
 
       let input = document.querySelector('#input');
@@ -50,7 +50,7 @@
         () => {
           potentialRoomId = location.hash.slice(1) ?? null;
           if (potentialRoomId !== state.roomId) {
-            setState('roomId', null);
+            setProps('roomId', null);
             input.value = potentialRoomId ?? '';
             renderUI(state);
           }
@@ -67,10 +67,10 @@
         e.preventDefault();
         if (state.inRoom) {
           leaveRoom();
-          setState('roomId', null);
+          setProps('roomId', null);
         } else {
           createRoom(potentialRoomId, {stageOnly: true});
-          setState('roomId', potentialRoomId);
+          setProps('roomId', potentialRoomId);
           enterRoom(potentialRoomId);
           location.hash = potentialRoomId;
         }

@@ -29,7 +29,7 @@ import {addAdmin, removeAdmin} from './admin';
 // TODO: it would be nice to be able to await some of these actions
 // with the promise resolving as soon as state-tree ran with the updated params
 // because otherwise it is hard to handle some of our API functions that assume existing state
-// e.g. setState('roomId', ...) -> wait until next tick when state.roomId has updated -> addSpeaker(peerId)
+// e.g. setProps('roomId', ...) -> wait until next tick when state.roomId has updated -> addSpeaker(peerId)
 // not waiting would potentially add a speaker to a different room
 
 export {createJam};
@@ -37,8 +37,9 @@ export {importRoomIdentity} from './identity';
 export {is, set, on, update};
 export {until} from '../lib/state-utils';
 
-function createApi(state, dispatch) {
+function createApi(state, dispatch, setProps) {
   return {
+    setProps,
     setState(...args) {
       is(state, ...args);
     },
@@ -87,12 +88,12 @@ function createJam({jamConfig, cachedRooms} = {}) {
       populateApiCache(`/rooms/${roomId}`, cachedRooms[roomId]);
     }
   }
-  const {state, dispatch} = declareStateRoot(AppState, {...defaultState}, [
-    'roomId',
-    'userInteracted',
-    'micMuted',
-  ]);
-  const api = createApi(state, dispatch);
+  const {state, dispatch, setProps} = declareStateRoot(
+    AppState,
+    {roomId: null, userInteracted: false, micMuted: false},
+    {defaultState}
+  );
+  const api = createApi(state, dispatch, setProps);
   return [state, api];
 }
 
@@ -149,11 +150,14 @@ function AppState() {
 
     declare(Reactions, {swarm});
 
+    // TODO
     userInteracted = userInteracted || !!inRoom;
     return merge(
       {
         swarm,
+        roomId,
         userInteracted,
+        micMuted,
         inRoom,
         room,
         iAmSpeaker,
@@ -162,7 +166,14 @@ function AppState() {
         myId,
         myIdentity,
       },
-      declare(AudioState, {myId, inRoom, iAmSpeaker, swarm, userInteracted})
+      declare(AudioState, {
+        myId,
+        inRoom,
+        iAmSpeaker,
+        swarm,
+        userInteracted,
+        micMuted,
+      })
     );
   };
 }

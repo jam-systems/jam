@@ -5,13 +5,13 @@ main();
 
 async function main() {
   // mount Jam
-  const [state, {setState, enterRoom, createRoom}] = createJam();
+  const [state, {setProps, enterRoom, createRoom}] = createJam();
 
   // try to create room
   createRoom(roomId, {stageOnly: true});
 
   // set room id
-  setState({roomId});
+  setProps({roomId});
 
   // enter room
   enterRoom(roomId);

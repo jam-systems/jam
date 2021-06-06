@@ -6,7 +6,7 @@ import Container from './Container';
 import {useJam} from '../jam-core-react';
 
 export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
-  const [, {enterRoom, setState, createRoom}] = useJam();
+  const [, {enterRoom, setProps, createRoom}] = useJam();
 
   // note: setters are currently unused because form is hidden
   let [name, setName] = useState(newRoom.name ?? '');
@@ -21,7 +21,7 @@ export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
 
   let submit = e => {
     e.preventDefault();
-    setState('userInteracted', true);
+    setProps('userInteracted', true);
     let roomId;
     if (name) {
       let slug = slugify(name, {lower: true, strict: true});

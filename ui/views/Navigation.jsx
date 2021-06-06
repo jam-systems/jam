@@ -34,7 +34,7 @@ export default function Navigation({
   editSelf,
   setEditSelf,
 }) {
-  const [state, {leaveRoom, sendReaction, retryMic}] = useJam();
+  const [state, {leaveRoom, sendReaction, retryMic, setProps}] = useJam();
   let [myAudio, micMuted, handRaised, iSpeak] = use(state, [
     'myAudio',
     'micMuted',
@@ -54,7 +54,7 @@ export default function Navigation({
 
   let talk = () => {
     if (micOn) {
-      is(state, 'micMuted', !micMuted);
+      setProps('micMuted', !micMuted);
     } else {
       retryMic();
     }
