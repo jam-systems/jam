@@ -1,10 +1,9 @@
-import {set} from 'minimal-state';
 import {useEffect} from 'react';
-import {useJamState} from './JamContext';
+import {useJam} from './JamContext';
 
 // unmute on space bar if currently muted
 export function usePushToTalk() {
-  const state = useJamState();
+  const [state, {setProps}] = useJam();
   useEffect(() => {
     let keys = [' ', 'Spacebar'];
     let isPressingKey = false;
@@ -19,7 +18,7 @@ export function usePushToTalk() {
         isPressingKey = true;
         event.stopPropagation();
         event.preventDefault();
-        set(state, 'micMuted', false);
+        setProps('micMuted', false);
       }
     };
     let muteOnSpaceUp = event => {
@@ -33,7 +32,7 @@ export function usePushToTalk() {
         isPressingKey = false;
         event.stopPropagation();
         event.preventDefault();
-        set(state, 'micMuted', true);
+        setProps('micMuted', true);
       }
     };
     document.addEventListener('keydown', unmuteOnSpaceDown);
@@ -42,5 +41,5 @@ export function usePushToTalk() {
       document.removeEventListener('keydown', unmuteOnSpaceDown);
       document.removeEventListener('keyup', muteOnSpaceUp);
     };
-  }, [state]);
+  }, [state, setProps]);
 }
