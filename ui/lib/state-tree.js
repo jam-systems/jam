@@ -17,8 +17,6 @@ import causalLog from './causal-log';
     or, if updates to root are made sufficiently fine-grained, possibly don't block
     non-changes to state in root (but first approach is cleaner)
 
-  - element unmount should be recursive, clean up its children
-
   - use a dedicated class for Fragment for efficiency (low priority, because a mid-sized full initial render
     without side effects turns out to only take a couple of ms)
 
@@ -214,6 +212,9 @@ function cleanup(element) {
   if (renderRoot !== null) {
     unsubscribeAll(renderRoot.actionSubs, element);
     unsubscribeAll(renderRoot.stateSubs, element);
+  }
+  for (let child of element.children) {
+    cleanup(child);
   }
 }
 
