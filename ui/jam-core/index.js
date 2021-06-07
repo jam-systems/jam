@@ -115,11 +115,13 @@ function AppState() {
     let [isJoinRoom, joinedRoomId] = useAction(actions.JOIN);
     if (!roomId || (closed && !iAmModerator)) {
       inRoom = null;
-    } else if (isJoinRoom) {
-      inRoom = joinedRoomId;
-    }
-    if (autoJoin && hasRoom) {
-      inRoom = roomId;
+    } else {
+      if (isJoinRoom) {
+        inRoom = joinedRoomId;
+      }
+      if (autoJoin && hasRoom) {
+        inRoom = roomId;
+      }
     }
 
     let [isLeaveStage] = useAction(actions.LEAVE_STAGE);
