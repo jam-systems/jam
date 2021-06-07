@@ -67,6 +67,7 @@ function createApi(state, dispatch, setProps) {
     leaveStage: () => dispatch(actions.LEAVE_STAGE),
     sendReaction: reaction => dispatch(actions.REACTION, reaction),
     retryMic: () => dispatch(actions.RETRY_MIC),
+    retryAudio: () => dispatch(actions.RETRY_AUDIO),
   };
 }
 

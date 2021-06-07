@@ -1,9 +1,18 @@
 import {addLocalStream} from '../lib/swarm';
-import {useState, declare, use, useRootState, useOn} from '../lib/state-tree';
+import {
+  useState,
+  declare,
+  use,
+  useRootState,
+  useOn,
+  useAction,
+} from '../lib/state-tree';
 import Microphone from './audio/Microphone';
 import AudioFile from './audio/AudioFile';
 import PlayingAudio from './audio/PlayingAudio';
 import VolumeMeter from './audio/VolumeMeter';
+import {is} from 'minimal-state';
+import {actions} from './state';
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 
 // TODO: could we use AudioContext.onstatechange to detect cases where the the ability to play audio is lost?
@@ -14,6 +23,7 @@ function AudioState({swarm}) {
   const state = useRootState();
   const audioElements = {}; // {peerId: HTMLAudioElement}
   let audioContext = null;
+  let audioContextStarted = false;
 
   // not clear whether this improves anything for Safari, could try to remove
   // creates lots of unnecessary audio elements in rooms with large audience
@@ -32,9 +42,32 @@ function AudioState({swarm}) {
     micMuted,
   }) {
     let [handRaised, audioFile] = useRootState(['handRaised', 'audioFile']);
+    let remoteStreams = use(swarm, 'remoteStreams');
 
-    if (userInteracted && audioContext === null && AudioContext) {
-      audioContext = new AudioContext();
+    if (audioContext === null && AudioContext) {
+      let shouldHaveAudioContext =
+        userInteracted || (inRoom && (iAmSpeaker || remoteStreams.length > 0));
+      if (shouldHaveAudioContext) {
+        audioContext = new AudioContext();
+        let now = Date.now();
+        let onAudioContextState = () => {
+          if (audioContext.state === 'running') {
+            audioContextStarted = true;
+            console.warn('audioContext started after', Date.now() - now);
+          }
+        };
+        audioContext.addEventListener('statechange', onAudioContextState);
+        setTimeout(() => {
+          audioContext.removeEventListener('statechange', onAudioContextState);
+          if (!audioContextStarted) {
+            is(state, 'audioPlayError', true);
+          }
+        }, 1000);
+      }
+    }
+    let [isRetrySound] = useAction(actions.RETRY_AUDIO);
+    if (isRetrySound && audioContext && !audioContextStarted) {
+      audioContext.resume();
     }
 
     let shouldHaveMic = !!(inRoom && (iAmSpeaker || handRaised));
@@ -53,7 +86,6 @@ function AudioState({swarm}) {
 
     let soundMuted = !inRoom || (iAmSpeaker && !hasRequestedOnce);
 
-    let remoteStreams = use(swarm, 'remoteStreams');
     remoteStreams.map(({peerId, stream}) =>
       declare(PlayingAudio, {
         key: peerId,

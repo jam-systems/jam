@@ -33,5 +33,6 @@ export const actions = {
   JOIN: Action('join'),
   LEAVE_STAGE: Action('leave-stage'),
   RETRY_MIC: Action('retry-mic'),
+  RETRY_AUDIO: Action('retry-audio'),
   REACTION: Action('reaction'),
 };

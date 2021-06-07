@@ -1,8 +1,8 @@
 import React from 'react';
 import {Modal, ShowModal} from './Modal';
 import {PrimaryButton} from './Button';
-import {useRootState, declare, dispatch} from '../lib/state-tree';
-import {useJamState} from '../jam-core-react';
+import {useRootState, declare} from '../lib/state-tree';
+import {useJam} from '../jam-core-react';
 import {set} from 'use-minimal-state';
 
 export function ShowInteractionModal() {
@@ -14,7 +14,7 @@ export function ShowInteractionModal() {
 }
 
 export default function InteractionModal({close}) {
-  const state = useJamState();
+  const [state, {retryAudio, setProps}] = useJam();
   return (
     <Modal close={close}>
       <h1>Allow playing sound</h1>
@@ -25,7 +25,8 @@ export default function InteractionModal({close}) {
         <PrimaryButton
           onClick={() => {
             set(state, 'audioPlayError', false);
-            dispatch(state, 'retry-audio-play');
+            setProps({userInteracted: true});
+            retryAudio();
             close();
           }}
         >

@@ -5,6 +5,7 @@ import {useDidChange} from '../../lib/state-utils';
 import {declare, useRootState, useAction} from '../../lib/state-tree';
 import {userAgent} from '../../lib/user-agent';
 import VolumeMeter from './VolumeMeter';
+import {actions} from '../state';
 
 export default function PlayingAudio({audioElements, peerId, soundMuted}) {
   const state = useRootState();
@@ -53,7 +54,7 @@ export default function PlayingAudio({audioElements, peerId, soundMuted}) {
       });
     }
 
-    let [isRetrySound] = useAction('retry-audio-play');
+    let [isRetrySound] = useAction(actions.RETRY_AUDIO);
     if (isRetrySound) {
       if (audio.paused) play(audio).catch(console.warn);
     }
