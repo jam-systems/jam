@@ -14,5 +14,7 @@ async function main() {
   setProps({roomId});
 
   // enter room
-  enterRoom(roomId);
+  await enterRoom(roomId);
+
+  console.log(state.inRoom === roomId);
 }

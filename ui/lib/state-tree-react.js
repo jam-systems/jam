@@ -54,7 +54,7 @@ function useStateComponent(Component, props, stableProps) {
   React.useEffect(() => {
     let {element} = stable;
     on(element.fragment, () => {
-      log('STATE-TREE React update', stable.component.name);
+      log('React update', stable.component.name);
       stable.shouldRun = false;
       forceUpdate(n => n + 1);
     });

@@ -62,21 +62,11 @@ function createApi(state, dispatch, setProps) {
 
     updateInfo: info => updateInfo(state, info),
 
-    enterRoom(roomId) {
-      dispatch(actions.JOIN, roomId);
-    },
-    leaveRoom() {
-      dispatch(actions.JOIN, null);
-    },
-    leaveStage() {
-      dispatch(actions.LEAVE_STAGE);
-    },
-    sendReaction(reaction) {
-      dispatch(actions.REACTION, reaction);
-    },
-    retryMic() {
-      dispatch(actions.RETRY_MIC);
-    },
+    enterRoom: roomId => dispatch(actions.JOIN, roomId),
+    leaveRoom: () => dispatch(actions.JOIN, null),
+    leaveStage: () => dispatch(actions.LEAVE_STAGE),
+    sendReaction: reaction => dispatch(actions.REACTION, reaction),
+    retryMic: () => dispatch(actions.RETRY_MIC),
   };
 }
 

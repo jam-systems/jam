@@ -9,12 +9,6 @@ import causalLog from './causal-log';
 
 /* TODOs:
 
-  - when batching component updates we have to enforce a strict order from top to bottom in hierarchy.
-    if a child renders before a parent in a batched update, it can happen that the child misses an update to its props
-    and renders (e.g. after an action) with wrong props.
-
-  - be able to await render-triggering actions (dispatch, setProps)
-
   - enable more Component return values
 
   - understand performance & optimize where possible
@@ -61,7 +55,7 @@ export {
 // INTERNAL exports for state-tree-react
 export {root, _run, log, cleanup};
 
-const root = {children: []};
+const root = {children: [], level: -1};
 let current = root;
 let renderRoot = null;
 let nUses = 0;
@@ -148,6 +142,7 @@ function _run(
       uses: [],
       renderTime,
       parent: current,
+      level: current.level + 1,
       root: renderRoot,
       isUsed,
       isEvent,
@@ -160,7 +155,7 @@ function _run(
       element.root = element;
       renderRoot = element;
     }
-    log('STATE-TREE', 'mounting new element', element.component.name);
+    log('mounting new element', element.component.name);
     current.children.push(element);
   } else {
     if (props !== null) element.props = props;
@@ -211,7 +206,7 @@ function _run(
 }
 
 function cleanup(element) {
-  log('STATE-TREE', 'unmounting element', element.component.name);
+  log('unmounting element', element.component.name);
   clear(element.fragment);
   for (let use of element.uses) {
     use?.cleanup?.();
@@ -235,19 +230,13 @@ function declareStateRoot(Component, props = null, {state, defaultState = {}}) {
   });
   const rootFragment = rootElement.fragment;
   let result = rootFragment[0];
-  log(
-    'STATE-TREE',
-    'initial root render returned',
-    result,
-    'after',
-    Date.now() - renderTime
-  );
+  log('initial root render returned', result, 'after', Date.now() - renderTime);
   // TODO: could it be problematic here that we don't update unchanged values, can there be stable sub-objects?
   is(state, result);
   renderRoot = null;
 
   on(rootFragment, (result, keys) => {
-    log('STATE-TREE', 'root fragment update triggered!', result, keys);
+    log('root fragment update triggered!', result, keys);
     // TODO: could it be problematic here that we don't update unchanged values, can there be stable sub-objects?
     if (keys === undefined) is(state, result);
     else {
@@ -272,9 +261,8 @@ function declareStateRoot(Component, props = null, {state, defaultState = {}}) {
     }
   });
 
-  const dispatch = (type, payload) => {
+  const dispatch = (type, payload) =>
     dispatchFromRoot(rootElement, type, payload);
-  };
   on(state, 'dispatch', dispatch);
   return {
     state,
@@ -299,82 +287,84 @@ function sameProps(prevProps, props) {
 // rerendering
 function queueUpdate(caller, reason = '') {
   log('queuing update', caller.component.name, reason);
-  let rootElement = markForUpdate(caller);
-  // rerender root
-  queueMicrotask(() => {
-    if (!updateSet.has(rootElement)) return;
-    log(
-      'STATE-TREE',
-      'render caused by queueUpdate',
-      caller.component.name,
-      reason
-    );
-    let result = rerender(rootElement);
-    log(
-      'STATE-TREE',
-      'render returned',
-      result,
-      'after',
-      Date.now() - renderTime
-    );
+  markForUpdate(caller);
+  return Promise.resolve().then(() => {
+    updateAll(caller.component.name + ' ' + reason);
   });
 }
 
+function updateAll(reason) {
+  if (updateSet.size === 0) {
+    // console.error('update obsolete: all elements updated', reason);
+    return;
+  }
+  log('tree update caused by', reason);
+  let orderedElements = [...updateSet].sort(
+    (el1, el2) => el1.level - el2.level
+  );
+  // console.error(
+  //   'orderedElements',
+  //   orderedElements.map(el => el.component.name).join(', ')
+  // );
+  for (let element of orderedElements) {
+    if (!updateSet.has(element)) {
+      // console.error('update obsolete: element already updated', reason);
+      continue;
+    }
+    renderRoot = element.root;
+    renderTime = Date.now();
+    log('rerendering', element.component.name);
+    let [, updateKeys] = _run(element.component, element.props, {element});
+    log('render took', Date.now() - renderTime);
+    let result = element.fragment[0];
+    // TODO: rerendered element should already provide fine-grained update info (keys)
+    emit(element.fragment, result, updateKeys);
+    renderRoot = null;
+  }
+}
+
 function markForUpdate(element) {
-  // log('markForUpdate', element.component.name);
   let parent = element;
-  // log('adding updateSet', parent.component.name);
   updateSet.add(parent);
   if (!parent.isUsed) return parent;
   while (parent.parent !== root) {
     parent = parent.parent;
-    // log('adding updateSet', parent.component.name);
     updateSet.add(parent);
     if (!parent.isUsed) return parent;
   }
   return parent;
 }
 
-function rerender(element) {
-  renderRoot = element.root;
-  renderTime = Date.now();
-  log('STATE-TREE', 'rerendering', element.component.name);
-  let [, updateKeys] = _run(element.component, element.props, {element});
-  let result = element.fragment[0];
-  // TODO: rerendered element should already provide fine-grained update info (keys)
-  emit(element.fragment, result, updateKeys);
-
-  renderRoot = null;
-  return result;
-}
-
 function setProps(element, ...args) {
-  log('STATE-TREE setProps', ...args);
+  log('setProps', ...args);
   let newProps = {...element.props};
   set(newProps, ...args);
   if (sameProps(element.props, newProps)) return;
   element.props = newProps;
-  queueUpdate(element, 'setProps');
+  return queueUpdate(element, 'setProps');
 }
 
 function dispatch(state, type, payload) {
   emit(state, 'dispatch', type, payload);
 }
 
-function dispatchFromRoot(rootElement, type, payload) {
-  log('STATE-TREE', 'dispatching', rootElement.component.name, String(type));
+async function dispatchFromRoot(rootElement, type, payload) {
+  log('dispatching', rootElement.component.name, String(type));
 
   let subscribers = rootElement.actionSubs.get(type);
   if (subscribers === undefined || subscribers.size === 0) return;
 
+  let promises = [];
   for (let element of subscribers) {
     for (let use of element.uses) {
       if (use.action === type) {
         use.push(payload);
-        queueUpdate(element, 'dispatch ' + type);
+        let promise = queueUpdate(element, 'dispatch ' + type);
+        promises.push(promise);
       }
     }
   }
+  return Promise.all(promises);
 }
 
 function subscribe(subscriptions, type, element) {
@@ -702,5 +692,5 @@ function debugStateTree() {
 
 function log(...args) {
   if (doLog === false) return;
-  causalLog(...args);
+  causalLog('STATE-TREE', ...args);
 }
