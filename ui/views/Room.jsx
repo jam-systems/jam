@@ -32,6 +32,7 @@ export default function Room({room, roomId}) {
     iSpeak,
     iModerate,
     myIdentity,
+    inRoom,
   ] = use(state, [
     'reactions',
     'handRaised',
@@ -40,6 +41,7 @@ export default function Room({room, roomId}) {
     'iAmSpeaker',
     'iAmModerator',
     'myIdentity',
+    'inRoom',
   ]);
   let [peers, peerState, myPeerState] = use(state.swarm, [
     'stickyPeers',
@@ -48,7 +50,7 @@ export default function Room({room, roomId}) {
   ]);
 
   let myInfo = myIdentity.info;
-  let hasEnteredRoom = myPeerState?.inRoom;
+  let hasEnteredRoom = inRoom === roomId;
 
   let [editRole, setEditRole] = useState(null);
   let [editSelf, setEditSelf] = useState(false);
