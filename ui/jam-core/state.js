@@ -1,3 +1,4 @@
+import {Action} from '../lib/state-tree';
 export {defaultState};
 
 const defaultState = {
@@ -29,8 +30,8 @@ const defaultState = {
 };
 
 export const actions = {
-  JOIN: 'join',
-  LEAVE_STAGE: 'leave-stage',
-  RETRY_MIC: 'retry-mic',
-  REACTION: 'reaction',
+  JOIN: Action('join'),
+  LEAVE_STAGE: Action('leave-stage'),
+  RETRY_MIC: Action('retry-mic'),
+  REACTION: Action('reaction'),
 };

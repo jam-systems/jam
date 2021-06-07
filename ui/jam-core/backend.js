@@ -102,6 +102,7 @@ async function createRoom(
   };
   let ok = await post(state, `/rooms/${roomId}`, room);
   if (ok) populateCache(API + `/rooms/${roomId}`, room);
+  // if (ok) setTimeout(() => populateCache(API + `/rooms/${roomId}`, room), 0);
   return ok;
 }
 

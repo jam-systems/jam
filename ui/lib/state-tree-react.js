@@ -3,6 +3,9 @@ import {on, use as useMinimalState} from 'use-minimal-state';
 import {cleanup, log, root, _run} from './state-tree';
 
 /* TODOs:
+
+  - make components in use() be able to useAction
+
   - add more API for using state-tree inside React components, i.e.
     * useStateRoot(Component, props) which is like declareStateRoot & updates React component w/ state
     * something like declare() for self-contained effects which can take props but don't return anything

@@ -17,15 +17,6 @@ import causalLog from './causal-log';
 
   - enable more Component return values
 
-  - improve actions/events as component input:
-    * enable any component tree to handle actions, not just the declareRootState variant
-    * dispatch() should queue an update which can be batched w/ other updates but *guarantees* that the component
-      is called once w/ the action & payload.
-    * multiple dispatches to the same action w/ different payloads should render the component multiple times
-      e.g. queue of actions is stored in use array, useAction calls queueUpdate
-    * for the retry-mic use case / encapsulated events: actions should optionally be a unique object, Action(type), that can
-      be exported (to avoid global strings which always have latent potential for conflicts)
-    
   - understand performance & optimize where possible
 
   - stale update problem: understand in what cases object identity of state properties must change.
@@ -52,7 +43,6 @@ export {
   declareStateRoot,
   dispatch,
   useAction,
-  useActions,
   useDispatch,
   useRootState,
   useExternalState,
@@ -62,6 +52,7 @@ export {
   useMemo,
   useCallback,
   useUnmount,
+  Action,
   Atom,
   merge,
   debugStateTree,
@@ -75,7 +66,6 @@ let current = root;
 let renderRoot = null;
 let nUses = 0;
 let renderTime = 0;
-let currentAction = [undefined, undefined];
 
 const updateSet = new Set();
 
@@ -372,36 +362,19 @@ function dispatch(state, type, payload) {
 }
 
 function dispatchFromRoot(rootElement, type, payload) {
-  log('STATE-TREE', 'queuing dispatch', rootElement.component.name, type);
-  queueMicrotask(() => {
-    let subscribers = rootElement.actionSubs.get(type);
-    if (subscribers === undefined || subscribers.size === 0) return;
+  log('STATE-TREE', 'dispatching', rootElement.component.name, String(type));
 
-    let actionRoots = new Set();
-    for (let element of subscribers) {
-      actionRoots.add(markForUpdate(element));
-    }
-    currentAction = [type, payload];
-    // TODO: we'd like to use a batched update here as well,
-    // but don't know yet how to ensure rendering of each subscribed component *with the currentAction context*
-    // in a way other updates can't interfere.
-    // a dispatched action must definitely show up in each subscribed component no matter what.
+  let subscribers = rootElement.actionSubs.get(type);
+  if (subscribers === undefined || subscribers.size === 0) return;
 
-    // instead of the global variable context we we need something more like hooks,
-    // where a value is saved to the component to be used for the next render, to then be removed
-    for (let element of actionRoots) {
-      log('STATE-TREE', 'render caused by dispatch', type);
-      let result = rerender(element);
-      log(
-        'STATE-TREE',
-        'render returned',
-        result,
-        'after',
-        Date.now() - renderTime
-      );
+  for (let element of subscribers) {
+    for (let use of element.uses) {
+      if (use.action === type) {
+        use.push(payload);
+        queueUpdate(element, 'dispatch ' + type);
+      }
     }
-    currentAction = [undefined, undefined];
-  });
+  }
 }
 
 function subscribe(subscriptions, type, element) {
@@ -419,37 +392,52 @@ function unsubscribeAll(subscriptions, element) {
   }
 }
 
-// TODO maybe more efficient to memo the next 2-3 hooks, like useState (not sure though)
-// note that the next two need to be rendered inside a state root
+// this will be useful for typing the payload
+function Action(type) {
+  return {type, toString: () => type};
+}
+
+// the next two need to be rendered inside an {isRoot: true} component
 function useAction(type) {
-  if (current === root)
-    throw Error('useAction can only be called during render');
-  subscribe(renderRoot.actionSubs, type, current);
-  if (currentAction[0] === type) {
-    return [true, currentAction[1]];
+  if (current === root) throw Error('Hooks can only be called during render');
+  let actionQueue = current.uses[nUses];
+  if (actionQueue === undefined) {
+    actionQueue = [];
+    actionQueue.action = type;
+    subscribe(renderRoot.actionSubs, type, current);
+    current.uses[nUses] = actionQueue;
+  }
+  nUses++;
+  if (actionQueue.length > 0) {
+    let payload = actionQueue.shift();
+    if (actionQueue.length > 0) {
+      queueUpdate(current, 'queued dispatch ' + type);
+    }
+    return [true, payload];
   } else {
     return [false, undefined];
   }
 }
 
-function useActions(...types) {
-  if (current === root)
-    throw Error('useAction can only be called during render');
-  for (let type of types) {
-    subscribe(renderRoot.actionSubs, type, current);
-  }
-  if (types.includes(currentAction[0])) {
-    return [currentAction[0], currentAction[1]];
-  } else {
-    return [undefined, undefined];
-  }
-}
+// function useActions(...types) {
+//   if (current === root)
+//     throw Error('useAction can only be called during render');
+//   for (let type of types) {
+//     subscribe(renderRoot.actionSubs, type, current);
+//   }
+//   if (types.includes(currentAction[0])) {
+//     return [currentAction[0], currentAction[1]];
+//   } else {
+//     return [undefined, undefined];
+//   }
+// }
 
 function useDispatch() {
   let callerRoot = renderRoot;
   return (type, payload) => dispatchFromRoot(callerRoot, type, payload);
 }
 
+// TODO maybe more efficient to memo this hook, like useState (not sure though)
 function useRootState(keys) {
   if (current === root) throw Error('Hooks can only be called during render');
   let {state} = renderRoot;
@@ -648,10 +636,10 @@ function setObjectFragment(fragment, obj) {
     if (isFragment(prop)) {
       pureObj[key] = prop[0];
       // these listeners should be a class method on (Object)Fragment
-      prop._deps.set(fragment, (value, _keys) => {
+      prop._deps.set(fragment, value => {
         pureObj[key] = value;
         // TODO: should object identity change?
-        // TODO: forward deeply nested update info, i.e. use _keys?
+        // TODO: forward deeply nested update info, i.e. use second param?
         emit(fragment, pureObj, [key]);
       });
     } else {

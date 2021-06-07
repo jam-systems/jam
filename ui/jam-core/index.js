@@ -97,10 +97,6 @@ function createJam({jamConfig, cachedRooms} = {}) {
   return [state, api];
 }
 
-// FIXME: there is no user interaction before playing audio in /s rooms
-// also, the code below has the wrong assumption that being in a room implies a previous user interaction
-// => audio context fails to start, no speaking rings or sound
-
 function AppState() {
   let inRoom = null;
   let leftStage = false;
@@ -150,8 +146,6 @@ function AppState() {
 
     declare(Reactions, {swarm});
 
-    // TODO
-    userInteracted = userInteracted || !!inRoom;
     return merge(
       {
         swarm,

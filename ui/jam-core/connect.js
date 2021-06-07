@@ -73,7 +73,6 @@ export function ConnectRoom({myId, myIdentity, swarm}) {
       if (swarm.room === roomId && swarm.hub) return;
       log('connecting room', roomId);
       if (swarm.hub) swarm.disconnect();
-      // make sure peerId is the current one
       swarm.config({myPeerId: myId});
       swarm.connect(roomId);
     } else if ((!shouldConnect || !roomId) && connectedRoomId !== null) {

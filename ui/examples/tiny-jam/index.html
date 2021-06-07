@@ -64,6 +64,7 @@
       });
 
       function submit(e) {
+        setProps({userInteracted: true});
         e.preventDefault();
         if (state.inRoom) {
           leaveRoom();
