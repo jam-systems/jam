@@ -59,6 +59,9 @@ function AudioState({swarm}) {
         audioContext.addEventListener('statechange', onAudioContextState);
         setTimeout(() => {
           audioContext.removeEventListener('statechange', onAudioContextState);
+          if (audioContext.state === 'running') {
+            audioContextStarted = true;
+          }
           if (!audioContextStarted) {
             is(state, 'audioPlayError', true);
           }

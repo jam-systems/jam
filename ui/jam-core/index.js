@@ -117,6 +117,7 @@ function AppState() {
     if (!roomId || (closed && !iAmModerator)) {
       inRoom = null;
     } else {
+      // FIXME: autoJoin rooms can not be left!!!
       if (isJoinRoom) {
         inRoom = joinedRoomId;
       }
