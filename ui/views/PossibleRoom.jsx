@@ -1,7 +1,7 @@
 import React, {createElement, useMemo} from 'react';
 import Room from './Room';
 import {importRoomIdentity} from '../jam-core';
-import {useJam, useRoom} from '../jam-core-react';
+import {useCreateRoom, useJam, useRoom} from '../jam-core-react';
 import StartFromURL from './StartFromURL';
 import {use} from 'use-minimal-state';
 
@@ -11,8 +11,9 @@ export default function PossibleRoom({
   roomIdentity,
   roomIdentityKeys,
   onError,
+  autoCreate,
 }) {
-  const [state] = useJam();
+  const [state, {enterRoom}] = useJam();
 
   // fetch room
   let actualRoom = use(state, 'room');
@@ -26,14 +27,15 @@ export default function PossibleRoom({
     }
   }, [roomId, roomIdentity, roomIdentityKeys]);
 
-  // if room does not exist, try to create new one
-  // let [roomFromURILoading, roomFromURIError] = useCreateRoom({
-  //   roomId,
-  //   room,
-  //   isLoading,
-  //   newRoom,
-  //   onSuccess: () => enterRoom(roomId),
-  // });
+  // if room does not exist && autoCreate is on, try to create new one
+  let shouldCreate = !room && autoCreate && !isLoading;
+  let [autoCreateLoading, autoCreateError] = useCreateRoom({
+    roomId,
+    room,
+    newRoom,
+    shouldCreate,
+    onSuccess: () => enterRoom(roomId),
+  });
 
   if (isLoading) return null;
   if (room)
@@ -43,8 +45,9 @@ export default function PossibleRoom({
         {...{room: actualRoom, roomId, roomIdentity, roomIdentityKeys}}
       />
     );
+  if (shouldCreate && autoCreateLoading) return null;
 
-  if (roomId.length < 4) {
+  if (roomId.length < 4 || (shouldCreate && autoCreateError)) {
     return typeof onError === 'function'
       ? createElement(onError, {roomId, error: {createRoom: true}})
       : onError || <Error />;

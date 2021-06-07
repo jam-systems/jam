@@ -80,7 +80,7 @@ function createJam({jamConfig, cachedRooms} = {}) {
   }
   const {state, dispatch, setProps} = declareStateRoot(
     AppState,
-    {roomId: null, userInteracted: false, micMuted: false},
+    {roomId: null, userInteracted: false, micMuted: false, autoJoin: false},
     {defaultState}
   );
   const api = createApi(state, dispatch, setProps);
@@ -92,7 +92,7 @@ function AppState() {
   let leftStage = false;
   const swarm = Swarm();
 
-  return function AppState({roomId, userInteracted, micMuted}) {
+  return function AppState({roomId, userInteracted, micMuted, autoJoin}) {
     let {myId, myIdentity} = use(Identity, {roomId});
 
     let {room, hasRoom, iAmSpeaker, iAmModerator} = use(RoomState, {
@@ -117,6 +117,9 @@ function AppState() {
       inRoom = null;
     } else if (isJoinRoom) {
       inRoom = joinedRoomId;
+    }
+    if (autoJoin && hasRoom) {
+      inRoom = roomId;
     }
 
     let [isLeaveStage] = useAction(actions.LEAVE_STAGE);

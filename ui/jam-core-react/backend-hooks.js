@@ -19,18 +19,12 @@ function useApiQuery(path, {dontFetch = false, fetchOnMount = false}) {
   return [data, isLoading, status];
 }
 
-function useCreateRoom({
-  roomId,
-  room,
-  isLoading: isRoomLoading,
-  newRoom,
-  onSuccess,
-}) {
+function useCreateRoom({roomId, room, shouldCreate, newRoom, onSuccess}) {
   const [, {createRoom}] = useJam();
   let [isError, setError] = useState(false);
   let [isLoading, setLoading] = useState(true);
   useEffect(() => {
-    if (roomId && !room && !isRoomLoading) {
+    if (roomId && !room && shouldCreate) {
       (async () => {
         let ok = await createRoom(roomId, newRoom);
         setLoading(false);
@@ -38,7 +32,7 @@ function useCreateRoom({
         else setError(true);
       })();
     }
-  }, [room, roomId, isRoomLoading]);
+  }, [room, roomId, shouldCreate]);
   return [isLoading, isError];
 }
 

@@ -19,13 +19,6 @@ import causalLog from './causal-log';
 
   - use a dedicated class for Fragment for efficiency (low priority, because a mid-sized full initial render
     without side effects turns out to only take a couple of ms)
-
-  - NOT SURE ABOUT THIS: components could be able to register methods which can update their state
-    the root component should return these methods in their own object (not mixed with state)
-    this enables prettier APIs than ones driven by dispatch / set
-    declareMethods({name: function}) / declareAPI / useMethods
-    ideally throw error if two components try to register same method name...
-    + useRootMethods to get at all these methods
 */
 
 export {

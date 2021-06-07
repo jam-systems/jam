@@ -48,6 +48,7 @@ function JamUI({style, className, route = null, dynamicConfig = {}, ...props}) {
           <PossibleRoom
             roomId={route}
             newRoom={dynamicConfig.room}
+            autoCreate={!!dynamicConfig.autoCreate}
             roomIdentity={dynamicConfig.identity}
             roomIdentityKeys={dynamicConfig.keys}
             onError={({error}) => (
@@ -61,10 +62,14 @@ function JamUI({style, className, route = null, dynamicConfig = {}, ...props}) {
         );
     }
   })();
+
   // set/unset room id
   useEffect(() => {
+    if (dynamicConfig.autoJoin !== undefined) {
+      setProps('autoJoin', dynamicConfig.autoJoin);
+    }
     setProps('roomId', roomId);
-  }, [roomId]);
+  }, [roomId, dynamicConfig.autoJoin]);
 
   // toggle debugging
   useEffect(() => {
