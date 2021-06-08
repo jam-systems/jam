@@ -17,12 +17,22 @@ import {
 } from './swarm-peer';
 import {removePeerState, updatePeerState} from './swarm-state';
 
+/* TODO: add SFU
+
+SFU actions:
+
+- set up everything => connect()
+- send own stream to server => part of addLocalStream()
+- listen on streams from server => connect(), handle like 'ontrack', needs to know from which peer
+
+*/
+
 // public API starts here
 
 function Swarm(initialConfig) {
   const swarm = {
     // state
-    stickyPeers: {}, // {peerId: {connections: {connId: {lastFailure: number, pc: SimplePeer, timeout, peerId, connId}}}
+    peers: {}, // {peerId: {connections: {connId: {lastFailure: number, pc: SimplePeer, timeout, peerId, connId}}}
     myPeer: {connections: {}}, // other sessions of same peer
     myPeerId: null,
     connected: false,
@@ -36,7 +46,7 @@ function Swarm(initialConfig) {
     debug: false,
     hub: null,
     localStreams: {},
-    reduceState: (_states, _current, latest, _findLatest) => latest,
+    reduceState: (_states, _current, latest) => latest,
     sharedStateTime: Date.now(),
     connectState: INITIAL,
     // events
@@ -57,7 +67,7 @@ function Swarm(initialConfig) {
     config(swarm, initialConfig);
   }
 
-  on(swarm.myPeerState, (_key, _value) => {
+  on(swarm.myPeerState, () => {
     let time = Date.now();
     swarm.sharedStateTime = time;
     swarm.hub?.broadcast('all', {
@@ -196,8 +206,8 @@ function connect(swarm, room) {
     connectPeer(connection);
   }
 
-  on(hub, 'peers', peers => {
-    for (let id of peers) {
+  on(hub, 'peers', peers_ => {
+    for (let id of peers_) {
       if (id === myCombinedPeerId) continue;
       // note: the other peer will get add-peer and try to connect as well
       initializeConnection(id);
@@ -265,15 +275,15 @@ function disconnectUnwanted(swarm) {
 
 function initializePeer(swarm, peerId) {
   if (peerId === swarm.myPeerId) return;
-  if (swarm.stickyPeers[peerId] === undefined) {
-    swarm.stickyPeers[peerId] = {connections: {}};
-    update(swarm, 'stickyPeers');
+  if (swarm.peers[peerId] === undefined) {
+    swarm.peers[peerId] = {connections: {}};
+    update(swarm, 'peers');
     emit(swarm, 'newPeer', peerId);
   }
 }
 
 function getPeer(swarm, peerId) {
-  return peerId === swarm.myPeerId ? swarm.myPeer : swarm.stickyPeers[peerId];
+  return peerId === swarm.myPeerId ? swarm.myPeer : swarm.peers[peerId];
 }
 
 function getConnection(swarm, peerId, connId) {
@@ -306,7 +316,7 @@ function removeConnection({swarm, peerId, connId}) {
   }
   let nConnections = Object.keys(peer?.connections || {}).length;
   if (nConnections === 0 && peerId !== swarm.myPeerId) {
-    delete swarm.stickyPeers[peerId];
+    delete swarm.peers[peerId];
     let {remoteStreams} = swarm;
     if (remoteStreams.find(streamObj => streamObj.peerId === peerId)) {
       set(
@@ -316,17 +326,17 @@ function removeConnection({swarm, peerId, connId}) {
       );
     }
   }
-  update(swarm, 'stickyPeers');
+  update(swarm, 'peers');
   removePeerState({swarm, peerId, connId});
 }
 
 function* yieldConnections(swarm) {
-  let {stickyPeers, myPeer} = swarm;
+  let {peers, myPeer} = swarm;
   for (let connId in myPeer.connections) {
     yield myPeer.connections[connId];
   }
-  for (let peerId in stickyPeers) {
-    let {connections} = stickyPeers[peerId];
+  for (let peerId in peers) {
+    let {connections} = peers[peerId];
     for (let connId in connections) {
       yield connections[connId];
     }

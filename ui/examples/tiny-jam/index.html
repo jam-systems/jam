@@ -89,8 +89,8 @@
         let speakingText = iAmSpeaker ? 'Speaking' : 'Not speaking';
         let speakingStyle = speaking.has(myId) ? 'color: green;' : '';
 
-        let {stickyPeers, peerState} = swarm;
-        let nJoinedPeers = Object.keys(stickyPeers).filter(
+        let {peers, peerState} = swarm;
+        let nJoinedPeers = Object.keys(peers).filter(
           id => peerState[id]?.inRoom
         ).length;
 

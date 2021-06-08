@@ -22,7 +22,7 @@ function NewModerators({swarm}) {
   let modPeers = new Set();
 
   return function NewModerators({moderators}) {
-    let peers = Object.keys(use(swarm, 'stickyPeers'));
+    let peers = Object.keys(use(swarm, 'peers'));
     let newModPeers;
     [modPeers, newModPeers] = newIntersection(peers, moderators, modPeers);
     if (newModPeers.size > 0) {

@@ -184,7 +184,7 @@ function createPeer(connection, initiator) {
     remoteStreams[i] = {stream, name, peerId};
     set(swarm, 'remoteStreams', remoteStreams);
     emit(swarm, 'stream', stream, name, peer);
-    // update(swarm, 'stickyPeers'); // why? this must have legacy reasons
+    // update(swarm, 'peers'); // why? this must have legacy reasons
   });
 
   peer.on('error', err => {
