@@ -68,6 +68,7 @@ function createApi(state, dispatch, setProps) {
     sendReaction: reaction => dispatch(actions.REACTION, reaction),
     retryMic: () => dispatch(actions.RETRY_MIC),
     retryAudio: () => dispatch(actions.RETRY_AUDIO),
+    autoJoinOnce: () => dispatch(actions.AUTO_JOIN),
   };
 }
 
@@ -91,6 +92,8 @@ function createJam({jamConfig, cachedRooms} = {}) {
 function AppState() {
   let inRoom = null;
   let leftStage = false;
+  let autoJoinCount = 0;
+  let didAutoJoin = false;
   const swarm = Swarm();
 
   return function AppState({roomId, userInteracted, micMuted, autoJoin}) {
@@ -114,14 +117,20 @@ function AppState() {
     declare(ModeratorState, {swarm, moderators});
 
     let [isJoinRoom, joinedRoomId] = useAction(actions.JOIN);
+    let [isAutoJoin] = useAction(actions.AUTO_JOIN);
+    if ((isAutoJoin || (autoJoin && !didAutoJoin)) && autoJoinCount === 0) {
+      didAutoJoin = true;
+      autoJoinCount = 1;
+    }
+
     if (!roomId || (closed && !iAmModerator)) {
       inRoom = null;
     } else {
-      // FIXME: autoJoin rooms can not be left!!!
       if (isJoinRoom) {
         inRoom = joinedRoomId;
       }
-      if (autoJoin && hasRoom) {
+      if (autoJoinCount > 0 && hasRoom) {
+        autoJoinCount--;
         inRoom = roomId;
       }
     }

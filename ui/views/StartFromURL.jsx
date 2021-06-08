@@ -10,17 +10,16 @@ const iOS =
 const macOS = /^Mac/.test(navigator.platform) && navigator.maxTouchPoints === 0;
 
 export default function StartFromURL({roomId, newRoom}) {
-  const [, {setProps, enterRoom, createRoom}] = useJam();
+  const [, {setProps, createRoom, autoJoinOnce}] = useJam();
   let mqp = useMqParser();
 
   let submit = e => {
     e.preventDefault();
     setProps('userInteracted', true);
-
-    (async () => {
-      let ok = await createRoom(roomId, newRoom);
-      if (ok) enterRoom(roomId);
-    })();
+    autoJoinOnce(); // => enter room as soon as create room succeeded
+    // (^ causes room to be entered in the same microtask where also room info updates;
+    // if we await createRoom the microtask queue is already emptied)
+    createRoom(roomId, newRoom);
   };
 
   return (

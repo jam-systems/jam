@@ -35,4 +35,5 @@ export const actions = {
   RETRY_MIC: Action('retry-mic'),
   RETRY_AUDIO: Action('retry-audio'),
   REACTION: Action('reaction'),
+  AUTO_JOIN: Action('auto-join'),
 };
