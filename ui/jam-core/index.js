@@ -26,11 +26,6 @@ import {populateApiCache, createRoom, updateRoom} from './backend';
 import {addAdmin, removeAdmin} from './admin';
 
 /* THE JAM API */
-// TODO: it would be nice to be able to await some of these actions
-// with the promise resolving as soon as state-tree ran with the updated params
-// because otherwise it is hard to handle some of our API functions that assume existing state
-// e.g. setProps('roomId', ...) -> wait until next tick when state.roomId has updated -> addSpeaker(peerId)
-// not waiting would potentially add a speaker to a different room
 
 export {createJam};
 export {importRoomIdentity} from './identity';
