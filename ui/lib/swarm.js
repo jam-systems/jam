@@ -61,7 +61,6 @@ function Swarm(initialConfig) {
     rawPeerState: null,
     peerEvent: {},
     serverEvent: {},
-    anonymous: null,
   };
   swarm.config = (...args) => config(swarm, ...args);
   swarm.connect = (...args) => connect(swarm, ...args);
