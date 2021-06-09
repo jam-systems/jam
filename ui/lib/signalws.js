@@ -124,3 +124,33 @@ function decode(data) {
     return undefined;
   }
 }
+
+// request / response
+
+const REQUEST_TIMEOUT = 20000;
+const clientId = Math.random().toString(32).slice(2, 12);
+const requests = new Map();
+
+let nextRequestId = 0;
+
+function newRequest(timeout = REQUEST_TIMEOUT) {
+  let requestId = `${clientId};${nextRequestId++}`;
+  const request = {id: requestId};
+  request.promise = new Promise((resolve, reject) => {
+    request.accept = data => {
+      clearTimeout(request.timeout);
+      resolve(data);
+    };
+    request.timeout = setTimeout(() => {
+      reject(new Error('request timeout'));
+    }, timeout);
+  });
+  requests.set(requestId, request);
+  return request;
+}
+
+function requestAccepted(requestId, data) {
+  let request = requests.get(requestId);
+  request.accept(data);
+  requests.delete(requestId);
+}
