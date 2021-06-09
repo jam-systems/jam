@@ -1,5 +1,5 @@
 import {Identity, updateInfo} from './identity';
-import {defaultState, actions} from './state';
+import {defaultState, actions, defaultProps} from './state';
 import {AudioState} from './audio';
 import {Reactions} from './reactions';
 import {
@@ -75,11 +75,9 @@ function createJam({jamConfig, cachedRooms} = {}) {
       populateApiCache(`/rooms/${roomId}`, cachedRooms[roomId]);
     }
   }
-  const {state, dispatch, setProps} = declareStateRoot(
-    AppState,
-    {roomId: null, userInteracted: false, micMuted: false, autoJoin: false},
-    {defaultState}
-  );
+  const {state, dispatch, setProps} = declareStateRoot(AppState, defaultProps, {
+    defaultState,
+  });
   const api = createApi(state, dispatch, setProps);
   return [state, api];
 }
@@ -151,7 +149,6 @@ function AppState() {
       {
         swarm,
         roomId,
-        userInteracted,
         micMuted,
         inRoom,
         room,

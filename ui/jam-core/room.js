@@ -54,7 +54,7 @@ const emptyRoom = {
 };
 
 function getCachedRoom(roomId) {
-  if (!roomId) return false;
+  if (!roomId) return null;
   return getCache(`${apiUrl()}/rooms/${roomId}`).data;
 }
 

@@ -25,6 +25,10 @@ SFU actions:
 - send own stream to server => part of addLocalStream()
 - listen on streams from server => connect(), handle like 'ontrack', needs to know from which peer
 
+NOTES:
+first step is sending stream to server instead of peers
+later we can start to avoid webrtc connections entirely
+
 */
 
 // public API starts here

@@ -1,5 +1,12 @@
 import {Action} from '../lib/state-tree';
-export {defaultState};
+export {defaultProps, defaultState};
+
+const defaultProps = {
+  roomId: null,
+  userInteracted: false,
+  micMuted: false,
+  autoJoin: false,
+};
 
 const defaultState = {
   myIdentity: null,
@@ -25,8 +32,6 @@ const defaultState = {
   audioPlayError: false,
 
   speaking: new Set(),
-
-  userInteracted: false,
 };
 
 export const actions = {
