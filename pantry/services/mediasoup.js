@@ -1,6 +1,6 @@
 const mediasoup = require('mediasoup');
 const os = require('os');
-const {sendRequestToPeer, onMessage, onRemovePeer} = require('./ws');
+const {sendRequest, onMessage, onRemovePeer} = require('./ws');
 
 const workers = [];
 const rooms = new Map();
@@ -251,7 +251,7 @@ async function createConsumer(room, {consumerPeer, producerPeer, producer}) {
 
   // Send a request to the remote Peer with Consumer parameters.
   try {
-    await sendRequestToPeer(room.id, consumerPeer.id, 'new-consumer', {
+    await sendRequest(room.id, consumerPeer.id, 'new-consumer', {
       peerId: producerPeer.id,
       producerId: producer.id,
       id: consumer.id,

@@ -28,9 +28,9 @@ export default function signalws({
     is(hub, 'opened', true);
   });
   ws.addEventListener('message', ({data}) => {
-    let msg = decode(data);
+    let msg = parse(data);
     if (msg === undefined) return;
-    let {t: topic, d, p} = msg;
+    let {t: topic, d, p, r: requestId} = msg;
     if (window.DEBUG && d?.peerId !== myPeerId) {
       console.log('ws message', data);
     }
@@ -41,7 +41,17 @@ export default function signalws({
       payload.peerId = peerId;
       payload.connId = connId;
     }
-    emit(hub, topic, payload);
+    if (topic === 'response') {
+      requestAccepted(requestId, payload);
+      return;
+    } else if (topic === 'server') {
+      let accept = requestId
+        ? data => sendAccept(hub, requestId, data)
+        : () => {};
+      emit(hub, topic, payload, accept);
+    } else {
+      emit(hub, topic, payload);
+    }
   });
   ws.addEventListener('error', () => {
     if (window.DEBUG) {
@@ -68,6 +78,9 @@ export default function signalws({
     },
     sendDirect(receiverId, message = {}) {
       return sendDirect(hub, receiverId, message);
+    },
+    sendRequest(topic, message = {}) {
+      return sendRequest(hub, topic, message);
     },
     close() {
       close(hub);
@@ -96,6 +109,17 @@ async function sendDirect(hub, {peerId, connId}, message) {
   return send(hub, {t: 'direct', d: message, p: `${peerId};${connId}`});
 }
 
+async function sendRequest(hub, topic, message) {
+  await until(hub, 'opened');
+  let {id, promise} = newRequest();
+  send(hub, {t: topic, d: message, r: id});
+  return promise;
+}
+
+async function sendAccept(hub, requestId, message) {
+  return send(hub, {t: 'response', d: message, r: requestId});
+}
+
 function close({ws, closed}, code = 1000) {
   if (!closed) ws.close(code);
 }
@@ -117,7 +141,7 @@ function send(hub, msg) {
   }
 }
 
-function decode(data) {
+function parse(data) {
   try {
     return JSON.parse(data);
   } catch (err) {
@@ -151,6 +175,7 @@ function newRequest(timeout = REQUEST_TIMEOUT) {
 
 function requestAccepted(requestId, data) {
   let request = requests.get(requestId);
+  if (request === undefined) return;
   request.accept(data);
   requests.delete(requestId);
 }

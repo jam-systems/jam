@@ -86,6 +86,10 @@ function Swarm(initialConfig) {
 
   checkWsHealth(swarm);
 
+  on(swarm.serverEvent, 'new-consumer', data => {
+    log('got new consumer', data);
+  });
+
   return swarm;
 }
 
@@ -255,9 +259,9 @@ function connect(swarm, room) {
     }
   });
 
-  on(hub, 'server', ({t: event, d: payload}) =>
-    emit(swarm.serverEvent, event, payload)
-  );
+  on(hub, 'server', ({t: event, d: payload}, accept) => {
+    emit(swarm.serverEvent, event, payload, accept);
+  });
 }
 
 function disconnect(swarm) {

@@ -12,7 +12,7 @@ function broadcast(roomId, topic, message) {
   publish(roomId, 'server', {t: 'server', d: {t: topic, d: message}});
 }
 
-async function sendRequestToPeer(roomId, peerId, topic, message) {
+async function sendRequest(roomId, peerId, topic, message) {
   let connection = getConnections(roomId).find(c => c.peerId === peerId);
   if (connection === undefined) throw Error('Peer is not connected');
   let {id, promise} = newRequest();
@@ -281,6 +281,7 @@ function newRequest(timeout = REQUEST_TIMEOUT) {
 
 function requestAccepted(requestId, data) {
   let request = requests.get(requestId);
+  if (request === undefined) return;
   request.accept(data);
   requests.delete(requestId);
 }
@@ -322,7 +323,7 @@ module.exports = {
   addWebsocket,
   activeUserCount,
   broadcast,
-  sendRequestToPeer,
+  sendRequest,
   onMessage,
   offMessage,
   onRemovePeer,
