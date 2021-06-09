@@ -2,6 +2,7 @@ const WebSocket = require('ws');
 const querystring = require('querystring');
 const {get} = require('../services/redis');
 const {ssrVerifyToken} = require('../ssr');
+const {handleMediasoupMessage, handleRemovePeer} = require('./mediasoup');
 
 // pub sub websocket
 
@@ -22,7 +23,14 @@ async function handleMessage(connection, roomId, msg) {
   if (topic === undefined || reservedTopics.includes(topic)) return;
 
   switch (topic) {
-    // special topics (not subscribable; sender decides who gets msg)
+    // special topics (not subscribable)
+    // messages to server
+    case 'mediasoup': {
+      let {t: subtopic, d: subdata} = data;
+      handleMediasoupMessage(roomId, senderId, subtopic, subdata);
+      break;
+    }
+    // messages where sender decides who gets it
     case 'direct': {
       // send to one specific peer
       let {p: receiverId} = msg;
@@ -83,6 +91,7 @@ function handleConnection(ws, req) {
     unsubscribeAll(connection);
 
     publish(roomId, 'remove-peer', {t: 'remove-peer', d: peerId});
+    handleRemovePeer(roomId, peerId);
 
     // console.log('debug', roomPeerIds, subscriptions);
   });
@@ -139,7 +148,7 @@ function getPublicKey({peerId}) {
 
 // peer connections per room
 
-const roomConnections = new Map(); // room => Set(connection)
+const roomConnections = new Map(); // roomId => Set(connection)
 
 function addPeer(roomId, connection) {
   let connections =
@@ -167,18 +176,18 @@ function getPeers(roomId) {
 
 const subscriptions = new Map(); // "roomId/topic" => Set(connection)
 
-function publish(room, topic, msg) {
-  let key = `${room}/${topic}`;
+function publish(roomId, topic, msg) {
+  let key = `${roomId}/${topic}`;
   let subscribers = subscriptions.get(key);
   if (subscribers === undefined) return;
   for (let subscriber of subscribers) {
     sendMessage(subscriber, msg);
   }
 }
-function subscribe(connection, room, topics) {
+function subscribe(connection, roomId, topics) {
   if (!(topics instanceof Array)) topics = [topics];
   for (let topic of topics) {
-    let key = `${room}/${topic}`;
+    let key = `${roomId}/${topic}`;
     let subscribers =
       subscriptions.get(key) ?? subscriptions.set(key, new Set()).get(key);
     subscribers.add(connection);
