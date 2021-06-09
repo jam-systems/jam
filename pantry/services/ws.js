@@ -2,14 +2,22 @@ const WebSocket = require('ws');
 const querystring = require('querystring');
 const {get} = require('../services/redis');
 const {ssrVerifyToken} = require('../ssr');
-const {handleMediasoupMessage, handleRemovePeer} = require('./mediasoup');
 
 // pub sub websocket
 
+const REQUEST_TIMEOUT = 20000;
 const reservedTopics = ['server', 'peers', 'add-peer', 'remove-peer'];
 
 function broadcast(roomId, topic, message) {
   publish(roomId, 'server', {t: 'server', d: {t: topic, d: message}});
+}
+
+async function sendRequestToPeer(roomId, peerId, topic, message) {
+  let connection = getConnections(roomId).find(c => c.peerId === peerId);
+  if (connection === undefined) throw Error('Peer is not connected');
+  let {id, promise} = newRequest();
+  sendMessage(connection, {t: 'server', d: {t: topic, d: message}, r: id});
+  return promise;
 }
 
 async function handleMessage(connection, roomId, msg) {
@@ -25,9 +33,14 @@ async function handleMessage(connection, roomId, msg) {
   switch (topic) {
     // special topics (not subscribable)
     // messages to server
+    case 'response': {
+      let {r: requestId} = msg;
+      requestAccepted(requestId, data);
+      break;
+    }
     case 'mediasoup': {
-      let {t: subtopic, d: subdata} = data;
-      handleMediasoupMessage(roomId, senderId, subtopic, subdata);
+      let {r: requestId} = msg;
+      handleMessageToServer(connection, roomId, topic, data, requestId);
       break;
     }
     // messages where sender decides who gets it
@@ -84,14 +97,13 @@ function handleConnection(ws, req) {
     if (msg !== undefined) handleMessage(connection, roomId, msg);
   });
 
-  ws.on('close', (_code, _reason) => {
-    // console.log('ws closed', code, reason);
+  ws.on('close', () => {
     nConnections--;
     removePeer(roomId, connection);
     unsubscribeAll(connection);
 
     publish(roomId, 'remove-peer', {t: 'remove-peer', d: peerId});
-    handleRemovePeer(roomId, peerId);
+    emitEvent('removePeer', roomId, peerId);
 
     // console.log('debug', roomPeerIds, subscriptions);
   });
@@ -138,8 +150,6 @@ function addWebsocket(server) {
   });
 }
 
-module.exports = {addWebsocket, activeUserCount, broadcast};
-
 // connection = {ws, peerId}
 
 function getPublicKey({peerId}) {
@@ -172,7 +182,7 @@ function getPeers(roomId) {
   return getConnections(roomId).map(c => c.peerId);
 }
 
-// pub sub
+// p2p pub sub
 
 const subscriptions = new Map(); // "roomId/topic" => Set(connection)
 
@@ -199,6 +209,80 @@ function unsubscribeAll(connection) {
     subscribers.delete(connection);
     if (subscribers.size === 0) subscriptions.delete(key);
   }
+}
+
+// server side subscriptions
+
+const serverSubscriptions = new Map(); // topic => listener(roomId, peerId, data, accept)
+const serverSideEvents = {
+  removePeer: new Set(),
+};
+
+function onMessage(topic, listener) {
+  serverSubscriptions.set(topic, listener);
+}
+
+function offMessage(topic) {
+  serverSubscriptions.delete(topic);
+}
+
+function onRemovePeer(listener) {
+  serverSideEvents.removePeer.add(listener);
+}
+
+function handleMessageToServer(connection, roomId, topic, data, requestId) {
+  let listener = serverSubscriptions.get(topic);
+  if (listener !== undefined) {
+    let accept = responseData => {
+      if (requestId)
+        sendMessage(connection, {t: 'response', d: responseData, r: requestId});
+    };
+    try {
+      listener(roomId, connection.peerId, data, accept);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+}
+
+function emitEvent(event, ...args) {
+  let listeners = serverSideEvents[event];
+  for (let listener of listeners) {
+    try {
+      listener(...args);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+}
+
+// request / response
+
+const serverId = Math.random().toString(32).slice(2, 12);
+const requests = new Map();
+
+let nextRequestId = 0;
+
+function newRequest(timeout = REQUEST_TIMEOUT) {
+  let requestId = `${serverId};${nextRequestId++}`;
+  const request = {id: requestId};
+  request.promise = new Promise((resolve, reject) => {
+    request.accept = data => {
+      clearTimeout(request.timeout);
+      resolve(data);
+    };
+    request.timeout = setTimeout(() => {
+      reject(new Error('request timeout'));
+    }, timeout);
+  });
+  requests.set(requestId, request);
+  return request;
+}
+
+function requestAccepted(requestId, data) {
+  let request = requests.get(requestId);
+  request.accept(data);
+  requests.delete(requestId);
 }
 
 // json
@@ -231,3 +315,15 @@ function sendMessage({ws}, msg) {
     return false;
   }
 }
+
+//
+
+module.exports = {
+  addWebsocket,
+  activeUserCount,
+  broadcast,
+  sendRequestToPeer,
+  onMessage,
+  offMessage,
+  onRemovePeer,
+};

@@ -1,25 +1,18 @@
 const mediasoup = require('mediasoup');
 const os = require('os');
+const {sendRequestToPeer, onMessage, onRemovePeer} = require('./ws');
 
 const workers = [];
 const rooms = new Map();
 let workerIndex = 0;
 
-module.exports = {
-  runMediasoupWorkers,
-  handleMediasoupMessage,
-  handleRemovePeer,
-};
+module.exports = {runMediasoupWorkers};
 
 // rooms = Map(roomId => room)
 // room = {id: roomId, router, peers: Map(peerId => peer)};
 // peer = {id: peerId, doesConsume, hasJoined, rtpCapabilities, transports, producers, consumers}
 
-// TODO make websocket be able to respond to requests
-function accept() {}
-async function request() {}
-
-async function handleMediasoupMessage(roomId, peerId, type, data) {
+onMessage('mediasoup', async (roomId, peerId, {type, data}, accept) => {
   const room = await getOrCreateRoom(roomId);
   const router = room.router;
   const peer = await getOrCreatePeer(room, peerId);
@@ -165,7 +158,7 @@ async function handleMediasoupMessage(roomId, peerId, type, data) {
       break;
     }
   }
-}
+});
 
 async function createConsumer(room, {consumerPeer, producerPeer, producer}) {
   // Optimization:
@@ -258,8 +251,7 @@ async function createConsumer(room, {consumerPeer, producerPeer, producer}) {
 
   // Send a request to the remote Peer with Consumer parameters.
   try {
-    // TODO
-    await request(consumerPeer.id, 'newConsumer', {
+    await sendRequestToPeer(room.id, consumerPeer.id, 'new-consumer', {
       peerId: producerPeer.id,
       producerId: producer.id,
       id: consumer.id,
@@ -287,7 +279,7 @@ async function createConsumer(room, {consumerPeer, producerPeer, producer}) {
   }
 }
 
-function handleRemovePeer(roomId, peerId) {
+onRemovePeer((roomId, peerId) => {
   const room = rooms.get(roomId);
   if (room === undefined) return;
   const peer = room.peers.get(peerId);
@@ -299,7 +291,7 @@ function handleRemovePeer(roomId, peerId) {
   if (room.peers.size === 0) {
     closeRoom(room);
   }
-}
+});
 
 async function getOrCreatePeer(room, peerId) {
   let peer = room.peers.get(peerId);
