@@ -64,7 +64,7 @@ export default function Speakers() {
       }
     }
     speakers = useStableArray(speakers.filter(s => !leftStagePeers.has(s)));
-    return {speakers};
+    return speakers;
   };
 }
 

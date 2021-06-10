@@ -1,6 +1,6 @@
 import {} from 'mediasoup-client';
 import {addLocalStream} from '../../lib/swarm';
-import {use, Atom, useRootState} from '../../lib/state-tree';
+import {use, useRootState} from '../../lib/state-tree';
 
 export default function ConnectAudio({swarm}) {
   let sendingStream = null;
@@ -19,6 +19,6 @@ export default function ConnectAudio({swarm}) {
       addLocalStream(swarm, null, 'audio');
     }
 
-    return Atom(remoteStreams);
+    return remoteStreams;
   };
 }

@@ -640,6 +640,12 @@ function resultToFragment(result, fragment) {
     return updateKeys;
   }
 
+  if (Array.isArray(result) || result instanceof Map || result instanceof Set) {
+    fragment[0] = result;
+    fragment._type = 'plain';
+    return;
+  }
+
   if (typeof result === 'object') {
     let updateKeys = setObjectFragment(fragment, result);
     fragment._type = 'object';

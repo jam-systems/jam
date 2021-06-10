@@ -8,37 +8,29 @@ import Speakers from './Speakers';
 export {RoomState, addModerator, removeModerator, emptyRoom};
 export {addSpeaker, removeSpeaker} from './Speakers';
 
-function RoomState() {
-  return function RoomState({
+function RoomState({roomId, myId, myIdentity, peerState, myPeerState}) {
+  const path = roomId && `${apiUrl()}/rooms/${roomId}`;
+  let {data} = use(GetRequest, {path});
+  let hasRoom = !!data;
+  let room = data ?? emptyRoom;
+  let {moderators, stageOnly} = room;
+
+  let speakers = use(Speakers, {
     roomId,
-    myId,
-    myIdentity,
+    hasRoom,
+    room,
     peerState,
     myPeerState,
-  }) {
-    const path = roomId && `${apiUrl()}/rooms/${roomId}`;
-    let {data} = use(GetRequest, {path});
-    let hasRoom = !!data;
-    let room = data ?? emptyRoom;
-    let {moderators, stageOnly} = room;
+    myIdentity,
+    myId,
+  });
 
-    let {speakers} = use(Speakers, {
-      roomId,
-      hasRoom,
-      room,
-      peerState,
-      myPeerState,
-      myIdentity,
-      myId,
-    });
+  room = useStableObject({...room, speakers});
 
-    room = useStableObject({...room, speakers});
+  let iAmModerator = moderators.includes(myId);
+  let iAmSpeaker = !!stageOnly || speakers.includes(myId);
 
-    let iAmModerator = moderators.includes(myId);
-    let iAmSpeaker = !!stageOnly || speakers.includes(myId);
-
-    return {room, hasRoom, iAmSpeaker, iAmModerator};
-  };
+  return {room, hasRoom, iAmSpeaker, iAmModerator};
 }
 
 const emptyRoom = {
