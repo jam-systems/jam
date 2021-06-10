@@ -9,13 +9,9 @@ import causalLog from './causal-log';
 
 /* TODOs:
 
-  - enable more Component return values
-
   - use(Component) and event(Component) should not automatically re-run the parent component,
     but check wether fragment updated.
     => will also help to refine fragment update rules
-
-  - understand performance & optimize where possible
 
   - stale update problem: understand in what cases object identity of state properties must change.
     or, if updates to root are made sufficiently fine-grained, possibly don't block
