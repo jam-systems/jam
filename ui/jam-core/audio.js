@@ -1,18 +1,11 @@
-import {addLocalStream} from '../lib/swarm';
-import {
-  useState,
-  declare,
-  use,
-  useRootState,
-  useOn,
-  useAction,
-} from '../lib/state-tree';
+import {declare, use, useRootState, useOn, useAction} from '../lib/state-tree';
 import Microphone from './audio/Microphone';
 import AudioFile from './audio/AudioFile';
 import PlayingAudio from './audio/PlayingAudio';
 import VolumeMeter from './audio/VolumeMeter';
 import {is} from 'minimal-state';
 import {actions} from './state';
+import {SendAudio, ReceiveAudio} from './connections/connect-audio';
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 
 // TODO: could we use AudioContext.onstatechange to detect cases where the the ability to play audio is lost?
@@ -42,7 +35,7 @@ function AudioState({swarm}) {
     micMuted,
   }) {
     let [handRaised, audioFile] = useRootState(['handRaised', 'audioFile']);
-    let remoteStreams = use(swarm, 'remoteStreams');
+    let remoteStreams = ReceiveAudio({swarm, shouldReceive: true});
 
     if (audioContext === null && AudioContext) {
       let shouldHaveAudioContext =
@@ -82,7 +75,11 @@ function AudioState({swarm}) {
 
     let myAudio = audioFileStream ?? micStream;
     declare(Muted, {myAudio, micMuted});
-    declare(ConnectMyAudio, {myAudio, iAmSpeaker, swarm});
+    declare(SendAudio, {
+      swarm,
+      localStream: myAudio,
+      shouldSend: myAudio && iAmSpeaker,
+    });
     if (iAmSpeaker) {
       declare(VolumeMeter, {peerId: myId, stream: myAudio, audioContext});
     }
@@ -112,18 +109,5 @@ function Muted({myAudio, micMuted}) {
         track.enabled = !micMuted;
       }
     }
-  }
-}
-
-function ConnectMyAudio({myAudio, iAmSpeaker, swarm}) {
-  let [connected, setConnected] = useState(null);
-  let shouldConnect = myAudio && iAmSpeaker;
-
-  if (connected !== myAudio && shouldConnect) {
-    addLocalStream(swarm, myAudio, 'audio');
-    setConnected(myAudio);
-  } else if (connected && !shouldConnect) {
-    addLocalStream(swarm, null, 'audio');
-    setConnected(null);
   }
 }
