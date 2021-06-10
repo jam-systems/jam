@@ -11,6 +11,10 @@ import causalLog from './causal-log';
 
   - enable more Component return values
 
+  - use(Component) and event(Component) should not automatically re-run the parent component,
+    but check wether fragment updated.
+    => will also help to refine fragment update rules
+
   - understand performance & optimize where possible
 
   - stale update problem: understand in what cases object identity of state properties must change.
@@ -31,6 +35,7 @@ export {
   useDispatch,
   useRootState,
   useExternalState,
+  useEvent,
   useOn,
   useUpdate,
   useState,
@@ -230,7 +235,7 @@ function declareStateRoot(Component, props = null, {state, defaultState = {}}) {
   renderRoot = null;
 
   on(rootFragment, (result, keys) => {
-    log('root fragment update triggered!', result, keys);
+    log('root fragment update triggered!', keys);
     // TODO: could it be problematic here that we don't update unchanged values, can there be stable sub-objects?
     if (keys === undefined) is(state, result);
     else {
@@ -448,17 +453,54 @@ function useExternalState(state, key) {
     if (use !== undefined) {
       use.cleanup();
     }
-    const listener = () => {
+    let cleanup = on(state, key, () => {
       if (current !== caller) {
         queueUpdate(caller, 'useExternalState ' + key);
       }
-    };
-    let cleanup = on(state, key, listener);
+    });
     use = {key, cleanup};
     caller.uses[nUses] = use;
   }
   nUses++;
   return state[key];
+}
+
+function useEvent(emitter, keyOrSelector) {
+  if (current === root) throw Error('Hooks can only be called during render');
+  let caller = current;
+  let eventQueue = caller.uses[nUses];
+  if (eventQueue === undefined || eventQueue.key !== keyOrSelector) {
+    if (eventQueue === undefined) {
+      eventQueue = [];
+    } else {
+      eventQueue.cleanup();
+    }
+    eventQueue.key = keyOrSelector;
+
+    let [key, selector] =
+      typeof keyOrSelector === 'function'
+        ? [undefined, keyOrSelector]
+        : [keyOrSelector, undefined];
+
+    let listener = (...args) => {
+      if (selector !== undefined && !selector(...args)) return;
+      eventQueue.push(args);
+      queueUpdate(caller, 'useEvent ' + key);
+    };
+    eventQueue.cleanup =
+      key === undefined ? on(emitter, listener) : on(emitter, key, listener);
+    current.uses[nUses] = eventQueue;
+  }
+  nUses++;
+  if (eventQueue.length > 0) {
+    let args = eventQueue.shift();
+    if (eventQueue.length > 0) {
+      queueUpdate(current, 'queued useEvent ');
+    }
+    return [true, ...args];
+  } else {
+    return [false];
+  }
 }
 
 function useOn(...args) {

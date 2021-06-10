@@ -5,7 +5,6 @@ import PlayingAudio from './audio/PlayingAudio';
 import VolumeMeter from './audio/VolumeMeter';
 import {is} from 'minimal-state';
 import {actions} from './state';
-import {SendAudio, ReceiveAudio} from './connections/connect-audio';
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 
 // TODO: could we use AudioContext.onstatechange to detect cases where the the ability to play audio is lost?
@@ -33,9 +32,9 @@ function AudioState({swarm}) {
     iAmSpeaker,
     userInteracted,
     micMuted,
+    remoteStreams,
   }) {
     let [handRaised, audioFile] = useRootState(['handRaised', 'audioFile']);
-    let remoteStreams = ReceiveAudio({swarm, shouldReceive: true});
 
     if (audioContext === null && AudioContext) {
       let shouldHaveAudioContext =
@@ -75,11 +74,7 @@ function AudioState({swarm}) {
 
     let myAudio = audioFileStream ?? micStream;
     declare(Muted, {myAudio, micMuted});
-    declare(SendAudio, {
-      swarm,
-      localStream: myAudio,
-      shouldSend: myAudio && iAmSpeaker,
-    });
+
     if (iAmSpeaker) {
       declare(VolumeMeter, {peerId: myId, stream: myAudio, audioContext});
     }

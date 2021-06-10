@@ -17,13 +17,13 @@ import {
   use,
   useAction,
 } from '../lib/state-tree';
-import {ConnectRoom} from './connect';
 import ModeratorState from './room/ModeratorState';
-import {useDidChange} from '../lib/state-utils';
 import {staticConfig} from './config';
 import Swarm from '../lib/swarm';
 import {populateApiCache, createRoom, updateRoom} from './backend';
 import {addAdmin, removeAdmin} from './admin';
+import ConnectAudio from './connections/ConnectAudio';
+import ConnectRoom from './connections/ConnectRoom';
 
 /* THE JAM API */
 
@@ -84,30 +84,23 @@ function createJam({jamConfig, cachedRooms} = {}) {
 
 function AppState() {
   let inRoom = null;
-  let leftStage = false;
   let autoJoinCount = 0;
   let didAutoJoin = false;
   const swarm = Swarm();
+  const {peerState, myPeerState} = swarm;
+  is(myPeerState, {inRoom: false, micMuted: false, leftStage: false});
 
   return function AppState({roomId, userInteracted, micMuted, autoJoin}) {
     let {myId, myIdentity} = use(Identity, {roomId});
 
     let {room, hasRoom, iAmSpeaker, iAmModerator} = use(RoomState, {
-      swarm,
       roomId,
-      myId,
-    });
-    let {closed, moderators} = room;
-
-    // connect with signaling server
-    declare(ConnectRoom, {
-      swarm,
       myId,
       myIdentity,
-      roomId,
-      shouldConnect: hasRoom,
+      peerState,
+      myPeerState,
     });
-    declare(ModeratorState, {swarm, moderators});
+    let {closed, moderators} = room;
 
     let [isJoinRoom, joinedRoomId] = useAction(actions.JOIN);
     let [isAutoJoin] = useAction(actions.AUTO_JOIN);
@@ -128,21 +121,22 @@ function AppState() {
       }
     }
 
-    let [isLeaveStage] = useAction(actions.LEAVE_STAGE);
-    let iBecameSpeaker = useDidChange(iAmSpeaker) && iAmSpeaker;
-    if (iBecameSpeaker) {
-      leftStage = false;
-    }
-    if (isLeaveStage && iAmSpeaker) {
-      leftStage = true;
-    }
-
-    is(swarm.myPeerState, {
-      micMuted,
-      inRoom: !!inRoom,
-      leftStage,
+    // connect with signaling server
+    declare(ConnectRoom, {
+      swarm,
+      myId,
+      myIdentity,
+      roomId,
+      shouldConnect: hasRoom,
+    });
+    declare(ModeratorState, {swarm, moderators});
+    let remoteStreams = use(ConnectAudio, {
+      swarm,
+      shouldSend: iAmSpeaker,
+      shouldReceive: true,
     });
 
+    is(myPeerState, {micMuted, inRoom: !!inRoom});
     declare(Reactions, {swarm});
 
     return merge(
@@ -154,7 +148,6 @@ function AppState() {
         room,
         iAmSpeaker,
         iAmModerator,
-        leftStage,
         myId,
         myIdentity,
       },
@@ -163,6 +156,7 @@ function AppState() {
         inRoom,
         iAmSpeaker,
         swarm,
+        remoteStreams,
         userInteracted,
         micMuted,
       })

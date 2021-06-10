@@ -1,23 +1,21 @@
 import {is, update} from 'minimal-state';
-import log from '../lib/causal-log';
-import {signData, verifyData} from '../lib/identity-utils';
-import {dispatch, useOn, useRootState} from '../lib/state-tree';
-import {get, populateApiCache} from './backend';
-import {staticConfig} from './config';
-import {actions} from './state';
+import log from '../../lib/causal-log';
+import {signData, verifyData} from '../../lib/identity-utils';
+import {dispatch, useOn, useRootState} from '../../lib/state-tree';
+import {get, populateApiCache} from '../backend';
+import {staticConfig} from '../config';
+import {actions} from '../state';
 
 // TODO this is an intermediary component to set up swarm that should be replaced w/ one that
 // properly integrates with swarm (knows connection state, returns remote streams etc)
 
-export function ConnectRoom({myId, myIdentity, swarm}) {
+export default function ConnectRoom({myId, myIdentity, swarm}) {
   const state = useRootState();
   swarm.config({myPeerId: myId});
 
   let connectedRoomId = null;
   configSwarm(myIdentity, swarm, staticConfig);
   useOn(staticConfig, conf => configSwarm(state.myIdentity, swarm, conf));
-
-  is(swarm.myPeerState, {inRoom: false, micMuted: false, leftStage: false});
 
   useOn(swarm, 'newPeer', async id => {
     for (let i = 0; i < 5; i++) {

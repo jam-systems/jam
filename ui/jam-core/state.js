@@ -19,7 +19,6 @@ const defaultState = {
   iAmModerator: false,
   identities: {},
   otherDeviceInRoom: false,
-  leftStage: false,
 
   reactions: {},
   handRaised: false,
