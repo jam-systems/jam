@@ -16,6 +16,7 @@ onMessage('mediasoup', async (roomId, peerId, {type, data}, accept) => {
   const room = await getOrCreateRoom(roomId);
   const router = room.router;
   const peer = await getOrCreatePeer(room, peerId);
+  console.log('mediasoup request', type, roomId, peerId);
 
   switch (type) {
     case 'getRouterRtpCapabilities': {
@@ -195,13 +196,13 @@ async function createConsumer(room, {consumerPeer, producerPeer, producer}) {
     return;
   }
 
-  // Create the Consumer in paused mode.
+  // Create the Consumer ~~in paused mode~~ TODO
   let consumer;
   try {
     consumer = await transport.consume({
       producerId: producer.id,
       rtpCapabilities: consumerPeer.rtpCapabilities,
-      paused: true,
+      paused: false,
     });
   } catch (error) {
     console.warn('createConsumer() | transport.consume()', error);
@@ -266,7 +267,7 @@ async function createConsumer(room, {consumerPeer, producerPeer, producer}) {
     // the Consumer so the remote endpoint will receive the a first RTP packet
     // of this new stream once its PeerConnection is already ready to process
     // and associate it.
-    await consumer.resume();
+    // await consumer.resume();
 
     // consumerPeer
     //   .notify('consumerScore', {
@@ -415,8 +416,8 @@ const config = {
     webRtcTransportOptions: {
       listenIps: [
         {
-          ip: process.env.MEDIASOUP_LISTEN_IP || '0.0.0.0',
-          announcedIp: process.env.MEDIASOUP_ANNOUNCED_IP || '0.0.0.0',
+          ip: process.env.MEDIASOUP_LISTEN_IP || '192.168.0.251',
+          announcedIp: process.env.MEDIASOUP_ANNOUNCED_IP,
         },
       ],
       initialAvailableOutgoingBitrate: 1000000,
@@ -424,16 +425,6 @@ const config = {
       maxSctpMessageSize: 262144,
       // Additional options that are not part of WebRtcTransportOptions.
       maxIncomingBitrate: 1500000,
-    },
-    // mediasoup PlainTransport options for legacy RTP endpoints (FFmpeg,
-    // GStreamer).
-    // See https://mediasoup.org/documentation/v3/mediasoup/api/#PlainTransportOptions
-    plainTransportOptions: {
-      listenIp: {
-        ip: process.env.MEDIASOUP_LISTEN_IP || '1.2.3.4',
-        announcedIp: process.env.MEDIASOUP_ANNOUNCED_IP,
-      },
-      maxSctpMessageSize: 262144,
     },
   },
 };

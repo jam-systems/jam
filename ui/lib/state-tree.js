@@ -9,9 +9,13 @@ import causalLog from './causal-log';
 
 /* TODOs:
 
-  - use(Component) and event(Component) should not automatically re-run the parent component,
+  - use(Component) should not automatically re-run the parent component,
     but check wether fragment updated.
     => will also help to refine fragment update rules
+    NOTE: it's a bit tricky because parent then has to rerun, but should not break use() components
+    However, it does not work for event() components
+
+  - possibly rename event() to useEvent() to make consistent with use()
 
   - stale update problem: understand in what cases object identity of state properties must change.
     or, if updates to root are made sufficiently fine-grained, possibly don't block

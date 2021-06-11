@@ -35,7 +35,6 @@ export default function Speakers() {
     let iBecameSpeaker =
       useDidChange(iAmServerSpeaker) && iAmServerSpeaker && !justGotRoom;
     if (iBecameSpeaker) {
-      console.error('I became speaker!', justGotRoom);
       is(leftStageRooms, roomId, undefined);
       leftStagePeers.delete(myId);
     }

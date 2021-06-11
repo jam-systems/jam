@@ -130,10 +130,12 @@ function AppState() {
       shouldConnect: hasRoom,
     });
     declare(ModeratorState, {swarm, moderators});
+
     let remoteStreams = use(ConnectAudio, {
       swarm,
+      roomId,
       shouldSend: iAmSpeaker,
-      shouldReceive: true,
+      shouldReceive: !!roomId,
     });
 
     is(myPeerState, {micMuted, inRoom: !!inRoom});
