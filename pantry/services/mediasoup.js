@@ -10,7 +10,7 @@ module.exports = {runMediasoupWorkers};
 
 // rooms = Map(roomId => room)
 // room = {id: roomId, router, peers: Map(peerId => peer)};
-// peer = {id: peerId, doesConsume, hasJoined, rtpCapabilities, transports, producers, consumers}
+// peer = {id: peerId, doesConsume, rtpCapabilities, transports, producers, consumers, doesConsume, consumerTransport}
 
 onMessage('mediasoup', async (roomId, peerId, {type, data}, accept) => {
   const room = await getOrCreateRoom(roomId);
@@ -24,33 +24,11 @@ onMessage('mediasoup', async (roomId, peerId, {type, data}, accept) => {
       break;
     }
 
-    case 'join': {
-      const {rtpCapabilities} = data;
-
-      if (peer.hasJoined) throw new Error('Peer already joined');
-      peer.hasJoined = true;
-      peer.rtpCapabilities = rtpCapabilities;
-
-      // send this peer the existing tracks from other peers
-      // => create Consumers for existing Producers
-      for (const otherPeer of yieldJoinedPeers(room, peerId)) {
-        for (const producer of otherPeer.producers.values()) {
-          createConsumer(room, {
-            consumerPeer: peer,
-            producerPeer: otherPeer,
-            producer,
-          });
-        }
-      }
-
-      accept();
-      break;
-    }
-
     case 'createWebRtcTransport': {
       // NOTE: Don't require that the Peer is joined here, so the client can
       // initiate mediasoup Transports and be ready when he later joins.
-      let {forceTcp, producing, consuming} = data;
+      let {forceTcp, producing, consuming, rtpCapabilities} = data;
+      peer.rtpCapabilities = rtpCapabilities;
 
       let transportOptions = {
         ...config.mediasoup.webRtcTransportOptions,
@@ -62,6 +40,10 @@ onMessage('mediasoup', async (roomId, peerId, {type, data}, accept) => {
       }
 
       const transport = await router.createWebRtcTransport(transportOptions);
+      if (consuming) {
+        peer.doesConsume = true;
+        peer.consumerTransport = transport;
+      }
 
       transport.on('dtlsstatechange', dtlsState => {
         if (dtlsState === 'failed' || dtlsState === 'closed')
@@ -79,6 +61,20 @@ onMessage('mediasoup', async (roomId, peerId, {type, data}, accept) => {
         iceCandidates: transport.iceCandidates,
         dtlsParameters: transport.dtlsParameters,
       });
+
+      if (consuming) {
+        // send this peer the existing tracks from other peers
+        // => create Consumers for existing Producers
+        for (const otherPeer of yieldOtherPeers(room, peerId)) {
+          for (const producer of otherPeer.producers.values()) {
+            createConsumer(room, {
+              consumerPeer: peer,
+              producerPeer: otherPeer,
+              producer,
+            });
+          }
+        }
+      }
       // const {maxIncomingBitrate} = config.mediasoup.webRtcTransportOptions;
       // if (maxIncomingBitrate) {
       //   try {
@@ -114,7 +110,6 @@ onMessage('mediasoup', async (roomId, peerId, {type, data}, accept) => {
       let {transportId, kind, rtpParameters, appData} = data;
       const transport = peer.transports.get(transportId);
 
-      if (!peer.hasJoined) throw new Error('Peer not yet joined');
       if (transport === undefined) {
         console.error('transport not found', transportId);
         return;
@@ -131,7 +126,7 @@ onMessage('mediasoup', async (roomId, peerId, {type, data}, accept) => {
 
       // send this new track to all other peers
       // => create Consumer on each peer except this one
-      for (const otherPeer of yieldJoinedPeers(room, peerId)) {
+      for (const otherPeer of yieldOtherPeers(room, peerId)) {
         createConsumer(room, {
           consumerPeer: otherPeer,
           producerPeer: peer,
@@ -143,7 +138,7 @@ onMessage('mediasoup', async (roomId, peerId, {type, data}, accept) => {
 
     case 'closeProducer': {
       // Ensure the Peer is joined.
-      if (!peer.hasJoined) throw new Error('Peer not yet joined');
+      // if (!peer.hasJoined) throw new Error('Peer not yet joined');
 
       const {producerId} = data;
       const producer = peer.producers.get(producerId);
@@ -162,9 +157,10 @@ onMessage('mediasoup', async (roomId, peerId, {type, data}, accept) => {
 });
 
 async function createConsumer(room, {consumerPeer, producerPeer, producer}) {
-  // NOTE: Don't create the Consumer if the remote Peer cannot consume it.
+  // don't create the Consumer if the remote Peer cannot consume it
   if (
     !consumerPeer.rtpCapabilities ||
+    !consumerPeer.doesConsume ||
     !room.router.canConsume({
       producerId: producer.id,
       rtpCapabilities: consumerPeer.rtpCapabilities,
@@ -173,18 +169,12 @@ async function createConsumer(room, {consumerPeer, producerPeer, producer}) {
     return;
   }
 
-  // Must take the Transport the remote Peer is using for consuming.
-  const transport = Array.from(consumerPeer.transports.values()).find(
-    t => t.appData.consuming
-  );
-
-  // This should not happen.
-  if (!transport) {
-    console.warn('createConsumer() | Transport for consuming not found');
-    return;
+  // check if consumerPeer already has the same producer (=> nothing should happen)
+  for (let otherProducer of consumerPeer.consumers.values()) {
+    if (producer === otherProducer) return;
   }
 
-  // Create the Consumer ~~in paused mode~~ TODO
+  const transport = consumerPeer.consumerTransport;
   let consumer;
   try {
     consumer = await transport.consume({
@@ -252,15 +242,16 @@ async function getOrCreatePeer(room, peerId) {
       transports: new Map(),
       producers: new Map(),
       consumers: new Map(),
+      consumerTransport: null,
     };
     room.peers.set(peerId, peer);
   }
   return peer;
 }
 
-function* yieldJoinedPeers(room, excludePeerId) {
+function* yieldOtherPeers(room, excludePeerId) {
   for (let peer of room.peers.values()) {
-    if (peer.hasJoined && peer.id !== excludePeerId) yield peer;
+    if (peer.id !== excludePeerId) yield peer;
   }
 }
 

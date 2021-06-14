@@ -18,7 +18,7 @@ const READY = 2;
 
 export default function ConnectAudio({swarm}) {
   const sendViaMediasoup = true;
-  const sendViaP2p = true;
+  const sendViaP2p = false;
 
   let update = useUpdate();
   const {serverEvent} = swarm;
@@ -29,6 +29,7 @@ export default function ConnectAudio({swarm}) {
   let sendState = INITIAL;
   let receiveState = INITIAL;
 
+  let connectedRoomId = null;
   let sendingStreamMediasoup = null;
   let sendingStreamP2p = null;
   let producer = null;
@@ -51,10 +52,23 @@ export default function ConnectAudio({swarm}) {
     switch (mediasoupState) {
       case INITIAL:
         if ((shouldReceive || shouldSend) && wsConnected) {
+          connectedRoomId = roomId;
           initializeMediasoup(hub, shouldSend, shouldReceive);
         }
         break;
       case READY:
+        if (!wsConnected || roomId !== connectedRoomId) {
+          connectedRoomId = null;
+          sendState = INITIAL;
+          receiveState = INITIAL;
+          mediasoupState = INITIAL;
+          producer = null;
+          sendingStreamMediasoup = null;
+          serverRemoteStreams = [];
+          if (wsConnected) update();
+          break;
+        }
+
         switch (sendState) {
           case INITIAL:
             if (shouldSend && wsConnected) initializeSending(hub);
@@ -84,8 +98,9 @@ export default function ConnectAudio({swarm}) {
         .consume({id, producerId, kind, rtpParameters})
         .then(consumer => {
           accept();
-
-          let newStream = new MediaStream([consumer._track]);
+          let track = consumer.track;
+          if (!track) return;
+          let newStream = new MediaStream([track]);
           let newRemoteStreams = [...serverRemoteStreams];
           let i = newRemoteStreams.findIndex(
             s => s.peerId === peerId && s.name === 'audio'
@@ -111,12 +126,11 @@ export default function ConnectAudio({swarm}) {
     }
 
     // merge remote streams from both sources
-    // TODO: has two streams if same peer sends over both channels, but only one is played
     for (let stream of p2pRemoteStreams) {
       let i = serverRemoteStreams.findIndex(r => r.peerId === stream.peerId);
       if (i !== -1) {
         console.warn('have two streams from the same peer', stream.peerId);
-        serverRemoteStreams.slice(i, 1);
+        serverRemoteStreams.splice(i, 1);
       }
     }
     let remoteStreams = useStableArray([
@@ -128,30 +142,19 @@ export default function ConnectAudio({swarm}) {
 
   async function initializeMediasoup(hub, shouldSend, shouldReceive) {
     mediasoupState = LOADING;
-    let routerRtpCapabilities = await hub.sendRequest('mediasoup', {
-      type: 'getRouterRtpCapabilities',
-    });
-    await mediasoupDevice.load({routerRtpCapabilities});
-    canSend = mediasoupDevice.canProduce('audio');
-    if (!canSend) console.warn('Mediasoup: cannot send audio');
-
+    if (!mediasoupDevice.loaded) {
+      let routerRtpCapabilities = await hub.sendRequest('mediasoup', {
+        type: 'getRouterRtpCapabilities',
+      });
+      await mediasoupDevice.load({routerRtpCapabilities});
+      canSend = mediasoupDevice.canProduce('audio');
+      if (!canSend) console.warn('Mediasoup: cannot send audio');
+    }
     mediasoupState = READY;
 
     // FIXME: shouldReceive = false causes error on server side
-    if (shouldReceive) initializeReceiving(hub).then(() => join(hub));
-    else join(hub);
-
+    if (shouldReceive) initializeReceiving(hub);
     if (shouldSend && canSend) initializeSending(hub);
-  }
-
-  async function join(hub) {
-    await hub.sendRequest('mediasoup', {
-      type: 'join',
-      data: {
-        rtpCapabilities: mediasoupDevice.rtpCapabilities,
-      },
-    });
-    update();
   }
 
   async function initializeSending(hub) {
@@ -167,6 +170,7 @@ export default function ConnectAudio({swarm}) {
         forceTcp: false,
         producing: true,
         consuming: false,
+        rtpCapabilities: mediasoupDevice.rtpCapabilities,
       },
     });
 
@@ -228,6 +232,7 @@ export default function ConnectAudio({swarm}) {
         forceTcp: false, // I guess
         producing: false,
         consuming: true,
+        rtpCapabilities: mediasoupDevice.rtpCapabilities,
       },
     });
 
