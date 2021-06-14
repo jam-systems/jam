@@ -162,18 +162,6 @@ onMessage('mediasoup', async (roomId, peerId, {type, data}, accept) => {
 });
 
 async function createConsumer(room, {consumerPeer, producerPeer, producer}) {
-  // Optimization:
-  // - Create the server-side Consumer in paused mode.
-  // - Tell its Peer about it and wait for its response.
-  // - Upon receipt of the response, resume the server-side Consumer.
-  // - If video, this will mean a single key frame requested by the
-  //   server-side Consumer (when resuming it).
-  // - If audio (or video), it will avoid that RTP packets are received by the
-  //   remote endpoint *before* the Consumer is locally created in the endpoint
-  //   (and before the local SDP O/A procedure ends). If that happens (RTP
-  //   packets are received before the SDP O/A is done) the PeerConnection may
-  //   fail to associate the RTP stream.
-
   // NOTE: Don't create the Consumer if the remote Peer cannot consume it.
   if (
     !consumerPeer.rtpCapabilities ||
@@ -222,34 +210,6 @@ async function createConsumer(room, {consumerPeer, producerPeer, producer}) {
     //   .catch(() => {});
   });
 
-  consumer.on('producerpause', () => {
-    // consumerPeer
-    //   .notify('consumerPaused', {consumerId: consumer.id})
-    //   .catch(() => {});
-  });
-
-  consumer.on('producerresume', () => {
-    // consumerPeer
-    //   .notify('consumerResumed', {consumerId: consumer.id})
-    //   .catch(() => {});
-  });
-
-  consumer.on('score', score => {
-    // consumerPeer
-    //   .notify('consumerScore', {consumerId: consumer.id, score})
-    //   .catch(() => {});
-  });
-
-  consumer.on('layerschange', layers => {
-    // consumerPeer
-    //   .notify('consumerLayersChanged', {
-    //     consumerId: consumer.id,
-    //     spatialLayer: layers ? layers.spatialLayer : null,
-    //     temporalLayer: layers ? layers.temporalLayer : null,
-    //   })
-    //   .catch(() => {});
-  });
-
   // Send a request to the remote Peer with Consumer parameters.
   try {
     await sendRequest(room.id, consumerPeer.id, 'new-consumer', {
@@ -262,19 +222,6 @@ async function createConsumer(room, {consumerPeer, producerPeer, producer}) {
       appData: producer.appData,
       producerPaused: consumer.producerPaused,
     });
-
-    // Now that we got the positive response from the remote endpoint, resume
-    // the Consumer so the remote endpoint will receive the a first RTP packet
-    // of this new stream once its PeerConnection is already ready to process
-    // and associate it.
-    // await consumer.resume();
-
-    // consumerPeer
-    //   .notify('consumerScore', {
-    //     consumerId: consumer.id,
-    //     score: consumer.score,
-    //   })
-    //   .catch(() => {});
   } catch (error) {
     console.warn('createConsumer() | failed', error);
   }
@@ -365,10 +312,10 @@ async function runMediasoupWorkers() {
     workers.push(worker);
 
     // Log worker resource usage every X seconds.
-    setInterval(async () => {
-      const usage = await worker.getResourceUsage();
-      console.log('mediasoup Worker resource usage', worker.pid, usage);
-    }, 120000);
+    // setInterval(async () => {
+    //   const usage = await worker.getResourceUsage();
+    //   console.log('mediasoup Worker resource usage', worker.pid, usage);
+    // }, 120000);
   }
 }
 
@@ -416,7 +363,7 @@ const config = {
     webRtcTransportOptions: {
       listenIps: [
         {
-          ip: process.env.MEDIASOUP_LISTEN_IP || '192.168.0.251',
+          ip: process.env.MEDIASOUP_LISTEN_IP || localIp(),
           announcedIp: process.env.MEDIASOUP_ANNOUNCED_IP,
         },
       ],
@@ -428,3 +375,12 @@ const config = {
     },
   },
 };
+
+function localIp() {
+  let interfaces = [].concat(...Object.values(os.networkInterfaces()));
+  let ip =
+    interfaces.find(x => !x.internal && x.family === 'IPv4')?.address ??
+    '127.0.0.1';
+  console.log('mediasoup: falling back to listening IP', ip);
+  return ip;
+}
