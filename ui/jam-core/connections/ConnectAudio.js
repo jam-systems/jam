@@ -18,7 +18,7 @@ const READY = 2;
 
 export default function ConnectAudio({swarm}) {
   const sendViaMediasoup = true;
-  const sendViaP2p = false;
+  const sendViaP2p = true;
 
   let update = useUpdate();
   const {serverEvent} = swarm;
@@ -40,20 +40,23 @@ export default function ConnectAudio({swarm}) {
   let receiveTransport = null;
 
   // TODO: handle roomId switches, like in ConnectRoom
-  return function ConnectAudio({roomId, shouldSend, shouldReceive}) {
+  return function ConnectAudio({roomId, iAmSpeaker}) {
     let localStream = useRootState('myAudio');
     let wsConnected = use(swarm, 'connected');
     const {hub} = swarm;
 
+    let shouldSend = iAmSpeaker;
     let shouldSendMediasoup = sendViaMediasoup && localStream && shouldSend;
     let shouldSendP2p = sendViaP2p && localStream && shouldSend;
+
+    let shouldReceiveMediasoup = !iAmSpeaker;
 
     // send & receive audio via SFU / mediasoup
     switch (mediasoupState) {
       case INITIAL:
-        if ((shouldReceive || shouldSend) && wsConnected) {
+        if ((shouldReceiveMediasoup || shouldSendMediasoup) && wsConnected) {
           connectedRoomId = roomId;
-          initializeMediasoup(hub, shouldSend, shouldReceive);
+          initializeMediasoup(hub, shouldSendMediasoup, shouldReceiveMediasoup);
         }
         break;
       case READY:
@@ -64,14 +67,14 @@ export default function ConnectAudio({swarm}) {
           mediasoupState = INITIAL;
           producer = null;
           sendingStreamMediasoup = null;
-          serverRemoteStreams = [];
+          stopReceiving();
           if (wsConnected) update();
           break;
         }
 
         switch (sendState) {
           case INITIAL:
-            if (shouldSend && wsConnected) initializeSending(hub);
+            if (shouldSendMediasoup && wsConnected) initializeSending(hub);
             break;
           case READY:
             if (shouldSendMediasoup && sendingStreamMediasoup !== localStream) {
@@ -84,8 +87,12 @@ export default function ConnectAudio({swarm}) {
         }
         switch (receiveState) {
           case INITIAL:
-            if (shouldReceive && wsConnected) initializeReceiving(hub);
+            if (shouldReceiveMediasoup && wsConnected) initializeReceiving(hub);
             break;
+          case READY:
+            if (!shouldReceiveMediasoup) {
+              stopReceiving();
+            }
         }
         break;
     }
@@ -126,16 +133,11 @@ export default function ConnectAudio({swarm}) {
     }
 
     // merge remote streams from both sources
-    for (let stream of p2pRemoteStreams) {
-      let i = serverRemoteStreams.findIndex(r => r.peerId === stream.peerId);
-      if (i !== -1) {
-        console.warn('have two streams from the same peer', stream.peerId);
-        serverRemoteStreams.splice(i, 1);
-      }
-    }
     let remoteStreams = useStableArray([
       ...p2pRemoteStreams,
-      ...serverRemoteStreams,
+      ...serverRemoteStreams.filter(
+        ({peerId}) => !p2pRemoteStreams.find(x => x.peerId === peerId)
+      ),
     ]);
     return remoteStreams;
   };
@@ -259,6 +261,13 @@ export default function ConnectAudio({swarm}) {
         .catch(errback);
     });
     update();
+  }
+
+  function stopReceiving() {
+    receiveState = INITIAL;
+    serverRemoteStreams = [];
+    receiveTransport.close();
+    receiveTransport = null;
   }
 
   async function sendLocalStream(hub, localStream) {
