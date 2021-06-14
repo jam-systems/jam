@@ -3,7 +3,6 @@ import Room from './Room';
 import {importRoomIdentity} from '../jam-core';
 import {useCreateRoom, useJam, useRoom} from '../jam-core-react';
 import StartFromURL from './StartFromURL';
-import {use} from 'use-minimal-state';
 
 export default function PossibleRoom({
   roomId, // truthy
@@ -12,11 +11,11 @@ export default function PossibleRoom({
   roomIdentityKeys,
   onError,
   autoCreate,
+  uxConfig,
 }) {
-  const [state, {enterRoom}] = useJam();
+  const [, {enterRoom}] = useJam();
 
   // fetch room
-  let actualRoom = use(state, 'room');
   let [room, isLoading] = useRoom(roomId);
 
   // import room identity
@@ -38,13 +37,7 @@ export default function PossibleRoom({
   });
 
   if (isLoading) return null;
-  if (room)
-    return (
-      <Room
-        key={roomId}
-        {...{room: actualRoom, roomId, roomIdentity, roomIdentityKeys}}
-      />
-    );
+  if (room) return <Room key={roomId} {...{room, roomId, uxConfig}} />;
   if (shouldCreate && autoCreateLoading) return null;
 
   if (roomId.length < 4 || (shouldCreate && autoCreateError)) {

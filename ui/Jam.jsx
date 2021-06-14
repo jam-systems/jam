@@ -51,6 +51,7 @@ function JamUI({style, className, route = null, dynamicConfig = {}, ...props}) {
             autoCreate={!!dynamicConfig.ux?.autoCreate}
             roomIdentity={dynamicConfig.identity}
             roomIdentityKeys={dynamicConfig.keys}
+            uxConfig={dynamicConfig.ux ?? emptyObject}
             onError={({error}) => (
               <Start
                 urlRoomId={route}
@@ -65,11 +66,12 @@ function JamUI({style, className, route = null, dynamicConfig = {}, ...props}) {
 
   // set/unset room id
   useEffect(() => {
-    if (dynamicConfig.ux?.autoJoin !== undefined) {
-      setProps('autoJoin', dynamicConfig.ux.autoJoin);
+    let {autoJoin} = dynamicConfig.ux ?? {};
+    if (autoJoin !== undefined) {
+      setProps('autoJoin', !!autoJoin);
     }
     setProps('roomId', roomId);
-  }, [roomId, dynamicConfig.ux]);
+  }, [roomId, dynamicConfig.ux, setProps]);
 
   // toggle debugging
   useEffect(() => {
@@ -83,7 +85,7 @@ function JamUI({style, className, route = null, dynamicConfig = {}, ...props}) {
       debug(state);
       debugStateTree();
     }
-  }, [dynamicConfig.debug]);
+  }, [dynamicConfig.debug, state]);
 
   // global styling
   // TODO: the color should depend on the loading state of GET /room, to not flash orange before being in the room
@@ -116,6 +118,8 @@ function JamUI({style, className, route = null, dynamicConfig = {}, ...props}) {
     </div>
   );
 }
+
+const emptyObject = {};
 
 function hexToRGB(hex, alpha) {
   const r = parseInt(hex.slice(1, 3), 16);

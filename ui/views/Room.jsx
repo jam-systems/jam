@@ -18,7 +18,7 @@ const inWebView =
     (userAgent.os?.name === 'iOS' &&
       userAgent.browser?.name !== 'Mobile Safari'));
 
-export default function Room({room, roomId}) {
+export default function Room({room, roomId, uxConfig}) {
   // room = {name, description, moderators: [peerId], speakers: [peerId]}
   const state = useJamState();
   useWakeLock();
@@ -106,6 +106,8 @@ export default function Room({room, roomId}) {
   let audiencePeers = stageOnly
     ? []
     : allPeers.filter(id => !stagePeers.includes(id));
+
+  let {noLeave} = uxConfig;
 
   return (
     <Container style={{display: 'flex', flexDirection: 'column'}}>
@@ -242,7 +244,15 @@ export default function Room({room, roomId}) {
       </div>
 
       <Navigation
-        {...{roomId, room, editRole, setEditRole, editSelf, setEditSelf}}
+        {...{
+          roomId,
+          room,
+          editRole,
+          setEditRole,
+          editSelf,
+          setEditSelf,
+          noLeave,
+        }}
       />
     </Container>
   );
