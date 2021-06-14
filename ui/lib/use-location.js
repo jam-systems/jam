@@ -8,7 +8,11 @@ export function useLocation() {
   use(atom);
   useEffect(() => {
     window.addEventListener('popstate', updater);
-    return () => window.removeEventListener('popstate', updater);
+    window.addEventListener('hashchange', updater);
+    return () => {
+      window.removeEventListener('popstate', updater);
+      window.removeEventListener('hashchange', updater);
+    };
   }, []);
   return location;
 }

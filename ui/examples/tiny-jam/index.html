@@ -45,18 +45,14 @@
       let potentialRoomId = location.hash.slice(1) ?? null;
       input.value = potentialRoomId ?? '';
 
-      window.addEventListener(
-        'hashchange',
-        () => {
-          potentialRoomId = location.hash.slice(1) ?? null;
-          if (potentialRoomId !== state.roomId) {
-            setProps('roomId', null);
-            input.value = potentialRoomId ?? '';
-            renderUI(state);
-          }
-        },
-        false
-      );
+      window.addEventListener('hashchange', () => {
+        potentialRoomId = location.hash.slice(1) ?? null;
+        if (potentialRoomId !== state.roomId) {
+          setProps('roomId', null);
+          input.value = potentialRoomId ?? '';
+          renderUI(state);
+        }
+      });
 
       input.addEventListener('input', e => {
         potentialRoomId = e.target.value ?? null;
