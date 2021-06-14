@@ -83,9 +83,6 @@ function createJam({jamConfig, cachedRooms} = {}) {
 }
 
 function AppState() {
-  let inRoom = null;
-  let autoJoinCount = 0;
-  let didAutoJoin = false;
   const swarm = Swarm();
   const {peerState, myPeerState} = swarm;
   is(myPeerState, {inRoom: false, micMuted: false, leftStage: false});
@@ -101,25 +98,7 @@ function AppState() {
       myPeerState,
     });
     let {closed, moderators} = room;
-
-    let [isJoinRoom, joinedRoomId] = useAction(actions.JOIN);
-    let [isAutoJoin] = useAction(actions.AUTO_JOIN);
-    if ((isAutoJoin || (autoJoin && !didAutoJoin)) && autoJoinCount === 0) {
-      didAutoJoin = true;
-      autoJoinCount = 1;
-    }
-
-    if (!roomId || (closed && !iAmModerator)) {
-      inRoom = null;
-    } else {
-      if (isJoinRoom) {
-        inRoom = joinedRoomId;
-      }
-      if (autoJoinCount > 0 && hasRoom) {
-        autoJoinCount--;
-        inRoom = roomId;
-      }
-    }
+    let inRoom = use(InRoom, {roomId, autoJoin, iAmModerator, hasRoom, closed});
 
     // connect with signaling server
     declare(ConnectRoom, {
@@ -163,5 +142,33 @@ function AppState() {
         micMuted,
       })
     );
+  };
+}
+
+function InRoom() {
+  let inRoom = null;
+  let autoJoinCount = 0;
+  let didAutoJoin = false;
+  return function InRoom({roomId, autoJoin, iAmModerator, hasRoom, closed}) {
+    let [isJoinRoom, joinedRoomId] = useAction(actions.JOIN);
+    let [isAutoJoin] = useAction(actions.AUTO_JOIN);
+    if ((isAutoJoin || (autoJoin && !didAutoJoin)) && autoJoinCount === 0) {
+      didAutoJoin = true;
+      autoJoinCount = 1;
+    }
+
+    if (!roomId || (closed && !iAmModerator)) {
+      inRoom = null;
+    } else {
+      if (isJoinRoom) {
+        inRoom = joinedRoomId;
+      }
+      if (autoJoinCount > 0 && hasRoom) {
+        autoJoinCount--;
+        inRoom = roomId;
+      }
+    }
+
+    return inRoom;
   };
 }
