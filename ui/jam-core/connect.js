@@ -67,13 +67,13 @@ export function ConnectRoom({myId, myIdentity, swarm}) {
     is(state, {otherDeviceInRoom});
   });
 
-  return function ConnectRoom({roomId, shouldConnect, myId}) {
+  return function ConnectRoom({roomId, shouldConnect, myId, myIdentity}) {
     if (shouldConnect && roomId && connectedRoomId !== roomId) {
       connectedRoomId = roomId;
       if (swarm.room === roomId && swarm.hub) return;
       log('connecting room', roomId);
       if (swarm.hub) swarm.disconnect();
-      swarm.config({myPeerId: myId});
+      swarm.config({myPeerId: myId, sign: data => signData(myIdentity, data)});
       swarm.connect(roomId);
     } else if ((!shouldConnect || !roomId) && connectedRoomId !== null) {
       connectedRoomId = null;
