@@ -7,13 +7,12 @@ import {parsePath, parseUrlConfig} from './lib/url-utils';
 render(<App />, document.querySelector('#root'));
 
 function App() {
-  // TODO: react on hash changes that don't affect route
   let {pathname, hash, search} = useLocation();
 
   const [route, dynamicConfig] = useMemo(() => {
     let {route, room} = parsePath(pathname);
     let config = parseUrlConfig(search, hash);
-    config.room = {...(config.room ?? null), ...room};
+    config.room = {...room, ...(config.room ?? null)};
     return [route, config];
   }, [pathname, hash, search]);
 

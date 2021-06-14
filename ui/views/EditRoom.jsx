@@ -1,13 +1,14 @@
 import React, {useState} from 'react';
-import {put} from '../logic/backend';
-import {useMqParser} from '../logic/tailwind-mqp';
+import {useMqParser} from '../lib/tailwind-mqp';
 import {Modal} from './Modal';
 import {rawTimeZones} from '@vvo/tzdb';
+import {useJam} from '../jam-core-react';
 
 export function EditRoomModal({roomId, room, close}) {
-  let updateRoom = async room_ => {
-    if (!roomId || !room_) return;
-    await put(`/rooms/${roomId}`, room_);
+  const [, {updateRoom}] = useJam();
+
+  let submitUpdate = async partialRoom => {
+    updateRoom(roomId, {...room, ...partialRoom});
   };
 
   let [name, setName] = useState(room.name || '');
@@ -44,7 +45,7 @@ export function EditRoomModal({roomId, room, close}) {
     setSchedule(undefined);
     let schedule = undefined;
 
-    updateRoom({...room, schedule});
+    submitUpdate({schedule});
   };
 
   let submitSchedule = e => {
@@ -52,14 +53,13 @@ export function EditRoomModal({roomId, room, close}) {
     if (scheduleCandidate) {
       let schedule = scheduleCandidate;
       setSchedule(scheduleCandidate);
-      updateRoom({...room, schedule});
+      submitUpdate({schedule});
     }
   };
 
   let submit = async e => {
     e.preventDefault();
-    await updateRoom({
-      ...room,
+    await submitUpdate({
       name,
       description,
       color,

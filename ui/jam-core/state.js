@@ -1,5 +1,10 @@
-import Swarm from '../lib/swarm';
-const state = {
+import {Action} from '../lib/state-tree';
+export {defaultState};
+
+const defaultState = {
+  myIdentity: null,
+  myId: null,
+
   roomId: window.existingRoomId ?? null,
   inRoom: null, // === roomId but only if entered
   room: {name: '', description: '', speakers: [], moderators: []},
@@ -7,6 +12,7 @@ const state = {
   iAmModerator: false,
   identities: {},
   otherDeviceInRoom: false,
+  leftStage: false,
 
   reactions: {},
   handRaised: false,
@@ -16,18 +22,18 @@ const state = {
   audioFile: null,
   audioFileElement: null,
   myAudio: null,
+  audioPlayError: false,
 
   speaking: new Set(),
-  audioContext: null,
 
-  modMessages: {},
   userInteracted: false,
 };
-export default state;
 
 export const actions = {
-  RETRY_MIC: 'retry-mic',
+  JOIN: Action('join'),
+  LEAVE_STAGE: Action('leave-stage'),
+  RETRY_MIC: Action('retry-mic'),
+  RETRY_AUDIO: Action('retry-audio'),
+  REACTION: Action('reaction'),
+  AUTO_JOIN: Action('auto-join'),
 };
-
-const swarm = Swarm();
-export {swarm};

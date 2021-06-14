@@ -1,6 +1,4 @@
-import React from 'react';
-import {is, on, emit, clear, use as useMinimalState} from 'use-minimal-state';
-import {staticConfig} from '../logic/config';
+import {is, on, emit, clear, set} from 'minimal-state';
 import causalLog from './causal-log';
 
 // a kind of "React for app state"
@@ -12,43 +10,15 @@ import causalLog from './causal-log';
 /* TODOs:
 
   - enable more Component return values
-  - batch updates in a more deterministic / purposeful way / order
-  - use a dedicated class for Fragment for efficiency
-  - core lib should not depend on React, be usable everywhere
-     => split out useStateComponent() & overloaded use()
-     => minimal-state instead of use-minimal-state => use-minimal-state has to *import* minimal-state
-        so they share the event book-keeping (otherwise useExternalState wouldn't work)
 
-  - add more API for using state-tree inside React components, i.e.
-    * useStateRoot(Component, props) which is like declareStateRoot & updates React component w/ state
-    * something like declare() for self-contained effects which can take props but don't return anything
-    * check whether declare / use could work w/ changing components, this works in state-tree but not in React bc
-      we fix reference to fragment
-
-  - improve actions/events as component input:
-    * enable any component tree to handle actions, not just the declareRootState variant
-    * dispatch() should queue an update which can be batched w/ other updates but *guarantees* that the component
-      is called once w/ the action & payload.
-    * multiple dispatches to the same action w/ different payloads should render the component multiple times
-      e.g. queue of actions is stored in use array, useAction calls queueUpdate
-    * for the retry-mic use case / encapsulated events: actions should optionally be a unique object, Action(type), that can
-      be exported (to avoid global strings which always have latent potential for conflicts)
-
-  - actions/events as component output:
-    * components should be able to act as event generators via their return value
-      needs a third wrapper in addition to declare() & use(), e.g. event(Component, props).
-      crucially, event() does NOT re-return the last result if it doesn't update, bc events are one-time things.
-      this could be another boolean flag in _run.
-      this pattern has same use case as callback-passing but is much cleaner
-      => avoids generating functions that have to be memoized, avoids an additional execution scope
-      should make most instances of dispatch from inside components unnecessary, then dispatch is still needed as a fallback
-      for actions that just can't be triggered by stable state, like retry-mic
-    
   - understand performance & optimize where possible
+
   - stale update problem: understand in what cases object identity of state properties must change.
     or, if updates to root are made sufficiently fine-grained, possibly don't block
     non-changes to state in root (but first approach is cleaner)
-  - element unmount should be recursive, clean up its children
+
+  - use a dedicated class for Fragment for efficiency (low priority, because a mid-sized full initial render
+    without side effects turns out to only take a couple of ms)
 */
 
 export {
@@ -61,25 +31,28 @@ export {
   useDispatch,
   useRootState,
   useExternalState,
+  useOn,
   useUpdate,
   useState,
   useMemo,
   useCallback,
   useUnmount,
+  Action,
   Atom,
   merge,
   debugStateTree,
 };
 
-const root = {children: []};
+// INTERNAL exports for state-tree-react
+export {root, _run, log, cleanup};
+
+const root = {children: [], level: -1};
 let current = root;
 let renderRoot = null;
 let nUses = 0;
 let renderTime = 0;
-let currentAction = [undefined, undefined];
 
 const updateSet = new Set();
-const rootUpdateSet = new Set();
 
 function declare(Component, props, stableProps) {
   let key = props?.key;
@@ -90,19 +63,8 @@ function declare(Component, props, stableProps) {
   return newElement.fragment;
 }
 
-// this works equivalently in React & state-tree components
 function use(Component, props, stableProps) {
   let isComponent = typeof Component === 'function';
-  if (current === root) {
-    // we are not in a state component => assume inside React component
-    if (isComponent) {
-      // eslint-disable-next-line
-      return useStateComponent(Component, props);
-    } else {
-      // eslint-disable-next-line
-      return useMinimalState(Component, props);
-    }
-  }
   if (!isComponent) {
     // eslint-disable-next-line
     return useExternalState(Component, props);
@@ -137,7 +99,15 @@ function event(Component, props, stableProps) {
 function _run(
   Component,
   props = null,
-  {element, stableProps = null, isUsed = false, isEvent = false} = {}
+  {
+    element,
+    stableProps = null,
+    isUsed = false,
+    isEvent = false,
+    isMount = false,
+    isRoot = false,
+    state,
+  } = {}
 ) {
   let mustUpdate = updateSet.has(element);
   if (mustUpdate) updateSet.delete(element);
@@ -151,9 +121,6 @@ function _run(
     return [element, undefined];
   }
 
-  // log('rendering', Component.name);
-
-  let isMount = false;
   if (element === undefined) {
     isMount = true;
     element = {
@@ -166,12 +133,20 @@ function _run(
       uses: [],
       renderTime,
       parent: current,
+      level: current.level + 1,
       root: renderRoot,
       isUsed,
       isEvent,
       fragment: Fragment(),
     };
-    log('STATE-TREE', 'mounting new element', element.component.name);
+    if (isRoot) {
+      element.actionSubs = new Map();
+      element.stateSubs = new Map();
+      element.state = state;
+      element.root = element;
+      renderRoot = element;
+    }
+    log('mounting new element', element.component.name);
     current.children.push(element);
   } else {
     if (props !== null) element.props = props;
@@ -222,7 +197,7 @@ function _run(
 }
 
 function cleanup(element) {
-  log('STATE-TREE', 'unmounting element', element.component.name);
+  log('unmounting element', element.component.name);
   clear(element.fragment);
   for (let use of element.uses) {
     use?.cleanup?.();
@@ -231,59 +206,39 @@ function cleanup(element) {
     unsubscribeAll(renderRoot.actionSubs, element);
     unsubscribeAll(renderRoot.stateSubs, element);
   }
+  for (let child of element.children) {
+    cleanup(child);
+  }
 }
 
 // for creating state obj at the top level & later rerun on update
-function declareStateRoot(Component, state, keys = []) {
+function declareStateRoot(Component, props = null, {state, defaultState = {}}) {
   current = root;
-  if (state === undefined) state = {};
+  state = state ?? {...defaultState};
   renderTime = Date.now();
 
-  const rootElement = {
-    component: Component,
-    render: Component,
-    props: null,
-    stableProps: null,
-    key: {},
-    children: [],
-    uses: [],
-    renderTime,
-    parent: current,
-    root: null,
-    isEvent: false,
-    isUsed: false,
-    fragment: Fragment(),
-    actionSubs: new Map(),
-    stateSubs: new Map(),
+  const [rootElement] = _run(Component, props, {
+    isMount: true,
+    isRoot: true,
     state,
-  };
-  rootElement.root = rootElement;
+  });
   const rootFragment = rootElement.fragment;
-
-  log('STATE-TREE', 'mounting ROOT element', rootElement);
-  current.children.push(rootElement);
-
-  renderRoot = rootElement;
-  _run(Component, {...state}, {element: rootElement});
   let result = rootFragment[0];
-  log(
-    'STATE-TREE',
-    'initial root render returned',
-    result,
-    'after',
-    Date.now() - renderTime
-  );
+  log('initial root render returned', result, 'after', Date.now() - renderTime);
   // TODO: could it be problematic here that we don't update unchanged values, can there be stable sub-objects?
   is(state, result);
   renderRoot = null;
 
   on(rootFragment, (result, keys) => {
-    log('STATE-TREE', 'root fragment update triggered!', result, keys);
+    log('root fragment update triggered!', result, keys);
     // TODO: could it be problematic here that we don't update unchanged values, can there be stable sub-objects?
     if (keys === undefined) is(state, result);
     else {
       for (let key of keys) {
-        log(key, 'value changed?', state[key] !== result[key]);
+        if (state[key] === result[key]) {
+          console.error('value did not change', key);
+        }
+        // probably use set here
         is(state, key, result[key]);
       }
     }
@@ -291,12 +246,7 @@ function declareStateRoot(Component, state, keys = []) {
 
   on(state, (key, value, oldValue) => {
     if (oldValue !== undefined && value === oldValue) return;
-
     // TODO: what updates should we queue on state updates during render?
-    if (renderRoot !== rootElement && (keys === '*' || keys.includes(key))) {
-      queueRootUpdate(rootElement, key);
-    }
-
     let subscribers = rootElement.stateSubs.get(key);
     if (subscribers !== undefined) {
       for (let element of subscribers) {
@@ -305,12 +255,14 @@ function declareStateRoot(Component, state, keys = []) {
     }
   });
 
-  const dispatch = (type, payload) => {
-    log('dispatching', type, payload);
+  const dispatch = (type, payload) =>
     dispatchFromRoot(rootElement, type, payload);
-  };
   on(state, 'dispatch', dispatch);
-  return {state, dispatch};
+  return {
+    state,
+    dispatch,
+    setProps: (...args) => setProps(rootElement, ...args),
+  };
 }
 
 function sameProps(prevProps, props) {
@@ -329,121 +281,84 @@ function sameProps(prevProps, props) {
 // rerendering
 function queueUpdate(caller, reason = '') {
   log('queuing update', caller.component.name, reason);
-  let rootElement = markForUpdate(caller);
-  // rerender root
-  queueMicrotask(() => {
-    if (!updateSet.has(rootElement)) return;
-    log(
-      'STATE-TREE',
-      'render caused by queueUpdate',
-      caller.component.name,
-      reason
-    );
-    let result = rerender(rootElement);
-    log(
-      'STATE-TREE',
-      'render returned',
-      result,
-      'after',
-      Date.now() - renderTime
-    );
+  markForUpdate(caller);
+  return Promise.resolve().then(() => {
+    updateAll(caller.component.name + ' ' + reason);
   });
 }
 
-function queueRootUpdate(rootElement, reason = '') {
-  log('queuing root update', reason);
-  rootUpdateSet.add(rootElement);
-  queueMicrotask(() => {
-    if (!rootUpdateSet.has(rootElement)) return;
-    rootUpdateSet.delete(rootElement);
-
-    log('STATE-TREE', 'root render caused by state update', reason);
-    let {state, fragment, component} = rootElement;
-    renderRoot = rootElement;
+function updateAll(reason) {
+  if (updateSet.size === 0) {
+    // console.error('update obsolete: all elements updated', reason);
+    return;
+  }
+  log('tree update caused by', reason);
+  let orderedElements = [...updateSet].sort(
+    (el1, el2) => el1.level - el2.level
+  );
+  // console.error(
+  //   'orderedElements',
+  //   orderedElements.map(el => el.component.name).join(', ')
+  // );
+  for (let element of orderedElements) {
+    if (!updateSet.has(element)) {
+      // console.error('update obsolete: element already updated', reason);
+      continue;
+    }
+    renderRoot = element.root;
     renderTime = Date.now();
-    _run(component, {...state}, {element: rootElement});
-    let result = fragment[0];
+    log('rerendering', element.component.name);
+    let [, updateKeys] = _run(element.component, element.props, {element});
+    log('render took', Date.now() - renderTime);
+    let result = element.fragment[0];
+    // TODO: rerendered element should already provide fine-grained update info (keys)
+    emit(element.fragment, result, updateKeys);
     renderRoot = null;
-    log(
-      'STATE-TREE',
-      'root render returned',
-      result,
-      'after',
-      Date.now() - renderTime
-    );
-    // TODO: could it be problematic here that we don't update unchanged values, can there be stable sub-objects?
-    is(state, result);
-  });
+  }
 }
 
 function markForUpdate(element) {
-  // log('markForUpdate', element.component.name);
   let parent = element;
-  // log('adding updateSet', parent.component.name);
   updateSet.add(parent);
   if (!parent.isUsed) return parent;
   while (parent.parent !== root) {
     parent = parent.parent;
-    // log('adding updateSet', parent.component.name);
     updateSet.add(parent);
     if (!parent.isUsed) return parent;
   }
   return parent;
 }
 
-function rerender(element) {
-  renderRoot = element.root;
-  renderTime = Date.now();
-  let result;
-  if (!element.isUsed) {
-    log('STATE-TREE', 'rerendering', element.component.name);
-    let [, updateKeys] = _run(element.component, element.props, {element});
-    result = element.fragment[0];
-    // TODO: rerendered element should already provide fine-grained update info (keys)
-    emit(element.fragment, result, updateKeys);
-  } else {
-    throw Error(
-      'used re-render! should not happen because used elements require update of parents'
-    );
-  }
-  renderRoot = null;
-  return result;
+function setProps(element, ...args) {
+  log('setProps', ...args);
+  let newProps = {...element.props};
+  set(newProps, ...args);
+  if (sameProps(element.props, newProps)) return;
+  element.props = newProps;
+  return queueUpdate(element, 'setProps');
 }
 
 function dispatch(state, type, payload) {
   emit(state, 'dispatch', type, payload);
 }
 
-function dispatchFromRoot(rootElement, type, payload) {
-  queueMicrotask(() => {
-    let subscribers = rootElement.actionSubs.get(type);
-    if (subscribers === undefined || subscribers.size === 0) return;
+async function dispatchFromRoot(rootElement, type, payload) {
+  log('dispatching', rootElement.component.name, String(type));
 
-    let actionRoots = new Set();
-    for (let element of subscribers) {
-      actionRoots.add(markForUpdate(element));
-    }
-    currentAction = [type, payload];
-    // TODO: we'd like to use a batched update here as well,
-    // but don't know yet how to ensure rendering of each subscribed component *with the currentAction context*
-    // in a way other updates can't interfere.
-    // a dispatched action must definitely show up in each subscribed component no matter what.
+  let subscribers = rootElement.actionSubs.get(type);
+  if (subscribers === undefined || subscribers.size === 0) return;
 
-    // instead of the global variable context we we need something more like hooks,
-    // where a value is saved to the component to be used for the next render, to then be removed
-    for (let element of actionRoots) {
-      log('STATE-TREE', 'render caused by dispatch', type);
-      let result = rerender(element);
-      log(
-        'STATE-TREE',
-        'render returned',
-        result,
-        'after',
-        Date.now() - renderTime
-      );
+  let promises = [];
+  for (let element of subscribers) {
+    for (let use of element.uses) {
+      if (use.action === type) {
+        use.push(payload);
+        let promise = queueUpdate(element, 'dispatch ' + type);
+        promises.push(promise);
+      }
     }
-    currentAction = [undefined, undefined];
-  });
+  }
+  return Promise.all(promises);
 }
 
 function subscribe(subscriptions, type, element) {
@@ -461,65 +376,52 @@ function unsubscribeAll(subscriptions, element) {
   }
 }
 
-// TODO: investigate whether the Component can be made changeable
-
-function useStateComponent(Component, props, stableProps) {
-  // a stable object which we use as render key and to store mutable state
-  let [stable] = React.useState({
-    shouldRun: true,
-    element: null,
-    component: Component,
-  });
-  if (props) props.key = stable;
-  else props = {key: stable};
-
-  if (stable.shouldRun) {
-    let {component} = stable;
-    let element = root.children.find(
-      c => c.component === component && c.key === stable
-    );
-    [element] = _run(component, props, {element, stableProps});
-    stable.element = element;
-  }
-  stable.shouldRun = true;
-
-  let [, forceUpdate] = React.useState(0);
-
-  React.useEffect(() => {
-    let {element} = stable;
-    on(element.fragment, () => {
-      log('STATE-TREE React update', stable.component.name);
-      stable.shouldRun = false;
-      forceUpdate(n => n + 1);
-    });
-    return () => {
-      cleanup(element);
-      let i = root.children.indexOf(element);
-      if (i !== -1) root.children.splice(i, 1);
-    };
-  }, [stable]);
-  return stable.element.fragment[0];
+// this will be useful for typing the payload
+function Action(type) {
+  return {type, toString: () => type};
 }
 
-// TODO maybe more efficient to memo the next 2-3 hooks, like useState (not sure though)
-// note that the next two need to be rendered inside a state root
+// the next two need to be rendered inside an {isRoot: true} component
 function useAction(type) {
-  if (current === root)
-    throw Error('useAction can only be called during render');
-  subscribe(renderRoot.actionSubs, type, current);
-  let callerRoot = renderRoot;
-  const dispatchThis = p => dispatchFromRoot(callerRoot, type, p);
-  if (currentAction[0] === type) {
-    return [true, currentAction[1], dispatchThis];
+  if (current === root) throw Error('Hooks can only be called during render');
+  let actionQueue = current.uses[nUses];
+  if (actionQueue === undefined) {
+    actionQueue = [];
+    actionQueue.action = type;
+    subscribe(renderRoot.actionSubs, type, current);
+    current.uses[nUses] = actionQueue;
+  }
+  nUses++;
+  if (actionQueue.length > 0) {
+    let payload = actionQueue.shift();
+    if (actionQueue.length > 0) {
+      queueUpdate(current, 'queued dispatch ' + type);
+    }
+    return [true, payload];
   } else {
-    return [false, undefined, dispatchThis];
+    return [false, undefined];
   }
 }
+
+// function useActions(...types) {
+//   if (current === root)
+//     throw Error('useAction can only be called during render');
+//   for (let type of types) {
+//     subscribe(renderRoot.actionSubs, type, current);
+//   }
+//   if (types.includes(currentAction[0])) {
+//     return [currentAction[0], currentAction[1]];
+//   } else {
+//     return [undefined, undefined];
+//   }
+// }
+
 function useDispatch() {
   let callerRoot = renderRoot;
   return (type, payload) => dispatchFromRoot(callerRoot, type, payload);
 }
 
+// TODO maybe more efficient to memo this hook, like useState (not sure though)
 function useRootState(keys) {
   if (current === root) throw Error('Hooks can only be called during render');
   let {state} = renderRoot;
@@ -544,24 +446,31 @@ function useExternalState(state, key) {
   let use = caller.uses[nUses];
   if (use === undefined || use.key !== key) {
     if (use !== undefined) {
-      // cleaning up when key changed
       use.cleanup();
     }
     const listener = () => {
-      // not sure whether we want this...
-      // I'd rather be able to force updates when I want and be careful about triggering them
-      // if (value === state[key]) return;
       if (current !== caller) {
         queueUpdate(caller, 'useExternalState ' + key);
       }
     };
-    // TODO: cleanup on onUnmount
     let cleanup = on(state, key, listener);
     use = {key, cleanup};
     caller.uses[nUses] = use;
   }
   nUses++;
   return state[key];
+}
+
+function useOn(...args) {
+  if (current === root) throw Error('Hooks can only be called during render');
+  let caller = current;
+  let use = caller.uses[nUses];
+  if (use !== undefined) {
+    use.cleanup();
+  }
+  let cleanup = on(...args);
+  caller.uses[nUses] = {cleanup};
+  nUses++;
 }
 
 function useUpdate() {
@@ -711,10 +620,10 @@ function setObjectFragment(fragment, obj) {
     if (isFragment(prop)) {
       pureObj[key] = prop[0];
       // these listeners should be a class method on (Object)Fragment
-      prop._deps.set(fragment, (value, _keys) => {
+      prop._deps.set(fragment, value => {
         pureObj[key] = value;
         // TODO: should object identity change?
-        // TODO: forward deeply nested update info, i.e. use _keys?
+        // TODO: forward deeply nested update info, i.e. use second param?
         emit(fragment, pureObj, [key]);
       });
     } else {
@@ -769,7 +678,7 @@ function setMergedFragment(fragment, objArray) {
   return keys;
 }
 
-let doLog = !!staticConfig.development;
+let doLog = !!window.jamConfig?.development;
 function debugStateTree() {
   window.root = root;
   doLog = true;
@@ -777,5 +686,5 @@ function debugStateTree() {
 
 function log(...args) {
   if (doLog === false) return;
-  causalLog(...args);
+  causalLog('STATE-TREE', ...args);
 }

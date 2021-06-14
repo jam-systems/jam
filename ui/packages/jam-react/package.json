@@ -1,6 +1,6 @@
 {
   "name": "jam-react",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Audio space like Clubhouse / Twitter Spaces as a React component, made with WebRTC",
   "keywords": [
     "audio",
@@ -13,8 +13,8 @@
   "browser": "dist/index.js",
   "module": "dist/index.js",
   "repository": {
-    "type" : "git",
-    "url" : "https://gitlab.com/jam-systems/jam.git",
+    "type": "git",
+    "url": "https://gitlab.com/jam-systems/jam.git",
     "directory": "ui/jam-react"
   },
   "author": "Gregor Mitscha-Baude",

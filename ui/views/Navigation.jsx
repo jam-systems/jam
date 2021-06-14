@@ -1,14 +1,11 @@
 import React, {useMemo, useState} from 'react';
-import {leaveRoom} from '../logic/main';
-import state, {actions} from '../logic/state';
 import {is, use} from 'use-minimal-state';
-import {sendReaction} from '../logic/reactions';
 import EditRole, {EditSelf} from './EditRole';
-import {breakpoints, useWidth} from '../logic/tailwind-mqp';
+import {breakpoints, useWidth} from '../lib/tailwind-mqp';
 import {openModal} from './Modal';
 import {InfoModal} from './InfoModal';
 import {MicOffSvg, MicOnSvg} from './Svg';
-import {dispatch} from '../lib/state-tree';
+import {useJam} from '../jam-core-react';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 
@@ -36,7 +33,9 @@ export default function Navigation({
   setEditRole,
   editSelf,
   setEditSelf,
+  noLeave,
 }) {
+  const [state, {leaveRoom, sendReaction, retryMic, setProps}] = useJam();
   let [myAudio, micMuted, handRaised, iSpeak] = use(state, [
     'myAudio',
     'micMuted',
@@ -56,9 +55,9 @@ export default function Navigation({
 
   let talk = () => {
     if (micOn) {
-      is(state, 'micMuted', !micMuted);
+      setProps('micMuted', !micMuted);
     } else {
-      dispatch(state, actions.RETRY_MIC);
+      retryMic();
     }
   };
 
@@ -193,12 +192,14 @@ export default function Navigation({
         </button>
 
         {/* Leave */}
-        <button
-          className="flex-shrink ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
-          onClick={() => leaveRoom(roomId)}
-        >
-          🖖🏽&nbsp;Leave
-        </button>
+        {!noLeave && (
+          <button
+            className="flex-shrink ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
+            onClick={() => leaveRoom(roomId)}
+          >
+            🖖🏽&nbsp;Leave
+          </button>
+        )}
       </div>
     </div>
   );

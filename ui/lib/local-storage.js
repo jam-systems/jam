@@ -1,12 +1,11 @@
-import State, {on, pure, set} from 'use-minimal-state';
+import {on, pure, set} from 'minimal-state';
 
-export function StoredState(name, initialize = () => ({}), options) {
-  let storedState = getStorage(localStorage, name);
-  if (!storedState) {
-    storedState = initialize();
-    setStorage(localStorage, name, storedState);
+export function StoredState(name, initialize = () => ({})) {
+  let state = getStorage(localStorage, name);
+  if (!state) {
+    state = initialize();
+    setStorage(localStorage, name, state);
   }
-  let state = State(storedState, options);
   let forwardUpdates = true;
   on(state, () => {
     if (forwardUpdates) setStorage(localStorage, name, pure(state));

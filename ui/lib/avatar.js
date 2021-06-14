@@ -1,4 +1,4 @@
-import {publicKeyToIndex} from '../logic/identity';
+import {decode} from './identity-utils';
 
 const roomAvatar = (info, room) => {
   if (room.userDisplay?.randomIdentities) {
@@ -76,3 +76,14 @@ const names = [
   'Yu',
   'Zero',
 ];
+
+const integerFromBytes = timeCodeBytes =>
+  timeCodeBytes[0] +
+  (timeCodeBytes[1] << 8) +
+  (timeCodeBytes[2] << 16) +
+  (timeCodeBytes[3] << 24);
+
+function publicKeyToIndex(publicKey, range) {
+  const bytes = decode(publicKey);
+  return Math.abs(integerFromBytes(bytes)) % range;
+}

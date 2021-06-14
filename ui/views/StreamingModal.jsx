@@ -2,11 +2,12 @@ import React from 'react';
 import {Modal} from './Modal';
 import {PrimaryButton, SecondaryButton} from './Button';
 import {LabeledInput, useFileInput} from './Input';
-import state from '../logic/state';
 import {set} from 'use-minimal-state';
+import {useJamState} from '../jam-core-react';
 
 export default function StreamingModal({close}) {
   // let [urlValue, urlInput] = useInput();
+  const state = useJamState();
   let [getFile, fileInput] = useFileInput();
   let submit = async e => {
     e.preventDefault();

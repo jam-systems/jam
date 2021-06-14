@@ -1,10 +1,9 @@
 import React from 'react';
 import {use} from 'use-minimal-state';
-import {enterRoom} from '../logic/main';
-import state from '../logic/state';
-import {useMqParser} from '../logic/tailwind-mqp';
+import {useMqParser} from '../lib/tailwind-mqp';
 import Container from './Container';
 import RoomHeader from './RoomHeader';
+import {useJam} from '../jam-core-react';
 
 const iOS =
   /^iP/.test(navigator.platform) ||
@@ -22,6 +21,7 @@ export default function EnterRoom({
   buttonText,
   logoURI,
 }) {
+  const [state, {enterRoom, setProps}] = useJam();
   let mqp = useMqParser();
   let otherDevice = use(state, 'otherDeviceInRoom');
   return (
@@ -62,7 +62,10 @@ export default function EnterRoom({
             in the future
         */}
         <button
-          onClick={() => enterRoom(roomId)}
+          onClick={() => {
+            setProps({userInteracted: true});
+            enterRoom(roomId);
+          }}
           className={
             closed
               ? 'hidden'

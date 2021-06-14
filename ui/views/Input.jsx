@@ -1,6 +1,6 @@
 import React, {useRef, useState} from 'react';
-import {useMediaQuery} from '../logic/tailwind-mqp';
-import {mergeClasses} from '../logic/util';
+import {useMediaQuery} from '../lib/tailwind-mqp';
+import {mergeClasses} from '../lib/util';
 
 export default function Input({className, inputRef, ...props}) {
   let width = useMediaQuery('sm', 'w-full', 'w-96');

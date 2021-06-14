@@ -1,19 +1,16 @@
-import React, {useEffect, useState} from 'react';
-import state, {swarm} from '../logic/state';
+import React, {useState} from 'react';
 import {use} from 'use-minimal-state';
 import EnterRoom from './EnterRoom';
 import RoomHeader from './RoomHeader';
-import {useCurrentIdentity} from '../logic/identity';
 import {openModal} from './Modal';
 import {EditRoomModal} from './EditRoom';
 import useWakeLock from '../lib/use-wake-lock';
 import {AudienceAvatar, StageAvatar} from './Avatar';
-import {useMqParser} from '../logic/tailwind-mqp';
+import {useMqParser} from '../lib/tailwind-mqp';
 import Container from './Container';
 import Navigation from './Navigation';
 import {userAgent} from '../lib/user-agent';
-import {usePushToTalk} from '../logic/hotkeys';
-import {disconnectRoom, maybeConnectRoom} from '../logic/room';
+import {usePushToTalk, useJamState} from '../jam-core-react';
 
 const inWebView =
   userAgent.browser?.name !== 'JamWebView' &&
@@ -21,21 +18,12 @@ const inWebView =
     (userAgent.os?.name === 'iOS' &&
       userAgent.browser?.name !== 'Mobile Safari'));
 
-export default function Room({room, roomId}) {
+export default function Room({room, roomId, uxConfig}) {
   // room = {name, description, moderators: [peerId], speakers: [peerId]}
+  const state = useJamState();
   useWakeLock();
-  usePushToTalk(state);
+  usePushToTalk();
 
-  // connect with signaling server
-  useEffect(() => {
-    maybeConnectRoom(roomId);
-    return () => {
-      // clean up on unmount
-      disconnectRoom(roomId);
-    };
-  }, [roomId]);
-
-  let myInfo = useCurrentIdentity().info;
   let [
     reactions,
     handRaised,
@@ -43,6 +31,8 @@ export default function Room({room, roomId}) {
     speaking,
     iSpeak,
     iModerate,
+    myIdentity,
+    inRoom,
   ] = use(state, [
     'reactions',
     'handRaised',
@@ -50,14 +40,17 @@ export default function Room({room, roomId}) {
     'speaking',
     'iAmSpeaker',
     'iAmModerator',
+    'myIdentity',
+    'inRoom',
   ]);
-  let [peers, peerState, myPeerState] = use(swarm, [
+  let [peers, peerState, myPeerState] = use(state.swarm, [
     'stickyPeers',
     'peerState',
     'myPeerState',
   ]);
 
-  let hasEnteredRoom = myPeerState?.inRoom;
+  let myInfo = myIdentity.info;
+  let hasEnteredRoom = inRoom === roomId;
 
   let [editRole, setEditRole] = useState(null);
   let [editSelf, setEditSelf] = useState(false);
@@ -113,6 +106,8 @@ export default function Room({room, roomId}) {
   let audiencePeers = stageOnly
     ? []
     : allPeers.filter(id => !stagePeers.includes(id));
+
+  let {noLeave} = uxConfig;
 
   return (
     <Container style={{display: 'flex', flexDirection: 'column'}}>
@@ -249,7 +244,15 @@ export default function Room({room, roomId}) {
       </div>
 
       <Navigation
-        {...{roomId, room, editRole, setEditRole, editSelf, setEditSelf}}
+        {...{
+          roomId,
+          room,
+          editRole,
+          setEditRole,
+          editSelf,
+          setEditSelf,
+          noLeave,
+        }}
       />
     </Container>
   );

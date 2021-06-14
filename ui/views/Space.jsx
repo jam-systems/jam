@@ -1,5 +1,5 @@
 import React from 'react';
-import {mergeClasses} from '../logic/util';
+import {mergeClasses} from '../lib/util';
 
 export default function Space({x = 1, className, ...props}) {
   return <div className={mergeClasses(`h-${x}`, className)} {...props} />;

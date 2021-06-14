@@ -1,7 +1,23 @@
 import {getStorage} from './local-storage';
-import {set, update} from 'use-minimal-state';
+import {set, update} from 'minimal-state';
 
-export const importLegacyIdentity = () => {
+export {importLegacyIdentity, migrateDisplayName};
+
+function migrateDisplayName(identities) {
+  for (let key in identities) {
+    let {info} = identities[key];
+    if (info.displayName !== undefined) {
+      console.warn('migrating identity', key, identities[key]);
+      if (info.name === undefined) {
+        info.name = info.displayName;
+      }
+      delete info.displayName;
+      set(identities, key, identities[key]);
+    }
+  }
+}
+
+function importLegacyIdentity() {
   const identity = getStorage(localStorage, 'identity');
   if (!identity) return;
 
@@ -46,4 +62,4 @@ export const importLegacyIdentity = () => {
   }
 
   return identity;
-};
+}

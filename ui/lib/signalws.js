@@ -1,5 +1,5 @@
 import base64 from 'compact-base64';
-import {clear, emit, is, on} from 'use-minimal-state';
+import {clear, emit, is, on} from 'minimal-state';
 import {until} from '../lib/state-utils';
 
 export default function signalws({

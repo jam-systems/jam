@@ -1,6 +1,6 @@
 import React from 'react';
-import {useWidth, breakpoints} from '../logic/tailwind-mqp';
-import {mergeClasses} from '../logic/util';
+import {useWidth, breakpoints} from '../lib/tailwind-mqp';
+import {mergeClasses} from '../lib/util';
 
 export default function Container({className, style, ...props}) {
   let width = useWidth();

@@ -1,0 +1,111 @@
+<html>
+  <head>
+    <title>tiny jam demo</title>
+    <link rel="icon" href="data:," />
+  </head>
+  <body>
+    <form id="form" style="margin-bottom: 4px">
+      <input
+        type="text"
+        id="input"
+        placeholder="Room ID"
+        style="width: 145px"
+      />
+      <button id="button" disabled>Join</button>
+    </form>
+    <div id="description" />
+    <!-- <script>
+      window.jamConfig = {urls: {}, development: true};
+    </script> -->
+    <script type="module">
+      import {
+        createJam,
+        on,
+      } from 'https://cdn.jsdelivr.net/npm/jam-core/dist/bundle.js';
+
+      const jamConfig = {
+        urls: {
+          jam: 'https://jam.systems',
+          pantry: `https://jam.systems/_/pantry`,
+          stun: `stun:stun.jam.systems:3478`,
+          turn: `turn:turn.jam.systems:3478`,
+          turnCredentials: {username: 'test', credential: 'yieChoi0PeoKo8ni'},
+        },
+        development: false,
+      };
+
+      const [state, api] = createJam({jamConfig});
+      const {onState, setProps, enterRoom, leaveRoom, createRoom} = api;
+      window.state = state;
+
+      let input = document.querySelector('#input');
+      let button = document.querySelector('#button');
+      let description = document.querySelector('#description');
+
+      let potentialRoomId = location.hash.slice(1) ?? null;
+      input.value = potentialRoomId ?? '';
+
+      window.addEventListener('hashchange', () => {
+        potentialRoomId = location.hash.slice(1) ?? null;
+        if (potentialRoomId !== state.roomId) {
+          setProps('roomId', null);
+          input.value = potentialRoomId ?? '';
+          renderUI(state);
+        }
+      });
+
+      input.addEventListener('input', e => {
+        potentialRoomId = e.target.value ?? null;
+        renderUI(state);
+      });
+
+      function submit(e) {
+        setProps({userInteracted: true});
+        e.preventDefault();
+        if (state.inRoom) {
+          leaveRoom();
+          setProps('roomId', null);
+        } else {
+          createRoom(potentialRoomId, {stageOnly: true});
+          setProps('roomId', potentialRoomId);
+          enterRoom(potentialRoomId);
+          location.hash = potentialRoomId;
+        }
+      }
+      button.addEventListener('click', submit);
+      form.addEventListener('submit', submit);
+
+      renderUI(state);
+
+      onState((key, value) => {
+        // console.log('update', key, value);
+        renderUI(state);
+      });
+      on(state.swarm, (key, value) => {
+        renderUI(state);
+      });
+
+      function renderUI({roomId, speaking, myId, inRoom, swarm, iAmSpeaker}) {
+        let speakingText = iAmSpeaker ? 'Speaking' : 'Not speaking';
+        let speakingStyle = speaking.has(myId) ? 'color: green;' : '';
+
+        let {stickyPeers, peerState} = swarm;
+        let nJoinedPeers = Object.keys(stickyPeers).filter(
+          id => peerState[id]?.inRoom
+        ).length;
+
+        button.disabled = !(potentialRoomId?.length > 3);
+        button.innerText = inRoom ? 'Leave' : 'Join';
+
+        input.disabled = !!roomId;
+
+        description.innerHTML = inRoom
+          ? `
+          <b style="${speakingStyle}">${speakingText}</b>
+          with <b>${nJoinedPeers}</b>
+          other peer${nJoinedPeers === 1 ? '' : 's'}.`
+          : '';
+      }
+    </script>
+  </body>
+</html>

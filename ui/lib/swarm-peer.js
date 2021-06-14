@@ -1,6 +1,6 @@
 import SimplePeer from './simple-peer-light';
 import causalLog from './causal-log';
-import {emit, set, update} from 'use-minimal-state';
+import {emit, set, update} from 'minimal-state';
 
 const MAX_CONNECT_TIME = 10000;
 const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;
@@ -184,7 +184,7 @@ function createPeer(connection, initiator) {
     remoteStreams[i] = {stream, name, peerId};
     set(swarm, 'remoteStreams', remoteStreams);
     emit(swarm, 'stream', stream, name, peer);
-    update(swarm, 'stickyPeers');
+    // update(swarm, 'stickyPeers'); // why? this must have legacy reasons
   });
 
   peer.on('error', err => {

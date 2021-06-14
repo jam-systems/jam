@@ -3,14 +3,20 @@
   "version": "0.1.0",
   "scripts": {
     "start": "DEVELOPMENT=1 server/bin/www & esbuild --bundle ./App.jsx --outfile=./public/bundle.js --format=esm --target=es6 --define:process.env.NODE_ENV='\"development\"' --watch",
+    "start-production": "server/bin/www & esbuild --bundle ./App.jsx --outfile=./public/bundle.js --format=esm --target=es6 --define:process.env.NODE_ENV='\"production\"' --watch",
     "build": "esbuild --bundle ./App.jsx --outfile=./public/bundle.js --minify --format=esm --target=es6 --define:process.env.NODE_ENV='\"production\"'",
     "pantry": "LOCAL=1 PORT=3001 node ../pantry/bin/www",
     "debug": "JAM_PANTRY_URL=http://localhost:3001 yarn start",
     "start-example": "serve -s ./jam-react/example & esbuild --bundle ./jam-react/example/App.jsx --outfile=./jam-react/example/bundle.js --format=esm --define:process.env.NODE_ENV='\"development\"' --watch --loader:.css=text"
   },
+  "private": true,
+  "workspaces": [
+    "packages/jam-core",
+    "examples/minimal-jam-bundled"
+  ],
   "devDependencies": {
     "ejs": "^3.1.6",
-    "esbuild": "^0.9.1",
+    "esbuild": "^0.12.5",
     "eslint": "^7.19.0",
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0",
@@ -19,10 +25,11 @@
     "node-fetch": "^2.6.1",
     "serve": "^11.3.2"
   },
-  "license": "MIT",
+  "license": "AGPL-3.0",
   "dependencies": {
     "@vvo/tzdb": "^6.5.1",
     "compact-base64": "^2.1.2",
+    "minimal-state": "^5.5.0",
     "qs": "^6.9.6",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
@@ -33,6 +40,6 @@
     "spark-md5": "^3.0.1",
     "tweetnacl": "^1.0.3",
     "ua-parser-js": "^0.7.24",
-    "use-minimal-state": "^3.4.0"
+    "use-minimal-state": "^3.4.1"
   }
 }

@@ -1,5 +1,5 @@
-import {set} from 'use-minimal-state';
-import {staticConfig} from '../logic/config';
+import {set} from 'minimal-state';
+import {staticConfig} from '../jam-core/config';
 import {debug} from '../lib/state-utils';
 import Jam from '../Jam';
 import css from '../css/main.css';
@@ -8,7 +8,6 @@ function prepareForComponent() {
   debug(staticConfig);
   set(staticConfig, {
     pantryUrl: 'https://beta.jam.systems/_/pantry',
-    isEmbedded: true,
   });
 
   // TODO: CSS injection should be done on component mount

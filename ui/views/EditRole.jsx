@@ -1,14 +1,11 @@
 import React from 'react';
-import {addRole, removeRole, leaveStage} from '../logic/room';
-import {addAdmin, removeAdmin, useIdentityAdminStatus} from '../logic/admin';
-import {currentId} from '../logic/identity';
 import {use} from 'use-minimal-state';
 import {openModal} from './Modal';
 import EditIdentity from './EditIdentity';
-import {useMqParser} from '../logic/tailwind-mqp';
+import {useMqParser} from '../lib/tailwind-mqp';
 import {ButtonContainer, SecondaryButton} from './Button';
 import StreamingModal from './StreamingModal';
-import state from '../logic/state';
+import {useJam, useIdentityAdminStatus} from '../jam-core-react';
 
 export default function EditRole({
   peerId,
@@ -17,8 +14,18 @@ export default function EditRole({
   stageOnly = false,
   onCancel,
 }) {
+  const [state, api] = useJam();
+  const {
+    addSpeaker,
+    addModerator,
+    removeSpeaker,
+    removeModerator,
+    addAdmin,
+    removeAdmin,
+  } = api;
+  let [myId, roomId] = use(state, ['myId', 'roomId']);
   let mqp = useMqParser();
-  let [myAdminStatus] = useIdentityAdminStatus(currentId());
+  let [myAdminStatus] = useIdentityAdminStatus(myId);
   let [peerAdminStatus] = useIdentityAdminStatus(peerId);
 
   let isSpeaker = stageOnly || speakers.includes(peerId);
@@ -60,14 +67,14 @@ export default function EditRole({
       {!stageOnly &&
         (isSpeaker ? (
           <button
-            onClick={() => removeRole(peerId, 'speakers').then(onCancel)}
+            onClick={() => removeSpeaker(roomId, peerId).then(onCancel)}
             className="mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
           >
             ↓ Move to Audience
           </button>
         ) : (
           <button
-            onClick={() => addRole(peerId, 'speakers').then(onCancel)}
+            onClick={() => addSpeaker(roomId, peerId).then(onCancel)}
             className="mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
           >
             ↑ Invite to Stage
@@ -75,7 +82,7 @@ export default function EditRole({
         ))}
       {isSpeaker && !isModerator && (
         <button
-          onClick={() => addRole(peerId, 'moderators').then(onCancel)}
+          onClick={() => addModerator(roomId, peerId).then(onCancel)}
           className="mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
         >
           ✳️ Make Moderator
@@ -83,7 +90,7 @@ export default function EditRole({
       )}
       {isModerator && (
         <button
-          onClick={() => removeRole(peerId, 'moderators').then(onCancel)}
+          onClick={() => removeModerator(roomId, peerId).then(onCancel)}
           className="mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
         >
           ❎ Demote Moderator
@@ -103,12 +110,14 @@ export default function EditRole({
 }
 
 export function EditSelf({onCancel}) {
+  const [state, {leaveStage, addSpeaker, removeSpeaker}] = useJam();
   let mqp = useMqParser();
-  let myPeerId = currentId();
-  let [iSpeak, iModerate, room] = use(state, [
+  let [iSpeak, iModerate, room, myId, roomId] = use(state, [
     'iAmSpeaker',
     'iAmModerator',
     'room',
+    'myId',
+    'roomId',
   ]);
   let stageOnly = !!room?.stageOnly;
   iSpeak = stageOnly || iSpeak;
@@ -129,14 +138,14 @@ export function EditSelf({onCancel}) {
         )}
         {!stageOnly && iModerate && !iSpeak && (
           <SecondaryButton
-            onClick={() => addRole(myPeerId, 'speakers').then(onCancel)}
+            onClick={() => addSpeaker(roomId, myId).then(onCancel)}
           >
             ↑ Move to Stage
           </SecondaryButton>
         )}
         {!stageOnly && iModerate && iSpeak && (
           <SecondaryButton
-            onClick={() => removeRole(myPeerId, 'speakers').then(onCancel)}
+            onClick={() => removeSpeaker(roomId, myId).then(onCancel)}
           >
             ↓ Leave Stage
           </SecondaryButton>

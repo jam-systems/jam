@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {avatarUrl, displayName} from '../lib/avatar';
 import animateEmoji from '../lib/animate-emoji';
-import {useMqParser} from '../logic/tailwind-mqp';
+import {useMqParser} from '../lib/tailwind-mqp';
 import {MicOffSvg} from './Svg';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];

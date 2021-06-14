@@ -1,11 +1,11 @@
-import {swarm} from '../state';
-import {use, event, useState, useRootState, Atom} from '../../lib/state-tree';
+import {use, event, useRootState, Atom} from '../../lib/state-tree';
 import {shareStateWithGroup, shareStateWithPeer} from '../../lib/swarm';
+import {useDidEverChange} from '../../lib/state-utils';
 
-export default function ModeratorState({moderators}) {
+export default function ModeratorState({moderators, swarm}) {
   let handRaised = useRootState('handRaised');
-  let [isRaiseHand, hasRaisedHand] = useNewValue(handRaised, false);
-  let newModerators = event(NewModerators, {moderators});
+  let [isRaiseHand, hasRaisedHand] = useDidEverChange(handRaised, false);
+  let newModerators = event(NewModerators, {moderators, swarm});
 
   if (isRaiseHand) {
     shareStateWithGroup(swarm, 'moderator', {handRaised});
@@ -18,7 +18,7 @@ export default function ModeratorState({moderators}) {
   }
 }
 
-function NewModerators() {
+function NewModerators({swarm}) {
   let modPeers = new Set();
 
   return function NewModerators({moderators}) {
@@ -29,18 +29,6 @@ function NewModerators() {
       return Atom(newModPeers);
     }
   };
-}
-
-function useNewValue(value, initial) {
-  let [hasChanged, setChanged] = useState(false);
-  let [value_, setValue] = useState(initial);
-  if (value !== value_) {
-    setValue(value);
-    setChanged(true);
-    return [true, true];
-  } else {
-    return [false, hasChanged];
-  }
 }
 
 function newIntersection(arrA, arrB, AnB) {

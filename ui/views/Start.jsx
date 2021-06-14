@@ -1,16 +1,13 @@
 import React, {useState, useMemo} from 'react';
 import slugify from 'slugify';
 
-import {createRoom} from '../logic/backend';
-import {currentId} from '../logic/identity';
 import {navigate} from '../lib/use-location';
-import {enterRoom} from '../logic/main';
 import Container from './Container';
-import {is} from 'use-minimal-state';
-import state from '../logic/state';
-import {populateCache} from '../logic/GetRequest';
+import {useJam} from '../jam-core-react';
 
 export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
+  const [, {enterRoom, setProps, createRoom}] = useJam();
+
   // note: setters are currently unused because form is hidden
   let [name, setName] = useState(newRoom.name ?? '');
   let [description, setDescription] = useState(newRoom.description ?? '');
@@ -20,11 +17,11 @@ export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
   let [buttonURI, setButtonURI] = useState(newRoom.buttonURI ?? '');
   let {stageOnly = false} = newRoom;
 
-  const [showAdvanced, setShowAdvanced] = useState(false);
+  let [showAdvanced, setShowAdvanced] = useState(false);
 
   let submit = e => {
     e.preventDefault();
-    is(state, 'userInteracted', true);
+    setProps('userInteracted', true);
     let roomId;
     if (name) {
       let slug = slugify(name, {lower: true, strict: true});
@@ -35,9 +32,8 @@ export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
 
     (async () => {
       let roomPosted = {name, description, logoURI, color, stageOnly};
-      let roomCreated = await createRoom(roomId, currentId(), roomPosted);
-      if (roomCreated) {
-        populateCache(`/rooms/${roomId}`, roomCreated);
+      let ok = await createRoom(roomId, roomPosted);
+      if (ok) {
         if (urlRoomId !== roomId) navigate('/' + roomId);
         enterRoom(roomId);
       }
@@ -60,10 +56,8 @@ export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
           }
         >
           The Room ID{' '}
-          <code className="text-gray-900 bg-yellow-200">
-            {window.location.pathname.substring(1)}
-          </code>{' '}
-          is not valid.
+          <code className="text-gray-900 bg-yellow-200">{urlRoomId}</code> is
+          not valid.
           <br />
           <a
             href="https://gitlab.com/jam-systems/jam"

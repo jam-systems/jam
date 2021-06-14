@@ -1,9 +1,8 @@
 import React, {createElement, useMemo} from 'react';
 import Room from './Room';
-import {initializeIdentity, useCreateRoom} from '../logic/backend';
-import {useRoom} from '../logic/room';
-import {importRoomIdentity} from '../logic/identity';
-import {enterRoom} from '../logic/main';
+import {importRoomIdentity} from '../jam-core';
+import {useCreateRoom, useJam, useRoom} from '../jam-core-react';
+import StartFromURL from './StartFromURL';
 
 export default function PossibleRoom({
   roomId, // truthy
@@ -11,7 +10,11 @@ export default function PossibleRoom({
   roomIdentity,
   roomIdentityKeys,
   onError,
+  autoCreate,
+  uxConfig,
 }) {
+  const [, {enterRoom}] = useJam();
+
   // fetch room
   let [room, isLoading] = useRoom(roomId);
 
@@ -20,31 +23,30 @@ export default function PossibleRoom({
   useMemo(() => {
     if (roomIdentity) {
       importRoomIdentity(roomId, roomIdentity, roomIdentityKeys);
-      initializeIdentity(roomId);
     }
   }, [roomId, roomIdentity, roomIdentityKeys]);
 
-  // if room does not exist, try to create new one
-  let [roomFromURILoading, roomFromURIError] = useCreateRoom({
+  // if room does not exist && autoCreate is on, try to create new one
+  let shouldCreate = !room && autoCreate && !isLoading;
+  let [autoCreateLoading, autoCreateError] = useCreateRoom({
     roomId,
     room,
-    isLoading,
     newRoom,
+    shouldCreate,
     onSuccess: () => enterRoom(roomId),
   });
 
   if (isLoading) return null;
-  if (room)
-    return (
-      <Room key={roomId} {...{room, roomId, roomIdentity, roomIdentityKeys}} />
-    );
-  if (roomFromURILoading) return null;
+  if (room) return <Room key={roomId} {...{room, roomId, uxConfig}} />;
+  if (shouldCreate && autoCreateLoading) return null;
 
-  // TODO: could be nice to document possible errors
-  let error = roomFromURIError ? {createRoom: true} : {};
-  return typeof onError === 'function'
-    ? createElement(onError, {roomId, error})
-    : onError || <Error />;
+  if (roomId.length < 4 || (shouldCreate && autoCreateError)) {
+    return typeof onError === 'function'
+      ? createElement(onError, {roomId, error: {createRoom: true}})
+      : onError || <Error />;
+  }
+
+  return <StartFromURL {...{roomId, newRoom}} />;
 }
 
 // TODO

@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <title>minimal jam demo</title>
+    <link rel="icon" href="data:," />
+  </head>
+  <body>
+    <script type="module">
+      import {createJam} from 'https://cdn.jsdelivr.net/npm/jam-core/dist/bundle.js';
+
+      const roomId = 'minimal-jam-1234';
+
+      // mount Jam
+      const [state, {setProps, enterRoom, createRoom}] = createJam();
+
+      // try to create room
+      createRoom(roomId, {stageOnly: true});
+
+      // set room id
+      setProps('roomId', roomId);
+
+      // enter room
+      enterRoom(roomId);
+    </script>
+  </body>
+</html>
