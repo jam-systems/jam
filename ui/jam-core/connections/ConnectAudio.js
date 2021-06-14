@@ -6,7 +6,7 @@ import {useStableArray} from '../../lib/state-diff';
 const INITIAL = 0;
 const LOADING = 1;
 const READY = 2;
-const ACTIVE = 3;
+// const ACTIVE = 3;
 
 /* TODOs
 
@@ -17,7 +17,8 @@ const ACTIVE = 3;
 */
 
 export default function ConnectAudio({swarm}) {
-  const useMediasoup = true;
+  const sendViaMediasoup = true;
+  const sendViaP2p = true;
 
   let update = useUpdate();
   const {serverEvent} = swarm;
@@ -28,7 +29,10 @@ export default function ConnectAudio({swarm}) {
   let sendState = INITIAL;
   let receiveState = INITIAL;
 
-  let sendingStream = null;
+  let sendingStreamMediasoup = null;
+  let sendingStreamP2p = null;
+  let producer = null;
+
   const mediasoupDevice = new Device();
   let canSend = false;
   let sendTransport = null;
@@ -40,6 +44,10 @@ export default function ConnectAudio({swarm}) {
     let wsConnected = use(swarm, 'connected');
     const {hub} = swarm;
 
+    let shouldSendMediasoup = sendViaMediasoup && localStream && shouldSend;
+    let shouldSendP2p = sendViaP2p && localStream && shouldSend;
+
+    // send & receive audio via SFU / mediasoup
     switch (mediasoupState) {
       case INITIAL:
         if ((shouldReceive || shouldSend) && wsConnected) {
@@ -52,15 +60,13 @@ export default function ConnectAudio({swarm}) {
             if (shouldSend && wsConnected) initializeSending(hub);
             break;
           case READY:
-            if (
-              shouldSend &&
-              localStream &&
-              sendingStream !== localStream &&
-              useMediasoup
-            ) {
+            if (shouldSendMediasoup && sendingStreamMediasoup !== localStream) {
+              sendingStreamMediasoup = localStream;
               sendLocalStream(hub, localStream);
+            } else if (!shouldSendMediasoup && sendingStreamMediasoup) {
+              sendingStreamMediasoup = null;
+              endLocalStream(hub);
             }
-          // TODO: stop sending stream
         }
         switch (receiveState) {
           case INITIAL:
@@ -70,8 +76,6 @@ export default function ConnectAudio({swarm}) {
         break;
     }
 
-    let p2pRemoteStreams = use(swarm, 'remoteStreams');
-
     let [isConsumer, payload, accept] = useEvent(serverEvent, 'new-consumer');
     if (isConsumer) {
       let {peerId, producerId, id, kind, rtpParameters} = payload;
@@ -79,9 +83,6 @@ export default function ConnectAudio({swarm}) {
       receiveTransport
         .consume({id, producerId, kind, rtpParameters})
         .then(consumer => {
-          consumer.on('transportclose', () => {
-            /* TODO clean up possibly? */
-          });
           accept();
 
           let newStream = new MediaStream([consumer._track]);
@@ -98,17 +99,26 @@ export default function ConnectAudio({swarm}) {
         .catch(console.error);
     }
 
-    let shouldSendStream = localStream && shouldSend && !useMediasoup;
+    // send & receive audio via p2p webRTC
+    let p2pRemoteStreams = use(swarm, 'remoteStreams');
 
-    if (sendingStream !== localStream && shouldSendStream) {
-      sendingStream = localStream;
+    if (shouldSendP2p && sendingStreamP2p !== localStream) {
+      sendingStreamP2p = localStream;
       addLocalStream(swarm, localStream, 'audio');
-    } else if (sendingStream && !shouldSendStream) {
-      sendingStream = null;
+    } else if (!shouldSendP2p && sendingStreamP2p) {
+      sendingStreamP2p = null;
       addLocalStream(swarm, null, 'audio');
     }
 
+    // merge remote streams from both sources
     // TODO: has two streams if same peer sends over both channels, but only one is played
+    for (let stream of p2pRemoteStreams) {
+      let i = serverRemoteStreams.findIndex(r => r.peerId === stream.peerId);
+      if (i !== -1) {
+        console.warn('have two streams from the same peer', stream.peerId);
+        serverRemoteStreams.slice(i, 1);
+      }
+    }
     let remoteStreams = useStableArray([
       ...p2pRemoteStreams,
       ...serverRemoteStreams,
@@ -201,6 +211,7 @@ export default function ConnectAudio({swarm}) {
         }
       }
     );
+    update();
   }
 
   async function initializeReceiving(hub) {
@@ -246,33 +257,27 @@ export default function ConnectAudio({swarm}) {
   }
 
   async function sendLocalStream(hub, localStream) {
-    sendState = LOADING;
     const track = localStream.getAudioTracks()[0];
-    let producer = await sendTransport.produce({
+    producer = await sendTransport.produce({
       track,
-      // TODO:
-      // codecOptions: {
-      //   opusStereo: 1,
-      //   opusDtx: 1,
-      // },
-      // codec: mediasoupDevice.rtpCapabilities.codecs
-      // 	.find(codec => codec.mimeType.toLowerCase() === 'audio/pcma')
+      codecOptions: {
+        opusStereo: 1,
+        opusDtx: 1,
+      },
     });
-    sendState = ACTIVE;
 
     producer.on('transportclose', () => {
-      // producer = null;
+      producer = null;
     });
+  }
 
-    producer.on('trackended', async () => {
-      // TODO notify about mic disconnect
-      producer.close();
-      await hub.sendRequest('mediasoup', {
-        type: 'closeProducer',
-        data: {producerId: producer.id},
-      });
-      // TODO notify app about removing producer
-      // producer = null;
+  async function endLocalStream(hub) {
+    let producerId = producer.id;
+    producer.close();
+    producer = null;
+    await hub.sendRequest('mediasoup', {
+      type: 'closeProducer',
+      data: {producerId},
     });
   }
 }
