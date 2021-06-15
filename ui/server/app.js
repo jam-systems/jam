@@ -41,7 +41,7 @@ const jamConfig = {
   ...jamConfigFromFile,
   urls,
   development: !!process.env.DEVELOPMENT,
-  sfu: !!process.env.SFU,
+  sfu: !!process.env.JAM_SFU,
 };
 app.use('/config.json', (_, res) => {
   res.json(jamConfig);

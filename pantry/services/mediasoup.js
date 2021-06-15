@@ -18,7 +18,7 @@ module.exports = {runMediasoup};
 // peer = {id: peerId, doesConsume, rtpCapabilities, transports, producers, consumers, doesConsume, consumerTransport}
 
 function runMediasoup() {
-  if (!['true', '1'].includes(process.env.SFU)) return;
+  if (!['true', '1'].includes(process.env.JAM_SFU)) return;
 
   try {
     const mediasoup = require('mediasoup');
@@ -26,7 +26,7 @@ function runMediasoup() {
   } catch (err) {
     throw Error(
       `Could not import mediasoup. Probably, optional npm dependencies were not installed.
-If you do not wish to use mediasoup, make sure the SFU environment variable is falsy.`
+If you do not wish to use mediasoup, make sure the JAM_SFU environment variable is not truthy.`
     );
   }
 
