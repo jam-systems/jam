@@ -20,8 +20,15 @@ module.exports = {runMediasoup};
 function runMediasoup() {
   if (!['true', '1'].includes(process.env.SFU)) return;
 
-  const mediasoup = require('mediasoup');
-  runMediasoupWorkers(mediasoup);
+  try {
+    const mediasoup = require('mediasoup');
+    runMediasoupWorkers(mediasoup);
+  } catch (err) {
+    console.warn(
+      'Could not load mediasoup. Probably, optional npm dependencies were not installed.'
+    );
+    return;
+  }
 
   onAddPeer(async (roomId, peerId) => {
     let room = await getOrCreateRoom(roomId);
