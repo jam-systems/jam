@@ -24,10 +24,10 @@ function runMediasoup() {
     const mediasoup = require('mediasoup');
     runMediasoupWorkers(mediasoup);
   } catch (err) {
-    console.warn(
-      'Could not load mediasoup. Probably, optional npm dependencies were not installed.'
+    throw Error(
+      `Could not import mediasoup. Probably, optional npm dependencies were not installed.
+If you do not wish to use mediasoup, make sure the SFU environment variable is falsy.`
     );
-    return;
   }
 
   onAddPeer(async (roomId, peerId) => {
