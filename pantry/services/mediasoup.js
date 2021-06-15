@@ -7,6 +7,7 @@ const {
   sendDirect,
 } = require('./ws');
 
+const hasMediasoup = ['true', '1'].includes(process.env.JAM_SFU);
 const workers = [];
 const rooms = new Map();
 let workerIndex = 0;
@@ -18,7 +19,7 @@ module.exports = {runMediasoup};
 // peer = {id: peerId, doesConsume, rtpCapabilities, transports, producers, consumers, doesConsume, consumerTransport}
 
 function runMediasoup() {
-  if (!['true', '1'].includes(process.env.JAM_SFU)) return;
+  if (!hasMediasoup) return;
 
   try {
     const mediasoup = require('mediasoup');
@@ -378,8 +379,8 @@ const config = {
     webRtcTransportOptions: {
       listenIps: [
         {
-          ip: process.env.MEDIASOUP_LISTEN_IP || localIp(),
-          announcedIp: process.env.MEDIASOUP_ANNOUNCED_IP,
+          ip: process.env.MEDIASOUP_LISTEN_IP || '0.0.0.0',
+          announcedIp: process.env.MEDIASOUP_ANNOUNCED_IP || localIp(),
         },
       ],
       initialAvailableOutgoingBitrate: 1000000,
@@ -393,9 +394,7 @@ const config = {
 
 function localIp() {
   let interfaces = [].concat(...Object.values(os.networkInterfaces()));
-  let ip =
-    interfaces.find(x => !x.internal && x.family === 'IPv4')?.address ??
-    '127.0.0.1';
-  console.log('mediasoup: falling back to listening IP', ip);
+  let ip = interfaces.find(x => !x.internal && x.family === 'IPv4')?.address;
+  if (hasMediasoup) console.log('mediasoup: falling back to announced IP', ip);
   return ip;
 }
