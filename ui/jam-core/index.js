@@ -75,14 +75,15 @@ function createJam({jamConfig, cachedRooms} = {}) {
       populateApiCache(`/rooms/${roomId}`, cachedRooms[roomId]);
     }
   }
-  const {state, dispatch, setProps} = declareStateRoot(AppState, defaultProps, {
+  let props = {...defaultProps, hasMediasoup: !!staticConfig.sfu};
+  const {state, dispatch, setProps} = declareStateRoot(AppState, props, {
     defaultState,
   });
   const api = createApi(state, dispatch, setProps);
   return [state, api];
 }
 
-function AppState() {
+function AppState({hasMediasoup}) {
   const swarm = Swarm();
   const {peerState, myPeerState} = swarm;
   is(myPeerState, {inRoom: false, micMuted: false, leftStage: false});
@@ -111,6 +112,7 @@ function AppState() {
     declare(ModeratorState, {swarm, moderators});
 
     let remoteStreams = use(ConnectAudio, {
+      hasMediasoup,
       swarm,
       roomId,
       iAmSpeaker,

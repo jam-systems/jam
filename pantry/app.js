@@ -13,10 +13,10 @@ const adminRouter = require('./routes/admin');
 const {roomAuthenticator, identityAuthenticator} = require('./auth');
 const {controller} = require('./routes/controller');
 const roomKeyRouter = require('./routes/roomKey');
-const {runMediasoupWorkers} = require('./services/mediasoup');
+const {runMediasoup} = require('./services/mediasoup');
 const app = express();
 
-runMediasoupWorkers();
+runMediasoup();
 
 app.use(logger('dev'));
 app.use(cors());

@@ -7,6 +7,7 @@ const defaultConfig = {
     turnCredentials: {username: 'test', credential: 'yieChoi0PeoKo8ni'},
   },
   development: false,
+  sfu: false,
 };
 
 const staticConfig = window.jamConfig ?? defaultConfig;

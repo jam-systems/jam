@@ -6,18 +6,9 @@ import {useStableArray} from '../../lib/state-diff';
 const INITIAL = 0;
 const LOADING = 1;
 const READY = 2;
-// const ACTIVE = 3;
 
-/* TODOs
-
-- cleanup / stop sending stream etc
-- send stream to mediasoup AND some selected peers via p2p (other stage members)
-- => don't consume when you're stage member (or use consuming as fallback?)
-
-*/
-
-export default function ConnectAudio({swarm}) {
-  const sendViaMediasoup = true;
+export default function ConnectAudio({swarm, hasMediasoup}) {
+  const sendViaMediasoup = hasMediasoup;
   const sendViaP2p = true;
 
   let update = useUpdate();
@@ -34,12 +25,13 @@ export default function ConnectAudio({swarm}) {
   let sendingStreamP2p = null;
   let producer = null;
 
+  let canUseMediasoup = false;
+  let routerRtpCapabilities = null;
   const mediasoupDevice = new Device();
   let canSend = false;
   let sendTransport = null;
   let receiveTransport = null;
 
-  // TODO: handle roomId switches, like in ConnectRoom
   return function ConnectAudio({roomId, iAmSpeaker}) {
     let localStream = useRootState('myAudio');
     let wsConnected = use(swarm, 'connected');
@@ -49,14 +41,38 @@ export default function ConnectAudio({swarm}) {
     let shouldSendMediasoup = sendViaMediasoup && localStream && shouldSend;
     let shouldSendP2p = sendViaP2p && localStream && shouldSend;
 
-    let shouldReceiveMediasoup = !iAmSpeaker;
+    let shouldReceiveMediasoup = hasMediasoup && !iAmSpeaker;
+
+    let [isMediasoupInfo, infoPayload] = useEvent(
+      serverEvent,
+      'mediasoup-info'
+    );
+    if (isMediasoupInfo) {
+      canUseMediasoup = true;
+      routerRtpCapabilities = infoPayload.rtpCapabilities;
+    }
 
     // send & receive audio via SFU / mediasoup
     switch (mediasoupState) {
       case INITIAL:
-        if ((shouldReceiveMediasoup || shouldSendMediasoup) && wsConnected) {
+        if (
+          canUseMediasoup &&
+          (shouldReceiveMediasoup || shouldSendMediasoup) &&
+          wsConnected
+        ) {
           connectedRoomId = roomId;
-          initializeMediasoup(hub, shouldSendMediasoup, shouldReceiveMediasoup);
+          mediasoupState = LOADING;
+          (async () => {
+            if (!mediasoupDevice.loaded) {
+              await mediasoupDevice.load({routerRtpCapabilities});
+            }
+            canSend = mediasoupDevice.canProduce('audio');
+            if (!canSend) console.warn('Mediasoup: cannot send audio');
+
+            mediasoupState = READY;
+            if (shouldReceiveMediasoup) initializeReceiving(hub);
+            if (shouldSendMediasoup && canSend) initializeSending(hub);
+          })();
         }
         break;
       case READY:
@@ -82,7 +98,7 @@ export default function ConnectAudio({swarm}) {
               sendLocalStream(hub, localStream);
             } else if (!shouldSendMediasoup && sendingStreamMediasoup) {
               sendingStreamMediasoup = null;
-              endLocalStream(hub);
+              removeLocalStream(hub);
             }
         }
         switch (receiveState) {
@@ -97,9 +113,12 @@ export default function ConnectAudio({swarm}) {
         break;
     }
 
-    let [isConsumer, payload, accept] = useEvent(serverEvent, 'new-consumer');
+    let [isConsumer, consumerPayload, accept] = useEvent(
+      serverEvent,
+      'new-consumer'
+    );
     if (isConsumer) {
-      let {peerId, producerId, id, kind, rtpParameters} = payload;
+      let {peerId, producerId, id, kind, rtpParameters} = consumerPayload;
       [peerId] = peerId.split(';');
       receiveTransport
         .consume({id, producerId, kind, rtpParameters})
@@ -123,6 +142,8 @@ export default function ConnectAudio({swarm}) {
 
     // send & receive audio via p2p webRTC
     let p2pRemoteStreams = use(swarm, 'remoteStreams');
+    // for now, to simulate no p2p stream arriving at audience
+    if (!iAmSpeaker && hasMediasoup) p2pRemoteStreams = [];
 
     if (shouldSendP2p && sendingStreamP2p !== localStream) {
       sendingStreamP2p = localStream;
@@ -141,23 +162,6 @@ export default function ConnectAudio({swarm}) {
     ]);
     return remoteStreams;
   };
-
-  async function initializeMediasoup(hub, shouldSend, shouldReceive) {
-    mediasoupState = LOADING;
-    if (!mediasoupDevice.loaded) {
-      let routerRtpCapabilities = await hub.sendRequest('mediasoup', {
-        type: 'getRouterRtpCapabilities',
-      });
-      await mediasoupDevice.load({routerRtpCapabilities});
-      canSend = mediasoupDevice.canProduce('audio');
-      if (!canSend) console.warn('Mediasoup: cannot send audio');
-    }
-    mediasoupState = READY;
-
-    // FIXME: shouldReceive = false causes error on server side
-    if (shouldReceive) initializeReceiving(hub);
-    if (shouldSend && canSend) initializeSending(hub);
-  }
 
   async function initializeSending(hub) {
     sendState = LOADING;
@@ -285,11 +289,11 @@ export default function ConnectAudio({swarm}) {
     });
   }
 
-  async function endLocalStream(hub) {
+  function removeLocalStream(hub) {
     let producerId = producer.id;
     producer.close();
     producer = null;
-    await hub.sendRequest('mediasoup', {
+    hub.sendRequest('mediasoup', {
       type: 'closeProducer',
       data: {producerId},
     });

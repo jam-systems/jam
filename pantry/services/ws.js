@@ -3,6 +3,18 @@ const querystring = require('querystring');
 const {get} = require('../services/redis');
 const {ssrVerifyToken} = require('../ssr');
 
+module.exports = {
+  addWebsocket,
+  activeUserCount,
+  broadcast,
+  sendRequest,
+  sendDirect,
+  onMessage,
+  offMessage,
+  onAddPeer,
+  onRemovePeer,
+};
+
 // pub sub websocket
 
 const REQUEST_TIMEOUT = 20000;
@@ -10,6 +22,12 @@ const reservedTopics = ['server', 'peers', 'add-peer', 'remove-peer'];
 
 function broadcast(roomId, topic, message) {
   publish(roomId, 'server', {t: 'server', d: {t: topic, d: message}});
+}
+
+async function sendDirect(roomId, peerId, topic, message) {
+  let connection = getConnections(roomId).find(c => c.peerId === peerId);
+  if (connection === undefined) throw Error('Peer is not connected');
+  sendMessage(connection, {t: 'server', d: {t: topic, d: message}});
 }
 
 async function sendRequest(roomId, peerId, topic, message) {
@@ -90,6 +108,7 @@ function handleConnection(ws, req) {
 
   // inform about peers immediately
   sendMessage(connection, {t: 'peers', d: getPeers(roomId)});
+  emitEvent('addPeer', roomId, peerId);
 
   ws.on('message', jsonMsg => {
     let msg = parseMessage(jsonMsg);
@@ -215,6 +234,7 @@ function unsubscribeAll(connection) {
 
 const serverSubscriptions = new Map(); // topic => listener(roomId, peerId, data, accept)
 const serverSideEvents = {
+  addPeer: new Set(),
   removePeer: new Set(),
 };
 
@@ -228,6 +248,9 @@ function offMessage(topic) {
 
 function onRemovePeer(listener) {
   serverSideEvents.removePeer.add(listener);
+}
+function onAddPeer(listener) {
+  serverSideEvents.addPeer.add(listener);
 }
 
 function handleMessageToServer(connection, roomId, topic, data, requestId) {
@@ -316,15 +339,3 @@ function sendMessage({ws}, msg) {
     return false;
   }
 }
-
-//
-
-module.exports = {
-  addWebsocket,
-  activeUserCount,
-  broadcast,
-  sendRequest,
-  onMessage,
-  offMessage,
-  onRemovePeer,
-};

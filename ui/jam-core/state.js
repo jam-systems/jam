@@ -6,6 +6,7 @@ const defaultProps = {
   userInteracted: false,
   micMuted: false,
   autoJoin: false,
+  hasMediasoup: false,
 };
 
 const defaultState = {
