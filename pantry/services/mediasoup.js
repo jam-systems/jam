@@ -1,4 +1,5 @@
 const os = require('os');
+const {local} = require('../config');
 const {
   sendRequest,
   onMessage,
@@ -8,6 +9,9 @@ const {
 } = require('./ws');
 
 const hasMediasoup = ['true', '1'].includes(process.env.JAM_SFU);
+const announcedIp =
+  process.env.JAM_SFU_EXTERNAL_IP || (local ? localIp() : null);
+
 const workers = [];
 const rooms = new Map();
 let workerIndex = 0;
@@ -21,13 +25,20 @@ module.exports = {runMediasoup};
 function runMediasoup() {
   if (!hasMediasoup) return;
 
+  if (!announcedIp) {
+    throw Error(
+      `Missing environment variable JAM_SFU_EXTERNAL_IP. Providing your external IP if you want to use mediasoup.
+If you do not wish to use mediasoup, make sure the JAM_SFU environment variable is not set.`
+    );
+  }
+
   try {
     const mediasoup = require('mediasoup');
     runMediasoupWorkers(mediasoup);
   } catch (err) {
     throw Error(
       `Could not import mediasoup. Probably, optional npm dependencies were not installed.
-If you do not wish to use mediasoup, make sure the JAM_SFU environment variable is not truthy.`
+If you do not wish to use mediasoup, make sure the JAM_SFU environment variable is not set.`
     );
   }
 
@@ -379,8 +390,8 @@ const config = {
     webRtcTransportOptions: {
       listenIps: [
         {
-          ip: process.env.MEDIASOUP_LISTEN_IP || '0.0.0.0',
-          announcedIp: process.env.MEDIASOUP_ANNOUNCED_IP || localIp(),
+          ip: '0.0.0.0',
+          announcedIp,
         },
       ],
       initialAvailableOutgoingBitrate: 1000000,
