@@ -1,12 +1,12 @@
-import {put, apiUrl} from '../backend';
-import {staticConfig} from '../config';
-import {use} from '../../lib/state-tree';
-import GetRequest, {getCache} from '../../lib/GetRequest';
-import {useStableObject} from '../../lib/state-diff';
-import Speakers from './Speakers';
+import {put, apiUrl} from './backend';
+import {staticConfig} from './config';
+import {use} from '../lib/state-tree';
+import GetRequest, {getCache} from '../lib/GetRequest';
+import {useStableObject} from '../lib/state-diff';
+import Speakers from './room/Speakers';
 
 export {RoomState, addModerator, removeModerator, emptyRoom};
-export {addSpeaker, removeSpeaker} from './Speakers';
+export {addSpeaker, removeSpeaker} from './room/Speakers';
 
 function RoomState({roomId, myId, myIdentity, peerState, myPeerState}) {
   const path = roomId && `${apiUrl()}/rooms/${roomId}`;

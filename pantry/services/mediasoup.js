@@ -27,7 +27,7 @@ function runMediasoup() {
 
   if (!announcedIp) {
     throw Error(
-      `Missing environment variable JAM_SFU_EXTERNAL_IP. Providing your external IP if you want to use mediasoup.
+      `Missing environment variable JAM_SFU_EXTERNAL_IP. Provide your external IP to use mediasoup.
 If you do not wish to use mediasoup, make sure the JAM_SFU environment variable is not set.`
     );
   }
