@@ -66,9 +66,12 @@ function JamUI({style, className, route = null, dynamicConfig = {}, ...props}) {
 
   // set/unset room id
   useEffect(() => {
-    let {autoJoin} = dynamicConfig.ux ?? {};
+    let {autoJoin, autoRejoin} = dynamicConfig.ux ?? {};
     if (autoJoin !== undefined) {
       setProps('autoJoin', !!autoJoin);
+    }
+    if (autoRejoin !== undefined) {
+      setProps('autoRejoin', !!autoRejoin);
     }
     setProps('roomId', roomId);
   }, [roomId, dynamicConfig.ux, setProps]);

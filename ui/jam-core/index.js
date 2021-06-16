@@ -24,6 +24,7 @@ import {populateApiCache, createRoom, updateRoom} from './backend';
 import {addAdmin, removeAdmin} from './admin';
 import ConnectAudio from './connections/ConnectAudio';
 import ConnectRoom from './connections/ConnectRoom';
+import {StoredState} from '../lib/local-storage';
 
 /* THE JAM API */
 
@@ -88,7 +89,13 @@ function AppState({hasMediasoup}) {
   const {peerState, myPeerState} = swarm;
   is(myPeerState, {inRoom: false, micMuted: false, leftStage: false});
 
-  return function AppState({roomId, userInteracted, micMuted, autoJoin}) {
+  return function AppState({
+    roomId,
+    userInteracted,
+    micMuted,
+    autoJoin,
+    autoRejoin,
+  }) {
     let {myId, myIdentity} = use(Identity, {roomId});
 
     let {room, hasRoom, iAmSpeaker, iAmModerator} = use(RoomState, {
@@ -99,7 +106,14 @@ function AppState({hasMediasoup}) {
       myPeerState,
     });
     let {closed, moderators} = room;
-    let inRoom = use(InRoom, {roomId, autoJoin, iAmModerator, hasRoom, closed});
+    let inRoom = use(InRoom, {
+      roomId,
+      autoJoin,
+      autoRejoin,
+      iAmModerator,
+      hasRoom,
+      closed,
+    });
 
     // connect with signaling server
     declare(ConnectRoom, {
@@ -150,7 +164,16 @@ function InRoom() {
   let inRoom = null;
   let autoJoinCount = 0;
   let didAutoJoin = false;
-  return function InRoom({roomId, autoJoin, iAmModerator, hasRoom, closed}) {
+  const joinedRooms = StoredState('jam.joinedRooms', () => ({}));
+
+  return function InRoom({
+    roomId,
+    autoJoin,
+    autoRejoin,
+    iAmModerator,
+    hasRoom,
+    closed,
+  }) {
     let [isJoinRoom, joinedRoomId] = useAction(actions.JOIN);
     let [isAutoJoin] = useAction(actions.AUTO_JOIN);
     if ((isAutoJoin || (autoJoin && !didAutoJoin)) && autoJoinCount === 0) {
@@ -162,7 +185,9 @@ function InRoom() {
       inRoom = null;
     } else {
       if (isJoinRoom) {
-        inRoom = joinedRoomId;
+        inRoom = joinedRoomId; // can be null, for leaving room
+      } else if (autoRejoin && hasRoom && joinedRooms[roomId]) {
+        inRoom = roomId;
       }
       if (autoJoinCount > 0 && hasRoom) {
         autoJoinCount--;
@@ -170,6 +195,7 @@ function InRoom() {
       }
     }
 
+    if (autoRejoin) is(joinedRooms, roomId, inRoom !== null || undefined);
     return inRoom;
   };
 }
