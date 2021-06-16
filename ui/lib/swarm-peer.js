@@ -1,6 +1,7 @@
 import SimplePeer from './simple-peer-light';
 import causalLog from './causal-log';
-import {emit, set, update} from 'minimal-state';
+import {emit, set} from 'minimal-state';
+import {timeout, addTimeout, stopTimeout} from './timeout';
 
 const MAX_CONNECT_TIME = 10000;
 const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;
@@ -17,7 +18,7 @@ export {
 };
 
 // connection:
-// {swarm, peerId, connId, ...timeoutStuff, pc }
+// {swarm, peerId, connId, lastFailure, pc }
 
 function newConnection({swarm, peerId, connId}) {
   return {swarm, peerId, connId, lastFailure: null};
@@ -111,7 +112,7 @@ function handleSignal(connection, {data}) {
   addPeerMetaData(peer, data.meta);
   peer.signal(data);
   if (!(first && !iAmActive))
-    addToTimeout(connection, MIN_MAX_CONNECT_TIME_AFTER_SIGNAL);
+    addTimeout(connection, MIN_MAX_CONNECT_TIME_AFTER_SIGNAL);
 }
 
 function createPeer(connection, initiator) {
@@ -201,11 +202,7 @@ function createPeer(connection, initiator) {
   peer.on('iceStateChange', state => {
     log('ice state', state);
     if (state === 'disconnected') {
-      timeoutPeer(
-        connection,
-        MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT,
-        'peer timed out after ice disconnect'
-      );
+      timeoutPeer(connection, MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT);
     }
     if (state === 'failed' || state === 'closed') {
       handlePeerFail(connection, false);
@@ -221,30 +218,12 @@ function createPeer(connection, initiator) {
   return peer;
 }
 
-function timeoutPeer(connection, delay, message) {
-  let now = Date.now();
-  connection.lastFailure = connection.lastFailure || now; // TODO update problem indicators?
-  clearTimeout(connection.timeout);
-  delay = Math.max(0, (connection.timeoutEnd || 0) - now, delay);
-  connection.timeoutEnd = now + delay;
-  if (message) connection.timeoutMessage = message;
-  connection.timeout = setTimeout(() => {
-    log(connection.timeoutMessage || 'peer timed out');
+function timeoutPeer(connection, delay) {
+  connection.lastFailure = connection.lastFailure || Date.now(); // TODO update problem indicators?
+  timeout(connection, delay, () => {
+    log('peer timed out');
     handlePeerFail(connection);
-  }, delay);
-
-  log('timeout peer in', delay);
-}
-
-function addToTimeout(connection, delay) {
-  if (connection.timeout) timeoutPeer(connection, delay);
-}
-
-function stopTimeout(connection) {
-  clearTimeout(connection.timeout);
-  connection.timeout = null;
-  connection.timeoutMessage = '';
-  connection.timeoutEnd = 0;
+  });
 }
 
 function handlePeerSuccess(connection) {
