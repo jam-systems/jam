@@ -10,16 +10,13 @@ import {
 import {
   newConnection,
   connectPeer,
+  disconnectPeer,
   addStreamToPeer,
   handleSignal,
-  stopTimeout,
   log,
 } from './swarm-peer';
 import {removePeerState, updatePeerState} from './swarm-state';
-
-/* TODO: selective connecting
-
-*/
+import {mergeObject} from './util';
 
 // public API starts here
 
@@ -34,10 +31,11 @@ function Swarm(initialConfig) {
     peerState: {}, // {peerId: state}
     connectionState: {}, // {peerId: {latest: connId, states: {connId: {state, time}}}}
     myPeerState: {}, // my portion of peerState, gets shared on update and on peer join
-    // internal
+    // internal / config
     url: '',
     room: '',
     debug: false,
+    autoConnect: true,
     hub: null,
     localStreams: {},
     reduceState: (_states, _current, latest) => latest,
@@ -47,6 +45,7 @@ function Swarm(initialConfig) {
     stream: null,
     data: null,
     newPeer: null,
+    newConnection: null,
     failedConnection: null,
     rawPeerState: null,
     peerEvent: {},
@@ -65,10 +64,13 @@ function Swarm(initialConfig) {
     swarm.sharedStateTime = time;
     swarm.hub?.broadcast('all', {
       type: 'shared-state',
-      state: {state: swarm.myPeerState, time},
+      data: {state: swarm.myPeerState, time},
     });
   });
 
+  // TODO when websocket pinging to detect dead connections is implemented,
+  // stop removing peers on a failed webrtc connection
+  // the websocket server should be the single source of truth about what peers are connected
   on(swarm, 'failedConnection', c => {
     if (c === getConnection(swarm, c.peerId, c.connId)) removeConnection(c);
   });
@@ -86,16 +88,19 @@ export default Swarm;
 
 function config(
   swarm,
-  {url, room, myPeerId, sign, verify, reduceState, pcConfig, debug}
+  {url, room, myPeerId, sign, verify, reduceState, pcConfig, debug, autoConnect}
 ) {
-  if (url) swarm.url = url;
-  if (room) swarm.room = room;
-  if (myPeerId) swarm.myPeerId = myPeerId;
-  if (sign) swarm.sign = sign; // sign(state): string
-  if (verify) swarm.verify = verify; // verify(signedState, peerId): state | undefined
-  if (reduceState) swarm.reduceState = reduceState; // reduceState([state], currentState, latestState, findLatest): state
-  if (pcConfig) swarm.pcConfig = pcConfig;
-  if (debug) swarm.debug = debug;
+  mergeObject(swarm, {
+    url,
+    room,
+    myPeerId,
+    sign, // sign(state): string
+    verify, // verify(signedState, peerId): state | undefined
+    reduceState, // reduceState([state], currentState, latestState, findLatest): state
+    pcConfig,
+    debug,
+    autoConnect,
+  });
 }
 
 function addLocalStream(swarm, stream, name) {
@@ -126,7 +131,7 @@ function shareStateWithGroup(swarm, topic, state) {
   let time = Date.now();
   swarm.hub?.broadcast(topic, {
     type: 'shared-state',
-    state: {state, time},
+    data: {state, time},
   });
 }
 function shareStateWithPeer(swarm, peerId, state) {
@@ -134,7 +139,7 @@ function shareStateWithPeer(swarm, peerId, state) {
   for (let connection of yieldConnectionsOfPeer(swarm, peerId)) {
     swarm.hub?.sendDirect(connection, {
       type: 'shared-state',
-      state: {state, time},
+      data: {state, time},
     });
   }
 }
@@ -143,6 +148,8 @@ export {
   config,
   connect,
   disconnect,
+  connectPeer,
+  disconnectPeer,
   addLocalStream,
   sendPeerEvent,
   shareStateWithGroup,
@@ -171,7 +178,6 @@ function connect(swarm, room) {
         removeConnection(connection);
       }
       break;
-    default:
   }
   let myConnId = randomHex4();
   swarm.myConnId = myConnId;
@@ -196,21 +202,20 @@ function connect(swarm, room) {
     disconnectUnwanted(swarm);
   });
 
-  function initializeConnection(combinedPeerId) {
-    let [peerId, connId] = combinedPeerId.split(';');
-    initializePeer(swarm, peerId);
-    let connection = getConnection(swarm, peerId, connId);
-    connectPeer(connection);
-  }
-
   on(hub, 'peers', peers_ => {
-    for (let id of peers_) {
-      if (id === myCombinedPeerId) continue;
+    for (let combinedPeerId of peers_) {
+      if (combinedPeerId === myCombinedPeerId) continue;
       // note: the other peer will get add-peer and try to connect as well
-      initializeConnection(id);
+      initializeConnection(swarm, combinedPeerId);
     }
   });
-  on(hub, 'add-peer', id => initializeConnection(id));
+  on(hub, 'add-peer', combinedPeerId => {
+    let connection = initializeConnection(swarm, combinedPeerId);
+    hub.sendDirect(connection, {
+      type: 'shared-state',
+      data: {state: swarm.myPeerState, time: swarm.sharedStateTime},
+    });
+  });
   on(hub, 'remove-peer', id => {
     let [peerId, connId] = id.split(';');
     if (getPeer(swarm, peerId) === undefined) return;
@@ -219,32 +224,31 @@ function connect(swarm, room) {
 
   hub.broadcast('all', {
     type: 'shared-state',
-    state: {state: swarm.myPeerState, time: swarm.sharedStateTime},
+    data: {state: swarm.myPeerState, time: swarm.sharedStateTime},
   });
   swarm.hub = hub;
 
-  on(hub, 'all', ({type, peerId, connId, data, state}) => {
+  on(hub, 'all', ({type, peerId, connId, data}) => {
     initializePeer(swarm, peerId);
     if (type === 'shared-state') {
       let connection = getConnection(swarm, peerId, connId);
-      updatePeerState(connection, state);
+      updatePeerState(connection, data);
     }
     if (type === 'peer-event') {
       emit(swarm.peerEvent, data.t, peerId, data.d);
     }
   });
 
-  on(hub, 'direct', ({type, peerId, data, connId, state}) => {
+  on(hub, 'direct', ({type, peerId, connId, data}) => {
     initializePeer(swarm, peerId);
     if (type === 'signal') {
       log('signal received from', s(peerId), connId, data.type);
       let connection = getConnection(swarm, peerId, connId);
-      updatePeerState(connection, state);
       handleSignal(connection, {data});
     }
     if (type === 'shared-state') {
       let connection = getConnection(swarm, peerId, connId);
-      updatePeerState(connection, state);
+      updatePeerState(connection, data);
     }
   });
 
@@ -279,6 +283,15 @@ function initializePeer(swarm, peerId) {
   }
 }
 
+function initializeConnection(swarm, combinedPeerId) {
+  let [peerId, connId] = combinedPeerId.split(';');
+  initializePeer(swarm, peerId);
+  let connection = getConnection(swarm, peerId, connId);
+  emit(swarm, 'newConnection', connection);
+  if (swarm.autoConnect) connectPeer(connection);
+  return connection;
+}
+
 function getPeer(swarm, peerId) {
   return peerId === swarm.myPeerId ? swarm.myPeer : swarm.peers[peerId];
 }
@@ -300,14 +313,7 @@ function removeConnection({swarm, peerId, connId}) {
   if (peer !== undefined) {
     let connection = peer.connections[connId];
     if (connection !== undefined) {
-      stopTimeout(connection);
-      let {pc} = connection;
-      if (pc !== undefined) {
-        pc.garbage = true;
-        try {
-          pc.destroy();
-        } catch (e) {}
-      }
+      disconnectPeer(connection);
     }
     delete peer.connections[connId];
   }

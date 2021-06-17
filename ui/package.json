@@ -2,11 +2,11 @@
   "name": "jam",
   "version": "0.1.0",
   "scripts": {
-    "start": "JAM_SFU=1 DEVELOPMENT=1 server/bin/www & esbuild --bundle ./App.jsx --outfile=./public/bundle.js --format=esm --target=es6 --define:process.env.NODE_ENV='\"development\"' --watch",
-    "start-production": "JAM_SFU=1 server/bin/www & esbuild --bundle ./App.jsx --outfile=./public/bundle.js --format=esm --target=es6 --define:process.env.NODE_ENV='\"production\"' --watch",
+    "start": "DEVELOPMENT=1 server/bin/www & esbuild --bundle ./App.jsx --outfile=./public/bundle.js --format=esm --target=es6 --define:process.env.NODE_ENV='\"development\"' --watch",
+    "start-production": "server/bin/www & esbuild --bundle ./App.jsx --outfile=./public/bundle.js --format=esm --target=es6 --define:process.env.NODE_ENV='\"production\"' --watch",
     "build": "esbuild --bundle ./App.jsx --outfile=./public/bundle.js --minify --format=esm --target=es6 --define:process.env.NODE_ENV='\"production\"'",
     "pantry": "LOCAL=1 PORT=3001 JAM_SFU=1 node ../pantry/bin/www",
-    "debug": "JAM_PANTRY_URL=http://localhost:3001 yarn start",
+    "debug": "JAM_SFU=1 JAM_PANTRY_URL=http://localhost:3001 yarn start",
     "start-example": "serve -s ./jam-react/example & esbuild --bundle ./jam-react/example/App.jsx --outfile=./jam-react/example/bundle.js --format=esm --define:process.env.NODE_ENV='\"development\"' --watch --loader:.css=text"
   },
   "private": true,

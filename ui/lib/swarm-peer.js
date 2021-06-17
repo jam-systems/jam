@@ -11,14 +11,14 @@ const MAX_FAIL_TIME = 20000;
 export {
   newConnection,
   connectPeer,
+  disconnectPeer,
   addStreamToPeer,
   handleSignal,
-  stopTimeout,
   log,
 };
 
 // connection:
-// {swarm, peerId, connId, lastFailure, pc }
+// {swarm, peerId, connId, pc, lastFailure}
 
 function newConnection({swarm, peerId, connId}) {
   return {swarm, peerId, connId, lastFailure: null};
@@ -34,7 +34,7 @@ function connectPeer(connection) {
   log('connecting peer', s(peerId), connId);
   if (swarm.hub === null) return;
 
-  let {myPeerId, myConnId, myPeerState, sharedStateTime} = swarm;
+  let {myPeerId, myConnId} = swarm;
   timeoutPeer(connection, MAX_CONNECT_TIME);
   if (myPeerId > peerId || (myPeerId === peerId && myConnId > connId)) {
     log('i initiate, and override any previous peer!');
@@ -43,7 +43,6 @@ function connectPeer(connection) {
     log('i dont initiate, wait for first signal');
     swarm.hub.sendDirect(connection, {
       type: 'signal',
-      state: {state: myPeerState, time: sharedStateTime},
       data: {youStart: true, type: 'you-start'},
     });
     let {pc} = connection;
@@ -53,6 +52,17 @@ function connectPeer(connection) {
       pc.destroy();
     }
     log('sent you-start', s(peerId));
+  }
+}
+
+function disconnectPeer(connection) {
+  stopTimeout(connection);
+  let {pc} = connection;
+  if (pc !== undefined) {
+    pc.garbage = true;
+    try {
+      pc.destroy();
+    } catch (e) {}
   }
 }
 
@@ -156,13 +166,11 @@ function createPeer(connection, initiator) {
     }
     data.meta = {remoteStreamIds};
     data.from = peer._id;
-    let state;
     if (!peer.didSignal) {
       data.first = true;
       peer.didSignal = true;
-      state = {state: swarm.myPeerState, time: swarm.sharedStateTime};
     }
-    hub.sendDirect(connection, {type: 'signal', data, state});
+    hub.sendDirect(connection, {type: 'signal', data});
   });
   peer.on('connect', () => {
     log('connected peer', s(peerId), 'after', Date.now() - peer.connectStart);

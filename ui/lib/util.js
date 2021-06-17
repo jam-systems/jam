@@ -1,8 +1,17 @@
-export {arrayRemove, domEvent, mergeClasses};
+export {arrayRemove, mergeObject, domEvent, mergeClasses};
 
 function arrayRemove(arr, el) {
   let i = arr.indexOf(el);
   if (i !== -1) arr.splice(i, 1);
+}
+
+function mergeObject(obj, partialObj) {
+  for (let key in partialObj) {
+    let value = partialObj[key];
+    if (value !== undefined) {
+      obj[key] = value;
+    }
+  }
 }
 
 function filterInPlace(arr, filter) {
