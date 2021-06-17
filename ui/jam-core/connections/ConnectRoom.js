@@ -74,8 +74,9 @@ export default function ConnectRoom({myId, myIdentity, swarm}) {
       swarm.config({myPeerId: myId, sign: data => signData(myIdentity, data)});
       swarm.connect(roomId);
     } else if ((!shouldConnect || !roomId) && connectedRoomId !== null) {
+      log('disconnecting room', connectedRoomId);
+      if (swarm.connected && swarm.room === connectedRoomId) swarm.disconnect();
       connectedRoomId = null;
-      if (swarm.connected && swarm.room === roomId) swarm.disconnect();
     }
   };
 }
