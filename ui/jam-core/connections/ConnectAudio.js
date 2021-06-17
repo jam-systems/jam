@@ -1,12 +1,14 @@
-import {use, useRootState} from '../../lib/state-tree';
+import {declare, use, useRootState} from '../../lib/state-tree';
 import {useStableArray} from '../../lib/state-diff';
 import Mediasoup from './Mediasoup';
 import P2pAudio from './P2pAudio';
+import WebRtcConnections from './WebRtcConnections';
 
 export default function ConnectAudio({
   swarm,
   hasMediasoup,
   roomId,
+  speakers,
   iAmSpeaker,
 }) {
   let localStream = useRootState('myAudio');
@@ -20,12 +22,11 @@ export default function ConnectAudio({
     localStream,
   });
 
+  // connect to subset of peers directly via webRTC
+  declare(WebRtcConnections, {swarm, hasMediasoup, iAmSpeaker, speakers});
+
   // send & receive audio via p2p webRTC
-  let p2pRemoteStreams = use(P2pAudio, {
-    swarm,
-    shouldSend: iAmSpeaker,
-    localStream,
-  });
+  let p2pRemoteStreams = use(P2pAudio, {swarm, iAmSpeaker, localStream});
   // for now, to simulate no p2p stream arriving at audience
   if (!iAmSpeaker && hasMediasoup) p2pRemoteStreams = [];
 

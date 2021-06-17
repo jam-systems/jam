@@ -105,7 +105,7 @@ function AppState({hasMediasoup}) {
       peerState,
       myPeerState,
     });
-    let {closed, moderators} = room;
+    let {closed, moderators, speakers} = room;
     let inRoom = use(InRoom, {
       roomId,
       autoJoin,
@@ -130,6 +130,7 @@ function AppState({hasMediasoup}) {
       swarm,
       roomId,
       iAmSpeaker,
+      speakers,
     });
 
     is(myPeerState, {micMuted, inRoom: !!inRoom});

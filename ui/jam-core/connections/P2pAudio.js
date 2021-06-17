@@ -4,10 +4,9 @@ import {use} from '../../lib/state-tree';
 export default function P2pAudio({swarm}) {
   let sendingStream = null;
 
-  return function P2pAudio({localStream, shouldSend}) {
-    shouldSend = localStream && shouldSend;
+  return function P2pAudio({localStream, iAmSpeaker}) {
+    let shouldSend = localStream && iAmSpeaker;
 
-    // send & receive audio via p2p webRTC
     let remoteStreams = use(swarm, 'remoteStreams');
 
     if (shouldSend && sendingStream !== localStream) {

@@ -84,7 +84,7 @@ export default function ConnectRoom({myId, myIdentity, swarm}) {
 function configSwarm(myIdentity, swarm, staticConfig) {
   swarm.config({
     url: staticConfig.urls.pantry,
-    autoConnect: true,
+    autoConnect: false,
     debug: staticConfig.development,
     sign: data => signData(myIdentity, data),
     verify: verifyData,

@@ -303,6 +303,7 @@ function getConnection(swarm, peerId, connId) {
   if (connection === undefined) {
     connection = newConnection({swarm, peerId, connId});
     peer.connections[connId] = connection;
+    update(swarm, 'peers');
   }
   return connection;
 }
