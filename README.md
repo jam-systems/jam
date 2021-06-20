@@ -60,13 +60,16 @@ An overview for how 🍞 Jam compares to similar services like Clubhouse or Twit
 
 ## Room Configuration via URL
 
-You can configure a room by adding parameters as query parameters or as base64URLencoded string in the hash component of a url.
+You can configure a room by adding parameters as query parameters or as [`base64URL`](https://en.wikipedia.org/wiki/Base64#The_URL_applications) encoded string in the hash component of a url.
+
+You can take a look at examples for room configurations via URLs in our [examples](./examples) directory or in our [Glide tutorial](https://medium.com/jam/lets-build-a-micro-clubhouse-using-glide-and-jam-32597368fc98)
+
 
 | key                  | value                     | note |
 |----------------------|---------------------------|------|
 | `room.name`          | name of the room          |      |
 | `room.description`   | description of the room   |      |
-| `room.color`         | primary color of the room | used for the primary action button and some styling like background chrome color |
+| `room.color`         | CSS value (e.g. "red" #CCCCCC) | primary color of the room, used for the primary action button and some styling like background chrome color, note that you need to encode the hash sign using %23 if passed as query parameter (#CCCCCC becomes %23CCCCCC) |
 | `room.stageOnly`     | true                      | users join directly on stage instead of in the audience |
 | `ux.noLeave          | true                      | removes the "leave" button |
 | `ux.autoJoin         | true                      | users join the room automatically without having to click a button to join |
