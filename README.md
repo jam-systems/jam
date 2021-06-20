@@ -58,6 +58,24 @@ An overview for how 🍞 Jam compares to similar services like Clubhouse or Twit
 💵 Earn Money: dedicated support for linkinging to off-platform services to charge money or sell your own products
 
 
+## Room Configuration via URL
+
+You can configure a room by adding parameters as query parameters or as base64URLencoded string in the hash component of a url.
+
+| key                  | value                     | note |
+|----------------------|---------------------------|------|
+| `room.name`          | name of the room          |      |
+| `room.description`   | description of the room   |      |
+| `room.color`         | primary color of the room | used for the primary action button and some styling like background chrome color |
+| `room.stageOnly`     | true                      | users join directly on stage instead of in the audience |
+| `ux.noLeave          | true                      | removes the "leave" button |
+| `ux.autoJoin         | true                      | users join the room automatically without having to click a button to join |
+| `ux.autoRejoin       | true                      | users re-join the room automatically if they have been in the room previously without having to click a button to join |
+| `identity.name`      | name of the user          |      |
+| `identity.avatar`    | image URL of the user     | avatar, profile picture, user photo … |
+
+
+
 ## Known Issues and Solutions
 
 **📱 iPhone: audio output sometimes switches randomly between loudspeaker and earspeaker.**
