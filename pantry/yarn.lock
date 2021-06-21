@@ -1434,7 +1434,7 @@ shebang-regex@^3.0.0:
   resolved "https://registry.yarnpkg.com/shebang-regex/-/shebang-regex-3.0.0.tgz#ae16f1644d873ecad843b0307b143362d4c42172"
   integrity sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==
 
-simple-signed-records-engine@^0.1.1:
+simple-signed-records-engine@0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/simple-signed-records-engine/-/simple-signed-records-engine-0.1.1.tgz#9aec1f7f3695126197ef583765559b08ad344e5f"
   integrity sha512-P3iqCSTrPQ+mZgprE2R9y+GWLk7BQWqwtPWX+7QlwMQGiKRR+vyQSVltbCKqG9fr00VE59WZWM9pJVoHBY1oPQ==

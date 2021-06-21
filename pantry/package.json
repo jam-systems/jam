@@ -16,7 +16,7 @@
     "morgan": "^1.10.0",
     "nets": "^3.2.0",
     "redis": "^3.0.2",
-    "simple-signed-records-engine": "^0.1.1",
+    "simple-signed-records-engine": "0.1.1",
     "tweetnacl": "^1.0.3",
     "ws": "^7.4.5"
   },
