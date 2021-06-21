@@ -9,6 +9,7 @@ const defaultConfig = {
   sfu: false,
 };
 
-const staticConfig = window.jamConfig ?? defaultConfig;
+const staticConfig =
+  ((window as any).jamConfig as typeof defaultConfig) ?? defaultConfig;
 
 export {staticConfig};

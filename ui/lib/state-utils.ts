@@ -1,17 +1,21 @@
 import {on} from 'minimal-state';
-import log from '../lib/causal-log';
+import log from './causal-log';
 import {useState} from './state-tree';
 
 export {until, debug, useDidChange, useDidEverChange};
 
-async function until(state, key, condition) {
+async function until<T, K extends keyof T>(
+  state: T,
+  key: K,
+  condition?: (value: T[K]) => boolean
+) {
   let value = state[key];
   if (condition ? condition(value) : value) {
     return value;
   } else {
     return new Promise(resolve => {
       let off = on(state, key, value => {
-        if (condition ? condition(value) : value) {
+        if (condition ? condition(value as T[K]) : value) {
           off();
           resolve(value);
         }
@@ -20,7 +24,7 @@ async function until(state, key, condition) {
   }
 }
 
-function useDidChange(value, initial) {
+function useDidChange<T>(value: T, initial: T) {
   let [oldValue, setValue] = useState(initial);
   if (value !== oldValue) {
     setValue(value);
@@ -30,7 +34,7 @@ function useDidChange(value, initial) {
   }
 }
 
-function useDidEverChange(value, initial) {
+function useDidEverChange<T>(value: T, initial: T) {
   let [hasChanged, setChanged] = useState(false);
   let [oldValue, setValue] = useState(initial);
   if (value !== oldValue) {
@@ -38,11 +42,11 @@ function useDidEverChange(value, initial) {
     setChanged(true);
     return [true, true];
   } else {
-    return [false, hasChanged];
+    return [false, hasChanged as boolean];
   }
 }
 
-function debug(state) {
+function debug<T>(state: T) {
   on(state, (key, value, oldValue) => {
     if (oldValue !== undefined) {
       log(key, oldValue, '->', value);

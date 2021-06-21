@@ -363,7 +363,7 @@ async function dispatchFromRoot(rootElement, type, payload) {
       }
     }
   }
-  return Promise.all(promises);
+  await Promise.all(promises);
 }
 
 function subscribe(subscriptions, type, element) {

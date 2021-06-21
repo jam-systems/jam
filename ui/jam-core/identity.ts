@@ -6,6 +6,7 @@ import {encode, decode} from '../lib/identity-utils';
 import {putOrPost} from './backend';
 import {use} from '../lib/state-tree';
 import {sendPeerEvent} from '../lib/swarm';
+import {IdentityInfo} from './state';
 
 export {Identity, importRoomIdentity, updateInfo};
 
@@ -42,10 +43,10 @@ function postInitialIdentity(identity) {
   );
 }
 
-async function updateInfo(state, info) {
+async function updateInfo(state: any, info: IdentityInfo) {
   let {myIdentity, myId, swarm} = state;
   info = {...myIdentity.info, ...info};
-  let ok = await putOrPost(state, `/identities/${myId}`, info);
+  let ok = (await putOrPost(state, `/identities/${myId}`, info)) as boolean;
   if (ok) {
     setCurrentIdentity(state, i => ({...i, info}));
     sendPeerEvent(swarm, 'identity-update', info);
@@ -58,10 +59,14 @@ function setCurrentIdentity({roomId}, valueOrFunction) {
   set(identities, identityKey, valueOrFunction);
 }
 
-function importRoomIdentity(roomId, roomIdentity, keys) {
+function importRoomIdentity(
+  roomId: string,
+  roomIdentity: IdentityInfo,
+  keys: any
+) {
   if (identities[roomId]) return;
   if (roomIdentity) {
-    if (keys && keys[roomIdentity.id]) {
+    if (keys && roomIdentity.id && keys[roomIdentity.id]) {
       if (keys[roomIdentity.id].seed) {
         addIdentity(
           roomId,
@@ -91,7 +96,7 @@ function createIdentityFromSeed(info, seedString) {
   return createIdentityFromKeypair(info, keypair);
 }
 
-function createIdentity(info) {
+function createIdentity(info?: any) {
   const keypair = nacl.sign.keyPair();
   return createIdentityFromKeypair(info, keypair);
 }
