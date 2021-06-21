@@ -4,18 +4,14 @@ import {useState} from './state-tree';
 
 export {until, debug, useDidChange, useDidEverChange};
 
-async function until<T, K extends keyof T>(
-  state: T,
-  key: K,
-  condition?: (value: T[K]) => boolean
-) {
+async function until(state, key, condition) {
   let value = state[key];
   if (condition ? condition(value) : value) {
     return value;
   } else {
     return new Promise(resolve => {
       let off = on(state, key, value => {
-        if (condition ? condition(value as T[K]) : value) {
+        if (condition ? condition(value) : value) {
           off();
           resolve(value);
         }
@@ -24,7 +20,7 @@ async function until<T, K extends keyof T>(
   }
 }
 
-function useDidChange<T>(value: T, initial: T) {
+function useDidChange(value, initial) {
   let [oldValue, setValue] = useState(initial);
   if (value !== oldValue) {
     setValue(value);
@@ -34,7 +30,7 @@ function useDidChange<T>(value: T, initial: T) {
   }
 }
 
-function useDidEverChange<T>(value: T, initial: T) {
+function useDidEverChange(value, initial) {
   let [hasChanged, setChanged] = useState(false);
   let [oldValue, setValue] = useState(initial);
   if (value !== oldValue) {
@@ -42,11 +38,11 @@ function useDidEverChange<T>(value: T, initial: T) {
     setChanged(true);
     return [true, true];
   } else {
-    return [false, hasChanged as boolean];
+    return [false, hasChanged];
   }
 }
 
-function debug<T>(state: T) {
+function debug(state) {
   on(state, (key, value, oldValue) => {
     if (oldValue !== undefined) {
       log(key, oldValue, '->', value);

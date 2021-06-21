@@ -25,7 +25,7 @@ import {
   use,
   useAction,
 } from '../lib/state-tree';
-import {debug, until} from '../lib/state-utils';
+import {debug} from '../lib/state-utils';
 import ModeratorState from './room/ModeratorState';
 import {staticConfig} from './config';
 import Swarm from '../lib/swarm';
@@ -260,4 +260,24 @@ function InRoom() {
     if (autoRejoin) is(joinedRooms, roomId, inRoom !== null || undefined);
     return inRoom;
   };
+}
+
+async function until<T, K extends keyof T>(
+  state: T,
+  key: K,
+  condition?: (value: T[K]) => boolean
+) {
+  let value = state[key];
+  if (condition ? condition(value) : value) {
+    return value;
+  } else {
+    return new Promise(resolve => {
+      let off = on(state, key, value => {
+        if (condition ? condition(value as T[K]) : value) {
+          off();
+          resolve(value);
+        }
+      });
+    });
+  }
 }
