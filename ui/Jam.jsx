@@ -7,7 +7,7 @@ import {use} from 'use-minimal-state';
 import Start from './views/Start';
 import Me from './views/Me';
 import PossibleRoom from './views/PossibleRoom';
-import {debugStateTree, declare, declareStateRoot} from './lib/state-tree';
+import {declare, declareStateRoot} from './lib/state-tree';
 import {ShowAudioPlayerToast} from './views/AudioPlayerToast';
 import {JamProvider, useJam} from './jam-core-react';
 import {createJam} from './jam-core';
@@ -81,12 +81,6 @@ function JamUI({style, className, route = null, dynamicConfig = {}, ...props}) {
     if (dynamicConfig.debug) {
       window.DEBUG = true;
       debug(state.swarm);
-    }
-    if (dynamicConfig.debug || window.jamConfig?.development) {
-      window.swarm = state.swarm;
-      window.state = state;
-      debug(state);
-      debugStateTree();
     }
   }, [dynamicConfig.debug, state]);
 

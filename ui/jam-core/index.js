@@ -11,12 +11,14 @@ import {
 } from './room';
 import {is, set, on, update} from 'minimal-state';
 import {
+  debugStateTree,
   declare,
   declareStateRoot,
   merge,
   use,
   useAction,
 } from '../lib/state-tree';
+import {debug} from '../lib/state-utils';
 import ModeratorState from './room/ModeratorState';
 import {staticConfig} from './config';
 import Swarm from '../lib/swarm';
@@ -68,7 +70,7 @@ function createApi(state, dispatch, setProps) {
   };
 }
 
-function createJam({jamConfig, cachedRooms} = {}) {
+function createJam({jamConfig, cachedRooms, debug: debug_ = false} = {}) {
   // setup stuff
   if (jamConfig) set(staticConfig, jamConfig);
   if (cachedRooms) {
@@ -76,11 +78,23 @@ function createJam({jamConfig, cachedRooms} = {}) {
       populateApiCache(`/rooms/${roomId}`, cachedRooms[roomId]);
     }
   }
+  if (debug_ || jamConfig?.development) {
+    if (debug_) window.DEBUG = true;
+    debugStateTree();
+  }
+
   let props = {...defaultProps, hasMediasoup: !!staticConfig.sfu};
   const {state, dispatch, setProps} = declareStateRoot(AppState, props, {
     defaultState,
   });
   const api = createApi(state, dispatch, setProps);
+
+  if (debug_ || jamConfig?.development) {
+    if (debug_) debug(state.swarm);
+    window.swarm = state.swarm;
+    window.state = state;
+    debug(state);
+  }
   return [state, api];
 }
 

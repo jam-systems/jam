@@ -1,6 +1,5 @@
 const defaultConfig = {
   urls: {
-    jam: 'https://beta.jam.systems',
     pantry: `https://beta.jam.systems/_/pantry`,
     stun: `stun:stun.beta.jam.systems:3478`,
     turn: `turn:turn.beta.jam.systems:3478`,
