@@ -6,6 +6,7 @@ import {
   IdentityInfo,
   StateType,
   RoomType,
+  Props,
 } from './state';
 import {AudioState} from './audio';
 import {Reactions} from './reactions';
@@ -47,8 +48,8 @@ function createApi<T>(
   state: T,
   dispatch: (type: Action, payload?: unknown) => Promise<void>,
   setProps: {
-    <K extends keyof T>(key: K, value: T[K]): Promise<void>;
-    (state: Partial<T>): Promise<void>;
+    <K extends keyof Props>(key: K, value: Props[K]): Promise<void>;
+    (state: Partial<Props>): Promise<void>;
   }
 ) {
   return {
@@ -71,7 +72,7 @@ function createApi<T>(
       ): () => void;
     },
     // create room with the own identity as the only moderator and speaker
-    createRoom: (roomId: string, partialRoom: Partial<RoomType>) =>
+    createRoom: (roomId: string, partialRoom?: Partial<RoomType>) =>
       createRoom(state, roomId, partialRoom) as Promise<boolean>,
 
     // completely replaces the room, rejects if moderator/speaker array is not set
@@ -130,8 +131,8 @@ function createJam(
     state: StateType;
     dispatch: (type: Action, payload?: unknown) => Promise<void>;
     setProps: {
-      <K extends keyof StateType>(key: K, value: StateType[K]): Promise<void>;
-      (state: Partial<StateType>): Promise<void>;
+      <K extends keyof Props>(key: K, value: Props[K]): Promise<void>;
+      (state: Partial<Props>): Promise<void>;
     };
   };
   const api = createApi(state, dispatch, setProps);

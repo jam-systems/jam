@@ -1,14 +1,15 @@
 import {Action} from '../lib/state-tree';
 export {defaultProps, defaultState};
-export {StateType, IdentityInfo, IdentityType, RoomType};
+export {StateType, IdentityInfo, IdentityType, RoomType, Props};
 
 const defaultProps = {
-  roomId: null,
+  roomId: null as string | null,
   userInteracted: false,
   micMuted: false,
   autoJoin: false,
   hasMediasoup: false,
 };
+type Props = typeof defaultProps;
 
 type IdentityInfo = {
   id?: string;
@@ -36,7 +37,7 @@ const defaultState = {
   myId: null as string | null,
 
   roomId: ((window as any).existingRoomId as string | null) ?? null,
-  inRoom: null, // === roomId but only if entered
+  inRoom: null as string | null, // === roomId but only if entered
   room: {name: '', description: '', speakers: [], moderators: []} as RoomType,
   iAmSpeaker: false,
   iAmModerator: false,
