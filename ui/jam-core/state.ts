@@ -15,7 +15,7 @@ type IdentityInfo = {
   id?: string;
   name?: string;
   avatar?: string;
-  identities?: {type: 'twitter'; id: string; verificationInfo: string}[];
+  identities?: {type: string; id: string; verificationInfo: string}[];
 };
 type IdentityType = {
   publicKey: string;
