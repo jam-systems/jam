@@ -41,7 +41,7 @@ type Action = string | {type: string};
 /* THE JAM API */
 
 export {createJam};
-export {importRoomIdentity} from './identity';
+export {importRoomIdentity, importDefaultIdentity} from './identity';
 export {is, set, on, update, until};
 
 function createApi<T>(

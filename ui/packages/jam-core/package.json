@@ -4,8 +4,8 @@
   "main": "dist/index.js",
   "license": "AGPL-3.0",
   "scripts": {
-    "build": "tsc --emitDeclarationOnly && esbuild --bundle ../../jam-core/index.ts --outfile=./dist/index.js --format=esm --target=es2020 --external:compact-base64 --external:minimal-state --external:simple-signed-records-engine --external:tweetnacl --external:ua-parser-js --external:mediasoup-client",
-    "bundle": "esbuild --bundle ../../jam-core/index.js --minify --outfile=./dist/bundle.js --format=esm --target=es6",
+    "build": "tsc --emitDeclarationOnly && cp './index.d.ts.fix' 'dist/index.d.ts' && esbuild --bundle ../../jam-core/index.ts --outfile=./dist/index.js --format=esm --target=es2020 --external:compact-base64 --external:minimal-state --external:simple-signed-records-engine --external:tweetnacl --external:ua-parser-js --external:mediasoup-client",
+    "bundle": "esbuild --bundle ../../jam-core/index.ts --minify --outfile=./dist/bundle.js --format=esm --target=es6",
     "size": "cat dist/bundle.js | gzip | wc -c",
     "prepublishOnly": "yarn build && yarn bundle"
   },
