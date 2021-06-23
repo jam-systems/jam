@@ -1,6 +1,6 @@
 import {Action} from '../lib/state-tree';
 export {defaultProps, defaultState};
-export {StateType, IdentityInfo, IdentityType, RoomType, Props};
+export {StateType, IdentityInfo, IdentityType, RoomType, ActionType, Props};
 
 const defaultProps = {
   roomId: null as string | null,
@@ -10,6 +10,7 @@ const defaultProps = {
   hasMediasoup: false,
 };
 type Props = typeof defaultProps;
+type ActionType = string | {type: string};
 
 type IdentityInfo = {
   id?: string;

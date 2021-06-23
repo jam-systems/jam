@@ -20,6 +20,7 @@ import {
   StateType,
   RoomType,
   Props,
+  ActionType,
 } from './jam-core/state';
 import {AudioState} from './jam-core/audio';
 import {Reactions} from './jam-core/reactions';
@@ -37,17 +38,15 @@ import {addAdmin, removeAdmin} from './jam-core/admin';
 import ConnectAudio from './jam-core/connections/ConnectAudio';
 import ConnectRoom from './jam-core/connections/ConnectRoom';
 
-type Action = string | {type: string};
-
 /* THE JAM API */
 
-export {createJam};
+export {createJam, createApi};
 export {is, set, on, update, until};
 export {importRoomIdentity, importDefaultIdentity} from './jam-core/identity';
 
 function createApi<T>(
   state: T,
-  dispatch: (type: Action, payload?: unknown) => Promise<void>,
+  dispatch: (type: ActionType, payload?: unknown) => Promise<void>,
   setProps: {
     <K extends keyof Props>(key: K, value: Props[K]): Promise<void>;
     (state: Partial<Props>): Promise<void>;
@@ -130,7 +129,7 @@ function createJam(
     defaultState,
   }) as {
     state: StateType;
-    dispatch: (type: Action, payload?: unknown) => Promise<void>;
+    dispatch: (type: ActionType, payload?: unknown) => Promise<void>;
     setProps: {
       <K extends keyof Props>(key: K, value: Props[K]): Promise<void>;
       (state: Partial<Props>): Promise<void>;
