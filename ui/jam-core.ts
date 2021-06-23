@@ -1,22 +1,3 @@
-import {Identity, updateInfo} from './identity';
-import {
-  defaultState,
-  actions,
-  defaultProps,
-  IdentityInfo,
-  StateType,
-  RoomType,
-  Props,
-} from './state';
-import {AudioState} from './audio';
-import {Reactions} from './reactions';
-import {
-  RoomState,
-  addSpeaker,
-  addModerator,
-  removeSpeaker,
-  removeModerator,
-} from './room';
 import {is, set, on, update} from 'minimal-state';
 import {
   debugStateTree,
@@ -25,24 +6,44 @@ import {
   merge,
   use,
   useAction,
-} from '../lib/state-tree';
-import {debug} from '../lib/state-utils';
-import ModeratorState from './room/ModeratorState';
-import {staticConfig} from './config';
-import Swarm from '../lib/swarm';
-import {populateApiCache, createRoom, updateRoom} from './backend';
-import {addAdmin, removeAdmin} from './admin';
-import ConnectAudio from './connections/ConnectAudio';
-import ConnectRoom from './connections/ConnectRoom';
-import {StoredState} from '../lib/local-storage';
+} from './lib/state-tree';
+import {debug} from './lib/state-utils';
+import Swarm from './lib/swarm';
+import {StoredState} from './lib/local-storage';
+
+import {Identity, updateInfo} from './jam-core/identity';
+import {
+  defaultState,
+  actions,
+  defaultProps,
+  IdentityInfo,
+  StateType,
+  RoomType,
+  Props,
+} from './jam-core/state';
+import {AudioState} from './jam-core/audio';
+import {Reactions} from './jam-core/reactions';
+import {
+  RoomState,
+  addSpeaker,
+  addModerator,
+  removeSpeaker,
+  removeModerator,
+} from './jam-core/room';
+import {staticConfig} from './jam-core/config';
+import ModeratorState from './jam-core/room/ModeratorState';
+import {populateApiCache, createRoom, updateRoom} from './jam-core/backend';
+import {addAdmin, removeAdmin} from './jam-core/admin';
+import ConnectAudio from './jam-core/connections/ConnectAudio';
+import ConnectRoom from './jam-core/connections/ConnectRoom';
 
 type Action = string | {type: string};
 
 /* THE JAM API */
 
 export {createJam};
-export {importRoomIdentity, importDefaultIdentity} from './identity';
 export {is, set, on, update, until};
+export {importRoomIdentity, importDefaultIdentity} from './jam-core/identity';
 
 function createApi<T>(
   state: T,

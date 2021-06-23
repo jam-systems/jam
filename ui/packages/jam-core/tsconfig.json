@@ -17,5 +17,5 @@
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true
   },
-  "include": ["index.ts"]
+  "include": ["../../jam-core.ts"]
 }
