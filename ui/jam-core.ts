@@ -157,6 +157,7 @@ function AppState({hasMediasoup}) {
     micMuted,
     autoJoin,
     autoRejoin,
+    customStream,
   }) {
     let {myId, myIdentity} = use(Identity, {roomId});
 
@@ -218,6 +219,7 @@ function AppState({hasMediasoup}) {
         remoteStreams,
         userInteracted,
         micMuted,
+        customStream,
       })
     );
   };

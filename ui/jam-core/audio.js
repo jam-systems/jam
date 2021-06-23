@@ -33,6 +33,7 @@ function AudioState({swarm}) {
     userInteracted,
     micMuted,
     remoteStreams,
+    customStream,
   }) {
     let [handRaised, audioFile] = useRootState(['handRaised', 'audioFile']);
 
@@ -72,7 +73,7 @@ function AudioState({swarm}) {
       audioContext,
     });
 
-    let myAudio = audioFileStream ?? micStream;
+    let myAudio = customStream ?? audioFileStream ?? micStream;
     declare(Muted, {myAudio, micMuted});
 
     if (iAmSpeaker) {

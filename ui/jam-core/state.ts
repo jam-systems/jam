@@ -8,6 +8,7 @@ const defaultProps = {
   micMuted: false,
   autoJoin: false,
   hasMediasoup: false,
+  customStream: null,
 };
 type Props = typeof defaultProps;
 type ActionType = string | {type: string};
