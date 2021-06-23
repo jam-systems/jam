@@ -108,6 +108,9 @@ If you do not wish to use mediasoup, make sure the JAM_SFU environment variable 
             consuming ? '(consuming)' : '(producing)'
           );
           peer.transports.delete(transport.id);
+          if (consuming && transport === peer.consumerTransport) {
+            peer.doesConsume = false;
+          }
           printTransports();
         });
 
