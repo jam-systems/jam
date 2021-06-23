@@ -1,6 +1,6 @@
 {
   "name": "jam-core",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "main": "dist/index.js",
   "license": "AGPL-3.0",
   "scripts": {
