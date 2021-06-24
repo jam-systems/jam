@@ -1,5 +1,5 @@
 FROM node:alpine
-RUN apk add build-base
+RUN apk add build-base python3
 ENV JAM_CONFIG_DIR=/jam-config
 RUN mkdir /pantry
 WORKDIR /pantry
