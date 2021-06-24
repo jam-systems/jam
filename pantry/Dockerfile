@@ -1,4 +1,5 @@
 FROM node:alpine
+RUN apk add build-base
 ENV JAM_CONFIG_DIR=/jam-config
 RUN mkdir /pantry
 WORKDIR /pantry
