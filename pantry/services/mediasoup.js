@@ -393,8 +393,8 @@ const config = {
     webRtcTransportOptions: {
       listenIps: [
         {
-          ip: '0.0.0.0',
-          announcedIp,
+          ip: announcedIp,
+          // announcedIp,
         },
       ],
       initialAvailableOutgoingBitrate: 1000000,
