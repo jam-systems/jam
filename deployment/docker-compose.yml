@@ -92,6 +92,7 @@ services:
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}_pantry.tls=true
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}_pantry.tls.certresolver=letsencrypt
       - traefik.enable=true
+      - traefik.http.services.${COMPOSE_PROJECT_NAME}_pantry.loadbalancer.server.port=3001
     volumes:
       - "../jam-config:/jam-config"
   traefik:
