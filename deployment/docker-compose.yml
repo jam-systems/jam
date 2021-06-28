@@ -76,7 +76,8 @@ services:
     command: "redis-server --appendonly yes"
   pantry:
     image: registry.gitlab.com/jam-systems/jam/pantry:${CHANNEL}
-    network_mode: host
+    networks: 
+      - hostnetwork
     restart: always
     environment:
       - JAM_HOST
@@ -125,3 +126,7 @@ services:
 volumes:
   prometheus_data: {}
   grafana_data: {}
+
+networks:
+  hostnetwork:
+    driver: host
