@@ -76,7 +76,8 @@ services:
       - "../data/pantryredis:/data"
     command: "redis-server --appendonly yes"
   pantry:
-    image: registry.gitlab.com/jam-systems/jam/pantry:${CHANNEL}
+    build: ../pantry
+    #image: registry.gitlab.com/jam-systems/jam/pantry:${CHANNEL}
     network_mode: host
     restart: always
     environment:
