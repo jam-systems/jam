@@ -1,5 +1,5 @@
-FROM node:alpine
-RUN apk add build-base python3
+FROM node:14-alpine
+RUN apk add --no-cache linux-headers make python g++
 ENV JAM_CONFIG_DIR=/jam-config
 RUN mkdir /pantry
 WORKDIR /pantry
@@ -10,4 +10,3 @@ RUN yarn
 COPY . /pantry
 EXPOSE 3001
 CMD node ./bin/www
-
