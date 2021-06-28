@@ -71,13 +71,13 @@ services:
       - "../jam-config:/jam-config"
   pantryredis:
     image: library/redis
+    network_mode: host
     volumes:
       - "../data/pantryredis:/data"
     command: "redis-server --appendonly yes"
   pantry:
     image: registry.gitlab.com/jam-systems/jam/pantry:${CHANNEL}
-    networks: 
-      - hostnetwork
+    network_mode: host
     restart: always
     environment:
       - JAM_HOST
@@ -123,10 +123,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ../data/traefik/acme:/acme
     profiles: [ "web" ]
+    extra_hosts:
+      - host.docker.internal:172.17.0.1
 volumes:
   prometheus_data: {}
   grafana_data: {}
-
-networks:
-  hostnetwork:
-    driver: host
