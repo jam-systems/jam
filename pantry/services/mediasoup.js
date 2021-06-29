@@ -393,8 +393,8 @@ const config = {
       enableTcp: true,
       listenIps: [
         {
-          ip: announcedIp,
-          // announcedIp,
+          ip: '0.0.0.0',
+          announcedIp,
         },
       ],
       initialAvailableOutgoingBitrate: 1000000,
