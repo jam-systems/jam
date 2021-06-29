@@ -17,8 +17,10 @@ let _exports = {
 };
 
 if (!local) {
-  const client = createNodeRedisClient({
-    host: process.env.NETWORK_MODE === 'host' ? '127.0.0.1' : 'pantryredis',
+  let client = createNodeRedisClient({host: '127.0.0.1'});
+  client.nodeRedis.on('error', () => {
+    client.nodeRedis.quit();
+    client = createNodeRedisClient({host: 'pantryredis'});
   });
 
   const roomCount = async () => (await client.keys('rooms/*')).length;
