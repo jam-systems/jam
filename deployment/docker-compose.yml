@@ -74,14 +74,20 @@ services:
     volumes:
       - "../data/pantryredis:/data"
     command: "redis-server --appendonly yes"
+    ports:
+      - "127.0.0.1:6379:6379"
   pantry:
+    #build: ../pantry
     image: registry.gitlab.com/jam-systems/jam/pantry:${CHANNEL}
     restart: always
+    network_mode: host # comment out to not use host network => JAM_SFU=true won't work
     environment:
       - JAM_HOST
       - JAM_RESTRICT_ROOM_CREATION
       - JAM_SFU
       - JAM_SFU_EXTERNAL_IP
+      - MEDIASOUP_MIN_PORT
+      - MEDIASOUP_MAX_PORT
     labels:
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}_pantry.rule=(Host(`${JAM_HOST}`) && PathPrefix(`/_/pantry`))
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}_pantry.middlewares=${COMPOSE_PROJECT_NAME}_pantry_stripprefix
@@ -89,6 +95,7 @@ services:
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}_pantry.tls=true
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}_pantry.tls.certresolver=letsencrypt
       - traefik.enable=true
+      - traefik.http.services.${COMPOSE_PROJECT_NAME}_pantry.loadbalancer.server.port=3001
     volumes:
       - "../jam-config:/jam-config"
   traefik:
@@ -121,7 +128,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ../data/traefik/acme:/acme
     profiles: [ "web" ]
+    extra_hosts:
+      - host.docker.internal:172.17.0.1
 volumes:
   prometheus_data: {}
   grafana_data: {}
-

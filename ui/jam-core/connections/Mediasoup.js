@@ -142,7 +142,6 @@ export default function Mediasoup({swarm}) {
     } = await hub.sendRequest('mediasoup', {
       type: 'createWebRtcTransport',
       data: {
-        forceTcp: false,
         producing: true,
         consuming: false,
         rtpCapabilities: mediasoupDevice.rtpCapabilities,
@@ -204,7 +203,6 @@ export default function Mediasoup({swarm}) {
     } = await hub.sendRequest('mediasoup', {
       type: 'createWebRtcTransport',
       data: {
-        forceTcp: false, // I guess
         producing: false,
         consuming: true,
         rtpCapabilities: mediasoupDevice.rtpCapabilities,
