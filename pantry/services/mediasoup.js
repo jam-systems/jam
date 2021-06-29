@@ -56,17 +56,13 @@ If you do not wish to use mediasoup, make sure the JAM_SFU environment variable 
 
     switch (type) {
       case 'createWebRtcTransport': {
-        let {forceTcp, producing, consuming, rtpCapabilities} = data;
+        let {producing, consuming, rtpCapabilities} = data;
         peer.rtpCapabilities = rtpCapabilities;
 
         let transportOptions = {
           ...config.mediasoup.webRtcTransportOptions,
           appData: {producing, consuming},
         };
-        if (forceTcp) {
-          transportOptions.enableUdp = false;
-          transportOptions.enableTcp = true;
-        }
 
         const transport = await router.createWebRtcTransport(transportOptions);
         if (consuming) {
@@ -343,6 +339,8 @@ function getMediasoupWorker() {
 async function runMediasoupWorkers(mediasoup) {
   const {numWorkers} = config.mediasoup;
   console.log(`running ${numWorkers} mediasoup Workers...`);
+  let {rtcMinPort, rtcMaxPort} = config.mediasoup.workerSettings;
+  console.log(`listening in ports ${rtcMinPort}-${rtcMaxPort}`)
 
   for (let i = 0; i < numWorkers; ++i) {
     const worker = await mediasoup.createWorker({
@@ -372,8 +370,8 @@ const config = {
     workerSettings: {
       logLevel: 'warn',
       logTags: ['info', 'ice', 'dtls', 'rtp', 'srtp', 'rtx', 'score', 'svc'],
-      rtcMinPort: Number(process.env.MEDIASOUP_MIN_PORT || 40000),
-      rtcMaxPort: Number(process.env.MEDIASOUP_MAX_PORT || 49999),
+      rtcMinPort: Number(process.env.MEDIASOUP_MIN_PORT || 30000),
+      rtcMaxPort: Number(process.env.MEDIASOUP_MAX_PORT || 39999),
     },
     // mediasoup Router options.
     // See https://mediasoup.org/documentation/v3/mediasoup/api/#RouterOptions
@@ -391,6 +389,8 @@ const config = {
     // libmediasoupclient).
     // See https://mediasoup.org/documentation/v3/mediasoup/api/#WebRtcTransportOptions
     webRtcTransportOptions: {
+      enableUdp: false,
+      enableTcp: true,
       listenIps: [
         {
           ip: announcedIp,
