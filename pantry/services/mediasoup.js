@@ -339,8 +339,6 @@ function getMediasoupWorker() {
 async function runMediasoupWorkers(mediasoup) {
   const {numWorkers} = config.mediasoup;
   console.log(`running ${numWorkers} mediasoup Workers...`);
-  let {rtcMinPort, rtcMaxPort} = config.mediasoup.workerSettings;
-  console.log(`listening in ports ${rtcMinPort}-${rtcMaxPort}`)
 
   for (let i = 0; i < numWorkers; ++i) {
     const worker = await mediasoup.createWorker({
