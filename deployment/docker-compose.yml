@@ -79,9 +79,10 @@ services:
   pantry:
     build: ../pantry
     #image: registry.gitlab.com/jam-systems/jam/pantry:${CHANNEL}
-    network_mode: host
     restart: always
+    network_mode: host # comment out to not use host network => JAM_SFU=true not working
     environment:
+      - NETWORK_MODE=host # comment out to not use host network => JAM_SFU=true not working
       - JAM_HOST
       - JAM_RESTRICT_ROOM_CREATION
       - JAM_SFU
