@@ -71,10 +71,11 @@ services:
       - "../jam-config:/jam-config"
   pantryredis:
     image: library/redis
-    network_mode: host
     volumes:
       - "../data/pantryredis:/data"
     command: "redis-server --appendonly yes"
+    ports:
+      - "127.0.0.1:6379:6379"
   pantry:
     build: ../pantry
     #image: registry.gitlab.com/jam-systems/jam/pantry:${CHANNEL}
