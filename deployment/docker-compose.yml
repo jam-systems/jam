@@ -77,8 +77,8 @@ services:
     ports:
       - "127.0.0.1:6379:6379"
   pantry:
-    build: ../pantry
-    #image: registry.gitlab.com/jam-systems/jam/pantry:${CHANNEL}
+    #build: ../pantry
+    image: registry.gitlab.com/jam-systems/jam/pantry:${CHANNEL}
     restart: always
     network_mode: host # comment out to not use host network => JAM_SFU=true not working
     environment:
