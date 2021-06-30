@@ -1,11 +1,11 @@
 {
   "name": "jam-core",
-  "version": "0.2.0",
+  "version": "0.3.8",
   "main": "dist/index.js",
   "license": "AGPL-3.0",
   "scripts": {
-    "build": "esbuild --bundle ../../jam-core/index.js --outfile=./dist/index.js --format=esm --target=es2020 --external:compact-base64 --external:minimal-state --external:simple-signed-records-engine --external:tweetnacl --external:ua-parser-js",
-    "bundle": "esbuild --bundle ../../jam-core/index.js --minify --outfile=./dist/bundle.js --format=esm --target=es6",
+    "build": "tsc --emitDeclarationOnly && mv dist/jam-core.d.ts dist/index.d.ts && esbuild --bundle ../../jam-core.ts --outfile=./dist/index.js --format=esm --target=es2020 --external:compact-base64 --external:minimal-state --external:simple-signed-records-engine --external:tweetnacl --external:ua-parser-js --external:mediasoup-client",
+    "bundle": "esbuild --bundle ../../jam-core.ts --minify --outfile=./dist/bundle.js --format=esm --target=es6",
     "size": "cat dist/bundle.js | gzip | wc -c",
     "prepublishOnly": "yarn build && yarn bundle"
   },
@@ -14,9 +14,13 @@
   ],
   "dependencies": {
     "compact-base64": "^2.1.2",
+    "mediasoup-client": "^3.6.31",
     "minimal-state": "^5.5.0",
-    "simple-signed-records-engine": "^0.1.2",
+    "simple-signed-records-engine": "0.1.2",
     "tweetnacl": "^1.0.3",
     "ua-parser-js": "^0.7.24"
+  },
+  "devDependencies": {
+    "typescript": "^4.3.4"
   }
 }

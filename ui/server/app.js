@@ -24,46 +24,7 @@ const urls = {
     credential: process.env.JAM_TURN_SERVER_CREDENTIAL || 'yieChoi0PeoKo8ni',
   },
 };
-
 console.log(urls);
-
-const pantryApiPrefix = `${urls.pantry}/api/v1/rooms`;
-
-const defaultMetaInfo = {
-  ogTitle: 'Jam',
-  ogDescription: 'Join this audio room',
-  ogUrl: urls.jam,
-  ogImage: `${urls.jam}/img/jam-app-icon.jpg`,
-  favIcon: '/img/jam-app-icon.jpg',
-};
-
-const reservedRoutes = ['me', null];
-
-async function getRoomMetaInfo(route) {
-  if (reservedRoutes.includes(route)) return {};
-  try {
-    // remove .ics or other suffixes
-    const [roomId] = route.split('.');
-    const roomInfo = await (await fetch(`${pantryApiPrefix}/${roomId}`)).json();
-    return {
-      meta: {
-        ogTitle: roomInfo.name,
-        ogDescription: roomInfo.description,
-        ogUrl: `${urls.jam}/${roomId}`,
-        ogImage: roomInfo.logoURI || `${urls.jam}/img/jam-app-icon.jpg`,
-        color: roomInfo.color || '',
-        id: roomId || '',
-        favIcon: roomInfo.logoURI || '/img/jam-app-icon.jpg',
-        schedule: roomInfo.schedule,
-      },
-      roomInfo,
-      roomId,
-    };
-  } catch (e) {
-    console.log(`Error getting info for ${route}`);
-    return {};
-  }
-}
 
 let jamConfigFromFile = {};
 try {
@@ -80,6 +41,7 @@ const jamConfig = {
   ...jamConfigFromFile,
   urls,
   development: !!process.env.DEVELOPMENT,
+  sfu: ['true', '1'].includes(process.env.JAM_SFU),
 };
 app.use('/config.json', (_, res) => {
   res.json(jamConfig);
@@ -140,8 +102,7 @@ app.use(async (req, res) => {
     }
   }
 
-  let {meta = null, roomInfo, roomId} = await getRoomMetaInfo(route);
-  const metaInfo = {...defaultMetaInfo, ...meta};
+  let {metaInfo, roomInfo, roomId} = await getRoomMetaInfo(route);
 
   if (req.path.includes('/_/integrations/oembed')) {
     if (!req.query.url?.startsWith(`${urls.jam}/`)) return res.json();
@@ -275,6 +236,43 @@ app.use(async (req, res) => {
 });
 
 module.exports = app;
+
+const pantryApiPrefix = `${urls.pantry}/api/v1/rooms`;
+const defaultMetaInfo = {
+  ogTitle: 'Jam',
+  ogDescription: 'Join this audio room',
+  ogUrl: urls.jam,
+  ogImage: `${urls.jam}/img/jam-app-icon.jpg`,
+  favIcon: '/img/jam-app-icon.jpg',
+};
+const reservedRoutes = ['me', null];
+
+async function getRoomMetaInfo(route) {
+  if (reservedRoutes.includes(route)) return {metaInfo: defaultMetaInfo};
+  try {
+    // remove .ics or other suffixes
+    const [roomId] = route.split('.');
+    const roomInfo = await (await fetch(`${pantryApiPrefix}/${roomId}`)).json();
+    return {
+      metaInfo: {
+        ...defaultMetaInfo,
+        ogTitle: roomInfo.name,
+        ogDescription: roomInfo.description,
+        ogUrl: `${urls.jam}/${roomId}`,
+        ogImage: roomInfo.logoURI || `${urls.jam}/img/jam-app-icon.jpg`,
+        color: roomInfo.color || '',
+        id: roomId || '',
+        favIcon: roomInfo.logoURI || '/img/jam-app-icon.jpg',
+        schedule: roomInfo.schedule,
+      },
+      roomInfo,
+      roomId,
+    };
+  } catch (e) {
+    console.log(`Error getting info for ${route}`);
+    return {metaInfo: defaultMetaInfo};
+  }
+}
 
 function parsePath(pathname) {
   let [first, second] = pathname.split('/').filter(x => x);

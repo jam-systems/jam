@@ -1,12 +1,4 @@
-import {addLocalStream} from '../lib/swarm';
-import {
-  useState,
-  declare,
-  use,
-  useRootState,
-  useOn,
-  useAction,
-} from '../lib/state-tree';
+import {declare, use, useRootState, useOn, useAction} from '../lib/state-tree';
 import Microphone from './audio/Microphone';
 import AudioFile from './audio/AudioFile';
 import PlayingAudio from './audio/PlayingAudio';
@@ -40,9 +32,10 @@ function AudioState({swarm}) {
     iAmSpeaker,
     userInteracted,
     micMuted,
+    remoteStreams,
+    customStream,
   }) {
     let [handRaised, audioFile] = useRootState(['handRaised', 'audioFile']);
-    let remoteStreams = use(swarm, 'remoteStreams');
 
     if (audioContext === null && AudioContext) {
       let shouldHaveAudioContext =
@@ -80,9 +73,9 @@ function AudioState({swarm}) {
       audioContext,
     });
 
-    let myAudio = audioFileStream ?? micStream;
+    let myAudio = customStream ?? audioFileStream ?? micStream;
     declare(Muted, {myAudio, micMuted});
-    declare(ConnectMyAudio, {myAudio, iAmSpeaker, swarm});
+
     if (iAmSpeaker) {
       declare(VolumeMeter, {peerId: myId, stream: myAudio, audioContext});
     }
@@ -112,18 +105,5 @@ function Muted({myAudio, micMuted}) {
         track.enabled = !micMuted;
       }
     }
-  }
-}
-
-function ConnectMyAudio({myAudio, iAmSpeaker, swarm}) {
-  let [connected, setConnected] = useState(null);
-  let shouldConnect = myAudio && iAmSpeaker;
-
-  if (connected !== myAudio && shouldConnect) {
-    addLocalStream(swarm, myAudio, 'audio');
-    setConnected(myAudio);
-  } else if (connected && !shouldConnect) {
-    addLocalStream(swarm, null, 'audio');
-    setConnected(null);
   }
 }

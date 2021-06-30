@@ -87,7 +87,13 @@ async function deleteRequest(state, path, payload = null) {
 async function createRoom(
   state,
   roomId,
-  {name = '', description = '', logoURI, color, stageOnly} = {}
+  {
+    name = '',
+    description = '',
+    logoURI = undefined,
+    color = undefined,
+    stageOnly = false,
+  } = {}
 ) {
   let {myId} = state;
   let room = {

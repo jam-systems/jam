@@ -1,5 +1,5 @@
 import {on} from 'minimal-state';
-import log from '../lib/causal-log';
+import log from './causal-log';
 import {useState} from './state-tree';
 
 export {until, debug, useDidChange, useDidEverChange};

@@ -1,6 +1,7 @@
 import SimplePeer from './simple-peer-light';
 import causalLog from './causal-log';
-import {emit, set, update} from 'minimal-state';
+import {emit, set} from 'minimal-state';
+import {timeout, addTimeout, stopTimeout} from './timeout';
 
 const MAX_CONNECT_TIME = 10000;
 const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;
@@ -10,14 +11,14 @@ const MAX_FAIL_TIME = 20000;
 export {
   newConnection,
   connectPeer,
+  disconnectPeer,
   addStreamToPeer,
   handleSignal,
-  stopTimeout,
   log,
 };
 
 // connection:
-// {swarm, peerId, connId, ...timeoutStuff, pc }
+// {swarm, peerId, connId, pc, lastFailure}
 
 function newConnection({swarm, peerId, connId}) {
   return {swarm, peerId, connId, lastFailure: null};
@@ -33,7 +34,7 @@ function connectPeer(connection) {
   log('connecting peer', s(peerId), connId);
   if (swarm.hub === null) return;
 
-  let {myPeerId, myConnId, myPeerState, sharedStateTime} = swarm;
+  let {myPeerId, myConnId} = swarm;
   timeoutPeer(connection, MAX_CONNECT_TIME);
   if (myPeerId > peerId || (myPeerId === peerId && myConnId > connId)) {
     log('i initiate, and override any previous peer!');
@@ -42,7 +43,6 @@ function connectPeer(connection) {
     log('i dont initiate, wait for first signal');
     swarm.hub.sendDirect(connection, {
       type: 'signal',
-      state: {state: myPeerState, time: sharedStateTime},
       data: {youStart: true, type: 'you-start'},
     });
     let {pc} = connection;
@@ -52,6 +52,46 @@ function connectPeer(connection) {
       pc.destroy();
     }
     log('sent you-start', s(peerId));
+  }
+}
+
+function disconnectPeer(connection) {
+  let {swarm, peerId, connId} = connection;
+  log('disconnecting peer', s(peerId), connId);
+  stopTimeout(connection);
+  let {remoteStreams, connectionStreams} = swarm;
+  if (connectionStreams.find(s => s.peerId === peerId && s.connId === connId)) {
+    connectionStreams = connectionStreams.filter(
+      s => s.peerId !== peerId || s.connId !== connId
+    );
+    remoteStreams = [...remoteStreams];
+    for (let i = remoteStreams.length - 1; i >= 0; i--) {
+      if (remoteStreams[i].peerId === peerId) {
+        let newRemoteStream;
+        let latestTime = -1;
+        for (let s of connectionStreams) {
+          if (s.peerId === peerId && s.name === remoteStreams[i].name) {
+            if (s.time > latestTime) {
+              newRemoteStream = s;
+              latestTime = s.time;
+            }
+          }
+        }
+        if (newRemoteStream !== undefined) {
+          remoteStreams[i] = newRemoteStream;
+        } else {
+          remoteStreams.splice(i, 1);
+        }
+      }
+    }
+    set(swarm, {remoteStreams, connectionStreams});
+  }
+  let {pc} = connection;
+  if (pc !== undefined) {
+    pc.garbage = true;
+    try {
+      pc.destroy();
+    } catch (e) {}
   }
 }
 
@@ -111,7 +151,7 @@ function handleSignal(connection, {data}) {
   addPeerMetaData(peer, data.meta);
   peer.signal(data);
   if (!(first && !iAmActive))
-    addToTimeout(connection, MIN_MAX_CONNECT_TIME_AFTER_SIGNAL);
+    addTimeout(connection, MIN_MAX_CONNECT_TIME_AFTER_SIGNAL);
 }
 
 function createPeer(connection, initiator) {
@@ -155,13 +195,11 @@ function createPeer(connection, initiator) {
     }
     data.meta = {remoteStreamIds};
     data.from = peer._id;
-    let state;
     if (!peer.didSignal) {
       data.first = true;
       peer.didSignal = true;
-      state = {state: swarm.myPeerState, time: swarm.sharedStateTime};
     }
-    hub.sendDirect(connection, {type: 'signal', data, state});
+    hub.sendDirect(connection, {type: 'signal', data});
   });
   peer.on('connect', () => {
     log('connected peer', s(peerId), 'after', Date.now() - peer.connectStart);
@@ -176,15 +214,24 @@ function createPeer(connection, initiator) {
   peer.on('track', (track, stream) => {
     log('onTrack', track, stream);
     let name = peer.remoteStreamIds?.find(([, id]) => id === stream.id)?.[0];
+    let time = Date.now();
+
+    let connectionStreams = [...swarm.connectionStreams];
+    let i = connectionStreams.findIndex(
+      s => s.peerId === peerId && s.connId === connId && s.name === name
+    );
+    if (i === -1) i = connectionStreams.length;
+    connectionStreams[i] = {stream, name, peerId, connId, time};
+
     let remoteStreams = [...swarm.remoteStreams];
-    let i = remoteStreams.findIndex(
+    i = remoteStreams.findIndex(
       streamObj => streamObj.peerId === peerId && streamObj.name === name
     );
     if (i === -1) i = remoteStreams.length;
     remoteStreams[i] = {stream, name, peerId};
-    set(swarm, 'remoteStreams', remoteStreams);
-    emit(swarm, 'stream', stream, name, peer);
-    // update(swarm, 'stickyPeers'); // why? this must have legacy reasons
+
+    set(swarm, {remoteStreams, connectionStreams});
+    emit(swarm, 'stream', {stream, name, connection});
   });
 
   peer.on('error', err => {
@@ -201,11 +248,7 @@ function createPeer(connection, initiator) {
   peer.on('iceStateChange', state => {
     log('ice state', state);
     if (state === 'disconnected') {
-      timeoutPeer(
-        connection,
-        MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT,
-        'peer timed out after ice disconnect'
-      );
+      timeoutPeer(connection, MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT);
     }
     if (state === 'failed' || state === 'closed') {
       handlePeerFail(connection, false);
@@ -221,30 +264,12 @@ function createPeer(connection, initiator) {
   return peer;
 }
 
-function timeoutPeer(connection, delay, message) {
-  let now = Date.now();
-  connection.lastFailure = connection.lastFailure || now; // TODO update problem indicators?
-  clearTimeout(connection.timeout);
-  delay = Math.max(0, (connection.timeoutEnd || 0) - now, delay);
-  connection.timeoutEnd = now + delay;
-  if (message) connection.timeoutMessage = message;
-  connection.timeout = setTimeout(() => {
-    log(connection.timeoutMessage || 'peer timed out');
+function timeoutPeer(connection, delay) {
+  connection.lastFailure = connection.lastFailure || Date.now(); // TODO update problem indicators?
+  timeout(connection, delay, () => {
+    log('peer timed out');
     handlePeerFail(connection);
-  }, delay);
-
-  log('timeout peer in', delay);
-}
-
-function addToTimeout(connection, delay) {
-  if (connection.timeout) timeoutPeer(connection, delay);
-}
-
-function stopTimeout(connection) {
-  clearTimeout(connection.timeout);
-  connection.timeout = null;
-  connection.timeoutMessage = '';
-  connection.timeoutEnd = 0;
+  });
 }
 
 function handlePeerSuccess(connection) {

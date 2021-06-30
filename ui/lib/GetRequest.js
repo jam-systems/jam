@@ -1,5 +1,6 @@
 import {update} from 'minimal-state';
 import {use} from './state-tree';
+import {mergeObject} from './util';
 
 export {getRequest, populateCache, getCache, setCache};
 
@@ -75,7 +76,7 @@ function setCache(path, {state, data, status}) {
   if (cached === undefined) {
     queryCache[path] = {state, data: data ?? null, status: status ?? null};
   } else {
-    merge(cached, {state, data, status});
+    mergeObject(cached, {state, data, status});
   }
   update(queryCache, path);
 }
@@ -83,13 +84,4 @@ function setCache(path, {state, data, status}) {
 // TODO: this should also take a function to update only one prop of `data`
 function populateCache(path, data) {
   setCache(path, {data, state: 'success', status: 200});
-}
-
-function merge(obj, partialObj) {
-  for (let key in partialObj) {
-    let value = partialObj[key];
-    if (value !== undefined) {
-      obj[key] = value;
-    }
-  }
 }

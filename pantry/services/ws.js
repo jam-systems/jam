@@ -3,12 +3,39 @@ const querystring = require('querystring');
 const {get} = require('../services/redis');
 const {ssrVerifyToken} = require('../ssr');
 
+module.exports = {
+  addWebsocket,
+  activeUserCount,
+  broadcast,
+  sendRequest,
+  sendDirect,
+  onMessage,
+  offMessage,
+  onAddPeer,
+  onRemovePeer,
+};
+
 // pub sub websocket
 
+const REQUEST_TIMEOUT = 20000;
 const reservedTopics = ['server', 'peers', 'add-peer', 'remove-peer'];
 
 function broadcast(roomId, topic, message) {
   publish(roomId, 'server', {t: 'server', d: {t: topic, d: message}});
+}
+
+async function sendDirect(roomId, peerId, topic, message) {
+  let connection = getConnections(roomId).find(c => c.peerId === peerId);
+  if (connection === undefined) throw Error('Peer is not connected');
+  sendMessage(connection, {t: 'server', d: {t: topic, d: message}});
+}
+
+async function sendRequest(roomId, peerId, topic, message) {
+  let connection = getConnections(roomId).find(c => c.peerId === peerId);
+  if (connection === undefined) throw Error('Peer is not connected');
+  let {id, promise} = newRequest();
+  sendMessage(connection, {t: 'server', d: {t: topic, d: message}, r: id});
+  return promise;
 }
 
 async function handleMessage(connection, roomId, msg) {
@@ -22,7 +49,19 @@ async function handleMessage(connection, roomId, msg) {
   if (topic === undefined || reservedTopics.includes(topic)) return;
 
   switch (topic) {
-    // special topics (not subscribable; sender decides who gets msg)
+    // special topics (not subscribable)
+    // messages to server
+    case 'response': {
+      let {r: requestId} = msg;
+      requestAccepted(requestId, data);
+      break;
+    }
+    case 'mediasoup': {
+      let {r: requestId} = msg;
+      handleMessageToServer(connection, roomId, topic, data, requestId);
+      break;
+    }
+    // messages where sender decides who gets it
     case 'direct': {
       // send to one specific peer
       let {p: receiverId} = msg;
@@ -69,6 +108,7 @@ function handleConnection(ws, req) {
 
   // inform about peers immediately
   sendMessage(connection, {t: 'peers', d: getPeers(roomId)});
+  emitEvent('addPeer', roomId, peerId);
 
   ws.on('message', jsonMsg => {
     let msg = parseMessage(jsonMsg);
@@ -76,13 +116,13 @@ function handleConnection(ws, req) {
     if (msg !== undefined) handleMessage(connection, roomId, msg);
   });
 
-  ws.on('close', (_code, _reason) => {
-    // console.log('ws closed', code, reason);
+  ws.on('close', () => {
     nConnections--;
     removePeer(roomId, connection);
     unsubscribeAll(connection);
 
     publish(roomId, 'remove-peer', {t: 'remove-peer', d: peerId});
+    emitEvent('removePeer', roomId, peerId);
 
     // console.log('debug', roomPeerIds, subscriptions);
   });
@@ -129,8 +169,6 @@ function addWebsocket(server) {
   });
 }
 
-module.exports = {addWebsocket, activeUserCount, broadcast};
-
 // connection = {ws, peerId}
 
 function getPublicKey({peerId}) {
@@ -139,7 +177,7 @@ function getPublicKey({peerId}) {
 
 // peer connections per room
 
-const roomConnections = new Map(); // room => Set(connection)
+const roomConnections = new Map(); // roomId => Set(connection)
 
 function addPeer(roomId, connection) {
   let connections =
@@ -163,22 +201,22 @@ function getPeers(roomId) {
   return getConnections(roomId).map(c => c.peerId);
 }
 
-// pub sub
+// p2p pub sub
 
 const subscriptions = new Map(); // "roomId/topic" => Set(connection)
 
-function publish(room, topic, msg) {
-  let key = `${room}/${topic}`;
+function publish(roomId, topic, msg) {
+  let key = `${roomId}/${topic}`;
   let subscribers = subscriptions.get(key);
   if (subscribers === undefined) return;
   for (let subscriber of subscribers) {
     sendMessage(subscriber, msg);
   }
 }
-function subscribe(connection, room, topics) {
+function subscribe(connection, roomId, topics) {
   if (!(topics instanceof Array)) topics = [topics];
   for (let topic of topics) {
-    let key = `${room}/${topic}`;
+    let key = `${roomId}/${topic}`;
     let subscribers =
       subscriptions.get(key) ?? subscriptions.set(key, new Set()).get(key);
     subscribers.add(connection);
@@ -190,6 +228,85 @@ function unsubscribeAll(connection) {
     subscribers.delete(connection);
     if (subscribers.size === 0) subscriptions.delete(key);
   }
+}
+
+// server side subscriptions
+
+const serverSubscriptions = new Map(); // topic => listener(roomId, peerId, data, accept)
+const serverSideEvents = {
+  addPeer: new Set(),
+  removePeer: new Set(),
+};
+
+function onMessage(topic, listener) {
+  serverSubscriptions.set(topic, listener);
+}
+
+function offMessage(topic) {
+  serverSubscriptions.delete(topic);
+}
+
+function onRemovePeer(listener) {
+  serverSideEvents.removePeer.add(listener);
+}
+function onAddPeer(listener) {
+  serverSideEvents.addPeer.add(listener);
+}
+
+function handleMessageToServer(connection, roomId, topic, data, requestId) {
+  let listener = serverSubscriptions.get(topic);
+  if (listener !== undefined) {
+    let accept = responseData => {
+      if (requestId)
+        sendMessage(connection, {t: 'response', d: responseData, r: requestId});
+    };
+    try {
+      listener(roomId, connection.peerId, data, accept);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+}
+
+function emitEvent(event, ...args) {
+  let listeners = serverSideEvents[event];
+  for (let listener of listeners) {
+    try {
+      listener(...args);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+}
+
+// request / response
+
+const serverId = Math.random().toString(32).slice(2, 12);
+const requests = new Map();
+
+let nextRequestId = 0;
+
+function newRequest(timeout = REQUEST_TIMEOUT) {
+  let requestId = `${serverId};${nextRequestId++}`;
+  const request = {id: requestId};
+  request.promise = new Promise((resolve, reject) => {
+    request.accept = data => {
+      clearTimeout(request.timeout);
+      resolve(data);
+    };
+    request.timeout = setTimeout(() => {
+      reject(new Error('request timeout'));
+    }, timeout);
+  });
+  requests.set(requestId, request);
+  return request;
+}
+
+function requestAccepted(requestId, data) {
+  let request = requests.get(requestId);
+  if (request === undefined) return;
+  request.accept(data);
+  requests.delete(requestId);
 }
 
 // json

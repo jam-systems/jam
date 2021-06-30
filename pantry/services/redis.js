@@ -17,7 +17,18 @@ let _exports = {
 };
 
 if (!local) {
-  const client = createNodeRedisClient({host: 'pantryredis'});
+  let client = createNodeRedisClient({host: '127.0.0.1'});
+  client.nodeRedis.on('error', err => {
+    console.log('error connecting to redis, host 127.0.0.1');
+    console.error(err);
+    client.nodeRedis.quit();
+    client = createNodeRedisClient({host: 'pantryredis'});
+    client.nodeRedis.on('error', err => {
+      console.log('error connecting to redis, host pantryredis');
+      console.error(err);
+      client.nodeRedis.quit();
+    });
+  });
 
   const roomCount = async () => (await client.keys('rooms/*')).length;
   const identityCount = async () => (await client.keys('identities/*')).length;

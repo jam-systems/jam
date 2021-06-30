@@ -46,7 +46,7 @@ const ssr = (req, res, next) => {
 function ssrVerifyToken(token, publicKey) {
   let identities;
   try {
-    let record = JSON.parse(base64.decode(token));
+    let record = JSON.parse(base64.decodeUrl(token));
     identities = data(record).identities;
   } catch (_) {}
   if (identities === undefined) return false;

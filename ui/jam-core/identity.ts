@@ -6,13 +6,14 @@ import {encode, decode} from '../lib/identity-utils';
 import {putOrPost} from './backend';
 import {use} from '../lib/state-tree';
 import {sendPeerEvent} from '../lib/swarm';
+import {IdentityInfo, IdentityType} from './state';
 
-export {Identity, importRoomIdentity, updateInfo};
+export {Identity, importDefaultIdentity, importRoomIdentity, updateInfo};
 
 const identities = StoredState('identities', () => {
   const _default = importLegacyIdentity() || createIdentity();
   return {_default};
-});
+}) as {_default: IdentityType; [x: string]: IdentityType};
 migrateDisplayName(identities);
 
 function Identity() {
@@ -42,10 +43,10 @@ function postInitialIdentity(identity) {
   );
 }
 
-async function updateInfo(state, info) {
+async function updateInfo(state: any, info: IdentityInfo) {
   let {myIdentity, myId, swarm} = state;
   info = {...myIdentity.info, ...info};
-  let ok = await putOrPost(state, `/identities/${myId}`, info);
+  let ok = (await putOrPost(state, `/identities/${myId}`, info)) as boolean;
   if (ok) {
     setCurrentIdentity(state, i => ({...i, info}));
     sendPeerEvent(swarm, 'identity-update', info);
@@ -58,47 +59,83 @@ function setCurrentIdentity({roomId}, valueOrFunction) {
   set(identities, identityKey, valueOrFunction);
 }
 
-function importRoomIdentity(roomId, roomIdentity, keys) {
+function importDefaultIdentity(
+  identity: Partial<IdentityType> & {seed?: string}
+) {
+  let fullIdentity: IdentityType;
+  if (identity.secretKey && identity.publicKey) {
+    fullIdentity = {
+      publicKey: identity.publicKey,
+      secretKey: identity.secretKey,
+      info: {...identity.info, id: identity.publicKey},
+    };
+  } else if (identity.secretKey) {
+    fullIdentity = createIdentityFromSecretKey(
+      identity.info,
+      identity.secretKey
+    );
+  } else if (identity.seed) {
+    fullIdentity = createIdentityFromSeed(identity.info, identity.seed);
+  } else {
+    fullIdentity = createIdentity(identity.info);
+  }
+  set(identities, '_default', fullIdentity);
+}
+
+function importRoomIdentity(
+  roomId: string,
+  roomIdentity: IdentityInfo,
+  keys?: {[x: string]: {seed: string} | {secretKey: string} | undefined}
+) {
   if (identities[roomId]) return;
   if (roomIdentity) {
-    if (keys && keys[roomIdentity.id]) {
-      if (keys[roomIdentity.id].seed) {
-        addIdentity(
-          roomId,
-          createIdentityFromSeed(roomIdentity, keys[roomIdentity.id].seed)
-        );
+    let identity: IdentityType;
+    let roomKeys = roomIdentity.id ? keys?.[roomIdentity.id] : undefined;
+    if (roomKeys !== undefined) {
+      if ('seed' in roomKeys) {
+        identity = createIdentityFromSeed(roomIdentity, roomKeys.seed);
       } else {
-        addIdentity(
-          roomId,
-          createIdentityFromSeed(roomIdentity, keys[roomIdentity.id].secretKey)
+        identity = createIdentityFromSecretKey(
+          roomIdentity,
+          roomKeys.secretKey
         );
       }
     } else {
-      addIdentity(roomId, createIdentity(roomIdentity));
+      identity = createIdentity(roomIdentity);
     }
+    set(identities, roomId, identity);
   }
 }
 
-function createIdentityFromSecretKey(info, privatekeyBase64) {
+function createIdentityFromSecretKey(
+  info: IdentityInfo | undefined,
+  privatekeyBase64: string
+) {
   const keypair = nacl.sign.keyPair.fromSecretKey(decode(privatekeyBase64));
   return createIdentityFromKeypair(info, keypair);
 }
 
-function createIdentityFromSeed(info, seedString) {
+function createIdentityFromSeed(
+  info: IdentityInfo | undefined,
+  seedString: string
+) {
   const keypair = nacl.sign.keyPair.fromSeed(
-    nacl.hash(new TextEncoder().encode(seedString))
+    nacl.hash(new TextEncoder().encode(seedString)).subarray(0, 32)
   );
   return createIdentityFromKeypair(info, keypair);
 }
 
-function createIdentity(info) {
+function createIdentity(info?: IdentityInfo) {
   const keypair = nacl.sign.keyPair();
   return createIdentityFromKeypair(info, keypair);
 }
 
-function createIdentityFromKeypair(info, keypair) {
-  let publicKey = encode(keypair.publicKey);
-  let secretKey = encode(keypair.secretKey);
+function createIdentityFromKeypair(
+  info: IdentityInfo | undefined,
+  keypair: nacl.SignKeyPair
+) {
+  let publicKey = encode(keypair.publicKey) as string;
+  let secretKey = encode(keypair.secretKey) as string;
   return {
     publicKey,
     secretKey,
@@ -107,8 +144,4 @@ function createIdentityFromKeypair(info, keypair) {
       id: publicKey,
     },
   };
-}
-
-function addIdentity(key, identity) {
-  set(identities, key, identity);
 }

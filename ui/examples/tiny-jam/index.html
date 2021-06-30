@@ -25,7 +25,6 @@
 
       const jamConfig = {
         urls: {
-          jam: 'https://jam.systems',
           pantry: `https://jam.systems/_/pantry`,
           stun: `stun:stun.jam.systems:3478`,
           turn: `turn:turn.jam.systems:3478`,
@@ -89,8 +88,8 @@
         let speakingText = iAmSpeaker ? 'Speaking' : 'Not speaking';
         let speakingStyle = speaking.has(myId) ? 'color: green;' : '';
 
-        let {stickyPeers, peerState} = swarm;
-        let nJoinedPeers = Object.keys(stickyPeers).filter(
+        let {peers, peerState} = swarm;
+        let nJoinedPeers = Object.keys(peers).filter(
           id => peerState[id]?.inRoom
         ).length;
 

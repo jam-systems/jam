@@ -44,7 +44,7 @@ export default function Room({room, roomId, uxConfig}) {
     'inRoom',
   ]);
   let [peers, peerState, myPeerState] = use(state.swarm, [
-    'stickyPeers',
+    'peers',
     'peerState',
     'myPeerState',
   ]);

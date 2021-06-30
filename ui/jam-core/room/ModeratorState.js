@@ -1,4 +1,4 @@
-import {use, event, useRootState, Atom} from '../../lib/state-tree';
+import {use, event, useRootState} from '../../lib/state-tree';
 import {shareStateWithGroup, shareStateWithPeer} from '../../lib/swarm';
 import {useDidEverChange} from '../../lib/state-utils';
 
@@ -22,11 +22,11 @@ function NewModerators({swarm}) {
   let modPeers = new Set();
 
   return function NewModerators({moderators}) {
-    let peers = Object.keys(use(swarm, 'stickyPeers'));
+    let peers = Object.keys(use(swarm, 'peers'));
     let newModPeers;
     [modPeers, newModPeers] = newIntersection(peers, moderators, modPeers);
     if (newModPeers.size > 0) {
-      return Atom(newModPeers);
+      return newModPeers;
     }
   };
 }
