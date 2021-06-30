@@ -56,7 +56,36 @@ function connectPeer(connection) {
 }
 
 function disconnectPeer(connection) {
+  let {swarm, peerId, connId} = connection;
+  log('disconnecting peer', s(peerId), connId);
   stopTimeout(connection);
+  let {remoteStreams, connectionStreams} = swarm;
+  if (connectionStreams.find(s => s.peerId === peerId && s.connId === connId)) {
+    connectionStreams = connectionStreams.filter(
+      s => s.peerId !== peerId || s.connId !== connId
+    );
+    remoteStreams = [...remoteStreams];
+    for (let i = remoteStreams.length - 1; i >= 0; i--) {
+      if (remoteStreams[i].peerId === peerId) {
+        let newRemoteStream;
+        let latestTime = -1;
+        for (let s of connectionStreams) {
+          if (s.peerId === peerId && s.name === remoteStreams[i].name) {
+            if (s.time > latestTime) {
+              newRemoteStream = s;
+              latestTime = s.time;
+            }
+          }
+        }
+        if (newRemoteStream !== undefined) {
+          remoteStreams[i] = newRemoteStream;
+        } else {
+          remoteStreams.splice(i, 1);
+        }
+      }
+    }
+    set(swarm, {remoteStreams, connectionStreams});
+  }
   let {pc} = connection;
   if (pc !== undefined) {
     pc.garbage = true;
@@ -185,15 +214,24 @@ function createPeer(connection, initiator) {
   peer.on('track', (track, stream) => {
     log('onTrack', track, stream);
     let name = peer.remoteStreamIds?.find(([, id]) => id === stream.id)?.[0];
+    let time = Date.now();
+
+    let connectionStreams = [...swarm.connectionStreams];
+    let i = connectionStreams.findIndex(
+      s => s.peerId === peerId && s.connId === connId && s.name === name
+    );
+    if (i === -1) i = connectionStreams.length;
+    connectionStreams[i] = {stream, name, peerId, connId, time};
+
     let remoteStreams = [...swarm.remoteStreams];
-    let i = remoteStreams.findIndex(
+    i = remoteStreams.findIndex(
       streamObj => streamObj.peerId === peerId && streamObj.name === name
     );
     if (i === -1) i = remoteStreams.length;
     remoteStreams[i] = {stream, name, peerId};
-    set(swarm, 'remoteStreams', remoteStreams);
-    emit(swarm, 'stream', stream, name, peer);
-    // update(swarm, 'peers'); // why? this must have legacy reasons
+
+    set(swarm, {remoteStreams, connectionStreams});
+    emit(swarm, 'stream', {stream, name, connection});
   });
 
   peer.on('error', err => {

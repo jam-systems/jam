@@ -27,6 +27,7 @@ function Swarm(initialConfig) {
     myPeer: {connections: {}}, // other sessions of same peer
     myPeerId: null,
     connected: false,
+    connectionStreams: [], // [{stream, name, peerId, connId}], only one per (name, peerId, connId) if name is set
     remoteStreams: [], // [{stream, name, peerId}], only one per (name, peerId) if name is set
     peerState: {}, // {peerId: state}
     connectionState: {}, // {peerId: {latest: connId, states: {connId: {state, time}}}}
@@ -321,14 +322,6 @@ function removeConnection({swarm, peerId, connId}) {
   let nConnections = Object.keys(peer?.connections || {}).length;
   if (nConnections === 0 && peerId !== swarm.myPeerId) {
     delete swarm.peers[peerId];
-    let {remoteStreams} = swarm;
-    if (remoteStreams.find(streamObj => streamObj.peerId === peerId)) {
-      set(
-        swarm,
-        'remoteStreams',
-        remoteStreams.filter(streamObj => streamObj.peerId !== peerId)
-      );
-    }
   }
   update(swarm, 'peers');
   removePeerState({swarm, peerId, connId});
