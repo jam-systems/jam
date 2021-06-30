@@ -80,6 +80,8 @@ services:
     #build: ../pantry
     image: registry.gitlab.com/jam-systems/jam/pantry:${CHANNEL}
     restart: always
+    depends_on: 
+      - pantryredis
     network_mode: host # comment out to not use host network => JAM_SFU=true won't work
     environment:
       - JAM_HOST

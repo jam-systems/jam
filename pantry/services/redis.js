@@ -18,9 +18,16 @@ let _exports = {
 
 if (!local) {
   let client = createNodeRedisClient({host: '127.0.0.1'});
-  client.nodeRedis.on('error', () => {
+  client.nodeRedis.on('error', err => {
+    console.log('error connecting to redis, host 127.0.0.1');
+    console.error(err);
     client.nodeRedis.quit();
     client = createNodeRedisClient({host: 'pantryredis'});
+    client.nodeRedis.on('error', err => {
+      console.log('error connecting to redis, host pantryredis');
+      console.error(err);
+      client.nodeRedis.quit();
+    });
   });
 
   const roomCount = async () => (await client.keys('rooms/*')).length;
