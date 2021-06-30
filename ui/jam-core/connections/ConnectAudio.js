@@ -27,8 +27,6 @@ export default function ConnectAudio({
 
   // send & receive audio via p2p webRTC
   let p2pRemoteStreams = use(P2pAudio, {swarm, iAmSpeaker, localStream});
-  // for now, to simulate no p2p stream arriving at audience
-  if (!iAmSpeaker && hasMediasoup) p2pRemoteStreams = [];
 
   // merge remote streams from both sources
   let remoteStreams = useStableArray([
