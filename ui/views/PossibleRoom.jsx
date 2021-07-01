@@ -1,8 +1,9 @@
 import React, {createElement, useMemo} from 'react';
 import Room from './Room';
 import {importRoomIdentity} from '../jam-core';
-import {useCreateRoom, useJam, useRoom} from '../jam-core-react';
+import {useCreateRoom, useJam, useRoomLoading} from '../jam-core-react';
 import StartFromURL from './StartFromURL';
+import {use} from 'use-minimal-state';
 
 export default function PossibleRoom({
   roomId, // truthy
@@ -13,10 +14,11 @@ export default function PossibleRoom({
   autoCreate,
   uxConfig,
 }) {
-  const [, {enterRoom}] = useJam();
+  const [state, {enterRoom}] = useJam();
 
   // fetch room
-  let [room, isLoading] = useRoom(roomId);
+  let isLoading = useRoomLoading(roomId);
+  let room = use(state, 'room');
 
   // import room identity
   // this has to be done BEFORE creating new room so that we can be moderator
@@ -30,7 +32,6 @@ export default function PossibleRoom({
   let shouldCreate = !room && autoCreate && !isLoading;
   let [autoCreateLoading, autoCreateError] = useCreateRoom({
     roomId,
-    room,
     newRoom,
     shouldCreate,
     onSuccess: () => enterRoom(roomId),

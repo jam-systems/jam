@@ -5,7 +5,7 @@ import {signedToken} from '../lib/identity-utils';
 import {apiUrl} from '../jam-core/backend';
 import GetRequest from '../lib/GetRequest';
 
-export {useApiQuery, useCreateRoom, useRoom, useIdentityAdminStatus};
+export {useApiQuery, useCreateRoom, useRoomLoading, useIdentityAdminStatus};
 
 function useApiQuery(path, {dontFetch = false, fetchOnMount = false}) {
   const state = useJamState();
@@ -19,12 +19,12 @@ function useApiQuery(path, {dontFetch = false, fetchOnMount = false}) {
   return [data, isLoading, status];
 }
 
-function useCreateRoom({roomId, room, shouldCreate, newRoom, onSuccess}) {
+function useCreateRoom({roomId, shouldCreate, newRoom, onSuccess}) {
   const [, {createRoom}] = useJam();
   let [isError, setError] = useState(false);
   let [isLoading, setLoading] = useState(true);
   useEffect(() => {
-    if (roomId && !room && shouldCreate) {
+    if (roomId && shouldCreate) {
       (async () => {
         let ok = await createRoom(roomId, newRoom);
         setLoading(false);
@@ -32,14 +32,14 @@ function useCreateRoom({roomId, room, shouldCreate, newRoom, onSuccess}) {
         else setError(true);
       })();
     }
-  }, [room, roomId, shouldCreate]);
+  }, [roomId, shouldCreate]);
   return [isLoading, isError];
 }
 
-function useRoom(roomId) {
+function useRoomLoading(roomId) {
   const path = roomId && apiUrl() + `/rooms/${roomId}`;
-  let {data, isLoading, status} = use(GetRequest, {path});
-  return [data, isLoading, status];
+  let {isLoading} = use(GetRequest, {path});
+  return isLoading;
 }
 
 function useIdentityAdminStatus(id) {
