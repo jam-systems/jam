@@ -1,7 +1,7 @@
 export {
   useApiQuery,
   useCreateRoom,
-  useRoom,
+  useRoomLoading,
   useIdentityAdminStatus,
 } from './jam-core-react/backend-hooks';
 
