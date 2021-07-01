@@ -38,8 +38,8 @@ function useCreateRoom({roomId, shouldCreate, newRoom, onSuccess}) {
 
 function useRoomLoading(roomId) {
   const path = roomId && apiUrl() + `/rooms/${roomId}`;
-  let {isLoading} = use(GetRequest, {path});
-  return isLoading;
+  let {data, isLoading} = use(GetRequest, {path});
+  return [data, isLoading];
 }
 
 function useIdentityAdminStatus(id) {
