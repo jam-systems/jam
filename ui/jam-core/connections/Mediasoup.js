@@ -22,7 +22,14 @@ export default function Mediasoup({swarm}) {
 
   let canUseMediasoup = false;
   let routerRtpCapabilities = null;
-  const mediasoupDevice = new Device();
+  let mediasoupDevice;
+  try {
+    mediasoupDevice = new Device();
+  } catch (err) {
+    console.warn(err);
+    // avoid UnsupportedError in non-standard environments, e.g. WebViews
+    mediasoupDevice = new Device({handlerName: 'Chrome74'});
+  }
   let canSend = false;
   let sendTransport = null;
   let receiveTransport = null;
