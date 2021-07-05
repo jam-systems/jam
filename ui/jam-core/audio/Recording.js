@@ -44,6 +44,7 @@ export default function Recording() {
         mediaRecorder.stop();
       }
       recordedChunks = [];
+      recordedAudio = null;
       mediaRecorder = new MediaRecorder(myAudio);
       isRecording = true;
       console.log('started media recorder', mediaRecorder);
