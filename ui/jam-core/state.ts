@@ -57,6 +57,9 @@ const defaultState = {
   audioPlayError: false,
 
   speaking: new Set<string>(),
+
+  isRecording: false,
+  recordedAudio: null as Blob | null,
 };
 
 type StateType = typeof defaultState & {swarm: any};

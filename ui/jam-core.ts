@@ -101,6 +101,11 @@ function createApi<T>(
     retryMic: () => dispatch(actions.RETRY_MIC),
     retryAudio: () => dispatch(actions.RETRY_AUDIO),
     autoJoinOnce: () => dispatch(actions.AUTO_JOIN),
+
+    startRecording: () => dispatch('start-recording'),
+    stopRecording: () => dispatch('stop-recording'),
+    downloadRecording: (fileName?: string) =>
+      dispatch('download-recording', fileName),
   };
 }
 
