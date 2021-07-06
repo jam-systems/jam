@@ -104,7 +104,7 @@ function AudioState({swarm}) {
 
     return merge(
       {myAudio, soundMuted, audioFileElement},
-      declare(Recording, {myAudio})
+      declare(Recording, {swarm, audioContext, myAudio, remoteStreams})
     );
   };
 }

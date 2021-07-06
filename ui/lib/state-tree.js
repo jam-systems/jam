@@ -3,10 +3,6 @@ import causalLog from './causal-log';
 
 // a kind of "React for app state"
 
-// element = {component, key, props, children}
-// children = [element]
-// Component(props) = partial state
-
 /* TODOs:
 
   - use(Component) should not automatically re-run the parent component,
@@ -14,6 +10,9 @@ import causalLog from './causal-log';
     => will also help to refine fragment update rules
     NOTE: it's a bit tricky because parent then has to rerun, but should not break use() components
     However, it does not work for event() components
+
+  - probably, event() components should have a different model that can accumulate events, like useAction.
+    then they could be run w/o rendering parent, and (if props change) re-run on render & queue a new event
 
   - possibly rename event() to useEvent() to make consistent with use()
 
@@ -445,24 +444,47 @@ function useRootState(keys) {
   }
 }
 
-function useExternalState(state, key) {
+function useExternalState(state, keyOrSelector) {
   if (current === root) throw Error('Hooks can only be called during render');
   let caller = current;
   let use = caller.uses[nUses];
-  if (use === undefined || use.key !== key) {
+
+  let [key, selector] =
+    typeof keyOrSelector === 'function'
+      ? [undefined, keyOrSelector]
+      : [keyOrSelector, undefined];
+
+  if (use === undefined || use.key !== keyOrSelector) {
     if (use !== undefined) {
       use.cleanup();
+    } else {
+      use = {key: keyOrSelector};
     }
-    let cleanup = on(state, key, () => {
-      if (current !== caller) {
-        queueUpdate(caller, 'useExternalState ' + key);
+
+    if (selector !== undefined) {
+      try {
+        use.value = selector(state);
+      } catch (err) {
+        console.warn(err);
       }
-    });
-    use = {key, cleanup};
+    }
+
+    let listener = () => {
+      if (current === caller) return;
+      if (selector !== undefined) {
+        let value = selector(state);
+        if (use.value === value) return;
+        use.value = value;
+      }
+      queueUpdate(caller, 'useExternalState ' + key);
+    };
+
+    use.cleanup =
+      key === undefined ? on(state, listener) : on(state, key, listener);
     caller.uses[nUses] = use;
   }
   nUses++;
-  return state[key];
+  return key === undefined ? use.value : state[key];
 }
 
 function useEvent(emitter, keyOrSelector) {

@@ -154,7 +154,12 @@ function createJam(
 function AppState({hasMediasoup}) {
   const swarm = Swarm();
   const {peerState, myPeerState} = swarm;
-  is(myPeerState, {inRoom: false, micMuted: false, leftStage: false});
+  is(myPeerState, {
+    inRoom: false,
+    micMuted: false,
+    leftStage: false,
+    isRecording: false,
+  });
 
   return function AppState({
     roomId,
