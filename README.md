@@ -72,6 +72,7 @@ You can take a look at examples for room configurations via URLs in our [example
 | `room.color`         | CSS value (e.g. "red" #CCCCCC) | primary color of the room, used for the primary action button and some styling like background chrome color, note that you need to encode the hash sign using %23 if passed as query parameter (#CCCCCC becomes %23CCCCCC) |
 | `room.stageOnly`     | true                      | users join directly on stage instead of in the audience |
 | `ux.noLeave`         | true                      | removes the "leave" button |
+| `ux.autoCreate`      | true                      | create room if it does not exist yet |
 | `ux.autoJoin`        | true                      | users join the room automatically without having to click a button to join |
 | `ux.autoRejoin`      | true                      | users re-join the room automatically if they have been in the room previously without having to click a button to join |
 | `identity.name`      | name of the user          |      |
