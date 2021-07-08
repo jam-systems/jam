@@ -204,9 +204,8 @@ app.use(async (req, res) => {
       href="<%= metaInfo.favIcon %>"
     />
     <link rel="apple-touch-icon" href="<%= metaInfo.favIcon %>" />
-    <!-- TODO: move tailwind to build pipeline if we keep it -->
     <link
-      href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
+      href="/css/tailwind.css"
       rel="stylesheet"
     />
     <link

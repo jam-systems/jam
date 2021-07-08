@@ -2,6 +2,7 @@
 *.iml
 node_modules
 ui/public/bundle*
+ui/public/css/tailwind.css
 ui/bundle*
 *.DS_Store
 .env
