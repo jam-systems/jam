@@ -16,6 +16,7 @@
   ],
   "devDependencies": {
     "@types/react": "^17.0.11",
+    "autoprefixer": "^10.2.6",
     "ejs": "^3.1.6",
     "esbuild": "^0.12.5",
     "eslint": "^7.19.0",
@@ -24,6 +25,7 @@
     "express": "^4.17.1",
     "ical-generator": "^2.0.0-develop.14",
     "node-fetch": "^2.6.1",
+    "postcss": "^8.3.5",
     "serve": "^11.3.2",
     "tailwindcss": "^2.2.4"
   },

@@ -2,7 +2,7 @@
 module.exports = {
   purge: {
     enabled: true,
-    content: ['./**/*.jsx'],
+    content: ['./views/**/*.jsx'],
     safelist: [
       'pt-12',
       'p-10',

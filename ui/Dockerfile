@@ -2,7 +2,7 @@ FROM node:alpine AS builder
 
 COPY yarn.lock package.json ./
 
-RUN yarn install && yarn global add esbuild
+RUN yarn
 COPY . .
 RUN yarn build
 
