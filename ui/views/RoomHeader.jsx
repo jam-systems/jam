@@ -50,14 +50,14 @@ export default function RoomHeader({
         </div>
       </div>
       <div className="flex-none flex">
-        {editRoom && (
-          <div className="w-8 h-6 cursor-pointer" onClick={editRoom}>
-            <EditSvg />
-          </div>
-        )}
         {isRecording && (
           <div className="flex items-center w-8 h-6" style={{color: '#ff0000'}}>
             <MicOnSvg className="h-5" stroke="#ffffff" />
+          </div>
+        )}
+        {editRoom && (
+          <div className="w-8 h-6 cursor-pointer" onClick={editRoom}>
+            <EditSvg />
           </div>
         )}
       </div>
