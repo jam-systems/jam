@@ -51,12 +51,12 @@ export default function RoomHeader({
       </div>
       <div className="flex-none flex">
         {isRecording && (
-          <div className="flex items-center w-8 h-6" style={{color: '#ff0000'}}>
+          <div role="button" aria-label="Room settings" className="flex items-center w-8 h-6" style={{color: '#ff0000'}}>
             <MicOnSvg className="h-5" stroke="#ffffff" />
           </div>
         )}
         {editRoom && (
-          <div className="w-8 h-6 cursor-pointer" onClick={editRoom}>
+          <div aria-label="Recording" className="w-8 h-6 cursor-pointer" onClick={editRoom}>
             <EditSvg />
           </div>
         )}
