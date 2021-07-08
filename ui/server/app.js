@@ -225,7 +225,7 @@ app.use(async (req, res) => {
         window.existingRoomInfo = ${JSON.stringify(roomInfo ?? null)};
         window.existingRoomId = ${JSON.stringify(roomId ?? null)};
     </script>
-    <script type="module" src="/bundle.js"></script>
+    <script type="module" src="/js/App.js"></script>
   </body>
 </html>
 `,

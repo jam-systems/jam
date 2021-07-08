@@ -15,7 +15,7 @@ WORKDIR /app
 
 COPY public ./public/
 COPY server ./server/
-COPY --from=builder /public/bundle.js ./public
+COPY --from=builder /public/js ./public/js/
 COPY --from=builder /public/css/tailwind.css ./public/css
 RUN yarn add express ejs node-fetch ical-generator@next
 
