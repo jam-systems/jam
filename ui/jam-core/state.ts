@@ -46,6 +46,8 @@ const defaultState = {
   identities: {},
   otherDeviceInRoom: false,
 
+  swarm: null,
+
   reactions: {},
   handRaised: false,
 

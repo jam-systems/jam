@@ -11,6 +11,8 @@ import {IdentityInfo, IdentityType} from './state';
 
 export {Identity, importDefaultIdentity, importRoomIdentity, updateInfo};
 
+let onload = domEvent(window, 'load');
+
 const identities = StoredState('identities', () => {
   const _default = importLegacyIdentity() || createIdentity();
   return {_default};
@@ -20,10 +22,10 @@ migrateDisplayName(identities);
 function Identity() {
   // we don't want to block the first React render with signing our avatar image
   // maybe there's something cleaner than this 100ms heuristic
-  domEvent(window, 'load').then(() => {
+  onload.then(() => {
     setTimeout(() => {
       postInitialIdentity(identities._default);
-    }, 100);
+    }, 0);
   });
   const hasPosted = new Set();
 

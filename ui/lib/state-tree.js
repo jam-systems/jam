@@ -333,7 +333,7 @@ function markForUpdate(element) {
   return parent;
 }
 
-function setProps(element, ...args) {
+async function setProps(element, ...args) {
   log('setProps', ...args);
   let newProps = {...element.props};
   set(newProps, ...args);

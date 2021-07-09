@@ -5,6 +5,8 @@ import {dispatch, useOn, useRootState} from '../../lib/state-tree';
 import {get, populateApiCache} from '../backend';
 import {staticConfig} from '../config';
 import {actions} from '../state';
+import {domEvent} from '../../lib/util';
+let onload = domEvent(window, 'load');
 
 // TODO this is an intermediary component to set up swarm that should be replaced w/ one that
 // properly integrates with swarm (knows connection state, returns remote streams etc)
@@ -72,7 +74,7 @@ export default function ConnectRoom({myId, myIdentity, swarm}) {
       log('connecting room', roomId);
       if (swarm.hub) swarm.disconnect();
       swarm.config({myPeerId: myId, sign: data => signData(myIdentity, data)});
-      swarm.connect(roomId);
+      onload.then(() => swarm.connect(roomId));
     } else if ((!shouldConnect || !roomId) && connectedRoomId !== null) {
       log('disconnecting room', connectedRoomId);
       if (swarm.connected && swarm.room === connectedRoomId) swarm.disconnect();

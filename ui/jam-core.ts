@@ -110,9 +110,10 @@ function createApi<T>(
 }
 
 function createJam(
-  {jamConfig, cachedRooms, debug: debug_ = false} = {} as {
-    jamConfig: Partial<typeof staticConfig>;
-    cachedRooms: {[K in string]: RoomType};
+  {jamConfig, initialProps, cachedRooms, debug: debug_ = false} = {} as {
+    jamConfig?: Partial<typeof staticConfig>;
+    initialProps?: Partial<typeof defaultProps>;
+    cachedRooms?: {[K in string]: RoomType};
     debug: boolean;
   }
 ) {
@@ -128,7 +129,11 @@ function createJam(
     debugStateTree();
   }
 
-  let props = {...defaultProps, hasMediasoup: !!staticConfig.sfu};
+  let props = {
+    ...defaultProps,
+    ...initialProps,
+    hasMediasoup: !!staticConfig.sfu,
+  };
   const {state, dispatch, setProps} = declareStateRoot(AppState, props, {
     state: undefined,
     defaultState,
