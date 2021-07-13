@@ -15,6 +15,7 @@ import {ShowInteractionModal} from './views/InteractionModal';
 
 const [state, api] = createJam({
   jamConfig: window.jamConfig,
+  initialProps: {roomId: window.existingRoomId ?? null},
   cachedRooms: window.existingRoomInfo && {
     [window.existingRoomId]: window.existingRoomInfo,
   },

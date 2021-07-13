@@ -1,4 +1,4 @@
-import {emit, on, is, clear, set, update} from 'minimal-state';
+import {emit, on, is, clear, update} from 'minimal-state';
 import signalws from './signalws';
 import {
   checkWsHealth,
@@ -19,6 +19,19 @@ import {removePeerState, updatePeerState} from './swarm-state';
 import {mergeObject} from './util';
 
 // public API starts here
+
+export {
+  Swarm as default,
+  config,
+  connect,
+  disconnect,
+  connectPeer,
+  disconnectPeer,
+  addLocalStream,
+  sendPeerEvent,
+  shareStateWithGroup,
+  shareStateWithPeer,
+};
 
 function Swarm(initialConfig) {
   const swarm = {
@@ -85,8 +98,6 @@ function Swarm(initialConfig) {
   return swarm;
 }
 
-export default Swarm;
-
 function config(
   swarm,
   {url, room, myPeerId, sign, verify, reduceState, pcConfig, debug, autoConnect}
@@ -144,18 +155,6 @@ function shareStateWithPeer(swarm, peerId, state) {
     });
   }
 }
-
-export {
-  config,
-  connect,
-  disconnect,
-  connectPeer,
-  disconnectPeer,
-  addLocalStream,
-  sendPeerEvent,
-  shareStateWithGroup,
-  shareStateWithPeer,
-};
 
 // public API ends here
 

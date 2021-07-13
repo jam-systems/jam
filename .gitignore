@@ -2,7 +2,9 @@
 *.iml
 node_modules
 ui/public/bundle*
+ui/public/css/tailwind.css
 ui/bundle*
+ui/public/js
 *.DS_Store
 .env
 .venv

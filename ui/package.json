@@ -2,9 +2,9 @@
   "name": "jam",
   "version": "0.1.0",
   "scripts": {
-    "start": "DEVELOPMENT=1 server/bin/www & esbuild --bundle ./App.jsx --outfile=./public/bundle.js --format=esm --target=es6 --define:process.env.NODE_ENV='\"development\"' --watch",
-    "start-production": "server/bin/www & esbuild --bundle ./App.jsx --outfile=./public/bundle.js --format=esm --target=es6 --define:process.env.NODE_ENV='\"production\"' --watch",
-    "build": "esbuild --bundle ./App.jsx --outfile=./public/bundle.js --minify --format=esm --target=es6 --define:process.env.NODE_ENV='\"production\"'",
+    "start": "DEVELOPMENT=1 server/bin/www & tailwindcss -o public/css/tailwind.css --watch & esbuild --splitting --bundle ./App.jsx ./bundling/*.js --outdir=./public/js --format=esm --target=es6 --define:process.env.NODE_ENV='\"development\"' --watch",
+    "start-production": "server/bin/www & tailwindcss -o public/css/tailwind.css --watch & esbuild --splitting --bundle ./App.jsx ./bundling/*.js --outdir=./public/js --format=esm --target=es6 --define:process.env.NODE_ENV='\"production\"' --minify --watch",
+    "build": "tailwindcss --minify -o public/css/tailwind.css && esbuild --splitting --bundle ./App.jsx ./bundling/*.js --outdir=./public/js --minify --format=esm --target=es6 --define:process.env.NODE_ENV='\"production\"'",
     "pantry": "LOCAL=1 PORT=3001 JAM_SFU=1 node ../pantry/bin/www",
     "debug": "JAM_SFU=1 JAM_PANTRY_URL=http://localhost:3001 yarn start",
     "start-example": "serve -s ./jam-react/example & esbuild --bundle ./jam-react/example/App.jsx --outfile=./jam-react/example/bundle.js --format=esm --define:process.env.NODE_ENV='\"development\"' --watch --loader:.css=text"
@@ -16,6 +16,7 @@
   ],
   "devDependencies": {
     "@types/react": "^17.0.11",
+    "autoprefixer": "^10.2.6",
     "ejs": "^3.1.6",
     "esbuild": "^0.12.5",
     "eslint": "^7.19.0",
@@ -24,7 +25,9 @@
     "express": "^4.17.1",
     "ical-generator": "^2.0.0-develop.14",
     "node-fetch": "^2.6.1",
-    "serve": "^11.3.2"
+    "postcss": "^8.3.5",
+    "serve": "^11.3.2",
+    "tailwindcss": "^2.2.4"
   },
   "license": "AGPL-3.0",
   "dependencies": {

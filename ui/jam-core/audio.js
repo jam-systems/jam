@@ -1,10 +1,18 @@
-import {declare, use, useRootState, useOn, useAction} from '../lib/state-tree';
+import {
+  declare,
+  use,
+  useRootState,
+  useOn,
+  useAction,
+  merge,
+} from '../lib/state-tree';
 import Microphone from './audio/Microphone';
 import AudioFile from './audio/AudioFile';
 import PlayingAudio from './audio/PlayingAudio';
 import VolumeMeter from './audio/VolumeMeter';
 import {is} from 'minimal-state';
 import {actions} from './state';
+import Recording from './audio/Recording';
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 
 // TODO: could we use AudioContext.onstatechange to detect cases where the the ability to play audio is lost?
@@ -94,7 +102,10 @@ function AudioState({swarm}) {
       })
     );
 
-    return {myAudio, soundMuted, audioFileElement};
+    return merge(
+      {myAudio, soundMuted, audioFileElement},
+      declare(Recording, {swarm, audioContext, myAudio, remoteStreams})
+    );
   };
 }
 

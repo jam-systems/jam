@@ -43,3 +43,47 @@ export function usePushToTalk() {
     };
   }, [state, setProps]);
 }
+
+export function useCtrlCombos() {
+  const [state, api] = useJam();
+  useEffect(() => {
+    let onKeyPress = event => {
+      if (
+        ctrlKeys.includes(event.key) &&
+        event.ctrlKey &&
+        event.altKey &&
+        !event.repeat &&
+        event.target?.tagName !== 'INPUT' &&
+        event.target?.tagName !== 'TEXTAREA'
+      ) {
+        event.stopPropagation();
+        event.preventDefault();
+        handleCtrlCombo[event.key]?.(state, api);
+      }
+    };
+    document.addEventListener('keydown', onKeyPress);
+    return () => {
+      document.removeEventListener('keydown', onKeyPress);
+    };
+  }, [state, api]);
+}
+
+let isRecording = false;
+
+const handleCtrlCombo = {
+  r: async (
+    {iAmModerator},
+    {startRecording, stopRecording, downloadRecording}
+  ) => {
+    if (!iAmModerator) return;
+    if (isRecording) {
+      isRecording = false;
+      stopRecording();
+      downloadRecording('my-recording');
+    } else {
+      isRecording = true;
+      startRecording();
+    }
+  },
+};
+const ctrlKeys = Object.keys(handleCtrlCombo);

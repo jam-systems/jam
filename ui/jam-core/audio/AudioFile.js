@@ -35,7 +35,11 @@ export default function AudioFile() {
 
   function closeAudioFileStream() {
     audioState = 'initial';
-    if (audio) audio.removeAttribute('src');
+    if (audio) {
+      let url = audio.src;
+      audio.removeAttribute('src');
+      if (url) URL.revokeObjectURL(url);
+    }
     audio = null;
     stream = null;
     activeFile = null;

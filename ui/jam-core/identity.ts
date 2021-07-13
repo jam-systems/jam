@@ -3,12 +3,15 @@ import {set} from 'minimal-state';
 import {StoredState} from '../lib/local-storage';
 import {importLegacyIdentity, migrateDisplayName} from '../lib/migrations';
 import {encode, decode} from '../lib/identity-utils';
+import {domEvent} from '../lib/util';
 import {putOrPost} from './backend';
 import {use} from '../lib/state-tree';
 import {sendPeerEvent} from '../lib/swarm';
 import {IdentityInfo, IdentityType} from './state';
 
 export {Identity, importDefaultIdentity, importRoomIdentity, updateInfo};
+
+let onload = domEvent(window, 'load');
 
 const identities = StoredState('identities', () => {
   const _default = importLegacyIdentity() || createIdentity();
@@ -17,7 +20,13 @@ const identities = StoredState('identities', () => {
 migrateDisplayName(identities);
 
 function Identity() {
-  postInitialIdentity(identities._default);
+  // we don't want to block the first React render with signing our avatar image
+  // maybe there's something cleaner than this 100ms heuristic
+  onload.then(() => {
+    setTimeout(() => {
+      postInitialIdentity(identities._default);
+    }, 0);
+  });
   const hasPosted = new Set();
 
   return function Identity({roomId}) {

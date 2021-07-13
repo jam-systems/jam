@@ -26,6 +26,8 @@ const urls = {
 };
 console.log(urls);
 
+const preloadScript = getPreloadScript();
+
 let jamConfigFromFile = {};
 try {
   jamConfigFromFile = JSON.parse(
@@ -188,31 +190,19 @@ app.use(async (req, res) => {
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <link rel="modulepreload" href="/js/App.js" as="script" />
+    <link rel="modulepreload" href="/js/${preloadScript}" as="script" />
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta property="og:title" content="<%= metaInfo.ogTitle %>" />
     <meta property="og:description" content="<%= metaInfo.ogDescription %>" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="<%= metaInfo.ogUrl %>" />
-    <meta
-      property="og:image"
-      content="<%= metaInfo.ogImage %>"
-    />
+    <meta property="og:image" content="<%= metaInfo.ogImage %>" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="shortcut icon"
-      type="image/png"
-      href="<%= metaInfo.favIcon %>"
-    />
+    <link rel="shortcut icon" type="image/png" href="<%= metaInfo.favIcon %>" />
     <link rel="apple-touch-icon" href="<%= metaInfo.favIcon %>" />
-    <!-- TODO: move tailwind to build pipeline if we keep it -->
-    <link
-      href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="/css/main.css"
-      rel="stylesheet"
-    />
+    <link href="/css/tailwind.css" rel="stylesheet" />
+    <link href="/css/main.css" rel="stylesheet" />
     <link rel="manifest" href="<%= metaInfo.ogUrl %>/manifest.json">
     <link rel="alternate" type="application/json+oembed" href="${
       urls.jam
@@ -226,7 +216,7 @@ app.use(async (req, res) => {
         window.existingRoomInfo = ${JSON.stringify(roomInfo ?? null)};
         window.existingRoomId = ${JSON.stringify(roomId ?? null)};
     </script>
-    <script type="module" src="/bundle.js"></script>
+    <script type="module" src="/js/App.js"></script>
   </body>
 </html>
 `,
@@ -280,4 +270,15 @@ function parsePath(pathname) {
   // other special configs go here
   let route = stageOnly ? second : first;
   return route ?? null;
+}
+
+function getPreloadScript() {
+  let bundleHelperFile = fs.readFileSync(
+    `${process.env.STATIC_FILES_DIR || 'public'}/js/bundling/all.js`,
+    {encoding: 'utf-8'}
+  );
+  let i = bundleHelperFile.indexOf('/chunk-');
+  let j = bundleHelperFile.indexOf('.js', i);
+  let thirdPartyChunk = bundleHelperFile.slice(i + 1, j + 3);
+  return thirdPartyChunk;
 }

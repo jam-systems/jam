@@ -160,7 +160,7 @@ export function EditSelf({onCancel}) {
             ↓ Leave Stage
           </SecondaryButton>
         )}
-        {iModerate && iSpeak && (
+        {iSpeak && (
           <SecondaryButton
             onClick={() => {
               openModal(StreamingModal);

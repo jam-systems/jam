@@ -1,13 +1,23 @@
 import {use} from 'use-minimal-state';
-import React, {createContext, useContext, useState} from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useMemo,
+  useEffect,
+} from 'react';
 import {ActionType, StateType, defaultState, Props} from '../jam-core/state';
-import {createApi} from '../jam-core';
+import {createApi, createJam} from '../jam-core';
 
 export {JamProvider, useJamState, useJam};
 
 // intial context values to infer types
-let fakeDispatch = async (type: ActionType, payload?: unknown) => {};
-let fakeSetProps = async (state: Partial<Props>) => {};
+let fakeDispatch = async (type: ActionType, payload?: unknown) => {
+  throw Error('state not created yet');
+};
+let fakeSetProps = async (state: Partial<Props>) => {
+  throw Error('state not created yet');
+};
 const defaultApi = createApi(defaultState, fakeDispatch, fakeSetProps);
 const JamContext = createContext([defaultState, defaultApi] as const);
 
@@ -18,12 +28,22 @@ function JamProvider({
   children,
   state,
   api,
+  options,
+  onState,
 }: {
   children: React.ReactChildren;
   state: StateType;
   api: typeof defaultApi;
+  options: Parameters<typeof createJam>[0];
+  onState: (state: StateType) => void;
 }) {
-  let [value] = useState([state, api] as const);
+  let value = useMemo(() => {
+    if (state === undefined) {
+      [state, api] = createJam(options);
+    }
+    onState?.(state);
+    return [state, api] as const;
+  }, []);
   return <JamContext.Provider value={value}>{children}</JamContext.Provider>;
 }
 

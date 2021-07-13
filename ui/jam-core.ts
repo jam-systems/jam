@@ -101,13 +101,19 @@ function createApi<T>(
     retryMic: () => dispatch(actions.RETRY_MIC),
     retryAudio: () => dispatch(actions.RETRY_AUDIO),
     autoJoinOnce: () => dispatch(actions.AUTO_JOIN),
+
+    startRecording: () => dispatch('start-recording'),
+    stopRecording: () => dispatch('stop-recording'),
+    downloadRecording: (fileName?: string) =>
+      dispatch('download-recording', fileName),
   };
 }
 
 function createJam(
-  {jamConfig, cachedRooms, debug: debug_ = false} = {} as {
-    jamConfig: Partial<typeof staticConfig>;
-    cachedRooms: {[K in string]: RoomType};
+  {jamConfig, initialProps, cachedRooms, debug: debug_ = false} = {} as {
+    jamConfig?: Partial<typeof staticConfig>;
+    initialProps?: Partial<typeof defaultProps>;
+    cachedRooms?: {[K in string]: RoomType};
     debug: boolean;
   }
 ) {
@@ -123,7 +129,11 @@ function createJam(
     debugStateTree();
   }
 
-  let props = {...defaultProps, hasMediasoup: !!staticConfig.sfu};
+  let props = {
+    ...defaultProps,
+    ...initialProps,
+    hasMediasoup: !!staticConfig.sfu,
+  };
   const {state, dispatch, setProps} = declareStateRoot(AppState, props, {
     state: undefined,
     defaultState,
@@ -149,7 +159,12 @@ function createJam(
 function AppState({hasMediasoup}) {
   const swarm = Swarm();
   const {peerState, myPeerState} = swarm;
-  is(myPeerState, {inRoom: false, micMuted: false, leftStage: false});
+  is(myPeerState, {
+    inRoom: false,
+    micMuted: false,
+    leftStage: false,
+    isRecording: false,
+  });
 
   return function AppState({
     roomId,

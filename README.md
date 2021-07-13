@@ -48,7 +48,7 @@ An overview for how 🍞 Jam compares to similar services like Clubhouse or Twit
 | 📱 Platform support             | ✅ Web, iOS, Android,<br/>macOS, Windows, Linux, … | ☑️ iOS App Store & invite | ☑️ iOS App Store & invite |
 | 🌏 [Data Sovereignty](https://en.wikipedia.org/wiki/Data_sovereignty) | ☑️ EU 🇪🇺 (Frankfurt, Germany 🇩🇪)<br/><br/> ✅ open source, host wherever you want | ☑️ USA 🇺🇸, China 🇨🇳 (Audio API Provider)<br/><br/>❌ proprietary, no self-hosting   | ☑️ USA 🇺🇸 (?)<br/><br/>❌ proprietary, no self-hosting |
 | 🎙 Number of Speakers in a Room | ✅ ~ 15+ (limited by p2p bandwidth) | ✅ ~ 100s (?) | ☑️ 10             |
-| 🎫 Number of People in a Room   | ☑️ ~ 30+ (limited by p2p bandwidth),<br/>we're working on lifting this limit!<br/><br/>current workaround: stream browser tab to<br/>Youtube, Twitch, Facebook Live … | ✅ ~ 8000     | ✅ ~ millions (?) |
+| 🎫 Number of People in a Room   | ✅ unlimited (depending on server)  | ✅ up to 8000 (?)     | ✅ unlimited (?) |
 | 🗓 Discovery                    | ☑️ off-platform (social networks, messengers) | ✅ hallway, upcoming events, off-platform | ✅ fleet bar, off-platform |
 
 💯 Animated Reactions (🎬 [see a demo](https://twitter.com/__tosh/status/1362558104412565504/video/1))
@@ -72,6 +72,7 @@ You can take a look at examples for room configurations via URLs in our [example
 | `room.color`         | CSS value (e.g. "red" #CCCCCC) | primary color of the room, used for the primary action button and some styling like background chrome color, note that you need to encode the hash sign using %23 if passed as query parameter (#CCCCCC becomes %23CCCCCC) |
 | `room.stageOnly`     | true                      | users join directly on stage instead of in the audience |
 | `ux.noLeave`         | true                      | removes the "leave" button |
+| `ux.autoCreate`      | true                      | create room if it does not exist yet |
 | `ux.autoJoin`        | true                      | users join the room automatically without having to click a button to join |
 | `ux.autoRejoin`      | true                      | users re-join the room automatically if they have been in the room previously without having to click a button to join |
 | `identity.name`      | name of the user          |      |
