@@ -80,7 +80,7 @@ services:
     restart: always
     depends_on: 
       - pantryredis
-    network_mode: host # comment out to not use host network => JAM_SFU=true won't work
+    # network_mode: host # comment out to not use host network => JAM_SFU=true won't work
     environment:
       - JAM_HOST
       - JAM_RESTRICT_ROOM_CREATION
