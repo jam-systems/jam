@@ -7,19 +7,35 @@ export {sendRequest, sendDirect, onMessage, onRemovePeer, onAddPeer};
 const eventEmitter = {opened: false};
 const msgEmitter = {};
 const subs = ['mediasoup'].join(',');
-// const url = `wss://${jamHost}/_/pantry/~forward?subs=${subs}&id=mediasoup`;
-const url = `ws://localhost:3001/~forward?subs=${subs}&id=mediasoup`;
-const ws = new WebSocket(url);
+const url = `wss://${jamHost}/_/pantry/~forward?subs=${subs}&id=mediasoup`;
+// const url = `ws://localhost:3001/~forward?subs=${subs}&id=mediasoup`;
 
-let hasOpened = new Promise(resolve => {
-  ws.on('open', () => {
-    resolve();
+
+let ws;
+let hasOpened;
+setInterval(() => {
+  if (ws?.readyState === WebSocket.OPEN) return;
+  try {
+    createWebSocket();
+  } catch (err) {
+    console.log(err);
+    console.log('retrying in 5 sec...');
+  }
+}, 5000);
+
+
+function createWebSocket() {
+  ws = new WebSocket(url, {rejectUnauthorized: false});
+  hasOpened = new Promise(resolve => {
+    ws.on('open', () => {
+      resolve();
+    });
   });
-});
-ws.on('message', jsonMsg => {
-  let msg = parseMessage(jsonMsg);
-  if (msg !== undefined) handleMessage(msg);
-});
+  ws.on('message', jsonMsg => {
+    let msg = parseMessage(jsonMsg);
+    if (msg !== undefined) handleMessage(msg);
+  });
+}
 
 function handleMessage(msg) {
   let {ro: roomId, t: topic, d: data, p: senderId, r: requestId} = msg;
@@ -33,11 +49,12 @@ function handleMessage(msg) {
       requestAccepted(requestId, data);
       break;
     default: {
-      let accept = requestId ? data => sendAccept(requestId, data) : () => {};
+      let accept = requestId ? data => sendAccept(roomId, senderId, requestId, data) : () => {};
       emit(msgEmitter, topic, roomId, senderId, data, accept);
     }
   }
 }
+
 
 async function sendDirect(roomId, peerId, topic, data) {
   await hasOpened;
@@ -51,9 +68,9 @@ async function sendRequest(roomId, peerId, topic, data) {
   return promise;
 }
 
-async function sendAccept(requestId, data) {
+async function sendAccept(roomId, peerId, requestId, data) {
   await hasOpened;
-  return sendMessage({t: 'response', d: data, r: requestId});
+  return sendMessage({t: 'response', d: data, ro: roomId, p: peerId, r: requestId});
 }
 
 function onMessage(topic, listener) {

@@ -42,8 +42,17 @@ async function sendRequest(roomId, peerId, topic, message) {
 function handleMessageFromServer(serverConnection, msg) {
   let {t: topic, d: data, r: requestId, ro: roomId, p: receiverId} = msg;
   let connection = getConnections(roomId).find(c => c.peerId === receiverId);
-  if (connection === undefined) throw Error('Peer is not connected');
-  if (requestId === undefined) {
+  if (connection === undefined) {
+    console.error(
+      "Peer is not connected, can't forward message to him",
+      roomId,
+      receiverId
+    );
+    return;
+  }
+  if (topic === 'response') {
+    sendMessage(connection, {t: 'response', d: data, r: requestId});
+  } else if (requestId === undefined) {
     sendMessage(connection, {t: 'server', d: {t: topic, d: data}});
   } else {
     newForwardRequest(serverConnection, requestId);
