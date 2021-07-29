@@ -11,7 +11,7 @@ import {
 
 export {runMediasoup};
 
-const hasMediasoup = ['true', '1'].includes(process.env.JAM_SFU);
+const hasMediasoup = true; //['true', '1'].includes(process.env.JAM_SFU);
 const announcedIp =
   process.env.JAM_SFU_EXTERNAL_IP || (local ? localIp() : null);
 
