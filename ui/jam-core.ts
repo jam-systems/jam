@@ -1,17 +1,8 @@
-import {is, set, on, update} from 'minimal-state';
-import {
-  debugStateTree,
-  declare,
-  declareStateRoot,
-  merge,
-  use,
-  useAction,
-} from './lib/state-tree';
+import {is, set, on, update, until} from 'minimal-state';
+import {debugStateTree, declareStateRoot} from './lib/state-tree';
 import {debug} from './lib/state-utils';
-import Swarm from './lib/swarm';
-import {StoredState} from './lib/local-storage';
 
-import {Identity, updateInfo} from './jam-core/identity';
+import {updateInfo} from './jam-core/identity';
 import {
   defaultState,
   actions,
@@ -22,21 +13,16 @@ import {
   Props,
   ActionType,
 } from './jam-core/state';
-import {AudioState} from './jam-core/audio';
-import {Reactions} from './jam-core/reactions';
 import {
-  RoomState,
   addSpeaker,
   addModerator,
   removeSpeaker,
   removeModerator,
 } from './jam-core/room';
 import {staticConfig} from './jam-core/config';
-import ModeratorState from './jam-core/room/ModeratorState';
 import {populateApiCache, createRoom, updateRoom} from './jam-core/backend';
 import {addAdmin, removeAdmin} from './jam-core/admin';
-import ConnectAudio from './jam-core/connections/ConnectAudio';
-import ConnectRoom from './jam-core/connections/ConnectRoom';
+import AppState from './jam-core/AppState';
 
 /* THE JAM API */
 
@@ -154,148 +140,4 @@ function createJam(
     debug(state);
   }
   return [state, api] as const;
-}
-
-function AppState({hasMediasoup}) {
-  const swarm = Swarm();
-  const {peerState, myPeerState} = swarm;
-  is(myPeerState, {
-    inRoom: false,
-    micMuted: false,
-    leftStage: false,
-    isRecording: false,
-  });
-
-  return function AppState({
-    roomId,
-    userInteracted,
-    micMuted,
-    autoJoin,
-    autoRejoin,
-    customStream,
-  }) {
-    let {myId, myIdentity} = use(Identity, {roomId});
-
-    let {room, hasRoom, iAmSpeaker, iAmModerator} = use(RoomState, {
-      roomId,
-      myId,
-      myIdentity,
-      peerState,
-      myPeerState,
-    });
-    let {closed, moderators, speakers} = room;
-    let inRoom = use(InRoom, {
-      roomId,
-      autoJoin,
-      autoRejoin,
-      iAmModerator,
-      hasRoom,
-      closed,
-    });
-
-    // connect with signaling server
-    declare(ConnectRoom, {
-      swarm,
-      myId,
-      myIdentity,
-      roomId,
-      shouldConnect: hasRoom,
-    });
-    declare(ModeratorState, {swarm, moderators});
-
-    let remoteStreams = use(ConnectAudio, {
-      hasMediasoup,
-      swarm,
-      roomId,
-      iAmSpeaker,
-      speakers,
-    });
-
-    is(myPeerState, {micMuted, inRoom: !!inRoom});
-    declare(Reactions, {swarm});
-
-    return merge(
-      {
-        swarm,
-        roomId,
-        micMuted,
-        inRoom,
-        room,
-        iAmSpeaker,
-        iAmModerator,
-        myId,
-        myIdentity,
-      },
-      declare(AudioState, {
-        myId,
-        inRoom,
-        iAmSpeaker,
-        swarm,
-        remoteStreams,
-        userInteracted,
-        micMuted,
-        customStream,
-      })
-    );
-  };
-}
-
-function InRoom() {
-  let inRoom = null;
-  let autoJoinCount = 0;
-  let didAutoJoin = false;
-  const joinedRooms = StoredState('jam.joinedRooms', () => ({}));
-
-  return function InRoom({
-    roomId,
-    autoJoin,
-    autoRejoin,
-    iAmModerator,
-    hasRoom,
-    closed,
-  }) {
-    let [isJoinRoom, joinedRoomId] = useAction(actions.JOIN);
-    let [isAutoJoin] = useAction(actions.AUTO_JOIN);
-    if ((isAutoJoin || (autoJoin && !didAutoJoin)) && autoJoinCount === 0) {
-      didAutoJoin = true;
-      autoJoinCount = 1;
-    }
-
-    if (!roomId || (closed && !iAmModerator)) {
-      inRoom = null;
-    } else {
-      if (isJoinRoom) {
-        inRoom = joinedRoomId; // can be null, for leaving room
-      } else if (autoRejoin && hasRoom && joinedRooms[roomId]) {
-        inRoom = roomId;
-      }
-      if (autoJoinCount > 0 && hasRoom) {
-        autoJoinCount--;
-        inRoom = roomId;
-      }
-    }
-
-    if (autoRejoin) is(joinedRooms, roomId, inRoom !== null || undefined);
-    return inRoom;
-  };
-}
-
-async function until<T, K extends keyof T>(
-  state: T,
-  key: K,
-  condition?: (value: T[K]) => boolean
-) {
-  let value = state[key];
-  if (condition ? condition(value) : value) {
-    return value;
-  } else {
-    return new Promise(resolve => {
-      let off = on(state, key, value => {
-        if (condition ? condition(value as T[K]) : value) {
-          off();
-          resolve(value);
-        }
-      });
-    });
-  }
 }

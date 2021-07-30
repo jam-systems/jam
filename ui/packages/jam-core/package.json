@@ -15,7 +15,7 @@
   "dependencies": {
     "compact-base64": "^2.1.2",
     "mediasoup-client": "^3.6.31",
-    "minimal-state": "^5.5.0",
+    "minimal-state": "^5.6.0",
     "simple-signed-records-engine": "0.1.2",
     "tweetnacl": "^1.0.3",
     "ua-parser-js": "^0.7.24"
