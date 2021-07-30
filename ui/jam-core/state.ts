@@ -6,6 +6,7 @@ const defaultProps = {
   roomId: null as string | null,
   userInteracted: false,
   micMuted: false,
+  handRaised: false,
   autoJoin: false,
   hasMediasoup: false,
   customStream: null,

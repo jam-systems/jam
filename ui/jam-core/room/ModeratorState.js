@@ -1,9 +1,8 @@
-import {use, event, useRootState} from '../../lib/state-tree';
+import {use, event} from '../../lib/state-tree';
 import {shareStateWithGroup, shareStateWithPeer} from '../../lib/swarm';
 import {useDidEverChange} from '../../lib/state-utils';
 
-export default function ModeratorState({moderators, swarm}) {
-  let handRaised = useRootState('handRaised');
+export default function ModeratorState({swarm, moderators, handRaised}) {
   let [isRaiseHand, hasRaisedHand] = useDidEverChange(handRaised, false);
   let newModerators = event(NewModerators, {moderators, swarm});
 

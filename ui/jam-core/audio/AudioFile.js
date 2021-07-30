@@ -46,7 +46,8 @@ export default function AudioFile() {
     is(state, 'audioFile', null);
   }
 
-  return function AudioFile({audioFile, audioContext}) {
+  return function AudioFile({audioContext}) {
+    let audioFile = useRootState('audioFile');
     let {file} = audioFile ?? {}; // {file, name, /* ... maybe other sources in the future */}
     let shouldPlay = file && audioContext;
 

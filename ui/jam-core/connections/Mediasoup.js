@@ -117,7 +117,7 @@ export default function Mediasoup({swarm}) {
       let {peerId, producerId, id, kind, rtpParameters} = consumerPayload;
       [peerId] = peerId.split(';');
       receiveTransport
-        .consume({id, producerId, kind, rtpParameters})
+        ?.consume({id, producerId, kind, rtpParameters})
         .then(consumer => {
           accept();
           let track = consumer.track;

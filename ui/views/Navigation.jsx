@@ -84,7 +84,7 @@ export default function Navigation({
       {/* TODO: button content breaks between icon and text on small screens. fix by using flexbox & text-overflow */}
       <div className="flex">
         <button
-          onClick={iSpeak ? talk : () => is(state, 'handRaised', !handRaised)}
+          onClick={iSpeak ? talk : () => setProps('handRaised', !handRaised)}
           onKeyUp={e => {
             // don't allow clicking mute button with space bar to prevent confusion with push-to-talk w/ space bar
             if (e.key === ' ') e.preventDefault();

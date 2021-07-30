@@ -23,7 +23,6 @@ function RoomState({roomId, myIdentity, peerState, myPeerState}) {
     peerState,
     myPeerState,
     myIdentity,
-    myId,
   });
 
   room = useStableObject({...room, speakers});
