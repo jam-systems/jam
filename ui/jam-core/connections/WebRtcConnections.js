@@ -4,7 +4,11 @@ import {use} from '../../lib/state-tree';
 export default function WebRtcConnections({swarm, hasMediasoup}) {
   const webRtcConnections = new Set();
 
-  return function WebRtcConnections({iAmSpeaker, speakers}) {
+  return function WebRtcConnections({roomState}) {
+    let {
+      iAmSpeaker,
+      room: {speakers, stageOnly},
+    } = roomState;
     let peers = use(swarm, 'peers');
 
     const allConnections = new Set();
@@ -24,10 +28,12 @@ export default function WebRtcConnections({swarm, hasMediasoup}) {
     for (let connection of allConnections) {
       // if mediasoup is used, only speakers should connect with each other
       // otherwise, speakers should connect with everyone and audience only with speakers
+      let theyAreSpeaker = stageOnly || speakers.includes(connection.peerId);
       let shouldConnect = hasMediasoup
-        ? iAmSpeaker && speakers.includes(connection.peerId)
-        : iAmSpeaker || speakers.includes(connection.peerId);
+        ? iAmSpeaker && theyAreSpeaker
+        : iAmSpeaker || theyAreSpeaker;
 
+      // TODO is this always correct?
       if (shouldConnect && !webRtcConnections.has(connection)) {
         webRtcConnections.add(connection);
         connectPeer(connection);

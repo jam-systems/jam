@@ -32,56 +32,28 @@ export default function AppState({hasMediasoup}) {
   }) {
     let {myId, myIdentity} = use(Identity, {roomId});
 
-    let {room, hasRoom, iAmSpeaker, iAmModerator} = use(RoomState, {
+    // {roomId, room, hasRoom, iAmSpeaker, iAmModerator} = roomState
+    let roomState = use(RoomState, {
       roomId,
-      myId,
       myIdentity,
       peerState,
       myPeerState,
     });
-    let {closed, moderators, speakers} = room;
-    let inRoom = use(InRoom, {
-      roomId,
-      autoJoin,
-      autoRejoin,
-      iAmModerator,
-      hasRoom,
-      closed,
-    });
+    let {room, iAmSpeaker} = roomState;
+    let inRoom = use(InRoom, {roomState, autoJoin, autoRejoin});
 
     // connect with signaling server
-    declare(ConnectRoom, {
-      swarm,
-      myId,
-      myIdentity,
-      roomId,
-      shouldConnect: hasRoom,
-    });
-    declare(ModeratorState, {swarm, moderators});
+    declare(ConnectRoom, {roomState, swarm, myIdentity});
+    declare(ModeratorState, {swarm, moderators: room.moderators});
 
-    let remoteStreams = use(ConnectAudio, {
-      hasMediasoup,
-      swarm,
-      roomId,
-      iAmSpeaker,
-      speakers,
-    });
+    let remoteStreams = use(ConnectAudio, {roomState, hasMediasoup, swarm});
 
     is(myPeerState, {micMuted, inRoom: !!inRoom});
     declare(Reactions, {swarm});
 
     return merge(
-      {
-        swarm,
-        roomId,
-        micMuted,
-        inRoom,
-        room,
-        iAmSpeaker,
-        iAmModerator,
-        myId,
-        myIdentity,
-      },
+      {swarm, micMuted, inRoom, myId, myIdentity},
+      roomState,
       declare(AudioState, {
         myId,
         inRoom,
@@ -102,14 +74,14 @@ function InRoom() {
   let didAutoJoin = false;
   const joinedRooms = StoredState('jam.joinedRooms', () => ({}));
 
-  return function InRoom({
-    roomId,
-    autoJoin,
-    autoRejoin,
-    iAmModerator,
-    hasRoom,
-    closed,
-  }) {
+  return function InRoom({roomState, autoJoin, autoRejoin}) {
+    let {
+      roomId,
+      hasRoom,
+      room: {closed},
+      iAmModerator,
+    } = roomState;
+
     let [isJoinRoom, joinedRoomId] = useAction(actions.JOIN);
     let [isAutoJoin] = useAction(actions.AUTO_JOIN);
     if ((isAutoJoin || (autoJoin && !didAutoJoin)) && autoJoinCount === 0) {
