@@ -1,35 +1,46 @@
+// websocket client which connects to pantry and registers itself to handle part of the messages
 import WebSocket from 'ws';
 import {emit, on} from 'minimal-state';
-import {jamHost} from './config.js';
+import {pantryWsUrl} from './config.js';
 
 export {sendRequest, sendDirect, onMessage, onRemovePeer, onAddPeer};
 
+// list of message topics which pantry will forward
+const subs = ['mediasoup'].join(',');
+// service id (should be unique; exact value only relevant for debugging)
+const serviceId = 'mediasoup';
+
+const wsUrl = `${pantryWsUrl}/~forward?subs=${subs}&id=${serviceId}`;
+
 const eventEmitter = {opened: false};
 const msgEmitter = {};
-const subs = ['mediasoup'].join(',');
-const url = `wss://${jamHost}/_/pantry/~forward?subs=${subs}&id=mediasoup`;
-// const url = `ws://localhost:3001/~forward?subs=${subs}&id=mediasoup`;
 
+let ws, hasOpened;
 
-let ws;
-let hasOpened;
+// give pantry some time to start up before we connect
+setTimeout(() => {
+  try {
+    createWebSocket();
+  } catch {}
+}, 3000);
+
+// we have to re-connect when pantry restarts
+// having an alive check every 10 seconds seems to be fairly robust
 setInterval(() => {
   if (ws?.readyState === WebSocket.OPEN) return;
   try {
+    console.log('recreating websocket');
     createWebSocket();
   } catch (err) {
     console.log(err);
     console.log('retrying in 5 sec...');
   }
-}, 5000);
-
+}, 10000);
 
 function createWebSocket() {
-  ws = new WebSocket(url, {rejectUnauthorized: false});
+  ws = new WebSocket(wsUrl, {rejectUnauthorized: false});
   hasOpened = new Promise(resolve => {
-    ws.on('open', () => {
-      resolve();
-    });
+    ws.on('open', () => resolve());
   });
   ws.on('message', jsonMsg => {
     let msg = parseMessage(jsonMsg);
@@ -49,12 +60,13 @@ function handleMessage(msg) {
       requestAccepted(requestId, data);
       break;
     default: {
-      let accept = requestId ? data => sendAccept(roomId, senderId, requestId, data) : () => {};
+      let accept = requestId
+        ? data => sendAccept(roomId, senderId, requestId, data)
+        : () => {};
       emit(msgEmitter, topic, roomId, senderId, data, accept);
     }
   }
 }
-
 
 async function sendDirect(roomId, peerId, topic, data) {
   await hasOpened;
@@ -70,7 +82,13 @@ async function sendRequest(roomId, peerId, topic, data) {
 
 async function sendAccept(roomId, peerId, requestId, data) {
   await hasOpened;
-  return sendMessage({t: 'response', d: data, ro: roomId, p: peerId, r: requestId});
+  return sendMessage({
+    t: 'response',
+    d: data,
+    ro: roomId,
+    p: peerId,
+    r: requestId,
+  });
 }
 
 function onMessage(topic, listener) {
