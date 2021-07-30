@@ -74,6 +74,19 @@ services:
     volumes:
       - "../data/pantryredis:/data"
     command: "redis-server --appendonly yes"
+  pantry-sfu:
+    #build: ../pantry-sfu
+    image: registry.gitlab.com/jam-systems/jam/pantry-sfu:${CHANNEL}
+    #restart: always
+    network_mode: host
+    depends_on: 
+      - pantry
+    environment:
+      - JAM_HOST
+      - JAM_SFU_EXTERNAL_IP
+      - MEDIASOUP_MIN_PORT
+      - MEDIASOUP_MAX_PORT
+    profiles: [ "sfu" ]
   pantry:
     #build: ../pantry
     image: registry.gitlab.com/jam-systems/jam/pantry:${CHANNEL}
@@ -83,10 +96,6 @@ services:
     environment:
       - JAM_HOST
       - JAM_RESTRICT_ROOM_CREATION
-      - JAM_SFU
-      - JAM_SFU_EXTERNAL_IP
-      - MEDIASOUP_MIN_PORT
-      - MEDIASOUP_MAX_PORT
     labels:
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}_pantry.rule=(Host(`${JAM_HOST}`) && PathPrefix(`/_/pantry`))
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}_pantry.middlewares=${COMPOSE_PROJECT_NAME}_pantry_stripprefix

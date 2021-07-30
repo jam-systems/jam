@@ -24,6 +24,19 @@ build-pantry:
       - pantry/**/*
       - .gitlab-ci.yml
 
+build-sfu:
+  stage: build
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t $DOCKER_NAMESPACE/pantry-sfu:${CI_COMMIT_REF_SLUG} pantry-sfu
+    - docker push $DOCKER_NAMESPACE/pantry-sfu:${CI_COMMIT_REF_SLUG}
+  only:
+    refs:
+      - master
+      - stable
+    changes:
+      - pantry-sfu/**/*
+      - .gitlab-ci.yml
 
 build-ui:
   stage: build
@@ -38,7 +51,6 @@ build-ui:
     changes:
       - ui/**/*
       - .gitlab-ci.yml
-
 
 update-beta-server:
   stage: deploy
