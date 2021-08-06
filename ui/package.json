@@ -12,8 +12,7 @@
   },
   "private": true,
   "workspaces": [
-    "packages/jam-core",
-    "examples/minimal-jam-bundled"
+    "packages/jam-core"
   ],
   "devDependencies": {
     "@types/react": "^17.0.11",
