@@ -1,5 +1,6 @@
 {
   "name": "jam-core-react",
+  "description": "React hooks for creating custom audio spaces like Clubhouse / Twitter Spaces, made with WebRTC",
   "version": "0.3.10",
   "main": "dist/index.js",
   "license": "AGPL-3.0",
