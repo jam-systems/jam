@@ -10,7 +10,8 @@ import {useMqParser} from '../lib/tailwind-mqp';
 import Container from './Container';
 import Navigation from './Navigation';
 import {userAgent} from '../lib/user-agent';
-import {usePushToTalk, useCtrlCombos, useJam} from '../jam-core-react';
+import {usePushToTalk, useCtrlCombos} from '../lib/hotkeys';
+import {useJam} from '../jam-core-react';
 
 const inWebView =
   userAgent.browser?.name !== 'JamWebView' &&

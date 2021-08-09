@@ -1,7 +1,7 @@
-import React, {createElement, useMemo} from 'react';
+import React, {createElement, useMemo, useState, useEffect} from 'react';
 import Room from './Room';
 import {importRoomIdentity} from '../jam-core';
-import {useCreateRoom, useJam} from '../jam-core-react';
+import {useJam} from '../jam-core-react';
 import StartFromURL from './StartFromURL';
 import {use} from 'use-minimal-state';
 
@@ -54,4 +54,21 @@ export default function PossibleRoom({
 // TODO
 function Error() {
   return <div>An error ocurred</div>;
+}
+
+function useCreateRoom({roomId, shouldCreate, newRoom, onSuccess}) {
+  const [, {createRoom}] = useJam();
+  let [isError, setError] = useState(false);
+  let [isLoading, setLoading] = useState(true);
+  useEffect(() => {
+    if (roomId && shouldCreate) {
+      (async () => {
+        let ok = await createRoom(roomId, newRoom);
+        setLoading(false);
+        if (ok) onSuccess?.();
+        else setError(true);
+      })();
+    }
+  }, [roomId, shouldCreate]);
+  return [isLoading, isError];
 }

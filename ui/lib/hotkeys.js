@@ -1,5 +1,5 @@
 import {useEffect} from 'react';
-import {useJam} from './JamContext';
+import {useJam} from '../jam-core-react/JamContext';
 
 // unmute on space bar if currently muted
 export function usePushToTalk() {
