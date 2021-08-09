@@ -68,20 +68,16 @@ export function useCtrlCombos() {
   }, [state, api]);
 }
 
-let isRecording = false;
-
 const handleCtrlCombo = {
   r: async (
-    {iAmModerator},
+    {iAmModerator, isRecording},
     {startRecording, stopRecording, downloadRecording}
   ) => {
     if (!iAmModerator) return;
     if (isRecording) {
-      isRecording = false;
       stopRecording();
       downloadRecording('my-recording');
     } else {
-      isRecording = true;
       startRecording();
     }
   },
