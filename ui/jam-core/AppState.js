@@ -34,7 +34,7 @@ export default function AppState({hasMediasoup}) {
     let myIdentity = use(Identity, {roomId});
     let myId = myIdentity.publicKey;
 
-    // {roomId, room, hasRoom, iAmSpeaker, iAmModerator} = roomState
+    // {roomId, room, hasRoom, isRoomLoading, iAmSpeaker, iAmModerator} = roomState
     let roomState = use(RoomState, {
       roomId,
       myIdentity,

@@ -42,6 +42,8 @@ const defaultState = {
   roomId: ((window as any).existingRoomId as string | null) ?? null,
   inRoom: null as string | null, // === roomId but only if entered
   room: {name: '', description: '', speakers: [], moderators: []} as RoomType,
+  hasRoom: false,
+  isRoomLoading: false,
   iAmSpeaker: false,
   iAmModerator: false,
   identities: {},

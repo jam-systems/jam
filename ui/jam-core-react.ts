@@ -1,9 +1,4 @@
-export {
-  useApiQuery,
-  useCreateRoom,
-  useRoomLoading,
-  useIdentityAdminStatus,
-} from './jam-core-react/backend-hooks';
+export {useApiQuery, useCreateRoom} from './jam-core-react/backend-hooks';
 
 export {usePushToTalk, useCtrlCombos} from './jam-core-react/hotkeys';
 

@@ -5,7 +5,7 @@ import {signedToken} from '../lib/identity-utils';
 import {apiUrl} from '../jam-core/backend';
 import GetRequest from '../lib/GetRequest';
 
-export {useApiQuery, useCreateRoom, useRoomLoading, useIdentityAdminStatus};
+export {useApiQuery, useCreateRoom};
 
 function useApiQuery(path, {dontFetch = false, fetchOnMount = false}) {
   const [state] = useJam();
@@ -34,14 +34,4 @@ function useCreateRoom({roomId, shouldCreate, newRoom, onSuccess}) {
     }
   }, [roomId, shouldCreate]);
   return [isLoading, isError];
-}
-
-function useRoomLoading(roomId) {
-  const path = roomId && apiUrl() + `/rooms/${roomId}`;
-  let {data, isLoading} = use(GetRequest, {path});
-  return [data, isLoading];
-}
-
-function useIdentityAdminStatus(id) {
-  return useApiQuery(`/admin/${id}`, {fetchOnMount: true});
 }
