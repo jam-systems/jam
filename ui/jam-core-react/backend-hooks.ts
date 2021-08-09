@@ -7,7 +7,10 @@ import GetRequest from '../lib/GetRequest';
 
 export {useApiQuery};
 
-function useApiQuery(path, {dontFetch = false, fetchOnMount = false}) {
+function useApiQuery(
+  path: string,
+  {dontFetch = false, fetchOnMount = false} = {}
+) {
   const [state] = useJam();
   const getToken = useCallback(() => signedToken(state.myIdentity), []);
   let {data, isLoading, status} = use(GetRequest, {
@@ -16,5 +19,5 @@ function useApiQuery(path, {dontFetch = false, fetchOnMount = false}) {
     fetchOnMount,
     getToken,
   });
-  return [data, isLoading, status];
+  return [data as unknown, isLoading as boolean, status as number] as const;
 }

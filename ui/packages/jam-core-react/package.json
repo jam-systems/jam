@@ -1,0 +1,28 @@
+{
+  "name": "jam-core-react",
+  "version": "0.3.10",
+  "main": "dist/index.js",
+  "license": "AGPL-3.0",
+  "scripts": {
+    "build": "tsc --emitDeclarationOnly && mv dist/jam-core-react.d.ts dist/index.d.ts && esbuild --bundle ../../jam-core-react.ts --outfile=./dist/index.js --format=esm --target=es2020 --external:compact-base64 --external:minimal-state --external:simple-signed-records-engine --external:use-minimal-state --external:jam-core --external:react",
+    "bundle": "esbuild --bundle ../../jam-core-react.ts --minify --outfile=./dist/bundle.js --format=esm --target=es6",
+    "size": "cat dist/bundle.js | gzip | wc -c",
+    "prepublishOnly": "yarn build && yarn bundle"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "compact-base64": "^2.1.2",
+    "jam-core": "0.3.10",
+    "minimal-state": "^5.6.0",
+    "simple-signed-records-engine": "0.1.2",
+    "use-minimal-state": "^3.5.0"
+  },
+  "peerDependencies": {
+    "react": "^17.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^4.3.4"
+  }
+}

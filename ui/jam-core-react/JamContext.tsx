@@ -1,13 +1,13 @@
 import {use} from 'use-minimal-state';
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useMemo,
-  useEffect,
-} from 'react';
-import {ActionType, StateType, defaultState, Props} from '../jam-core/state';
-import {createApi, createJam} from '../jam-core';
+import React, {createContext, useContext, useMemo} from 'react';
+import {
+  createApi,
+  createJam,
+  ActionType,
+  StateType,
+  defaultState,
+  Props,
+} from 'jam-core';
 
 export {JamProvider, useJamState, useJam};
 

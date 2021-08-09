@@ -30,6 +30,9 @@ export {createJam, createApi};
 export {is, set, on, update, until};
 export {importRoomIdentity, importDefaultIdentity} from './jam-core/identity';
 
+// types
+export {StateType, RoomType, IdentityInfo, ActionType, Props, defaultState};
+
 function createApi<T>(
   state: T,
   dispatch: (type: ActionType, payload?: unknown) => Promise<void>,

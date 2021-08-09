@@ -1,0 +1,19 @@
+{
+  "name": "tiny-jam",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "npx serve . & esbuild --bundle ./App.jsx --outfile=./bundle.js --format=esm --watch",
+    "build": "esbuild --bundle ./App.jsx --outfile=./bundle.js --format=esm"
+  },
+  "dependencies": {
+    "jam-core": "^0.3.10",
+    "jam-core-react": "^0.3.10",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1"
+  },
+  "devDependencies": {
+    "serve": "^12.0.0"
+  }
+}
