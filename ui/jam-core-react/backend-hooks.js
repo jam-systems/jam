@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useState} from 'react';
 import {use} from '../lib/state-tree-react';
-import {useJam, useJamState} from './JamContext';
+import {useJam} from './JamContext';
 import {signedToken} from '../lib/identity-utils';
 import {apiUrl} from '../jam-core/backend';
 import GetRequest from '../lib/GetRequest';
@@ -8,7 +8,7 @@ import GetRequest from '../lib/GetRequest';
 export {useApiQuery, useCreateRoom, useRoomLoading, useIdentityAdminStatus};
 
 function useApiQuery(path, {dontFetch = false, fetchOnMount = false}) {
-  const state = useJamState();
+  const [state] = useJam();
   const getToken = useCallback(() => signedToken(state.myIdentity), []);
   let {data, isLoading, status} = use(GetRequest, {
     path: apiUrl() + path,

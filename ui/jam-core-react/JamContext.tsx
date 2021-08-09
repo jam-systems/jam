@@ -63,5 +63,5 @@ function useJamState<
 function useJamState(): T;
 function useJamState(keys?: any) {
   let [state] = useContext(JamContext);
-  return (keys ? use(state, keys) : state) as never;
+  return use(state, keys) as never;
 }

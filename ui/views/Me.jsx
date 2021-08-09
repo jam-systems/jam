@@ -1,12 +1,9 @@
 import React from 'react';
-import {use} from 'use-minimal-state';
 import Container from './Container';
 import {useJamState} from '../jam-core-react';
 
 export default function Me() {
-  const state = useJamState();
-  let myId = use(state, 'myId');
-
+  let myId = useJamState('myId');
   return (
     <Container style={{height: 'initial', minHeight: '100%'}}>
       <div className="p-6 md:p-10">
