@@ -71,7 +71,6 @@ async function findWorkspaceSiblings() {
 
     let workspaces = (await getPackageJson(cwd))?.workspaces;
     if (workspaces) {
-      // return workspaces.map(ws => path.resolve(cwd, ws));
       let workspaceSiblings = {};
 
       for (let ws of workspaces) {

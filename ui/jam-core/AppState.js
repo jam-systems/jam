@@ -11,6 +11,7 @@ import {RoomState} from './room';
 import ModeratorState from './room/ModeratorState';
 import ConnectAudio from './connections/ConnectAudio';
 import ConnectRoom from './connections/ConnectRoom';
+import {useStableArray, useStableObject} from '../lib/state-diff';
 
 export default function AppState({hasMediasoup}) {
   const swarm = Swarm();
@@ -56,6 +57,7 @@ export default function AppState({hasMediasoup}) {
     return merge(
       {swarm, micMuted, handRaised, inRoom, myId, myIdentity},
       roomState,
+      declare(PeerState, {swarm}),
       declare(AudioState, {
         myId,
         inRoom,
@@ -69,6 +71,13 @@ export default function AppState({hasMediasoup}) {
       })
     );
   };
+}
+
+function PeerState({swarm}) {
+  let peers = useStableArray(Object.keys(use(swarm, 'peers') ?? {}));
+  let peerState = useStableObject({...use(swarm, 'peerState')});
+  let myPeerState = useStableObject({...use(swarm, 'myPeerState')});
+  return {peers, peerState, myPeerState};
 }
 
 function InRoom() {

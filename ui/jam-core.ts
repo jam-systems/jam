@@ -113,14 +113,28 @@ function createApi<T>(
 
 function createJam(
   {jamConfig, initialProps, cachedRooms, debug: debug_ = false} = {} as {
-    jamConfig?: Partial<typeof staticConfig>;
+    jamConfig?: Partial<typeof staticConfig> & {domain?: string};
     initialProps?: Partial<typeof defaultProps>;
     cachedRooms?: {[K in string]: RoomType};
     debug: boolean;
   }
 ) {
   // setup stuff
-  if (jamConfig) set(staticConfig, jamConfig);
+  if (jamConfig) {
+    let {domain} = jamConfig;
+    if (domain) {
+      let jamConfigUrls: Partial<typeof staticConfig.urls> = jamConfig.urls ?? {
+        turnCredentials: staticConfig.urls.turnCredentials,
+      };
+      jamConfigUrls.pantry =
+        jamConfigUrls.pantry ?? `https://${domain}/_/pantry`;
+      jamConfigUrls.stun = jamConfigUrls.stun ?? `stun:stun.${domain}:3478`;
+      jamConfigUrls.turn = jamConfigUrls.turn ?? `turn:turn.${domain}:3478`;
+      jamConfig.urls = jamConfigUrls as typeof staticConfig.urls;
+      delete jamConfig.domain;
+    }
+    set(staticConfig, jamConfig);
+  }
   if (cachedRooms) {
     for (let roomId in cachedRooms) {
       populateApiCache(`/rooms/${roomId}`, cachedRooms[roomId]);

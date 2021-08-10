@@ -34,6 +34,12 @@ type RoomType = {
   color?: string;
   logoURI?: string;
 };
+type PeerState = {
+  inRoom: boolean;
+  micMuted: boolean;
+  leftStage: boolean;
+  isRecording: boolean;
+};
 
 const defaultState = {
   myIdentity: null as IdentityType | null,
@@ -50,6 +56,14 @@ const defaultState = {
   otherDeviceInRoom: false,
 
   swarm: null,
+  peers: [] as string[],
+  peerState: {} as Record<string, PeerState | undefined>,
+  myPeerState: {
+    inRoom: false,
+    micMuted: false,
+    leftStage: false,
+    isRecording: false,
+  },
 
   reactions: {},
   handRaised: false,

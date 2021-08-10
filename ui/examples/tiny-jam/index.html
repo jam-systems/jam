@@ -18,18 +18,10 @@
       window.jamConfig = {urls: {}, development: true};
     </script> -->
     <script type="module">
-      import {
-        createJam,
-        on,
-      } from 'https://cdn.jsdelivr.net/npm/jam-core/dist/bundle.js';
+      import {createJam} from 'https://cdn.jsdelivr.net/npm/jam-core/dist/bundle.js';
 
       const jamConfig = {
-        urls: {
-          pantry: `https://jam.systems/_/pantry`,
-          stun: `stun:stun.jam.systems:3478`,
-          turn: `turn:turn.jam.systems:3478`,
-          turnCredentials: {username: 'test', credential: 'yieChoi0PeoKo8ni'},
-        },
+        domain: 'jam.systems',
         development: false,
       };
 
@@ -80,18 +72,20 @@
         // console.log('update', key, value);
         renderUI(state);
       });
-      on(state.swarm, (key, value) => {
-        renderUI(state);
-      });
 
-      function renderUI({roomId, speaking, myId, inRoom, swarm, iAmSpeaker}) {
+      function renderUI({
+        roomId,
+        speaking,
+        myId,
+        inRoom,
+        peers,
+        peerState,
+        iAmSpeaker,
+      }) {
         let speakingText = iAmSpeaker ? 'Speaking' : 'Not speaking';
         let speakingStyle = speaking.has(myId) ? 'color: green;' : '';
 
-        let {peers, peerState} = swarm;
-        let nJoinedPeers = Object.keys(peers).filter(
-          id => peerState[id]?.inRoom
-        ).length;
+        let nJoinedPeers = peers.filter(id => peerState[id]?.inRoom).length;
 
         button.disabled = !(potentialRoomId?.length > 3);
         button.innerText = inRoom ? 'Leave' : 'Join';

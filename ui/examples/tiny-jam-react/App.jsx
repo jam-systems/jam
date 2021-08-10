@@ -3,13 +3,9 @@ import {render} from 'react-dom';
 import {JamProvider, useJam, use} from 'jam-core-react';
 
 const jamConfig = {
-  urls: {
-    pantry: `https://beta.jam.systems/_/pantry`,
-    stun: `stun:stun.beta.jam.systems:3478`,
-    turn: `turn:turn.beta.jam.systems:3478`,
-    turnCredentials: {username: 'test', credential: 'yieChoi0PeoKo8ni'},
-  },
-  development: false,
+  domain: 'beta.jam.systems',
+  development: true,
+  sfu: true,
 };
 
 render(
@@ -21,19 +17,27 @@ render(
 
 function App() {
   const [state, {createRoom, setProps, enterRoom, leaveRoom}] = useJam();
-  let [roomId, speaking, myId, inRoom, iAmSpeaker] = use(state, [
+  let [
+    roomId,
+    speaking,
+    myId,
+    inRoom,
+    iAmSpeaker,
+    peers,
+    peerState,
+  ] = use(state, [
     'roomId',
     'speaking',
     'myId',
     'inRoom',
     'iAmSpeaker',
+    'peers',
+    'peerState',
   ]);
-  let [peers, peerState] = use(state.swarm, ['peers', 'peerState']);
 
   let hash = location.hash.slice(1) || null;
   let [potentialRoomId, setPotentialRoomId] = useState(hash);
-  let nJoinedPeers = Object.keys(peers).filter(id => peerState[id]?.inRoom)
-    .length;
+  let nJoinedPeers = peers.filter(id => peerState[id]?.inRoom).length;
 
   function submit(e) {
     setProps({userInteracted: true});
