@@ -20,13 +20,13 @@ export default function Speakers() {
     peerState,
     myPeerState,
     myIdentity,
-    myId,
   }) {
     let leftStagePeers =
       leftStageMap.get(roomId) ??
       leftStageMap.set(roomId, new Set()).get(roomId);
 
     let {speakers, stageOnly} = room;
+    let myId = myIdentity.publicKey;
 
     // did I leave stage? (from localStorage / gets overridden when we are put back on stage while in the room)
     let [isLeaveStage] = useAction(actions.LEAVE_STAGE);

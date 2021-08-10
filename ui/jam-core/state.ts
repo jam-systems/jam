@@ -6,6 +6,7 @@ const defaultProps = {
   roomId: null as string | null,
   userInteracted: false,
   micMuted: false,
+  handRaised: false,
   autoJoin: false,
   hasMediasoup: false,
   customStream: null,
@@ -33,6 +34,12 @@ type RoomType = {
   color?: string;
   logoURI?: string;
 };
+type PeerState = {
+  inRoom: boolean;
+  micMuted: boolean;
+  leftStage: boolean;
+  isRecording: boolean;
+};
 
 const defaultState = {
   myIdentity: null as IdentityType | null,
@@ -41,12 +48,22 @@ const defaultState = {
   roomId: ((window as any).existingRoomId as string | null) ?? null,
   inRoom: null as string | null, // === roomId but only if entered
   room: {name: '', description: '', speakers: [], moderators: []} as RoomType,
+  hasRoom: false,
+  isRoomLoading: false,
   iAmSpeaker: false,
   iAmModerator: false,
   identities: {},
   otherDeviceInRoom: false,
 
   swarm: null,
+  peers: [] as string[],
+  peerState: {} as Record<string, PeerState | undefined>,
+  myPeerState: {
+    inRoom: false,
+    micMuted: false,
+    leftStage: false,
+    isRecording: false,
+  },
 
   reactions: {},
   handRaised: false,

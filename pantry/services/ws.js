@@ -9,10 +9,10 @@ module.exports = {
   broadcast,
   sendRequest,
   sendDirect,
-  onMessage,
-  offMessage,
-  onAddPeer,
-  onRemovePeer,
+  // onMessage,
+  // offMessage,
+  // onAddPeer,
+  // onRemovePeer,
 };
 
 // pub sub websocket
@@ -38,6 +38,32 @@ async function sendRequest(roomId, peerId, topic, message) {
   return promise;
 }
 
+// allows forward-server to create an equivalent sendDirect / sendRequest interface
+function handleMessageFromServer(serverConnection, msg) {
+  let {t: topic, d: data, r: requestId, ro: roomId, p: receiverId} = msg;
+  let connection = getConnections(roomId).find(c => c.peerId === receiverId);
+  if (connection === undefined) {
+    console.error(
+      "Peer is not connected, can't forward message to him",
+      roomId,
+      receiverId
+    );
+    return;
+  }
+  if (topic === 'response') {
+    sendMessage(connection, {t: 'response', d: data, r: requestId});
+  } else if (requestId === undefined) {
+    sendMessage(connection, {t: 'server', d: {t: topic, d: data}});
+  } else {
+    newForwardRequest(serverConnection, requestId);
+    sendMessage(connection, {
+      t: 'server',
+      d: {t: topic, d: data},
+      r: requestId,
+    });
+  }
+}
+
 async function handleMessage(connection, roomId, msg) {
   // TODO: allow unsubscribe
   let {s: subscribeTopics, t: topic, d: data} = msg;
@@ -58,7 +84,13 @@ async function handleMessage(connection, roomId, msg) {
     }
     case 'mediasoup': {
       let {r: requestId} = msg;
-      handleMessageToServer(connection, roomId, topic, data, requestId);
+      forwardMessage(topic, {
+        t: topic,
+        d: data,
+        ro: roomId,
+        r: requestId,
+        p: senderId,
+      });
       break;
     }
     // messages where sender decides who gets it
@@ -92,6 +124,10 @@ let nConnections = 0;
 
 function handleConnection(ws, req) {
   let {roomId, peerId, subs} = req;
+  if (roomId === '~forward') {
+    handleForwardingConnection(ws, req);
+    return;
+  }
   console.log('ws open', roomId, peerId, subs);
 
   const connection = {ws, peerId};
@@ -101,6 +137,7 @@ function handleConnection(ws, req) {
 
   // inform every participant about new peer connection
   publish(roomId, 'add-peer', {t: 'add-peer', d: peerId});
+  publishToServers({t: 'add-peer', d: peerId, ro: roomId});
 
   // auto subscribe to updates about connected peers
   subscribe(connection, roomId, reservedTopics);
@@ -122,9 +159,32 @@ function handleConnection(ws, req) {
     unsubscribeAll(connection);
 
     publish(roomId, 'remove-peer', {t: 'remove-peer', d: peerId});
+    publishToServers({t: 'remove-peer', d: peerId, ro: roomId});
     emitEvent('removePeer', roomId, peerId);
 
     // console.log('debug', roomPeerIds, subscriptions);
+  });
+
+  ws.on('error', error => {
+    console.log('ws error', error);
+  });
+}
+
+function handleForwardingConnection(ws, req) {
+  let {peerId: serverId, subs: topics} = req;
+  console.log('ws start forwarding', serverId, topics);
+
+  const connection = {ws, serverId};
+
+  addForwardServer(connection, topics);
+
+  ws.on('message', jsonMsg => {
+    let msg = parseMessage(jsonMsg);
+    if (msg !== undefined) handleMessageFromServer(connection, msg);
+  });
+
+  ws.on('close', () => {
+    removeForwardServer(connection);
   });
 
   ws.on('error', error => {
@@ -148,11 +208,18 @@ function addWebsocket(server) {
     let params = querystring.parse(query);
     // console.log(path, params);
     let {id: peerId, subs, token} = params;
+
+    // this is for forwarding messages to other containers
+    // TODO authenticate
+    let internal = false;
+    if (roomId === '~forward') {
+      internal = true;
+    }
+
     let publicKey = peerId?.split(';')[0];
     if (
       peerId === undefined ||
-      roomId === undefined ||
-      !ssrVerifyToken(token, publicKey)
+      ((roomId === undefined || !ssrVerifyToken(token, publicKey)) && !internal)
     ) {
       console.log('ws rejected!', req.url, 'room', roomId, 'peer', peerId);
       socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
@@ -231,6 +298,7 @@ function unsubscribeAll(connection) {
 }
 
 // server side subscriptions
+// CURRENTLY UNUSED, replaced by server side forwarding via ws
 
 const serverSubscriptions = new Map(); // topic => listener(roomId, peerId, data, accept)
 const serverSideEvents = {
@@ -279,6 +347,41 @@ function emitEvent(event, ...args) {
   }
 }
 
+// server side forwarding
+
+const forwardServers = new Set(); // Set(connection)
+const forwardServerTopics = new Map(); // topic => connection
+
+function addForwardServer(connection, topics) {
+  forwardServers.add(connection);
+  for (let topic of topics) {
+    forwardServerTopics.set(topic, connection);
+  }
+}
+
+function removeForwardServer(connection) {
+  forwardServers.delete(connection);
+  for (let entry of forwardServerTopics) {
+    let [topic, connection_] = entry;
+    if (connection_ === connection) {
+      forwardServerTopics.delete(topic);
+    }
+  }
+}
+
+function forwardMessage(serverTopic, msg) {
+  let connection = forwardServerTopics.get(serverTopic);
+  if (connection !== undefined) {
+    sendMessage(connection, msg);
+  }
+}
+
+function publishToServers(msg) {
+  for (let connection of forwardServers) {
+    sendMessage(connection, msg);
+  }
+}
+
 // request / response
 
 const serverId = Math.random().toString(32).slice(2, 12);
@@ -298,6 +401,17 @@ function newRequest(timeout = REQUEST_TIMEOUT) {
       reject(new Error('request timeout'));
     }, timeout);
   });
+  requests.set(requestId, request);
+  return request;
+}
+
+function newForwardRequest(connection, requestId) {
+  const request = {
+    id: requestId,
+    accept(data) {
+      sendMessage(connection, {t: 'response', d: data, r: requestId});
+    },
+  };
   requests.set(requestId, request);
   return request;
 }

@@ -4,13 +4,8 @@ import Mediasoup from './Mediasoup';
 import P2pAudio from './P2pAudio';
 import WebRtcConnections from './WebRtcConnections';
 
-export default function ConnectAudio({
-  swarm,
-  hasMediasoup,
-  roomId,
-  speakers,
-  iAmSpeaker,
-}) {
+export default function ConnectAudio({roomState, swarm, hasMediasoup}) {
+  let {roomId, iAmSpeaker} = roomState;
   let localStream = useRootState('myAudio');
 
   // send & receive audio via SFU / mediasoup
@@ -23,7 +18,7 @@ export default function ConnectAudio({
   });
 
   // connect to subset of peers directly via webRTC
-  declare(WebRtcConnections, {swarm, hasMediasoup, iAmSpeaker, speakers});
+  declare(WebRtcConnections, {roomState, swarm, hasMediasoup});
 
   // send & receive audio via p2p webRTC
   let p2pRemoteStreams = use(P2pAudio, {swarm, iAmSpeaker, localStream});

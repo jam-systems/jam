@@ -10,7 +10,8 @@ import {useMqParser} from '../lib/tailwind-mqp';
 import Container from './Container';
 import Navigation from './Navigation';
 import {userAgent} from '../lib/user-agent';
-import {usePushToTalk, useCtrlCombos, useJamState} from '../jam-core-react';
+import {usePushToTalk, useCtrlCombos} from '../lib/hotkeys';
+import {useJam} from '../jam-core-react';
 
 const inWebView =
   userAgent.browser?.name !== 'JamWebView' &&
@@ -20,7 +21,7 @@ const inWebView =
 
 export default function Room({room, roomId, uxConfig}) {
   // room = {name, description, moderators: [peerId], speakers: [peerId]}
-  const state = useJamState();
+  const [state] = useJam();
   useWakeLock();
   usePushToTalk();
   useCtrlCombos();
@@ -34,6 +35,9 @@ export default function Room({room, roomId, uxConfig}) {
     iModerate,
     myIdentity,
     inRoom,
+    peers,
+    peerState,
+    myPeerState,
   ] = use(state, [
     'reactions',
     'handRaised',
@@ -43,8 +47,6 @@ export default function Room({room, roomId, uxConfig}) {
     'iAmModerator',
     'myIdentity',
     'inRoom',
-  ]);
-  let [peers, peerState, myPeerState] = use(state.swarm, [
     'peers',
     'peerState',
     'myPeerState',
@@ -100,13 +102,12 @@ export default function Room({room, roomId, uxConfig}) {
   }
 
   let myPeerId = myInfo.id;
-  let allPeers = Object.keys(peers ?? {});
   let stagePeers = stageOnly
-    ? allPeers
-    : (speakers ?? []).filter(id => id in peers);
+    ? peers
+    : (speakers ?? []).filter(id => peers.includes(id));
   let audiencePeers = stageOnly
     ? []
-    : allPeers.filter(id => !stagePeers.includes(id));
+    : peers.filter(id => !stagePeers.includes(id));
 
   let {noLeave} = uxConfig;
 

@@ -11,8 +11,9 @@ let onload = domEvent(window, 'load');
 // TODO this is an intermediary component to set up swarm that should be replaced w/ one that
 // properly integrates with swarm (knows connection state, returns remote streams etc)
 
-export default function ConnectRoom({myId, myIdentity, swarm}) {
+export default function ConnectRoom({myIdentity, swarm}) {
   const state = useRootState();
+  let myId = myIdentity.publicKey;
   swarm.config({myPeerId: myId});
 
   let connectedRoomId = null;
@@ -67,7 +68,10 @@ export default function ConnectRoom({myId, myIdentity, swarm}) {
     is(state, {otherDeviceInRoom});
   });
 
-  return function ConnectRoom({roomId, shouldConnect, myId, myIdentity}) {
+  return function ConnectRoom({roomState, myIdentity}) {
+    let myId = myIdentity.publicKey;
+    let {roomId, hasRoom} = roomState;
+    let shouldConnect = hasRoom;
     if (shouldConnect && roomId && connectedRoomId !== roomId) {
       connectedRoomId = roomId;
       if (swarm.room === roomId && swarm.hub) return;

@@ -1,22 +1,23 @@
-const os = require('os');
-const {local} = require('../config');
-const {
+import os from 'os';
+import mediasoup from 'mediasoup';
+import {local} from './config.js';
+import {
   sendRequest,
   onMessage,
   onRemovePeer,
   onAddPeer,
   sendDirect,
-} = require('./ws');
+} from './ws.js';
 
-const hasMediasoup = ['true', '1'].includes(process.env.JAM_SFU);
+export {runMediasoup};
+
+const hasMediasoup = true; //['true', '1'].includes(process.env.JAM_SFU);
 const announcedIp =
   process.env.JAM_SFU_EXTERNAL_IP || (local ? localIp() : null);
 
 const workers = [];
 const rooms = new Map();
 let workerIndex = 0;
-
-module.exports = {runMediasoup};
 
 // rooms = Map(roomId => room)
 // room = {id: roomId, router, peers: Map(peerId => peer)};
@@ -32,15 +33,7 @@ If you do not wish to use mediasoup, make sure the JAM_SFU environment variable 
     );
   }
 
-  try {
-    const mediasoup = require('mediasoup');
-    runMediasoupWorkers(mediasoup);
-  } catch (err) {
-    throw Error(
-      `Could not import mediasoup. Probably, optional npm dependencies were not installed.
-If you do not wish to use mediasoup, make sure the JAM_SFU environment variable is not set.`
-    );
-  }
+  runMediasoupWorkers();
 
   onAddPeer(async (roomId, peerId) => {
     let room = await getOrCreateRoom(roomId);
@@ -336,7 +329,7 @@ function getMediasoupWorker() {
   return worker;
 }
 
-async function runMediasoupWorkers(mediasoup) {
+async function runMediasoupWorkers() {
   const {numWorkers} = config.mediasoup;
   console.log(`running ${numWorkers} mediasoup Workers...`);
 

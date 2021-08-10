@@ -1,5 +1,4 @@
-FROM node:14-alpine
-RUN apk add --no-cache linux-headers make python g++
+FROM node:alpine
 ENV JAM_CONFIG_DIR=/jam-config
 RUN mkdir /pantry
 WORKDIR /pantry

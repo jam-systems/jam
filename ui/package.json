@@ -2,17 +2,20 @@
   "name": "jam",
   "version": "0.1.0",
   "scripts": {
-    "start": "DEVELOPMENT=1 server/bin/www & tailwindcss -o public/css/tailwind.css --watch & esbuild --splitting --bundle ./App.jsx ./bundling/*.js --outdir=./public/js --format=esm --target=es6 --define:process.env.NODE_ENV='\"development\"' --watch",
+    "init-start": "esbuild --splitting --bundle ./App.jsx ./bundling/*.js --outdir=./public/js --format=esm --target=es6 --define:process.env.NODE_ENV='\"development\"'",
+    "start": "yarn run init-start && JAM_SFU=1 DEVELOPMENT=1 server/bin/www & tailwindcss -o public/css/tailwind.css --watch & esbuild --splitting --bundle ./App.jsx ./bundling/*.js --outdir=./public/js --format=esm --target=es6 --define:process.env.NODE_ENV='\"development\"' --watch",
     "start-production": "server/bin/www & tailwindcss -o public/css/tailwind.css --watch & esbuild --splitting --bundle ./App.jsx ./bundling/*.js --outdir=./public/js --format=esm --target=es6 --define:process.env.NODE_ENV='\"production\"' --minify --watch",
     "build": "tailwindcss --minify -o public/css/tailwind.css && esbuild --splitting --bundle ./App.jsx ./bundling/*.js --outdir=./public/js --minify --format=esm --target=es6 --define:process.env.NODE_ENV='\"production\"'",
     "pantry": "LOCAL=1 PORT=3001 JAM_SFU=1 node ../pantry/bin/www",
-    "debug": "JAM_SFU=1 JAM_PANTRY_URL=http://localhost:3001 yarn start",
+    "debug": "JAM_PANTRY_URL=http://localhost:3001 yarn start",
     "start-example": "serve -s ./jam-react/example & esbuild --bundle ./jam-react/example/App.jsx --outfile=./jam-react/example/bundle.js --format=esm --define:process.env.NODE_ENV='\"development\"' --watch --loader:.css=text"
   },
   "private": true,
   "workspaces": [
     "packages/jam-core",
-    "examples/minimal-jam-bundled"
+    "packages/jam-core-react",
+    "examples/minimal-jam-bundled",
+    "examples/tiny-jam-react"
   ],
   "devDependencies": {
     "@types/react": "^17.0.11",
@@ -34,7 +37,7 @@
     "@vvo/tzdb": "^6.5.1",
     "compact-base64": "^2.1.2",
     "mediasoup-client": "^3.6.31",
-    "minimal-state": "^5.5.0",
+    "minimal-state": "^5.6.0",
     "qs": "^6.9.6",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
@@ -45,6 +48,6 @@
     "spark-md5": "^3.0.1",
     "tweetnacl": "^1.0.3",
     "ua-parser-js": "^0.7.24",
-    "use-minimal-state": "^3.4.1"
+    "use-minimal-state": "^3.5.0"
   }
 }

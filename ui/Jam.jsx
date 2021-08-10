@@ -1,7 +1,6 @@
 import React, {useEffect, useMemo} from 'react';
 import Modals from './views/Modal';
 import {mergeClasses} from './lib/util';
-import {debug} from './lib/state-utils';
 import {useProvideWidth, WidthContext} from './lib/tailwind-mqp';
 import {use} from 'use-minimal-state';
 import Start from './views/Start';
@@ -12,6 +11,9 @@ import {ShowAudioPlayerToast} from './views/AudioPlayerToast';
 import {JamProvider, useJam} from './jam-core-react';
 import {createJam} from './jam-core';
 import {ShowInteractionModal} from './views/InteractionModal';
+import {parseUrlConfig} from './lib/url-utils';
+
+let urlConfig = parseUrlConfig(location.search, location.hash);
 
 const [state, api] = createJam({
   jamConfig: window.jamConfig,
@@ -19,6 +21,7 @@ const [state, api] = createJam({
   cachedRooms: window.existingRoomInfo && {
     [window.existingRoomId]: window.existingRoomInfo,
   },
+  debug: !!urlConfig.debug,
 });
 
 declareStateRoot(ShowModals, null, {state});
@@ -76,14 +79,6 @@ function JamUI({style, className, route = null, dynamicConfig = {}, ...props}) {
     }
     setProps('roomId', roomId);
   }, [roomId, dynamicConfig.ux, setProps]);
-
-  // toggle debugging
-  useEffect(() => {
-    if (dynamicConfig.debug) {
-      window.DEBUG = true;
-      debug(state.swarm);
-    }
-  }, [dynamicConfig.debug, state]);
 
   // global styling
   // TODO: the color should depend on the loading state of GET /room, to not flash orange before being in the room

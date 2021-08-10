@@ -5,7 +5,7 @@ import EditIdentity from './EditIdentity';
 import {useMqParser} from '../lib/tailwind-mqp';
 import {ButtonContainer, SecondaryButton} from './Button';
 import StreamingModal from './StreamingModal';
-import {useJam, useIdentityAdminStatus} from '../jam-core-react';
+import {useJam, useApiQuery} from '../jam-core-react';
 
 export default function EditRole({
   peerId,
@@ -25,8 +25,8 @@ export default function EditRole({
   } = api;
   let [myId, roomId] = use(state, ['myId', 'roomId']);
   let mqp = useMqParser();
-  let [myAdminStatus] = useIdentityAdminStatus(myId);
-  let [peerAdminStatus] = useIdentityAdminStatus(peerId);
+  let [myAdminStatus] = useApiQuery(`/admin/${myId}`, {fetchOnMount: true});
+  let [peerAdminStatus] = useApiQuery(`/admin/${peerId}`, {fetchOnMount: true});
 
   let isSpeaker = stageOnly || speakers.includes(peerId);
   let isModerator = moderators.includes(peerId);

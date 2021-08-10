@@ -8,12 +8,13 @@ import Speakers from './room/Speakers';
 export {RoomState, addModerator, removeModerator, emptyRoom};
 export {addSpeaker, removeSpeaker} from './room/Speakers';
 
-function RoomState({roomId, myId, myIdentity, peerState, myPeerState}) {
+function RoomState({roomId, myIdentity, peerState, myPeerState}) {
   const path = roomId && `${apiUrl()}/rooms/${roomId}`;
-  let {data} = use(GetRequest, {path});
+  let {data, isLoading} = use(GetRequest, {path});
   let hasRoom = !!data;
   let room = data ?? emptyRoom;
   let {moderators, stageOnly} = room;
+  let myId = myIdentity.publicKey;
 
   let speakers = use(Speakers, {
     roomId,
@@ -22,7 +23,6 @@ function RoomState({roomId, myId, myIdentity, peerState, myPeerState}) {
     peerState,
     myPeerState,
     myIdentity,
-    myId,
   });
 
   room = useStableObject({...room, speakers});
@@ -30,7 +30,14 @@ function RoomState({roomId, myId, myIdentity, peerState, myPeerState}) {
   let iAmModerator = moderators.includes(myId);
   let iAmSpeaker = !!stageOnly || speakers.includes(myId);
 
-  return {room, hasRoom, iAmSpeaker, iAmModerator};
+  return {
+    roomId,
+    room,
+    hasRoom,
+    isRoomLoading: isLoading,
+    iAmSpeaker,
+    iAmModerator,
+  };
 }
 
 const emptyRoom = {

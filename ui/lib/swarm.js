@@ -80,6 +80,7 @@ function Swarm(initialConfig) {
       type: 'shared-state',
       data: {state: swarm.myPeerState, time},
     });
+    update(swarm, 'myPeerState');
   });
 
   // TODO when websocket pinging to detect dead connections is implemented,

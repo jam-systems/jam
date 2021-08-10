@@ -21,7 +21,7 @@ migrateDisplayName(identities);
 
 function Identity() {
   // we don't want to block the first React render with signing our avatar image
-  // maybe there's something cleaner than this 100ms heuristic
+  // maybe there's something cleaner than this heuristic
   onload.then(() => {
     setTimeout(() => {
       postInitialIdentity(identities._default);
@@ -39,8 +39,7 @@ function Identity() {
     }
 
     let myIdentity = roomIdentity ?? defaultIdentity;
-    let myId = myIdentity.publicKey;
-    return {myId, myIdentity};
+    return myIdentity;
   };
 }
 

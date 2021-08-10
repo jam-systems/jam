@@ -24,7 +24,6 @@ const urls = {
     credential: process.env.JAM_TURN_SERVER_CREDENTIAL || 'yieChoi0PeoKo8ni',
   },
 };
-console.log(urls);
 
 const preloadScript = getPreloadScript();
 
@@ -45,6 +44,7 @@ const jamConfig = {
   development: !!process.env.DEVELOPMENT,
   sfu: ['true', '1'].includes(process.env.JAM_SFU),
 };
+console.log(jamConfig);
 app.use('/config.json', (_, res) => {
   res.json(jamConfig);
 });

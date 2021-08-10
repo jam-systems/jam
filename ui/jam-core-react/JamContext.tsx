@@ -1,13 +1,13 @@
 import {use} from 'use-minimal-state';
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useMemo,
-  useEffect,
-} from 'react';
-import {ActionType, StateType, defaultState, Props} from '../jam-core/state';
-import {createApi, createJam} from '../jam-core';
+import React, {createContext, useContext, useMemo} from 'react';
+import {
+  createApi,
+  createJam,
+  ActionType,
+  StateType,
+  defaultState,
+  Props,
+} from '../jam-core';
 
 export {JamProvider, useJamState, useJam};
 
@@ -63,5 +63,5 @@ function useJamState<
 function useJamState(): T;
 function useJamState(keys?: any) {
   let [state] = useContext(JamContext);
-  return (keys ? use(state, keys) : state) as never;
+  return use(state, keys) as never;
 }

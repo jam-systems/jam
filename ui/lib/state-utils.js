@@ -2,23 +2,7 @@ import {on} from 'minimal-state';
 import log from './causal-log';
 import {useState} from './state-tree';
 
-export {until, debug, useDidChange, useDidEverChange};
-
-async function until(state, key, condition) {
-  let value = state[key];
-  if (condition ? condition(value) : value) {
-    return value;
-  } else {
-    return new Promise(resolve => {
-      let off = on(state, key, value => {
-        if (condition ? condition(value) : value) {
-          off();
-          resolve(value);
-        }
-      });
-    });
-  }
-}
+export {debug, useDidChange, useDidEverChange};
 
 function useDidChange(value, initial) {
   let [oldValue, setValue] = useState(initial);

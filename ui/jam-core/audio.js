@@ -40,11 +40,10 @@ function AudioState({swarm}) {
     iAmSpeaker,
     userInteracted,
     micMuted,
+    handRaised,
     remoteStreams,
     customStream,
   }) {
-    let [handRaised, audioFile] = useRootState(['handRaised', 'audioFile']);
-
     if (audioContext === null && AudioContext) {
       let shouldHaveAudioContext =
         userInteracted || (inRoom && (iAmSpeaker || remoteStreams.length > 0));
@@ -76,10 +75,7 @@ function AudioState({swarm}) {
 
     let shouldHaveMic = !!(inRoom && (iAmSpeaker || handRaised));
     let {micStream, hasRequestedOnce} = use(Microphone, {shouldHaveMic});
-    let {audioFileStream, audioFileElement} = use(AudioFile, {
-      audioFile,
-      audioContext,
-    });
+    let {audioFileStream, audioFileElement} = use(AudioFile, {audioContext});
 
     let myAudio = customStream ?? audioFileStream ?? micStream;
     declare(Muted, {myAudio, micMuted});

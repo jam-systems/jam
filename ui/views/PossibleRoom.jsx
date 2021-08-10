@@ -1,7 +1,7 @@
-import React, {createElement, useMemo} from 'react';
+import React, {createElement, useMemo, useState, useEffect} from 'react';
 import Room from './Room';
 import {importRoomIdentity} from '../jam-core';
-import {useCreateRoom, useJam, useRoomLoading} from '../jam-core-react';
+import {useJam} from '../jam-core-react';
 import StartFromURL from './StartFromURL';
 import {use} from 'use-minimal-state';
 
@@ -15,10 +15,11 @@ export default function PossibleRoom({
   uxConfig,
 }) {
   const [state, {enterRoom}] = useJam();
-
-  // fetch room
-  let [loadingRoom, isLoading] = useRoomLoading(roomId);
-  let room = use(state, 'room');
+  let [room, hasRoom, isLoading] = use(state, [
+    'room',
+    'hasRoom',
+    'isRoomLoading',
+  ]);
 
   // import room identity
   // this has to be done BEFORE creating new room so that we can be moderator
@@ -29,7 +30,7 @@ export default function PossibleRoom({
   }, [roomId, roomIdentity, roomIdentityKeys]);
 
   // if room does not exist && autoCreate is on, try to create new one
-  let shouldCreate = !loadingRoom && autoCreate && !isLoading;
+  let shouldCreate = !hasRoom && autoCreate && !isLoading;
   let [autoCreateLoading, autoCreateError] = useCreateRoom({
     roomId,
     newRoom,
@@ -38,7 +39,7 @@ export default function PossibleRoom({
   });
 
   if (isLoading) return null;
-  if (loadingRoom) return <Room key={roomId} {...{room, roomId, uxConfig}} />;
+  if (hasRoom) return <Room key={roomId} {...{room, roomId, uxConfig}} />;
   if (shouldCreate && autoCreateLoading) return null;
 
   if (roomId.length < 4 || (shouldCreate && autoCreateError)) {
@@ -53,4 +54,21 @@ export default function PossibleRoom({
 // TODO
 function Error() {
   return <div>An error ocurred</div>;
+}
+
+function useCreateRoom({roomId, shouldCreate, newRoom, onSuccess}) {
+  const [, {createRoom}] = useJam();
+  let [isError, setError] = useState(false);
+  let [isLoading, setLoading] = useState(true);
+  useEffect(() => {
+    if (roomId && shouldCreate) {
+      (async () => {
+        let ok = await createRoom(roomId, newRoom);
+        setLoading(false);
+        if (ok) onSuccess?.();
+        else setError(true);
+      })();
+    }
+  }, [roomId, shouldCreate]);
+  return [isLoading, isError];
 }
