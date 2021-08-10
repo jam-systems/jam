@@ -1,11 +1,16 @@
 {
   "name": "jam-core",
   "description": "Jam SDK for creating custom audio spaces like Clubhouse / Twitter Spaces, made with WebRTC",
-  "version": "0.3.10",
+  "version": "0.3.11",
   "main": "dist/index.js",
   "license": "AGPL-3.0",
+  "type": "module",
+  "exports": {
+    "import": "./dist/index.js"
+  },
+  "proxy": "../../jam-core.ts",
   "scripts": {
-    "build": "tsc --emitDeclarationOnly && mv dist/jam-core.d.ts dist/index.d.ts && esbuild --bundle ../../jam-core.ts --outfile=./dist/index.js --format=esm --target=es2020 --external:compact-base64 --external:minimal-state --external:simple-signed-records-engine --external:tweetnacl --external:ua-parser-js --external:mediasoup-client",
+    "build": "tsc --emitDeclarationOnly && mv dist/jam-core.d.ts dist/index.d.ts && node ../../buildProxyPackage.mjs",
     "bundle": "esbuild --bundle ../../jam-core.ts --minify --outfile=./dist/bundle.js --format=esm --target=es6",
     "size": "cat dist/bundle.js | gzip | wc -c",
     "prepublishOnly": "yarn build && yarn bundle"

@@ -2,7 +2,7 @@ import {useCallback} from 'react';
 import {use} from '../lib/state-tree-react';
 import {useJam} from './JamContext';
 import {signedToken} from '../lib/identity-utils';
-import {apiUrl} from '../jam-core/backend';
+import {apiUrl} from '../jam-core';
 import GetRequest from '../lib/GetRequest';
 
 export {useApiQuery};

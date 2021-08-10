@@ -7,7 +7,7 @@ import {
   StateType,
   defaultState,
   Props,
-} from 'jam-core';
+} from '../jam-core';
 
 export {JamProvider, useJamState, useJam};
 

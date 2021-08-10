@@ -20,7 +20,12 @@ import {
   removeModerator,
 } from './jam-core/room';
 import {staticConfig} from './jam-core/config';
-import {populateApiCache, createRoom, updateRoom} from './jam-core/backend';
+import {
+  populateApiCache,
+  createRoom,
+  updateRoom,
+  apiUrl,
+} from './jam-core/backend';
 import {addAdmin, removeAdmin} from './jam-core/admin';
 import AppState from './jam-core/AppState';
 
@@ -30,8 +35,16 @@ export {createJam, createApi};
 export {is, set, on, update, until};
 export {importRoomIdentity, importDefaultIdentity} from './jam-core/identity';
 
-// types
-export {StateType, RoomType, IdentityInfo, ActionType, Props, defaultState};
+// types, internal stuff for jam-core-react
+export {
+  StateType,
+  RoomType,
+  IdentityInfo,
+  ActionType,
+  Props,
+  defaultState,
+  apiUrl,
+};
 
 function createApi<T>(
   state: T,
