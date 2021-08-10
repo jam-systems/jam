@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "start": "npx serve . & esbuild --bundle ./App.jsx --outfile=./bundle.js --format=esm --watch",
-    "build": "esbuild --bundle ./App.jsx --outfile=./bundle.js --format=esm"
+    "build": "esbuild --minify --bundle ./App.jsx --outfile=./public/bundle.js --format=esm"
   },
   "dependencies": {
     "jam-core": "^0.3.11",
@@ -14,6 +14,7 @@
     "react-dom": "^17.0.1"
   },
   "devDependencies": {
+    "esbuild": "^0.12.5",
     "serve": "^12.0.0"
   }
 }
