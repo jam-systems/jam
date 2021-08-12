@@ -52,7 +52,7 @@ const defaultState = {
   isRoomLoading: false,
   iAmSpeaker: false,
   iAmModerator: false,
-  identities: {},
+  identities: {} as Record<string, IdentityInfo>,
   otherDeviceInRoom: false,
 
   swarm: null,

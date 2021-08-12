@@ -108,7 +108,8 @@ let {
   room, // = {name, description, speakers, moderators, stageOnly, ...}; various information about the room
   iAmSpeaker, // boolean; is the user a speaker in the room?
 
-  peers, // array of other user's ids which are currently in the same room
+  peers, // array of other users' ids which are currently in the same room
+  identities, // = {peerId: {name, avatar}, peerId2: ...}; identity infos for the other peers
 
   myAudio, // the user's audio stream, can come from his mic or from a streamed file, or be null
   micMuted, // boolean; has the the user muted his mic?
