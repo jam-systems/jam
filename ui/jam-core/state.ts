@@ -45,8 +45,8 @@ const defaultState = {
   myIdentity: null as IdentityType | null,
   myId: null as string | null,
 
-  roomId: ((window as any).existingRoomId as string | null) ?? null,
-  inRoom: null as string | null, // === roomId but only if entered
+  roomId: null as string | null,
+  inRoom: null as string | null, // === roomId if user joined, null otherwise
   room: {name: '', description: '', speakers: [], moderators: []} as RoomType,
   hasRoom: false,
   isRoomLoading: false,

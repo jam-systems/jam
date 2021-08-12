@@ -25,7 +25,7 @@ export default function PossibleRoom({
   // this has to be done BEFORE creating new room so that we can be moderator
   useMemo(() => {
     if (roomIdentity) {
-      importRoomIdentity(roomId, roomIdentity, roomIdentityKeys);
+      importRoomIdentity(roomId, {...roomIdentityKeys, info: roomIdentity});
     }
   }, [roomId, roomIdentity, roomIdentityKeys]);
 
