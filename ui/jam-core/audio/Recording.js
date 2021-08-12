@@ -91,7 +91,7 @@ export default function Recording({swarm}) {
       downloadFileName = undefined;
     }
 
-    return {recordedAudio, isRecording: isSomeoneRecording};
+    return {recordedAudio, isRecording, isSomeoneRecording};
   };
 }
 

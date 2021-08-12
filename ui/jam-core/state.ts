@@ -77,7 +77,8 @@ const defaultState = {
 
   speaking: new Set<string>(),
 
-  isRecording: false,
+  isRecording: false, // am I recording?
+  isSomeoneRecording: false, // is someone in the room recording?
   recordedAudio: null as Blob | null,
 };
 
