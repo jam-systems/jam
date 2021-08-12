@@ -27,11 +27,9 @@ await enterRoom(roomId);
 console.log(state.inRoom === roomId); // true
 ```
 
-Embedding this example [in a HTML page](https://gitlab.com/jam-systems/jam/-/blob/master/ui/examples/minimal-jam/index.html) and running it in two different browsers is actually enough to let two people speak with each other over WebRTC 🎧
+Embedding this example [in a HTML page](https://gitlab.com/jam-systems/jam/-/blob/master/ui/examples/minimal-jam/index.html) and running it in two different browsers is enough to let two people speak with each other over WebRTC 🎧
 
-You can use `jam-core` to build custom UIs and bots that run in a Browser.
-
-Find out more about Jam on our Gitlab: [https://gitlab.com/jam-systems/jam](https://gitlab.com/jam-systems/jam)
+You can use `jam-core` to build custom UIs and bots for Jam that run in a Browser. Find out more about Jam on our Gitlab: [https://gitlab.com/jam-systems/jam](https://gitlab.com/jam-systems/jam)
 
 `jam-core` is compatible with [Jam as a Service](https://jamshelf.com/) where we manage Jam servers for you. This lets you build powerful connected audio apps while only worrying about the UI 🚀
 
@@ -51,7 +49,7 @@ The API essentially consists of a single function, `createJam()`, which returns 
 const [state, api] = createJam(options);
 ```
 
-`state` and `api` together represent a _single user_ in a _single Jam room_ (which can be switched), as in the [official Jam app](https://jam.systems). If this is your use case, you probably need to call `createJam()` exactly once at the beginning. (If you want your page to act as multiple users or be in multiple Jam rooms at the same time, you have to `createJam()` multiple times.)
+`state` and `api` together represent a _single user_ in a _single Jam room_ (which can be switched), as in the [official Jam app](https://jam.systems). If this is your use case, you probably only need to call `createJam()` once, at the beginning. If you want your page to act as multiple users, or be in multiple Jam rooms at the same time, call `createJam()` multiple times.
 
 The `options` parameter is mainly a way of specifying the domain where Jam is hosted on, and whether this domain has an SFU (server-side streaming) enabled:
 
