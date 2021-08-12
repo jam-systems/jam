@@ -42,7 +42,7 @@ function App() {
 }
 ```
 
-The `state` and `api` objects are the same as the ones returned by `createJam()` in `jam-core`. See the [jam-core docs](https://gitlab.com/jam-systems/jam/-/tree/master/ui/packages/jam-core) for extensive documentation and examples of how to use them.
+The `state` and `api` objects are the same as returned by `createJam()` in `jam-core`. See the [jam-core documentation](https://gitlab.com/jam-systems/jam/-/tree/master/ui/packages/jam-core) for extensive documentation and examples of how to use them.
 
 The additional steps to integrate with React are simple:
 

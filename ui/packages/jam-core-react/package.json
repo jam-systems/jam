@@ -20,7 +20,7 @@
   ],
   "dependencies": {
     "compact-base64": "^2.1.2",
-    "jam-core": "0.3.11",
+    "jam-core": "0.3.12",
     "minimal-state": "^5.6.0",
     "simple-signed-records-engine": "0.1.2",
     "use-minimal-state": "^3.5.0"
