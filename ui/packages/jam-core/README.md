@@ -29,7 +29,7 @@ console.log(state.inRoom === roomId); // true
 
 Embedding this example [in a HTML page](https://gitlab.com/jam-systems/jam/-/blob/master/ui/examples/minimal-jam/index.html) and running it in two different browsers is enough to let two people speak with each other over WebRTC 🎧
 
-You can use `jam-core` to build custom UIs and bots for Jam that run in a Browser. Find out more about Jam on our Gitlab: [https://gitlab.com/jam-systems/jam](https://gitlab.com/jam-systems/jam)
+You can use `jam-core` to build custom UIs and bots for Jam that run in a Browser. Find out more about Jam on our Gitlab page: [https://gitlab.com/jam-systems/jam](https://gitlab.com/jam-systems/jam)
 
 `jam-core` is compatible with [Jam as a Service](https://jamshelf.com/) where we manage Jam servers for you. This lets you build powerful connected audio apps while only worrying about the UI 🚀
 
