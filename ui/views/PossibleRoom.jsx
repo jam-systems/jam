@@ -15,11 +15,13 @@ export default function PossibleRoom({
   uxConfig,
 }) {
   const [state, {enterRoom}] = useJam();
-  let [room, hasRoom, isLoading] = use(state, [
+  let [room, hasRoom, isLoading, _roomId] = use(state, [
     'room',
     'hasRoom',
     'isRoomLoading',
+    'roomId',
   ]);
+  isLoading = isLoading || _roomId === null;
 
   // import room identity
   // this has to be done BEFORE creating new room so that we can be moderator
