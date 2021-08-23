@@ -51,6 +51,7 @@ async function main() {
     outfile: './dist/index.js',
     bundle: true,
     format: 'esm',
+    target: 'es2019',
     plugins: [makeAllPackagesExternalPlugin, makeYarnWorkspacesExternalPlugin],
   });
 
