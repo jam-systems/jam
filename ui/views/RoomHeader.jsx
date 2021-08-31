@@ -12,7 +12,7 @@ export default function RoomHeader({
   buttonText,
   editRoom,
 }) {
-  let isRecording = useJamState('isRecording');
+  let isRecording = useJamState('isSomeoneRecording');
   return (
     <div className="flex room-header">
       {logoURI && (
@@ -51,12 +51,21 @@ export default function RoomHeader({
       </div>
       <div className="flex-none flex">
         {isRecording && (
-          <div role="button" aria-label="Room settings" className="flex items-center w-8 h-6" style={{color: '#ff0000'}}>
+          <div
+            role="button"
+            aria-label="Room settings"
+            className="flex items-center w-8 h-6"
+            style={{color: '#ff0000'}}
+          >
             <MicOnSvg className="h-5" stroke="#ffffff" />
           </div>
         )}
         {editRoom && (
-          <div aria-label="Recording" className="w-8 h-6 cursor-pointer" onClick={editRoom}>
+          <div
+            aria-label="Recording"
+            className="w-8 h-6 cursor-pointer"
+            onClick={editRoom}
+          >
             <EditSvg />
           </div>
         )}

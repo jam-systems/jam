@@ -45,14 +45,14 @@ const defaultState = {
   myIdentity: null as IdentityType | null,
   myId: null as string | null,
 
-  roomId: ((window as any).existingRoomId as string | null) ?? null,
-  inRoom: null as string | null, // === roomId but only if entered
+  roomId: null as string | null,
+  inRoom: null as string | null, // === roomId if user joined, null otherwise
   room: {name: '', description: '', speakers: [], moderators: []} as RoomType,
   hasRoom: false,
   isRoomLoading: false,
   iAmSpeaker: false,
   iAmModerator: false,
-  identities: {},
+  identities: {} as Record<string, IdentityInfo>,
   otherDeviceInRoom: false,
 
   swarm: null,
@@ -77,7 +77,8 @@ const defaultState = {
 
   speaking: new Set<string>(),
 
-  isRecording: false,
+  isRecording: false, // am I recording?
+  isSomeoneRecording: false, // is someone in the room recording?
   recordedAudio: null as Blob | null,
 };
 

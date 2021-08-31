@@ -31,8 +31,8 @@ import AppState from './jam-core/AppState';
 
 /* THE JAM API */
 
-export {createJam, createApi};
-export {is, set, on, update, until};
+export {createJam}; // main API
+export {is, set, on, update, until}; // helper functions
 export {importRoomIdentity, importDefaultIdentity} from './jam-core/identity';
 
 // types, internal stuff for jam-core-react
@@ -43,6 +43,7 @@ export {
   ActionType,
   Props,
   defaultState,
+  createApi,
   apiUrl,
 };
 
@@ -167,6 +168,7 @@ function createJam(
     if (debug_) debug(state.swarm);
     (window as any).swarm = state.swarm;
     (window as any).state = state;
+    (window as any).api = api;
     debug(state);
   }
   return [state, api] as const;

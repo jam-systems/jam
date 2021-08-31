@@ -70,7 +70,15 @@ function setCurrentIdentity({roomId}, valueOrFunction) {
 function importDefaultIdentity(
   identity: Partial<IdentityType> & {seed?: string}
 ) {
+  importRoomIdentity('_default', identity);
+}
+
+function importRoomIdentity(
+  roomId: string,
+  identity: Partial<IdentityType> & {seed?: string}
+) {
   let fullIdentity: IdentityType;
+  let existingIdentity = identities[roomId];
   if (identity.secretKey && identity.publicKey) {
     fullIdentity = {
       publicKey: identity.publicKey,
@@ -84,35 +92,17 @@ function importDefaultIdentity(
     );
   } else if (identity.seed) {
     fullIdentity = createIdentityFromSeed(identity.info, identity.seed);
+  } else if (existingIdentity) {
+    fullIdentity = existingIdentity;
+    fullIdentity.info = {
+      ...existingIdentity.info,
+      ...identity.info,
+      id: existingIdentity.publicKey,
+    };
   } else {
     fullIdentity = createIdentity(identity.info);
   }
-  set(identities, '_default', fullIdentity);
-}
-
-function importRoomIdentity(
-  roomId: string,
-  roomIdentity: IdentityInfo,
-  keys?: {[x: string]: {seed: string} | {secretKey: string} | undefined}
-) {
-  if (identities[roomId]) return;
-  if (roomIdentity) {
-    let identity: IdentityType;
-    let roomKeys = roomIdentity.id ? keys?.[roomIdentity.id] : undefined;
-    if (roomKeys !== undefined) {
-      if ('seed' in roomKeys) {
-        identity = createIdentityFromSeed(roomIdentity, roomKeys.seed);
-      } else {
-        identity = createIdentityFromSecretKey(
-          roomIdentity,
-          roomKeys.secretKey
-        );
-      }
-    } else {
-      identity = createIdentity(roomIdentity);
-    }
-    set(identities, roomId, identity);
-  }
+  set(identities, roomId, fullIdentity);
 }
 
 function createIdentityFromSecretKey(
