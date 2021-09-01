@@ -69,7 +69,7 @@ services:
   pantry-sfu:
     #build: ../pantry-sfu
     image: registry.gitlab.com/jam-systems/jam/pantry-sfu:${CHANNEL}
-    #restart: always
+    restart: always
     network_mode: host
     depends_on: 
       - pantry
