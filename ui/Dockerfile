@@ -15,9 +15,10 @@ WORKDIR /app
 
 COPY public ./public/
 COPY server ./server/
+COPY server-package.json package.json
 COPY --from=builder /public/js ./public/js/
 COPY --from=builder /public/css/tailwind.css ./public/css
-RUN yarn add express ejs node-fetch ical-generator@next
+RUN yarn
 
 CMD node server/bin/www.js
 
