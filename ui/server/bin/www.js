@@ -4,9 +4,10 @@
 /**
  * Module dependencies.
  */
-const app = require('../app');
-const debug = require('debug')('pantry:server');
-const http = require('http');
+import app from '../app.js';
+import createDebug from 'debug';
+import http from 'http';
+const debug = createDebug('pantry:server');
 
 /**
  * Get port from environment and store in Express.
