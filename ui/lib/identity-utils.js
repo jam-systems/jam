@@ -1,5 +1,6 @@
 import base64 from 'compact-base64';
-import ssr from 'simple-signed-records-engine';
+// import ssr from 'simple-signed-records-engine';
+import * as wsj from './watsign-json.js';
 
 export {signedToken, verifyToken, signData, verifyData, decode, encode};
 
@@ -7,28 +8,28 @@ export {signedToken, verifyToken, signData, verifyData, decode, encode};
 
 const MESSAGE_VALIDITY_SECONDS = 300;
 
-function signData(identity, data) {
-  return ssr.sign({
+async function signData(identity, data) {
+  return wsj.signData({
     record: data,
     keypair: keypair(identity),
     validSeconds: MESSAGE_VALIDITY_SECONDS,
   });
 }
 
-function verifyData(record, key) {
-  let verifiedRecord = ssr.data(record);
+async function verifyData(record, key) {
+  let verifiedRecord = await wsj.getVerifiedData(record);
   if (!verifiedRecord) return;
   let {identities, data} = verifiedRecord;
   if (!identities.includes(base64.urlToOriginal(key))) return;
   return data;
 }
 
-function signedToken(identity) {
-  return base64.encodeUrl(JSON.stringify(signData(identity, {})));
+async function signedToken(identity) {
+  return base64.encodeUrl(JSON.stringify(await signData(identity, {})));
 }
 
-function verifyToken(authToken) {
-  return ssr.verify(decode(authToken));
+async function verifyToken(authToken) {
+  return wsj.verifyData(decode(authToken));
 }
 
 function keypair(identity) {

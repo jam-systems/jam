@@ -1,7 +1,7 @@
 import base64 from 'compact-base64';
 import {clear, emit, is, on, until} from 'minimal-state';
 
-export default function signalws({
+export default async function signalws({
   url,
   roomId,
   myPeerId,
@@ -17,7 +17,7 @@ export default function signalws({
   url = url.indexOf('://') === -1 ? 'wss://' + url : url;
   url = url.replace('http', 'ws');
   if (!url.endsWith('/')) url += '/';
-  let token = base64.encodeUrl(JSON.stringify(sign({})));
+  let token = base64.encodeUrl(JSON.stringify(await sign({})));
   let subs = subscriptions.join(',');
   url += `${roomId}?id=${myPeerId};${myConnId}&token=${token}&subs=${subs}`;
 

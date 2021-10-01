@@ -159,7 +159,7 @@ function shareStateWithPeer(swarm, peerId, state) {
 
 // public API ends here
 
-function connect(swarm, room) {
+async function connect(swarm, room) {
   config(swarm, {room});
   if (!swarm.room || !swarm.url) {
     return console.error(
@@ -186,7 +186,7 @@ function connect(swarm, room) {
   swarm.connectState = CONNECTING;
   let {myPeerId, sign, verify} = swarm;
   let myCombinedPeerId = `${myPeerId};${myConnId}`;
-  let hub = signalws({
+  let hub = await signalws({
     roomId: swarm.room,
     url: swarm.url,
     myPeerId,

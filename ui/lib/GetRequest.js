@@ -37,7 +37,7 @@ export default function GetRequest({path, dontFetch, fetchOnMount, getToken}) {
 async function getRequest(path, getToken) {
   setCache(path, {state: 'loading'});
   let headers = {Accept: 'application/json'};
-  if (getToken) headers.Authorization = `Token ${getToken()}`;
+  if (getToken) headers.Authorization = `Token ${await getToken()}`;
 
   let res = await fetch(path, {headers}).catch(console.warn);
   let {state, data, status} = getCache(path);

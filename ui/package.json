@@ -37,6 +37,7 @@
   "dependencies": {
     "@vvo/tzdb": "^6.5.1",
     "compact-base64": "^2.1.2",
+    "fast-base64": "^0.1.6",
     "mediasoup-client": "^3.6.31",
     "minimal-state": "^5.6.0",
     "qs": "^6.9.6",
@@ -49,6 +50,7 @@
     "spark-md5": "^3.0.1",
     "tweetnacl": "^1.0.3",
     "ua-parser-js": "^0.7.24",
-    "use-minimal-state": "^3.5.0"
+    "use-minimal-state": "^3.5.0",
+    "watsign": "^0.1.2"
   }
 }

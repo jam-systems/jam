@@ -36,7 +36,9 @@ async function authenticatedApiRequest({myIdentity}, method, path, payload) {
       Accept: 'application/json',
       'Content-Type': 'application/json',
     },
-    body: payload ? JSON.stringify(signData(myIdentity, payload)) : undefined,
+    body: payload
+      ? JSON.stringify(await signData(myIdentity, payload))
+      : undefined,
   });
   return res.ok;
 }
@@ -59,7 +61,7 @@ async function authedGet({myIdentity}, path) {
     method: 'GET',
     headers: {
       Accept: 'application/json',
-      Authorization: `Token ${signedToken(myIdentity)}`,
+      Authorization: `Token ${await signedToken(myIdentity)}`,
     },
   });
   if (res.status < 400) return [await res.json(), true, res.status];
