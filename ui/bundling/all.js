@@ -8,10 +8,9 @@ import 'ua-parser-js';
 import {rawTimeZones} from '@vvo/tzdb';
 
 import 'tweetnacl';
-import 'tweetnacl-util';
-import 'compact-base64';
-import 'simple-signed-records-engine';
 import 'watsign';
 import 'fast-base64';
+import 'fast-base64/js';
+import 'fast-base64/url';
 
 import 'mediasoup-client';

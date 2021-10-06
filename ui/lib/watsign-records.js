@@ -5,8 +5,6 @@ import {concatBytes} from './util.js';
 export {signData, verifyData, getVerifiedData};
 
 async function signData({record, keypair, validSeconds, validUntil}) {
-  // publicKey = await toBytes(fromUrl(publicKey));
-  // secretKey = await toBytes(fromUrl(secretKey));
   let Certified = await toBase64(
     new TextEncoder().encode(JSON.stringify(record))
   );
@@ -96,6 +94,7 @@ async function createBytesToSign({Version, Expiration, KeyType, Certified}) {
   for (let i = 0; i < 4; i++) {
     versionBytes[i] = (Version >> (8 * i)) & 0xff;
   }
+  // TODO: this is incorrect, n >> 32 is just n >> 0 = n (the shift amount is taken mod 32)
   // Convert the timestamp into a little-endian uint64 representation
   for (let i = 0; i < 8; i++) {
     expirationBytes[i] = (Expiration >> (8 * i)) & 0xff;
