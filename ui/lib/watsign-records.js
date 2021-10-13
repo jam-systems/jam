@@ -16,13 +16,17 @@ async function signData({record, keypair, validSeconds, validUntil}) {
     KeyType: 'ed25519',
     Certified,
   });
+  let Signatures = [];
+  try {
+    Signatures.push(await createSignature(bytesToSign, keypair));
+  } catch {}
 
   return {
     Version: 0,
     Expiration,
     KeyType: 'ed25519',
     Certified,
-    Signatures: [await createSignature(bytesToSign, keypair)],
+    Signatures,
   };
 }
 
