@@ -9,10 +9,6 @@ module.exports = {
   broadcast,
   sendRequest,
   sendDirect,
-  // onMessage,
-  // offMessage,
-  // onAddPeer,
-  // onRemovePeer,
 };
 
 // pub sub websocket
@@ -145,7 +141,6 @@ function handleConnection(ws, req) {
 
   // inform about peers immediately
   sendMessage(connection, {t: 'peers', d: getPeers(roomId)});
-  emitEvent('addPeer', roomId, peerId);
 
   ws.on('message', jsonMsg => {
     let msg = parseMessage(jsonMsg);
@@ -160,7 +155,6 @@ function handleConnection(ws, req) {
 
     publish(roomId, 'remove-peer', {t: 'remove-peer', d: peerId});
     publishToServers({t: 'remove-peer', d: peerId, ro: roomId});
-    emitEvent('removePeer', roomId, peerId);
 
     // console.log('debug', roomPeerIds, subscriptions);
   });
@@ -294,56 +288,6 @@ function unsubscribeAll(connection) {
     let [key, subscribers] = entry;
     subscribers.delete(connection);
     if (subscribers.size === 0) subscriptions.delete(key);
-  }
-}
-
-// server side subscriptions
-// CURRENTLY UNUSED, replaced by server side forwarding via ws
-
-const serverSubscriptions = new Map(); // topic => listener(roomId, peerId, data, accept)
-const serverSideEvents = {
-  addPeer: new Set(),
-  removePeer: new Set(),
-};
-
-function onMessage(topic, listener) {
-  serverSubscriptions.set(topic, listener);
-}
-
-function offMessage(topic) {
-  serverSubscriptions.delete(topic);
-}
-
-function onRemovePeer(listener) {
-  serverSideEvents.removePeer.add(listener);
-}
-function onAddPeer(listener) {
-  serverSideEvents.addPeer.add(listener);
-}
-
-function handleMessageToServer(connection, roomId, topic, data, requestId) {
-  let listener = serverSubscriptions.get(topic);
-  if (listener !== undefined) {
-    let accept = responseData => {
-      if (requestId)
-        sendMessage(connection, {t: 'response', d: responseData, r: requestId});
-    };
-    try {
-      listener(roomId, connection.peerId, data, accept);
-    } catch (e) {
-      console.error(e);
-    }
-  }
-}
-
-function emitEvent(event, ...args) {
-  let listeners = serverSideEvents[event];
-  for (let listener of listeners) {
-    try {
-      listener(...args);
-    } catch (e) {
-      console.error(e);
-    }
   }
 }
 
