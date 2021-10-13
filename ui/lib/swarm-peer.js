@@ -40,17 +40,19 @@ function connectPeer(connection) {
     log('i initiate, and override any previous peer!');
     createPeer(connection, true);
   } else {
-    log('i dont initiate, wait for first signal');
+    log('i dont initiate, wait for signal');
     swarm.hub.sendDirect(connection, {
       type: 'signal',
       data: {youStart: true, type: 'you-start'},
     });
-    let {pc} = connection;
-    if (pc) {
-      log('destroying old peer', s(peerId));
-      pc.garbage = true;
-      pc.destroy();
-    }
+    // pc shouldn't be destroyed here, for consistency with other side who
+    // will ignore you-start message when it has a peer
+    // let {pc} = connection;
+    // if (pc) {
+    //   log('destroying old peer', s(peerId));
+    //   pc.garbage = true;
+    //   pc.destroy();
+    // }
     log('sent you-start', s(peerId));
   }
 }
@@ -128,11 +130,17 @@ function handleSignal(connection, {data}) {
   }
 
   if (!peer || peer.destroyed) {
-    console.warn(
-      'I received a signal without being in a valid state for any further action. Reconnecting!'
-    );
-    log('Signal data:', data);
-    connectPeer(connection);
+    let pcUid = `${peerId};${connId};${from}`;
+    if (!rejectedPeers.has(pcUid)) {
+      rejectedPeers.add(pcUid);
+      console.warn(
+        'I received a signal without being in a valid state for any further action. Reconnecting!'
+      );
+      log('Signal data:', data);
+      connectPeer(connection);
+    } else {
+      console.warn('Ignoring another signal from same peer in invalid state');
+    }
     return;
   }
 
@@ -153,6 +161,8 @@ function handleSignal(connection, {data}) {
   if (!(first && !iAmActive))
     addTimeout(connection, MIN_MAX_CONNECT_TIME_AFTER_SIGNAL);
 }
+
+const rejectedPeers = new Set();
 
 function createPeer(connection, initiator) {
   let {swarm, peerId, connId} = connection;
@@ -238,11 +248,18 @@ function createPeer(connection, initiator) {
     if (peer.garbage) return;
     log('simplepeer error', err);
     let errCode = err?.code;
-    if (
-      errCode !== 'ERR_ICE_CONNECTION_FAILURE' &&
-      errCode !== 'ERR_ICE_CONNECTION_CLOSED'
-    ) {
-      handlePeerFail(connection, true);
+    switch (errCode) {
+      case 'ERR_ICE_CONNECTION_FAILURE':
+      case 'ERR_ICE_CONNECTION_CLOSED':
+        // this gets handled elsewhere
+        break;
+      case 'ERR_DATA_CHANNEL':
+        // this sometimes happens instead of ice state failures in Chrome, so needs retry
+        handlePeerFail(connection, false);
+        break;
+      default:
+        // kill the peer
+        handlePeerFail(connection, true);
     }
   });
   peer.on('iceStateChange', state => {
