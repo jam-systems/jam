@@ -22,7 +22,6 @@
     "fast-base64": "^0.1.6",
     "mediasoup-client": "^3.6.31",
     "minimal-state": "^5.6.0",
-    "tweetnacl": "^1.0.3",
     "ua-parser-js": "^0.7.24",
     "watsign": "^0.1.6"
   },

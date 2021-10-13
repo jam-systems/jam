@@ -6,6 +6,12 @@ import {get, populateApiCache} from '../backend';
 import {staticConfig} from '../config';
 import {actions} from '../state';
 import {domEvent} from '../../lib/util';
+import {
+  CONNECTED,
+  CONNECTING,
+  DISCONNECTED,
+  INITIAL,
+} from '../../lib/swarm-health';
 let onload = domEvent(window, 'load');
 
 // TODO this is an intermediary component to set up swarm that should be replaced w/ one that
@@ -68,21 +74,30 @@ export default function ConnectRoom({myIdentity, swarm}) {
     is(state, {otherDeviceInRoom});
   });
 
-  return function ConnectRoom({roomState, myIdentity}) {
+  return function ConnectRoom({roomId, hasRoom, myIdentity}) {
     let myId = myIdentity.publicKey;
-    let {roomId, hasRoom} = roomState;
-    let shouldConnect = hasRoom;
-    if (shouldConnect && roomId && connectedRoomId !== roomId) {
-      connectedRoomId = roomId;
-      if (swarm.room === roomId && swarm.hub) return;
-      log('connecting room', roomId);
-      if (swarm.hub) swarm.disconnect();
-      swarm.config({myPeerId: myId, sign: data => signData(myIdentity, data)});
-      onload.then(() => swarm.connect(roomId));
-    } else if ((!shouldConnect || !roomId) && connectedRoomId !== null) {
-      log('disconnecting room', connectedRoomId);
-      if (swarm.connected && swarm.room === connectedRoomId) swarm.disconnect();
-      connectedRoomId = null;
+    let shouldConnect = hasRoom && roomId;
+
+    if (shouldConnect) {
+      if (
+        swarm.connectState === INITIAL ||
+        swarm.connectState === DISCONNECTED ||
+        roomId !== swarm.room ||
+        myId !== swarm.myPeerId
+      ) {
+        connectedRoomId = roomId;
+        log('connecting room', roomId);
+        swarm.config({
+          myPeerId: myId,
+          sign: data => signData(myIdentity, data),
+        });
+        swarm.connect(roomId);
+      }
+    } else {
+      if (swarm.connectState !== INITIAL) {
+        connectedRoomId = null;
+        swarm.disconnect();
+      }
     }
   };
 }

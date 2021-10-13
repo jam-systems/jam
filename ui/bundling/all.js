@@ -7,7 +7,6 @@ import 'slugify';
 import 'ua-parser-js';
 import {rawTimeZones} from '@vvo/tzdb';
 
-import 'tweetnacl';
 import 'watsign';
 import 'fast-base64';
 import 'fast-base64/js';

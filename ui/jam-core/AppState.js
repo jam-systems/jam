@@ -33,6 +33,7 @@ export default function AppState({hasMediasoup}) {
     customStream,
   }) {
     let myIdentity = use(Identity, {roomId});
+    if (!myIdentity) return;
     let myId = myIdentity.publicKey;
 
     // {roomId, room, hasRoom, isRoomLoading, iAmSpeaker, iAmModerator} = roomState
@@ -42,11 +43,11 @@ export default function AppState({hasMediasoup}) {
       peerState,
       myPeerState,
     });
-    let {room, iAmSpeaker} = roomState;
+    let {room, iAmSpeaker, hasRoom} = roomState;
     let inRoom = use(InRoom, {roomState, autoJoin, autoRejoin});
 
     // connect with signaling server
-    declare(ConnectRoom, {roomState, swarm, myIdentity});
+    declare(ConnectRoom, {roomId, hasRoom, swarm, myIdentity});
     declare(ModeratorState, {swarm, moderators: room.moderators, handRaised});
 
     let remoteStreams = use(ConnectAudio, {roomState, hasMediasoup, swarm});

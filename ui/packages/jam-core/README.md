@@ -349,14 +349,14 @@ Note that you probably don't need `onState()` when using our React integration [
 
 ### Additional API for identities
 
-Sometimes you might need to manually specify the identity of your user, rather than let us create a random one. For this, we give you two functions which are best called before `createJam()`:
+Sometimes you might need to manually specify the identity of your user, rather than let us create a random one. For this, we give you two functions which are best called before `createJam()`. Bot are async:
 
 - `importDefaultIdentity(identity)` lets you replace the current default identity stored in the browser:
 
 ```js
 import {importDefaultIdentity, createJam} from 'jam-core';
 
-importDefaultIdentity({
+await importDefaultIdentity({
   publicKey: '...',
   secretKey: '...',
   info: {name: 'Christoph'},
@@ -365,13 +365,16 @@ importDefaultIdentity({
 // all of the properties on the input object are optional!
 
 // just the secret key is enough to restore an existing user:
-importDefaultIdentity({secretKey: '...'});
+await importDefaultIdentity({secretKey: '...'});
 
 // alternatively, you can pass a seed from which the keys are created deterministically:
-importDefaultIdentity({seed: 'arbitrary string!', info: {name: 'Christoph'}});
+await importDefaultIdentity({
+  seed: 'arbitrary string!',
+  info: {name: 'Christoph'},
+});
 
-// if you pass neither keys or seed and an identity already exists, the info will just be merged into the existing one
-importDefaultIdentity({info: {name: 'Christoph'}});
+// if you pass neither keys nor seed and an identity already exists, the info will just be merged into the existing one
+await importDefaultIdentity({info: {name: 'Christoph'}});
 
 let [state, api] = createJam();
 
@@ -386,13 +389,16 @@ import {importRoomIdentity, createJam} from 'jam-core';
 let roomId = 'the-simpsons-jam';
 
 // API is the same as importDefaultIdentity with an additional `roomId` parameter
-importRoomIdentity(roomId, {secretKey: '...', info: {name: 'Homer Simpson'}});
-importRoomIdentity(roomId, {secretKey: '...'});
-importRoomIdentity(roomId, {
+await importRoomIdentity(roomId, {
+  secretKey: '...',
+  info: {name: 'Homer Simpson'},
+});
+await importRoomIdentity(roomId, {secretKey: '...'});
+await importRoomIdentity(roomId, {
   seed: 'arbitrary string!',
   info: {name: 'Homer Simpson'},
 });
-importRoomIdentity(roomId, {info: {name: 'Homer Simpson'}});
+await importRoomIdentity(roomId, {info: {name: 'Homer Simpson'}});
 
 let [state, api] = createJam();
 
