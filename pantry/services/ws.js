@@ -150,6 +150,7 @@ function handleConnection(ws, req) {
 
   ws.on('close', () => {
     nConnections--;
+    console.log('ws closed', roomId, peerId);
     removePeer(roomId, connection);
     unsubscribeAll(connection);
 
@@ -245,6 +246,7 @@ function addPeer(roomId, connection) {
     roomConnections.get(roomId) ??
     roomConnections.set(roomId, new Set()).get(roomId);
   connections.add(connection);
+  console.log('all peers:', getPeers(roomId));
 }
 function removePeer(roomId, connection) {
   let connections = roomConnections.get(roomId);
@@ -252,6 +254,7 @@ function removePeer(roomId, connection) {
     connections.delete(connection);
     if (connections.size === 0) roomConnections.delete(roomId);
   }
+  console.log('all peers:', getPeers(roomId));
 }
 function getConnections(roomId) {
   let connections = roomConnections.get(roomId);
