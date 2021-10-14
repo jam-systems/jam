@@ -3117,10 +3117,10 @@ watever-js-wrapper@^0.1.1:
   resolved "https://registry.yarnpkg.com/watever-js-wrapper/-/watever-js-wrapper-0.1.1.tgz#1807df90e0a45e999af6fe9d5ee40d2d2ffec015"
   integrity sha512-ShbTAwP2WZE7HOxp2bnAJCsa/NDph9lIorqWVsIAG6Bl2liO0n+XXWdJ3b4rUvCESqvg6P2M9ncK3w1oP0A6Ng==
 
-watsign@^0.1.4:
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/watsign/-/watsign-0.1.4.tgz#fa5d7527841e25c253dd91562ed1f805a231cb55"
-  integrity sha512-Dz2Z7gfCwAVgSJ+8x+pE+TTRtT+08SNp4rlUhXUBZjYUHBii52G18yZsVMPfNg6/pRIA6wm9cmiL4WeQhk0P2Q==
+watsign@^0.1.6:
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/watsign/-/watsign-0.1.6.tgz#2e3a84e08b968f48e0794db9ce948f73b178e456"
+  integrity sha512-22jGqXiFQmFdwsG+j0cP2GjB2G5fUI5vU0ROBQUL3NmU3tjAMfkRou+25tE+6txUjYWHq90YwUG4ofUyl9zYpg==
   dependencies:
     watever-js-wrapper "^0.1.1"
 

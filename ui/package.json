@@ -49,6 +49,6 @@
     "tweetnacl": "^1.0.3",
     "ua-parser-js": "^0.7.24",
     "use-minimal-state": "^3.5.0",
-    "watsign": "^0.1.4"
+    "watsign": "^0.1.6"
   }
 }
