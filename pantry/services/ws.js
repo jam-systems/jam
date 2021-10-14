@@ -133,6 +133,7 @@ function handleConnection(ws, req) {
     if (timeSincePing > PING_MAX_INTERVAL) {
       console.log(`killing ws after ${timeSincePing}ms`, roomId, peerId);
       ws.close();
+      closeWs();
     }
   }, PING_CHECK_INTERVAL);
 
@@ -161,7 +162,13 @@ function handleConnection(ws, req) {
     }
   });
 
-  ws.on('close', () => {
+  ws.on('close', closeWs);
+
+  ws.on('error', error => {
+    console.log('ws error', error);
+  });
+
+  function closeWs() {
     clearInterval(interval);
     nConnections--;
     console.log('ws closed', roomId, peerId);
@@ -170,13 +177,7 @@ function handleConnection(ws, req) {
 
     publish(roomId, 'remove-peer', {t: 'remove-peer', d: peerId});
     publishToServers({t: 'remove-peer', d: peerId, ro: roomId});
-
-    // console.log('debug', roomPeerIds, subscriptions);
-  });
-
-  ws.on('error', error => {
-    console.log('ws error', error);
-  });
+  }
 }
 
 function handleForwardingConnection(ws, req) {
