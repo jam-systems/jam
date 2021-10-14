@@ -2,11 +2,12 @@ import SimplePeer from './simple-peer-light';
 import causalLog from './causal-log';
 import {emit, set} from 'minimal-state';
 import {timeout, addTimeout, stopTimeout} from './timeout';
+import {DISCONNECTED, INITIAL} from './swarm-health';
 
-const MAX_CONNECT_TIME = 10000;
+const MAX_CONNECT_TIME = 6000;
 const MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT = 2000;
 const MIN_MAX_CONNECT_TIME_AFTER_SIGNAL = 2000;
-const MAX_FAIL_TIME = 20000;
+const MAX_FAIL_TIME = Infinity;
 
 export {
   newConnection,
@@ -255,11 +256,13 @@ function createPeer(connection, initiator) {
         break;
       case 'ERR_DATA_CHANNEL':
         // this sometimes happens instead of ice state failures in Chrome, so needs retry
-        handlePeerFail(connection, false);
+        // handlePeerFail(connection, false);
+        timeoutPeer(connection, MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT);
         break;
       default:
         // kill the peer
-        handlePeerFail(connection, true);
+        // handlePeerFail(connection, true);
+        timeoutPeer(connection, MAX_CONNECT_TIME);
     }
   });
   peer.on('iceStateChange', state => {
@@ -268,7 +271,7 @@ function createPeer(connection, initiator) {
       timeoutPeer(connection, MAX_CONNECT_TIME_AFTER_ICE_DISCONNECT);
     }
     if (state === 'failed' || state === 'closed') {
-      handlePeerFail(connection, false);
+      handlePeerFail(connection);
     }
     if (state === 'connected' || state === 'completed') {
       handlePeerSuccess(connection);
@@ -284,6 +287,13 @@ function createPeer(connection, initiator) {
 function timeoutPeer(connection, delay) {
   connection.lastFailure = connection.lastFailure || Date.now(); // TODO update problem indicators?
   timeout(connection, delay, () => {
+    if (
+      connection.swarm.connectState === DISCONNECTED ||
+      connection.swarm.connectState === INITIAL
+    ) {
+      timeoutPeer(connection, MAX_CONNECT_TIME);
+      return;
+    }
     log('peer timed out');
     handlePeerFail(connection);
   });
@@ -305,7 +315,9 @@ function handlePeerFail(connection, forcedFail) {
   log('handle peer fail! time failing:', failTime);
 
   if (forcedFail === true || failTime > MAX_FAIL_TIME) {
-    emit(connection.swarm, 'failedConnection', connection);
+    // this does currently never happen
+    // emit(connection.swarm, 'failedConnection', connection);
+    disconnectPeer(connection);
   } else {
     connectPeer(connection);
   }

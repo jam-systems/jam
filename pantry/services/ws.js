@@ -117,6 +117,8 @@ async function handleMessage(connection, roomId, msg) {
 }
 
 let nConnections = 0;
+const PING_CHECK_INTERVAL = 5000;
+const PING_MAX_INTERVAL = 25000;
 
 function handleConnection(ws, req) {
   let {roomId, peerId, subs} = req;
@@ -125,6 +127,14 @@ function handleConnection(ws, req) {
     return;
   }
   console.log('ws open', roomId, peerId, subs);
+  let lastPing = Date.now();
+  let interval = setInterval(() => {
+    let timeSincePing = Date.now() - lastPing;
+    if (timeSincePing > PING_MAX_INTERVAL) {
+      console.log(`killing ws after ${timeSincePing}ms`, roomId, peerId);
+      ws.close();
+    }
+  }, PING_CHECK_INTERVAL);
 
   const connection = {ws, peerId};
 
@@ -145,10 +155,14 @@ function handleConnection(ws, req) {
   ws.on('message', jsonMsg => {
     let msg = parseMessage(jsonMsg);
     // console.log('ws message', msg);
-    if (msg !== undefined) handleMessage(connection, roomId, msg);
+    if (msg !== undefined) {
+      if (msg.t === 'ping') lastPing = Date.now();
+      else handleMessage(connection, roomId, msg);
+    }
   });
 
   ws.on('close', () => {
+    clearInterval(interval);
     nConnections--;
     console.log('ws closed', roomId, peerId);
     removePeer(roomId, connection);
