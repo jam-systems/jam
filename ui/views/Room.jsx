@@ -38,6 +38,7 @@ export default function Room({room, roomId, uxConfig}) {
     peers,
     peerState,
     myPeerState,
+    hasMicFailed,
   ] = use(state, [
     'reactions',
     'handRaised',
@@ -50,6 +51,7 @@ export default function Room({room, roomId, uxConfig}) {
     'peers',
     'peerState',
     'myPeerState',
+    'hasMicFailed',
   ]);
 
   let myInfo = myIdentity.info;
@@ -193,6 +195,7 @@ export default function Room({room, roomId, uxConfig}) {
                   key={myPeerId}
                   peerId={myPeerId}
                   {...{speaking, moderators, reactions, room}}
+                  canSpeak={!hasMicFailed}
                   peerState={myPeerState}
                   info={myInfo}
                   onClick={() => setEditSelf(true)}
@@ -203,6 +206,7 @@ export default function Room({room, roomId, uxConfig}) {
                   key={peerId}
                   {...{speaking, moderators, room}}
                   {...{peerId, peerState, reactions}}
+                  canSpeak={true}
                   peerState={peerState[peerId]}
                   info={identities[peerId]}
                   onClick={iModerate ? () => setEditRole(peerId) : undefined}

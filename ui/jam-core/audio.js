@@ -74,7 +74,9 @@ function AudioState({swarm}) {
     }
 
     let shouldHaveMic = !!(inRoom && (iAmSpeaker || handRaised));
-    let {micStream, hasRequestedOnce} = use(Microphone, {shouldHaveMic});
+    let {micStream, hasRequestedOnce, hasMicFailed} = use(Microphone, {
+      shouldHaveMic,
+    });
     let {audioFileStream, audioFileElement} = use(AudioFile, {audioContext});
 
     let myAudio = customStream ?? audioFileStream ?? micStream;
@@ -99,7 +101,7 @@ function AudioState({swarm}) {
     );
 
     return merge(
-      {myAudio, soundMuted, audioFileElement},
+      {myAudio, soundMuted, audioFileElement, hasMicFailed},
       declare(Recording, {swarm, audioContext, myAudio, remoteStreams})
     );
   };

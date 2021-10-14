@@ -76,6 +76,6 @@ export default function Microphone() {
         break;
     }
 
-    return {micStream, hasRequestedOnce};
+    return {micStream, hasRequestedOnce, hasMicFailed: micState === 'failed'};
   };
 }

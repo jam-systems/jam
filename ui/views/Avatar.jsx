@@ -9,6 +9,7 @@ const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
 export function StageAvatar({
   room,
   speaking,
+  canSpeak,
   moderators,
   peerId,
   peerState,
@@ -55,15 +56,19 @@ export function StageAvatar({
           </div>
         </div>
         {/* div for showing mute/unmute status */}
-        <div className={micMuted ? '' : 'hidden'}>
+        {(!!micMuted || !canSpeak) && (
           <div
             className={mqp(
               'absolute w-10 h-10 right-0 top-12 md:top-20 rounded-full bg-white border-2 text-2xl border-gray-400 flex items-center justify-center'
             )}
           >
-            <MicOffSvg className="w-5 h-5 text-gray-700" stroke="white" />
+            <MicOffSvg
+              className="w-5 h-5 text-gray-700"
+              stroke="white"
+              fill={!canSpeak ? 'red' : undefined}
+            />
           </div>
-        </div>
+        )}
         <div className={mqp('w-20 md:w-28 m-2')}>
           <div className="flex">
             <div className={mqp('flex-none text-center pl-1 w-20 md:w-28')}>
