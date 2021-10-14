@@ -86,9 +86,11 @@ function Swarm(initialConfig) {
   // TODO when websocket pinging to detect dead connections is implemented,
   // stop removing peers on a failed webrtc connection
   // the websocket server should be the single source of truth about what peers are connected
-  on(swarm, 'failedConnection', c => {
-    if (c === getConnection(swarm, c.peerId, c.connId)) removeConnection(c);
-  });
+  // TODO: not sure about pinging anymore, because setInterval is not reliable in background tabs
+  // and it seems that there is some (very slow) cleanup work on the server which removes dead websockets
+  // on(swarm, 'failedConnection', c => {
+  //   if (c === getConnection(swarm, c.peerId, c.connId)) removeConnection(c);
+  // });
 
   checkWsHealth(swarm);
 
