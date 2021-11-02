@@ -7,7 +7,7 @@ export default function Jam({jamUrl, roomId, newRoom, ...props}) {
   return (
     <iframe
       src={`${jamUrl}${roomId || ''}${hash}`}
-      allow="microphone;*"
+      allow="microphone *; screen-wake-lock *"
       {...props}
     />
   );

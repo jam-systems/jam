@@ -1,12 +1,14 @@
 /* eslint-env node */
-const express = require('express');
-const app = express();
-const fetch = require('node-fetch');
-const qs = require('qs');
-const fs = require('fs');
-const ical = require('ical-generator').default;
+import express from 'express';
+import fetch from 'node-fetch';
+import qs from 'qs';
+import fs from 'fs';
+import ical from 'ical-generator';
+import ejs from 'ejs';
 
-let ejs = require('ejs');
+export {app as default};
+
+const app = express();
 
 app.use(express.static(process.env.JAM_CONFIG_DIR + '/public'));
 app.use(express.static(process.env.STATIC_FILES_DIR || 'public'));
@@ -224,8 +226,6 @@ app.use(async (req, res) => {
     )
   );
 });
-
-module.exports = app;
 
 const pantryApiPrefix = `${urls.pantry}/api/v1/rooms`;
 const defaultMetaInfo = {

@@ -9,10 +9,6 @@ module.exports = {
   broadcast,
   sendRequest,
   sendDirect,
-  // onMessage,
-  // offMessage,
-  // onAddPeer,
-  // onRemovePeer,
 };
 
 // pub sub websocket
@@ -121,6 +117,8 @@ async function handleMessage(connection, roomId, msg) {
 }
 
 let nConnections = 0;
+const PING_CHECK_INTERVAL = 5000;
+const PING_MAX_INTERVAL = 25000;
 
 function handleConnection(ws, req) {
   let {roomId, peerId, subs} = req;
@@ -129,6 +127,15 @@ function handleConnection(ws, req) {
     return;
   }
   console.log('ws open', roomId, peerId, subs);
+  let lastPing = Date.now();
+  let interval = setInterval(() => {
+    let timeSincePing = Date.now() - lastPing;
+    if (timeSincePing > PING_MAX_INTERVAL) {
+      console.log(`killing ws after ${timeSincePing}ms`, roomId, peerId);
+      ws.close();
+      closeWs();
+    }
+  }, PING_CHECK_INTERVAL);
 
   const connection = {ws, peerId};
 
@@ -145,29 +152,32 @@ function handleConnection(ws, req) {
 
   // inform about peers immediately
   sendMessage(connection, {t: 'peers', d: getPeers(roomId)});
-  emitEvent('addPeer', roomId, peerId);
 
   ws.on('message', jsonMsg => {
     let msg = parseMessage(jsonMsg);
     // console.log('ws message', msg);
-    if (msg !== undefined) handleMessage(connection, roomId, msg);
+    if (msg !== undefined) {
+      if (msg.t === 'ping') lastPing = Date.now();
+      else handleMessage(connection, roomId, msg);
+    }
   });
 
-  ws.on('close', () => {
+  ws.on('close', closeWs);
+
+  ws.on('error', error => {
+    console.log('ws error', error);
+  });
+
+  function closeWs() {
+    clearInterval(interval);
     nConnections--;
+    console.log('ws closed', roomId, peerId);
     removePeer(roomId, connection);
     unsubscribeAll(connection);
 
     publish(roomId, 'remove-peer', {t: 'remove-peer', d: peerId});
     publishToServers({t: 'remove-peer', d: peerId, ro: roomId});
-    emitEvent('removePeer', roomId, peerId);
-
-    // console.log('debug', roomPeerIds, subscriptions);
-  });
-
-  ws.on('error', error => {
-    console.log('ws error', error);
-  });
+  }
 }
 
 function handleForwardingConnection(ws, req) {
@@ -251,6 +261,7 @@ function addPeer(roomId, connection) {
     roomConnections.get(roomId) ??
     roomConnections.set(roomId, new Set()).get(roomId);
   connections.add(connection);
+  console.log('all peers:', getPeers(roomId));
 }
 function removePeer(roomId, connection) {
   let connections = roomConnections.get(roomId);
@@ -258,6 +269,7 @@ function removePeer(roomId, connection) {
     connections.delete(connection);
     if (connections.size === 0) roomConnections.delete(roomId);
   }
+  console.log('all peers:', getPeers(roomId));
 }
 function getConnections(roomId) {
   let connections = roomConnections.get(roomId);
@@ -294,56 +306,6 @@ function unsubscribeAll(connection) {
     let [key, subscribers] = entry;
     subscribers.delete(connection);
     if (subscribers.size === 0) subscriptions.delete(key);
-  }
-}
-
-// server side subscriptions
-// CURRENTLY UNUSED, replaced by server side forwarding via ws
-
-const serverSubscriptions = new Map(); // topic => listener(roomId, peerId, data, accept)
-const serverSideEvents = {
-  addPeer: new Set(),
-  removePeer: new Set(),
-};
-
-function onMessage(topic, listener) {
-  serverSubscriptions.set(topic, listener);
-}
-
-function offMessage(topic) {
-  serverSubscriptions.delete(topic);
-}
-
-function onRemovePeer(listener) {
-  serverSideEvents.removePeer.add(listener);
-}
-function onAddPeer(listener) {
-  serverSideEvents.addPeer.add(listener);
-}
-
-function handleMessageToServer(connection, roomId, topic, data, requestId) {
-  let listener = serverSubscriptions.get(topic);
-  if (listener !== undefined) {
-    let accept = responseData => {
-      if (requestId)
-        sendMessage(connection, {t: 'response', d: responseData, r: requestId});
-    };
-    try {
-      listener(roomId, connection.peerId, data, accept);
-    } catch (e) {
-      console.error(e);
-    }
-  }
-}
-
-function emitEvent(event, ...args) {
-  let listeners = serverSideEvents[event];
-  for (let listener of listeners) {
-    try {
-      listener(...args);
-    } catch (e) {
-      console.error(e);
-    }
   }
 }
 

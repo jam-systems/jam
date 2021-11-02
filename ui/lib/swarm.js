@@ -86,9 +86,11 @@ function Swarm(initialConfig) {
   // TODO when websocket pinging to detect dead connections is implemented,
   // stop removing peers on a failed webrtc connection
   // the websocket server should be the single source of truth about what peers are connected
-  on(swarm, 'failedConnection', c => {
-    if (c === getConnection(swarm, c.peerId, c.connId)) removeConnection(c);
-  });
+  // TODO: not sure about pinging anymore, because setInterval is not reliable in background tabs
+  // and it seems that there is some (very slow) cleanup work on the server which removes dead websockets
+  // on(swarm, 'failedConnection', c => {
+  //   if (c === getConnection(swarm, c.peerId, c.connId)) removeConnection(c);
+  // });
 
   checkWsHealth(swarm);
 
@@ -159,17 +161,27 @@ function shareStateWithPeer(swarm, peerId, state) {
 
 // public API ends here
 
-function connect(swarm, room) {
-  config(swarm, {room});
-  if (!swarm.room || !swarm.url) {
+// this is designed to robustly create the intended state, e.g. can be called repeatedly
+async function connect(swarm, roomId, myPeerId) {
+  if (!(roomId || swarm.room) || !(myPeerId || swarm.myPeerId) || !swarm.url) {
     return console.error(
-      'Must call swarm.config({url, room}) before connecting!'
+      'Must call swarm.config({url, room, myPeerId}) before connecting!'
     );
   }
   switch (swarm.connectState) {
     case CONNECTED:
     case CONNECTING:
-      return;
+      if (
+        (roomId && roomId !== swarm.room) ||
+        (myPeerId && myPeerId !== swarm.myPeerId)
+      ) {
+        // if connection uses either wrong room or wrong identity, reconnect
+        disconnect(swarm);
+      } else {
+        // otherwise just stay connected
+        return;
+      }
+      break;
     case DISCONNECTED:
       if (swarm.hub) {
         clear(swarm.hub);
@@ -180,13 +192,15 @@ function connect(swarm, room) {
       }
       break;
   }
+  config(swarm, {room: roomId, myPeerId});
+  myPeerId = swarm.myPeerId;
   let myConnId = randomHex4();
   swarm.myConnId = myConnId;
   log('connecting. conn id', myConnId);
   swarm.connectState = CONNECTING;
-  let {myPeerId, sign, verify} = swarm;
+  let {sign, verify} = swarm;
   let myCombinedPeerId = `${myPeerId};${myConnId}`;
-  let hub = signalws({
+  let hub = await signalws({
     roomId: swarm.room,
     url: swarm.url,
     myPeerId,
@@ -195,6 +209,11 @@ function connect(swarm, room) {
     verify,
     subscriptions: ['all'],
   });
+  if (swarm.myConnId !== myConnId) {
+    // disregard this connection if swarm was diconnected / re-connected during await
+    hub.close();
+    return;
+  }
   on(hub, 'opened', () => {
     swarm.connectState = CONNECTED;
     is(swarm, 'connected', true);
@@ -259,6 +278,7 @@ function connect(swarm, room) {
 }
 
 function disconnect(swarm) {
+  if (swarm.connectState === INITIAL) return;
   if (swarm.hub) swarm.hub.close();
   swarm.hub = null;
   swarm.myConnId = null;

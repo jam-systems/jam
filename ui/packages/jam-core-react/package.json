@@ -19,11 +19,11 @@
     "dist"
   ],
   "dependencies": {
-    "compact-base64": "^2.1.2",
+    "fast-base64": "^0.1.6",
     "jam-core": "0.3.13",
     "minimal-state": "^5.6.0",
-    "simple-signed-records-engine": "0.1.2",
-    "use-minimal-state": "^3.5.0"
+    "use-minimal-state": "^3.5.0",
+    "watsign": "^0.1.6"
   },
   "peerDependencies": {
     "react": "^17.0.1"

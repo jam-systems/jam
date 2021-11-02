@@ -74,6 +74,7 @@ const defaultState = {
   audioFileElement: null,
   myAudio: null as MediaStream | null,
   audioPlayError: false,
+  hasMicFailed: false,
 
   speaking: new Set<string>(),
 

@@ -691,6 +691,8 @@ function setObjectFragment(fragment, obj) {
       pureObj[key] = prop[0];
       // these listeners should be a class method on (Object)Fragment
       prop._deps.set(fragment, value => {
+        // do not forward on non-changes to be consistent with non-fragment props
+        if (pureObj[key] === value) return;
         pureObj[key] = value;
         // TODO: should object identity change?
         // TODO: forward deeply nested update info, i.e. use second param?

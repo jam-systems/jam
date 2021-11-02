@@ -23,6 +23,8 @@ if (!local) {
     console.error(err);
     client.nodeRedis.quit();
   });
+  // do this after migrating to esm
+  // await new Promise(resolve => client.nodeRedis.on('ready', resolve));
 
   const roomCount = async () => (await client.keys('rooms/*')).length;
   const identityCount = async () => (await client.keys('identities/*')).length;

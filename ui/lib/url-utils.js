@@ -1,4 +1,4 @@
-import base64 from 'compact-base64';
+import {decode} from './identity-utils';
 
 export {parsePath, parseUrlConfig};
 
@@ -17,7 +17,7 @@ function parseUrlConfig(search, hash) {
 
   if (hashContent) {
     try {
-      return JSON.parse(base64.decodeUrl(hashContent));
+      return JSON.parse(new TextDecoder().decode(decode(hashContent)));
     } catch {
       return parseParams(hashContent);
     }

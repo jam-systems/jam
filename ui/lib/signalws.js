@@ -1,7 +1,9 @@
-import base64 from 'compact-base64';
+import {encode} from './identity-utils';
 import {clear, emit, is, on, until} from 'minimal-state';
 
-export default function signalws({
+const PING_INTERVAL = 5000;
+
+export default async function signalws({
   url,
   roomId,
   myPeerId,
@@ -17,7 +19,7 @@ export default function signalws({
   url = url.indexOf('://') === -1 ? 'wss://' + url : url;
   url = url.replace('http', 'ws');
   if (!url.endsWith('/')) url += '/';
-  let token = base64.encodeUrl(JSON.stringify(sign({})));
+  let token = encode(new TextEncoder().encode(JSON.stringify(await sign({}))));
   let subs = subscriptions.join(',');
   url += `${roomId}?id=${myPeerId};${myConnId}&token=${token}&subs=${subs}`;
 
@@ -25,6 +27,9 @@ export default function signalws({
 
   ws.addEventListener('open', () => {
     is(hub, 'opened', true);
+    hub.interval = setInterval(() => {
+      send(hub, {t: 'ping'});
+    }, PING_INTERVAL);
   });
   ws.addEventListener('message', ({data}) => {
     let msg = parse(data);
@@ -61,11 +66,13 @@ export default function signalws({
     if (window.DEBUG) console.log('ws closed');
     is(hub, 'closed', true);
     clear(hub);
+    clearInterval(hub.interval);
   });
 
   const hub = {
     opened: false,
     closed: false,
+    interval: null,
     myPeerId,
     ws,
     subs: subscriptions,
@@ -125,10 +132,10 @@ function close({ws, closed}, code = 1000) {
 
 function send(hub, msg) {
   let {ws} = hub;
-  msg = JSON.stringify(msg);
-  if (window.DEBUG) console.log('ws sending', msg);
+  let jsonMsg = JSON.stringify(msg);
+  if (window.DEBUG && msg?.t !== 'ping') console.log('ws sending', jsonMsg);
   try {
-    ws.send(msg);
+    ws.send(jsonMsg);
     return true;
   } catch (err) {
     if (window.DEBUG) {

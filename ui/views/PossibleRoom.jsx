@@ -25,9 +25,12 @@ export default function PossibleRoom({
 
   // import room identity
   // this has to be done BEFORE creating new room so that we can be moderator
-  useMemo(() => {
+  let importIdentityPromise = useMemo(() => {
     if (roomIdentity) {
-      importRoomIdentity(roomId, {...roomIdentityKeys, info: roomIdentity});
+      return importRoomIdentity(roomId, {
+        ...roomIdentityKeys,
+        info: roomIdentity,
+      });
     }
   }, [roomId, roomIdentity, roomIdentityKeys]);
 
@@ -37,6 +40,7 @@ export default function PossibleRoom({
     roomId,
     newRoom,
     shouldCreate,
+    promiseToAwait: importIdentityPromise,
     onSuccess: () => enterRoom(roomId),
   });
 
@@ -58,13 +62,20 @@ function Error() {
   return <div>An error ocurred</div>;
 }
 
-function useCreateRoom({roomId, shouldCreate, newRoom, onSuccess}) {
+function useCreateRoom({
+  roomId,
+  shouldCreate,
+  newRoom,
+  promiseToAwait,
+  onSuccess,
+}) {
   const [, {createRoom}] = useJam();
   let [isError, setError] = useState(false);
   let [isLoading, setLoading] = useState(true);
   useEffect(() => {
     if (roomId && shouldCreate) {
       (async () => {
+        await promiseToAwait;
         let ok = await createRoom(roomId, newRoom);
         setLoading(false);
         if (ok) onSuccess?.();

@@ -1,4 +1,4 @@
-export {arrayRemove, mergeObject, domEvent, mergeClasses};
+export {arrayRemove, mergeObject, domEvent, mergeClasses, concatBytes};
 
 function arrayRemove(arr, el) {
   let i = arr.indexOf(el);
@@ -31,4 +31,16 @@ function domEvent(el, event) {
 
 function mergeClasses(...classes) {
   return classes.filter(x => x).join(' ');
+}
+
+function concatBytes(...arrays) {
+  if (!arrays.length) return null;
+  let totalLength = arrays.reduce((acc, value) => acc + value.length, 0);
+  let result = new Uint8Array(totalLength);
+  let length = 0;
+  for (let array of arrays) {
+    result.set(array, length);
+    length += array.length;
+  }
+  return result;
 }

@@ -35,6 +35,10 @@ const ssr = (req, res, next) => {
             base64.originalToUrl
           );
           req.body = verifiedRecord.data;
+        } else {
+          // if data is in ssr format, it has to be unpacked even if signatures don't verify
+          // otherwise routes that don't check identities might accidently use packed data
+          if (record.Certified) req.body = unpack(record);
         }
       }
       break;
@@ -51,6 +55,10 @@ function ssrVerifyToken(token, publicKey) {
   } catch (_) {}
   if (identities === undefined) return false;
   return identities.includes(base64.urlToOriginal(publicKey));
+}
+
+function unpack(data) {
+  return JSON.parse(Buffer.from(data.Certified, 'base64').toString('utf-8'));
 }
 
 module.exports = {

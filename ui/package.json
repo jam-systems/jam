@@ -1,10 +1,11 @@
 {
   "name": "jam",
   "version": "0.1.0",
+  "type": "module",
   "scripts": {
     "init-start": "esbuild --splitting --bundle ./App.jsx ./bundling/*.js --outdir=./public/js --format=esm --target=es6 --define:process.env.NODE_ENV='\"development\"'",
-    "start": "yarn run init-start && JAM_SFU=1 DEVELOPMENT=1 server/bin/www & tailwindcss -o public/css/tailwind.css --watch & esbuild --splitting --bundle ./App.jsx ./bundling/*.js --outdir=./public/js --format=esm --target=es6 --define:process.env.NODE_ENV='\"development\"' --watch",
-    "start-production": "server/bin/www & tailwindcss -o public/css/tailwind.css --watch & esbuild --splitting --bundle ./App.jsx ./bundling/*.js --outdir=./public/js --format=esm --target=es6 --define:process.env.NODE_ENV='\"production\"' --minify --watch",
+    "start": "yarn run init-start && JAM_SFU=1 DEVELOPMENT=1 server/bin/www.js & tailwindcss -o public/css/tailwind.css --watch & esbuild --splitting --bundle ./App.jsx ./bundling/*.js --outdir=./public/js --format=esm --target=es6 --define:process.env.NODE_ENV='\"development\"' --watch",
+    "start-production": "server/bin/www.js & tailwindcss -o public/css/tailwind.css --watch & esbuild --splitting --bundle ./App.jsx ./bundling/*.js --outdir=./public/js --format=esm --target=es6 --define:process.env.NODE_ENV='\"production\"' --minify --watch",
     "build": "tailwindcss --minify -o public/css/tailwind.css && esbuild --splitting --bundle ./App.jsx ./bundling/*.js --outdir=./public/js --minify --format=esm --target=es6 --define:process.env.NODE_ENV='\"production\"'",
     "pantry": "LOCAL=1 PORT=3001 JAM_SFU=1 node ../pantry/bin/www",
     "debug": "JAM_PANTRY_URL=http://localhost:3001 yarn start",
@@ -35,7 +36,7 @@
   "license": "AGPL-3.0",
   "dependencies": {
     "@vvo/tzdb": "^6.5.1",
-    "compact-base64": "^2.1.2",
+    "fast-base64": "^0.1.6",
     "mediasoup-client": "^3.6.31",
     "minimal-state": "^5.6.0",
     "qs": "^6.9.6",
@@ -43,11 +44,10 @@
     "react-dom": "^17.0.1",
     "react-markdown": "^5.0.3",
     "remark-gfm": "1.0.0",
-    "simple-signed-records-engine": "0.1.2",
     "slugify": "^1.4.6",
     "spark-md5": "^3.0.1",
-    "tweetnacl": "^1.0.3",
     "ua-parser-js": "^0.7.24",
-    "use-minimal-state": "^3.5.0"
+    "use-minimal-state": "^3.5.0",
+    "watsign": "^0.1.6"
   }
 }
