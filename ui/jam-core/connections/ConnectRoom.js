@@ -1,6 +1,13 @@
 import log from '../../lib/causal-log';
 import {signData, verifyData} from '../../lib/identity-utils';
-import {useDispatch, useEvent, useOn, useUpdate} from '../../lib/state-tree';
+import {
+  declare,
+  useDispatch,
+  useEvent,
+  useOn,
+  useState,
+  useUpdate,
+} from '../../lib/state-tree';
 import {get, populateApiCache} from '../backend';
 import {staticConfig} from '../config';
 import {actions} from '../state';
@@ -17,8 +24,6 @@ export default function ConnectRoom({myIdentity, swarm}) {
 
   const identities = {};
   let update = useUpdate();
-  let dispatch = useDispatch();
-  let otherDeviceInRoom = false;
 
   return function ConnectRoom({roomId, hasRoom, inRoom, myIdentity}) {
     let myId = myIdentity.publicKey;
@@ -45,7 +50,7 @@ export default function ConnectRoom({myIdentity, swarm}) {
       }
     }
 
-    let {peerEvent, serverEvent, connectionState} = swarm;
+    let {peerEvent, serverEvent} = swarm;
 
     // collect real-time peer identity info
     let [isNewPeer, id] = useEvent(swarm, 'newPeer');
@@ -80,13 +85,22 @@ export default function ConnectRoom({myIdentity, swarm}) {
       }
     }
 
-    // is the user in the same room with another device?
-    // leave room when same peer joins from elsewhere
-    let [isMyConnectionState, myConnState] = useEvent(connectionState, myId);
-    if (isMyConnectionState) {
-      if (myConnState === undefined) {
-        otherDeviceInRoom = false;
-      }
+    return {
+      identities: useStableObject({...identities}),
+      otherDeviceInRoom: declare(OtherDeviceInRoom, {swarm, inRoom, myId}),
+    };
+  };
+}
+
+function OtherDeviceInRoom({swarm, inRoom, myId}) {
+  let [otherDeviceInRoom, setState] = useState(false);
+  let dispatch = useDispatch();
+  // leave room when same peer joins from other device
+  let [isMyConnection, myConnState] = useEvent(swarm.connectionState, myId);
+  if (isMyConnection) {
+    if (myConnState === undefined) {
+      otherDeviceInRoom = false;
+    } else {
       let {states, latest} = myConnState;
       let {myConnId} = swarm;
       otherDeviceInRoom = false;
@@ -100,9 +114,9 @@ export default function ConnectRoom({myIdentity, swarm}) {
         }
       }
     }
-
-    return {identities: useStableObject({...identities}), otherDeviceInRoom};
-  };
+    setState(otherDeviceInRoom);
+  }
+  return otherDeviceInRoom;
 }
 
 function configSwarmIdentity(swarm, myIdentity) {
