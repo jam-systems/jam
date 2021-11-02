@@ -46,8 +46,6 @@ export default function AppState({hasMediasoup}) {
     let {room, iAmSpeaker, hasRoom} = roomState;
     let inRoom = use(InRoom, {roomState, autoJoin, autoRejoin});
 
-    // connect with signaling server
-    declare(ConnectRoom, {roomId, hasRoom, swarm, myIdentity});
     declare(ModeratorState, {swarm, moderators: room.moderators, handRaised});
 
     let remoteStreams = use(ConnectAudio, {roomState, hasMediasoup, swarm});
@@ -59,6 +57,7 @@ export default function AppState({hasMediasoup}) {
       {swarm, micMuted, handRaised, inRoom, myId, myIdentity},
       roomState,
       declare(PeerState, {swarm}),
+      declare(ConnectRoom, {roomId, hasRoom, inRoom, swarm, myIdentity}),
       declare(AudioState, {
         myId,
         inRoom,
