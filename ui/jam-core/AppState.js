@@ -32,8 +32,8 @@ export default function AppState({hasMediasoup}) {
     autoRejoin,
     customStream,
   }) {
-    let myIdentity = use(Identity, {roomId});
-    if (!myIdentity) return;
+    let myIdentity = use(Identity, {swarm, roomId});
+    if (!myIdentity) return {swarm};
     let myId = myIdentity.publicKey;
 
     // {roomId, room, hasRoom, isRoomLoading, iAmSpeaker, iAmModerator} = roomState

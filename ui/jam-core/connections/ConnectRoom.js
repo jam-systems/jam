@@ -88,10 +88,9 @@ export default function ConnectRoom({myIdentity, swarm}) {
         connectedRoomId = roomId;
         log('connecting room', roomId);
         swarm.config({
-          myPeerId: myId,
           sign: data => signData(myIdentity, data),
         });
-        swarm.connect(roomId);
+        swarm.connect(roomId, myId);
       }
     } else {
       if (swarm.connectState !== INITIAL) {

@@ -22,36 +22,44 @@ let identityReady = (async () => {
   migrateDisplayName(identities);
 })();
 
-function Identity() {
+function Identity({swarm}) {
+  const hasPosted = new Map<string, IdentityInfo>();
+
   // we don't want to block the first React render with signing our avatar image
   // maybe there's something cleaner than this heuristic
   Promise.all([onload, identityReady]).then(() => {
     setTimeout(() => {
-      postInitialIdentity(identities._default);
+      maybePostIdentity('_default', identities._default);
     }, 0);
   });
-  const hasPosted = new Set();
+
+  function maybePostIdentity(roomId: string, identity: IdentityType) {
+    let previous = hasPosted.get(roomId);
+    if (previous && previous === identity.info) return;
+    hasPosted.set(roomId, identity.info);
+    if (!previous) {
+      putOrPost(
+        {myIdentity: identity},
+        `/identities/${identity.publicKey}`,
+        identity.info
+      );
+    }
+    if (identity.publicKey === swarm.myPeerId) {
+      sendPeerEvent(swarm, 'identity-update', identity.info);
+    }
+  }
 
   return function Identity({roomId}) {
     let defaultIdentity = use(identities, '_default');
     let roomIdentity = use(identities, roomId);
 
-    if (roomIdentity !== undefined && !hasPosted.has(roomId)) {
-      hasPosted.add(roomId);
-      postInitialIdentity(roomIdentity);
+    if (roomIdentity !== undefined) {
+      maybePostIdentity(roomId, roomIdentity);
     }
 
     let myIdentity = roomIdentity ?? defaultIdentity;
     return myIdentity;
   };
-}
-
-function postInitialIdentity(identity) {
-  return putOrPost(
-    {myIdentity: identity},
-    `/identities/${identity.publicKey}`,
-    identity.info
-  );
 }
 
 async function updateInfo(state: any, info: IdentityInfo) {
@@ -105,7 +113,16 @@ async function importRoomIdentity(
   } else {
     fullIdentity = await createIdentity(identity.info);
   }
+
   set(identities, roomId, fullIdentity);
+  let ok = await putOrPost(
+    {myIdentity: fullIdentity},
+    `/identities/${fullIdentity.publicKey}`,
+    fullIdentity.info
+  );
+  if (!ok) {
+    console.error('importing identity failed!');
+  }
 }
 
 async function createIdentityFromSecretKey(
