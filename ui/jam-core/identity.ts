@@ -1,4 +1,3 @@
-// import nacl from 'tweetnacl';
 import {keyPairFromSecretKey, keyPairFromSeed, newKeyPair} from 'watsign';
 import {set} from 'minimal-state';
 import {StoredState} from '../lib/local-storage';
