@@ -1,6 +1,5 @@
 const base64 = require('compact-base64');
 const {data} = require('simple-signed-records-engine');
-// const {data} = require('./ssr-engine');
 
 const extractToken = req => {
   const authHeader = req.header('Authorization') || '';

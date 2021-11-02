@@ -349,7 +349,7 @@ Note that you probably don't need `onState()` when using our React integration [
 
 ### Additional API for identities
 
-Sometimes you might need to manually specify the identity of your user, rather than let us create a random one. For this, we give you two functions which are best called before `createJam()`. Bot are async:
+Sometimes you might need to manually specify the identity of your user, rather than let us create a random one. For this, we give you two functions which are best called before `createJam()`. Both are async:
 
 - `importDefaultIdentity(identity)` lets you replace the current default identity stored in the browser:
 
