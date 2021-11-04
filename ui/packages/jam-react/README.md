@@ -18,48 +18,54 @@ Usage:
 ```js
 import Jam from 'jam-react';
 
-<Jam roomId="new-jam-room" />
+<Jam roomId="new-jam-room" />;
 ```
 
 `<Jam>` supports three props:
 
-* `roomId` - **required**, string, your room ID which also makes the room accessible by navigating to `https://jam.systems/<roomId>`.
-* `jamUrl` - optional, string, URL of the jam instance. The default is `https://jam.systems` which you may use freely.
-* `newRoom` - optional, `{name: string, description: string}`, to customize the room at the moment it is created. (Advanced options that will add way more customizations than the current UI are coming soon.)
+- `roomId` - **required**, string, your room ID which also makes the room accessible by navigating to `https://jam.systems/<roomId>`.
+- `jamUrl` - optional, string, URL of the jam instance. The default is `https://jam.systems` which you may use freely.
+- `params` - optional, allows many customizations that are documented [here](https://gitlab.com/jam-systems/jam#room-configuration-via-url).
 
 Any other props, like `style`, are merged into the top-level `<iframe>` which loads jam. This allows you to add styling, customize `iframe` feature policy etc. Note that Jam needs `allow="microphone"` to work.
 
-Here is a full example for rendering three audio rooms on one page:
+Here is a full example with customizations, including setting an identity for the user from outside:
 
 ```js
 import React from 'react';
 import Jam from 'jam-react';
 
 function App() {
-  let ids = ['01', '02', '03'];
   return (
     <div style={{padding: '1rem'}}>
       <h1>Jam: My own Clubhouse!!!!</h1>
-      <div>
-        {ids.map(id => (
-          <Jam
-            key={id}
-            roomId={`new-jam-room-${id}`}
-            newRoom={{
-              name: 'A new Jam Room',
-              description: 'This Room was created by a React component',
-              color: '#000000',
-            }}
-            style={{width: '400px', height: '600px'}}
-          />
-        ))}
-      </div>
+      <Jam
+        jamUrl="http://beta.jam.systems"
+        roomId="klubhaus-123456"
+        params={{
+          room: {
+            name: 'A new Jam Room',
+            description: 'This Room was created by a React component',
+            color: '#000000',
+            stageOnly: true,
+          },
+          ux: {
+            autoCreate: false,
+            autoJoin: true,
+          },
+          identity: {
+            name: 'Gregor',
+            avatar: 'https://avatars.githubusercontent.com/u/20989968',
+          },
+        }}
+        style={{width: '400px', height: '600px', border: 'none'}}
+      />
     </div>
   );
 }
 ```
 
-Result:
+And here is an example with three `<Jam>` components rendered next to each other:
 
 <p align="center">
   <img src="https://i.imgur.com/nmYENw9.png"
@@ -75,7 +81,6 @@ With Jam you can create audio rooms that can be used for panel discussions, jam 
 Try Jam on [https://jam.systems/](https://jam.systems/)
 
 Find out more about Jam at our [Gitlab repository](https://gitlab.com/jam-systems/jam/).
-
 
 ## Buy Us ☕
 

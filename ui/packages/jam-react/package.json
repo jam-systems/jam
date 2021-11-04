@@ -12,6 +12,7 @@
   "main": "dist/index.js",
   "browser": "dist/index.js",
   "module": "dist/index.js",
+  "types": "./index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://gitlab.com/jam-systems/jam.git",
@@ -24,14 +25,17 @@
   ],
   "license": "Apache-2.0",
   "files": [
-    "dist"
+    "dist",
+    "index.d.ts"
   ],
   "scripts": {
     "build": "esbuild index.jsx --bundle --outfile=dist/index.js --external:react --format=esm --target=es2018",
+    "start": "serve example & esbuild --watch --bundle example/App.jsx --format=esm --outfile=example/bundle.js --define:process.env.NODE_ENV='\"development\"'",
     "size": "cat dist/index.js | esbuild --minify | gzip | wc -c"
   },
   "devDependencies": {
-    "esbuild": "^0.9.2"
+    "esbuild": "^0.9.2",
+    "serve": "^13.0.2"
   },
   "peerDependencies": {
     "react": "^17.0.1"

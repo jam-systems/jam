@@ -1,28 +1,54 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {render} from 'react-dom';
-import Jam from '../index.jsx';
+import Jam from '../dist/index.js';
 
 render(<App />, document.getElementById('root'));
 
 function App() {
-  let ids = ['01', '02', '03'];
+  let [nameInput, setNameInput] = useState('Gregor');
+  let [name, setName] = useState('Gregor');
+  let submit = e => {
+    e.preventDefault();
+    setName(nameInput);
+  };
   return (
     <div style={{padding: '1rem'}}>
-      <h1>Jam: My own Clubhouse!!!!</h1>
+      <h1>Jam: My own Clubhouse!</h1>
+      <form onSubmit={submit}>
+        <label>
+          Name:
+          <input
+            type="test"
+            value={nameInput}
+            onChange={e => setNameInput(e.target.value)}
+          />
+        </label>
+        <input value="OK" type="submit" onSubmit={submit} />
+      </form>
+      <div style={{height: '1rem'}} />
       <div>
-        {ids.map(id => (
-          <Jam
-            key={id}
-            jamUrl="http://beta.jam.systems"
-            roomId={`klubhaus-${id}`}
-            newRoom={{
+        <Jam
+          jamUrl="http://beta.jam.systems"
+          roomId="klubhaus-123456"
+          params={{
+            room: {
               name: 'A new Jam Room',
               description: 'This Room was created by a React component',
               color: '#000000',
-            }}
-            style={{width: '400px', height: '600px'}}
-          />
-        ))}
+              stageOnly: true,
+            },
+            ux: {
+              autoCreate: false,
+              autoRejoin: true,
+            },
+            identity: {
+              name,
+              avatar: 'https://avatars.githubusercontent.com/u/20989968',
+            },
+            // debug: true,
+          }}
+          style={{width: '400px', height: '600px', border: 'none'}}
+        />
       </div>
     </div>
   );
