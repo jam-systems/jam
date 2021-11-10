@@ -139,6 +139,13 @@ e.g.: a Raspberry Pi (1+ GB RAM) or the smallest [Digital Ocean Basic Droplet (1
 6. `mv ../pantryredis ../data`   
 7. `docker-compose up -d`
 
+
+## Jam SDK
+
+If you want to build your own audio room UI from scratch, or even develop a Jam bot, then Jam gives you the tools to do so as well! Take a look at [jam-core](https://gitlab.com/jam-systems/jam/-/tree/master/ui/packages/jam-core), our npm package which exposes all functionalities of Jam as a JavaScript library, without prescribing any UI.
+
+For easily integrating `jam-core` into a React app, check out the companion package [jam-core-react](https://gitlab.com/jam-systems/jam/-/tree/master/ui/packages/jam-core-react). The official Jam app itself is primarily built on `jam-core-react`.
+
 ## Develop
 
 In in the `ui` directory use `yarn` to install dependencies and `yarn start` to start the local development server.

@@ -6,6 +6,7 @@ const {ssrVerifyToken} = require('../ssr');
 module.exports = {
   addWebsocket,
   activeUserCount,
+  activeUsersInRoom,
   broadcast,
   sendRequest,
   sendDirect,
@@ -204,6 +205,13 @@ function handleForwardingConnection(ws, req) {
 
 function activeUserCount() {
   return nConnections;
+}
+function activeUsersInRoom(roomId) {
+  let peersInRoom = getPeers(roomId).map(
+    combinedPeerId => combinedPeerId.split(';')[0]
+  );
+  // make list unique
+  return [...new Set(peersInRoom)];
 }
 
 // ws server, handles upgrade requests for http server
