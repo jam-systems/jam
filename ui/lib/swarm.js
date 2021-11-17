@@ -29,6 +29,7 @@ export {
   disconnectPeer,
   addLocalStream,
   sendPeerEvent,
+  sendEventToOnePeer,
   shareStateWithGroup,
   shareStateWithPeer,
 };
@@ -137,6 +138,14 @@ function sendPeerEvent(swarm, event, payload) {
     type: 'peer-event',
     data: {t: event, d: payload},
   });
+}
+function sendEventToOnePeer(swarm, peerId, event, payload) {
+  for (let connection of yieldConnectionsOfPeer(swarm, peerId)) {
+    swarm.hub?.sendDirect(connection, {
+      type: 'peer-event',
+      data: {t: event, d: payload},
+    });
+  }
 }
 
 // these two don't quite fit the original model of peer state but use its
@@ -269,6 +278,9 @@ async function connect(swarm, roomId, myPeerId) {
     if (type === 'shared-state') {
       let connection = getConnection(swarm, peerId, connId);
       updatePeerState(connection, data);
+    }
+    if (type === 'peer-event') {
+      emit(swarm.peerEvent, data.t, peerId, data.d);
     }
   });
 
