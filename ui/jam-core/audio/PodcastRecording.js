@@ -37,7 +37,7 @@ export default function PodcastRecording({swarm}) {
   useOn(swarm.peerEvent, 'podcast-chunk-end', peerId => {
     if (!(peerId in podcastChunks)) return;
     podcastTracks[peerId] = new Blob(podcastChunks[peerId], {
-      type: 'audio/mp3; codecs=opus',
+      type: 'audio/opus; codecs=opus',
     });
     delete podcastChunks[peerId];
     downloadMp3(`podcast-track-${peerId}`, podcastTracks[peerId]);
@@ -190,7 +190,7 @@ function downloadMp3(fileName, blob) {
   document.body.appendChild(a);
   a.style = 'display: none';
   a.href = url;
-  a.download = `${fileName ?? 'recording'}.mp3`;
+  a.download = `${fileName ?? 'recording'}.opus`;
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
