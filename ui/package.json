@@ -35,7 +35,7 @@
   "license": "AGPL-3.0",
   "dependencies": {
     "@vvo/tzdb": "^6.5.1",
-    "fast-base64": "^0.1.6",
+    "fast-base64": "^0.1.8",
     "mediasoup-client": "^3.6.31",
     "minimal-state": "^5.6.0",
     "qs": "^6.9.6",
@@ -47,6 +47,6 @@
     "spark-md5": "^3.0.1",
     "ua-parser-js": "^0.7.24",
     "use-minimal-state": "^3.5.0",
-    "watsign": "^0.1.6"
+    "watsign": "^0.1.8"
   }
 }
