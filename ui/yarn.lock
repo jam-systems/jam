@@ -1113,10 +1113,10 @@ extend@^3.0.0:
   resolved "https://registry.yarnpkg.com/extend/-/extend-3.0.2.tgz"
   integrity sha512-fjquC59cD7CyW6urNXK0FBufkZcoiGG80wTuPujX590cB5Ttln20E2UB4S/WARVqhXffZl2LNgS+gQdPIIim/g==
 
-fast-base64@^0.1.6:
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/fast-base64/-/fast-base64-0.1.6.tgz#36c16d5b38b5db0174aff35c0f4ae803a82cd6fb"
-  integrity sha512-1ZV3FaUt849waC4rnFObTxflrDKOnyOMkNy9ScgoIyZmmA9iQ7G5M0UlF+Jib8y2S0XnQ+FyDcSZfXeayYYO+g==
+fast-base64@^0.1.8:
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/fast-base64/-/fast-base64-0.1.8.tgz#530b9dc18053bbf397ab7ca7f92b2e990c7c3023"
+  integrity sha512-LICiPjlLyh7/P3gcJYDjKEIX41odzqny1VHSnPsAlBb/zcSJJPYrSNHs54e2TytDRTwHZl7KG5c33IMLdT+9Eg==
 
 fast-deep-equal@^2.0.1:
   version "2.0.1"
@@ -3107,17 +3107,17 @@ vfile@^4.0.0:
     unist-util-stringify-position "^2.0.0"
     vfile-message "^2.0.0"
 
-watever-js-wrapper@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/watever-js-wrapper/-/watever-js-wrapper-0.1.1.tgz#1807df90e0a45e999af6fe9d5ee40d2d2ffec015"
-  integrity sha512-ShbTAwP2WZE7HOxp2bnAJCsa/NDph9lIorqWVsIAG6Bl2liO0n+XXWdJ3b4rUvCESqvg6P2M9ncK3w1oP0A6Ng==
+watever-js-wrapper@^0.3.2:
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/watever-js-wrapper/-/watever-js-wrapper-0.3.2.tgz#73bdd081b83e67ca97dd8b8a1cda312a8494bf34"
+  integrity sha512-BRJn27AJ5qhKaKTLSsuAHFQ9y0htoDOFCfiW7Wvc00uOzqLkdm7cvGtrr0zSjs8J6i2TGFqR8C33D9R5tvu9yA==
 
-watsign@^0.1.6:
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/watsign/-/watsign-0.1.6.tgz#2e3a84e08b968f48e0794db9ce948f73b178e456"
-  integrity sha512-22jGqXiFQmFdwsG+j0cP2GjB2G5fUI5vU0ROBQUL3NmU3tjAMfkRou+25tE+6txUjYWHq90YwUG4ofUyl9zYpg==
+watsign@^0.1.8:
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/watsign/-/watsign-0.1.8.tgz#7d51b2e232e32276ad4738cecbf394c03e0e03d6"
+  integrity sha512-W/lt3V4ibTjEvcKk3pEBygTEtwJ75yYZODM1tiflwqPyfSLu4yITcS1jc1cXNEsI5tsBjiepvmCRE846/mM31A==
   dependencies:
-    watever-js-wrapper "^0.1.1"
+    watever-js-wrapper "^0.3.2"
 
 which@^1.2.9:
   version "1.3.1"

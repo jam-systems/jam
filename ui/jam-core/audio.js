@@ -13,6 +13,7 @@ import VolumeMeter from './audio/VolumeMeter';
 import {is} from 'minimal-state';
 import {actions} from './state';
 import Recording from './audio/Recording';
+import PodcastRecording from './audio/PodcastRecording';
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 
 // TODO: could we use AudioContext.onstatechange to detect cases where the the ability to play audio is lost?
@@ -38,6 +39,8 @@ function AudioState({swarm}) {
     myId,
     inRoom,
     iAmSpeaker,
+    iAmModerator,
+    moderators,
     userInteracted,
     micMuted,
     handRaised,
@@ -102,7 +105,15 @@ function AudioState({swarm}) {
 
     return merge(
       {myAudio, soundMuted, audioFileElement, hasMicFailed},
-      declare(Recording, {swarm, audioContext, myAudio, remoteStreams})
+      declare(Recording, {swarm, audioContext, myAudio, remoteStreams}),
+      declare(PodcastRecording, {
+        swarm,
+        audioContext,
+        myAudio,
+        iAmSpeaker,
+        iAmModerator,
+        moderators,
+      })
     );
   };
 }

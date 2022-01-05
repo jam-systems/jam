@@ -109,6 +109,9 @@ function createApi<T>(
     stopRecording: () => dispatch('stop-recording'),
     downloadRecording: (fileName?: string) =>
       dispatch('download-recording', fileName),
+
+    startPodcastRecording: () => dispatch('start-podcast-recording'),
+    stopPodcastRecording: () => dispatch('stop-podcast-recording'),
   };
 }
 
