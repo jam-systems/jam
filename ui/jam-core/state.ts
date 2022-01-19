@@ -81,6 +81,10 @@ const defaultState = {
   isRecording: false, // am I recording?
   isSomeoneRecording: false, // is someone in the room recording?
   recordedAudio: null as Blob | null,
+
+  isPodcasting: false,
+  isSomeonePodcasting: false,
+  podcastTracks: {} as Record<string, Blob>,
 };
 
 type StateType = typeof defaultState & {swarm: any};
