@@ -20,7 +20,7 @@
   ],
   "dependencies": {
     "fast-base64": "^0.1.8",
-    "jam-core": "0.3.16",
+    "jam-core": "0.3.17",
     "minimal-state": "^5.6.0",
     "use-minimal-state": "^3.5.0",
     "watsign": "^0.1.8"
