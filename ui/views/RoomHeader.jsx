@@ -56,8 +56,7 @@ export default function RoomHeader({
       <div className="flex-none flex">
         {isRecording && (
           <div
-            role="button"
-            aria-label="Room settings"
+            aria-label="Recording"
             className="flex items-center w-8 h-6"
             style={{color: '#ff0000'}}
           >
@@ -66,7 +65,8 @@ export default function RoomHeader({
         )}
         {editRoom && (
           <div
-            aria-label="Recording"
+            role="button"
+            aria-label="Room settings"
             className="w-8 h-6 cursor-pointer"
             onClick={editRoom}
           >
