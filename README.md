@@ -77,6 +77,7 @@ You can take a look at examples for room configurations via URLs in our [example
 | `ux.autoRejoin`      | true                      | users re-join the room automatically if they have been in the room previously without having to click a button to join |
 | `identity.name`      | name of the user          |      |
 | `identity.avatar`    | image URL of the user     | avatar, profile picture, user photo … |
+| `keys.seed`    | string seed for deriving a public/private keypair     | a seed for deriving a public/private keypair. this keypair is for the current user within the room (related: creating rooms with a known set of moderators requires the public keys of the moderators) |
 
 
 
