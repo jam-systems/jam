@@ -9,7 +9,7 @@
 
 <a href="https://discord.gg/BfakmCuXSX">![Discord](https://img.shields.io/discord/813009761468416000?label=Jam%20discord&logo=discord)</a> <a href="https://twitter.com/jam_systems">![Twitter Follow](https://img.shields.io/twitter/follow/jam_systems?style=social)</a> <a href="https://github.com/jam-systems/jam">![GitHub Repo stars](https://img.shields.io/github/stars/jam-systems/jam?style=social)</a> <a href="https://www.npmjs.com/package/jam-react">![npm](https://img.shields.io/npm/v/jam-react?label=jam-react%20on%20npm)</a>
 
-🍞 Jam is an open source alternative to Clubhouse, Twitter Spaces and similar audio spaces.
+🍓 Jam is an open source alternative to Clubhouse, Twitter Spaces and similar audio spaces.
 
 With Jam you can create audio rooms that can be used for panel discussions, jam sessions, free flowing conversations, debates, theatre plays, musicals and more. The only limit is your imagination.
 
@@ -36,9 +36,9 @@ add Jam to your [Wordpress](https://medium.com/jam/add-jam-to-wordpress-ca1932cd
 
 ## Feature Comparison
 
-An overview for how 🍞 Jam compares to similar services like Clubhouse or Twitter Spaces. We intend to keep this table up to date as the services evolve. Please let us know what you care about and how we can make it easier for you to understand whether 🍞 Jam is right for you.
+An overview for how 🍓 Jam compares to similar services like Clubhouse or Twitter Spaces. We intend to keep this table up to date as the services evolve. Please let us know what you care about and how we can make it easier for you to understand whether 🍓 Jam is right for you.
 
-|                                 | 🍞 Jam                 | 👋 Clubhouse      | 🐣 Twitter Spaces          |
+|                                 | 🍓 Jam                 | 👋 Clubhouse      | 🐣 Twitter Spaces          |
 |---------------------------------|------------------------|--------------------|----------------------------|
 | 🎨 Branded Rooms                | ✅ set your own logo, color   | ❌                | ❌                  |
 | 🧩 Embed in your app or website | ✅ iFrame, WebView, JS SDK    | ❌                | ❌                  |
@@ -92,7 +92,7 @@ Workaround: make sure you are using Jam in the standalone browser instead of wit
 
 **Participants can hear me but I can not hear them**
 
-When participants join a room on 🍞 Jam they start in the _audience_, you can add them to the stage by tapping on them and by tapping the `"invite to stage"` button
+When participants join a room on 🍓 Jam they start in the _audience_, you can add them to the stage by tapping on them and by tapping the `"invite to stage"` button
 
 ## Host Your Own Server
 
