@@ -12,3 +12,4 @@ ui/esbuild.json
 data
 jam-config
 __pycache__
+deployment/turnserver.conf
