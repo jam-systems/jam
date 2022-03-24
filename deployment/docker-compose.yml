@@ -1,7 +1,7 @@
 version: '3'
 services:
   coturn:
-    image: woahbase/alpine-coturn
+    image: coturn/coturn:alpine
     volumes:
       - "./turnserver.conf:/var/lib/coturn/turnserver.conf"
     network_mode: host

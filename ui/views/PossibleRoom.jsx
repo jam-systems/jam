@@ -26,7 +26,7 @@ export default function PossibleRoom({
   // import room identity
   // this has to be done BEFORE creating new room so that we can be moderator
   let importIdentityPromise = useMemo(() => {
-    if (roomIdentity) {
+    if (roomIdentity || roomIdentityKeys) {
       return importRoomIdentity(roomId, {
         ...roomIdentityKeys,
         info: roomIdentity,

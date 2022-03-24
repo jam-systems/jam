@@ -1,9 +1,9 @@
 {
   "name": "jam-core",
   "description": "Jam SDK for creating custom audio spaces like Clubhouse / Twitter Spaces, made with WebRTC",
-  "version": "0.3.16",
+  "version": "0.3.17",
   "main": "dist/index.js",
-  "license": "AGPL-3.0",
+  "license": "(AGPL-3.0 OR Apache-2.0)",
   "type": "module",
   "exports": {
     "import": "./dist/index.js"

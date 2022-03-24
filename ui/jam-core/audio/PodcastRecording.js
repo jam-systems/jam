@@ -143,8 +143,12 @@ function LocalRecording({swarm, podcasterId}) {
         }
       };
       mediaRecorder.onstop = () => {
-        sendEventToOnePeer(swarm, podcasterId, 'podcast-chunk-end');
-        dispatch('podcast-ended', podcasterId);
+        // BAD HACK: wait another 100ms before sending the end signal.. to make sure that the last
+        // recording chunk is sent before this, so the end of the recording doesn't get lost
+        setTimeout(() => {
+          sendEventToOnePeer(swarm, podcasterId, 'podcast-chunk-end');
+          dispatch('podcast-ended', podcasterId);
+        }, 100);
       };
       mediaRecorder.start(2000);
     }
