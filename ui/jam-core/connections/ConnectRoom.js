@@ -141,7 +141,7 @@ function configSwarm(swarm, staticConfig) {
       iceTransportPolicy: 'all',
       iceServers: [
         // {urls: `stun:stun.jam.systems:3478`},
-        {urls: [`${staticConfig.urls.stun}`, `stun:stun.jam.systems:3478`]},
+        {urls: [`${staticConfig.urls.stun}`, `stun:coturn.jam.systems:3478`]},
         {
           ...staticConfig.urls.turnCredentials,
           urls: `${staticConfig.urls.turn}`,
