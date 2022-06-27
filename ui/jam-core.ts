@@ -132,8 +132,8 @@ function createJam(
       };
       jamConfigUrls.pantry =
         jamConfigUrls.pantry ?? `https://${domain}/_/pantry`;
-      jamConfigUrls.stun = jamConfigUrls.stun ?? `stun:stun.${domain}:3478`;
-      jamConfigUrls.turn = jamConfigUrls.turn ?? `turn:turn.${domain}:3478`;
+      jamConfigUrls.stun = jamConfigUrls.stun ?? `stun:${domain}:3478`;
+      jamConfigUrls.turn = jamConfigUrls.turn ?? `turn:${domain}:3478`;
       jamConfig.urls = jamConfigUrls as typeof staticConfig.urls;
       delete jamConfig.domain;
     }
