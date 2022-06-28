@@ -2,6 +2,7 @@ import React, {useMemo, useState} from 'react';
 import {is, use} from 'use-minimal-state';
 import EditRole, {EditSelf} from './EditRole';
 import {breakpoints, useWidth} from '../lib/tailwind-mqp';
+import {colors} from '../lib/theme';
 import {openModal} from './Modal';
 import {InfoModal} from './InfoModal';
 import {MicOffSvg, MicOnSvg} from './Svg';
@@ -47,11 +48,15 @@ export default function Navigation({
 
   let [showReactions, setShowReactions] = useState(false);
 
-  let {color, speakers, moderators, stageOnly} = room ?? {};
+  let {speakers, moderators, stageOnly} = room ?? {};
 
-  let isColorDark = useMemo(() => isDark(color), [color]);
+  const roomColors = colors(room);
+
+  let isColorDark = useMemo(() => isDark(roomColors.buttonPrimary), [color]);
 
   let width = useWidth();
+
+  let backgroundColor = roomColors.background;
 
   let talk = () => {
     if (micOn) {
@@ -63,11 +68,12 @@ export default function Navigation({
 
   return (
     <div
-      className="z-10 bg-white p-4"
+      className="z-10 p-4"
       style={{
         ...navigationStyle,
         ...(width < breakpoints.sm ? navigationStyleSmall : null),
         width: width < 720 ? '100%' : '700px',
+        backgroundColor,
       }}
     >
       {editRole && (
@@ -91,7 +97,7 @@ export default function Navigation({
           }}
           className="flex-grow select-none h-12 mt-4 px-6 text-lg text-white bg-gray-600 rounded-lg focus:outline-none active:bg-gray-600"
           style={{
-            backgroundColor: color || '#4B5563',
+            backgroundColor: roomColors.buttonPrimary,
             color: isColorDark ? 'white' : 'black',
           }}
         >
@@ -133,11 +139,12 @@ export default function Navigation({
       <div className="flex relative">
         <button
           onClick={() => setShowReactions(s => !s)}
-          className="flex-grow select-none text-center h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
+          className="flex-grow select-none text-center h-12 px-6 text-lg text-black rounded-lg focus:shadow-outline"
+          style={{backgroundColor: roomColors.buttonSecondary}}
         >
           {/* heroicons/emoji-happy */}
           <svg
-            className="text-gray-600 w-6 h-6 inline-block"
+            className="w-6 h-6 inline-block"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -155,11 +162,12 @@ export default function Navigation({
           <div className="text-4xl w-64 flex-shrink text-black text-center bg-gray-200 rounded-lg absolute left-0 bottom-14">
             {reactionEmojis.map(r => (
               <button
-                className="m-2 p-2 human-radius select-none px-3 bg-gray-100 active:bg-gray-50"
+                className="m-2 p-2 human-radius select-none px-3"
                 key={r}
                 onClick={() => {
                   sendReaction(r);
                 }}
+                style={{backgroundColor: roomColors.buttonSecondary}}
               >
                 {r}
               </button>
@@ -172,11 +180,12 @@ export default function Navigation({
           onClick={() => {
             openModal(InfoModal, {roomId, room});
           }}
-          className="hidden ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
+          className="hidden ml-3 select-none h-12 px-6 text-lg text-black rounded-lg focus:shadow-outline"
+          style={{backgroundColor: roomColors.buttonSecondary}}
         >
           {/* information-circle */}
           <svg
-            className="text-gray-600 w-6 h-6"
+            className="w-6 h-6"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -194,8 +203,9 @@ export default function Navigation({
         {/* Leave */}
         {!noLeave && (
           <button
-            className="flex-shrink ml-3 select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
+            className="flex-shrink ml-3 select-none h-12 px-6 text-lg text-black rounded-lg focus:shadow-outline"
             onClick={() => leaveRoom(roomId)}
+            style={{backgroundColor: roomColors.buttonSecondary}}
           >
             🖖🏽&nbsp;Leave
           </button>

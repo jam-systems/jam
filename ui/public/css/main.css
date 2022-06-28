@@ -300,7 +300,6 @@
 .jam h1,
 .jam h2,
 .jam h3 {
-  color: black;
   width: 100%;
   font-weight: normal;
 }
@@ -308,7 +307,6 @@
   font-size: 24px;
 }
 .jam h2 {
-  color: #9c9c9c;
   font-size: 20px;
   margin: -4% 0 6% 0;
 }
@@ -316,7 +314,6 @@
 .jam textarea {
   padding: 10px;
   font-size: 18px;
-  border: 0;
   border-radius: 3px;
   border: 1px solid rgb(213, 213, 213);
 }
