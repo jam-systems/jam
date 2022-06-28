@@ -52,7 +52,9 @@ export default function Navigation({
 
   const roomColors = colors(room);
 
-  let isColorDark = useMemo(() => isDark(roomColors.buttonPrimary), [color]);
+  let isColorDark = useMemo(() => isDark(roomColors.buttonPrimary), [
+    roomColors,
+  ]);
 
   let width = useWidth();
 
@@ -107,7 +109,7 @@ export default function Navigation({
                 <>
                   <MicOffSvg
                     className="w-5 h-5 mr-2 opacity-80 inline-block"
-                    stroke={color}
+                    stroke={roomColors.buttonPrimary}
                   />
                   Your&nbsp;microphone&nbsp;is&nbsp;off
                 </>
@@ -116,7 +118,7 @@ export default function Navigation({
                 <>
                   <MicOnSvg
                     className="w-5 h-5 mr-2 opacity-80 inline-block"
-                    stroke={color}
+                    stroke={roomColors.buttonPrimary}
                   />
                   Your&nbsp;microphone&nbsp;is&nbsp;on
                 </>
