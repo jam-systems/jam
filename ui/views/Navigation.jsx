@@ -1,5 +1,5 @@
 import React, {useMemo, useState} from 'react';
-import {is, use} from 'use-minimal-state';
+import {use} from 'use-minimal-state';
 import EditRole, {EditSelf} from './EditRole';
 import {breakpoints, useWidth} from '../lib/tailwind-mqp';
 import {colors} from '../lib/theme';
@@ -53,7 +53,7 @@ export default function Navigation({
   const roomColors = colors(room);
 
   let isColorDark = useMemo(() => isDark(roomColors.buttonPrimary), [
-    roomColors,
+    roomColors.buttonPrimary,
   ]);
 
   let width = useWidth();
