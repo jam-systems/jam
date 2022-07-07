@@ -1,17 +1,30 @@
 import {decode} from './identity-utils';
 
+const defaultAvatar = `/img/avatar-default.png`;
+
 const roomAvatar = (info, room) => {
-  if (room.userDisplay?.randomIdentities) {
+  if (room.userDisplay?.identities) {
+    return room.userDisplay.identities[info.id].avatar || defaultAvatar;
+  } else if (room.userDisplay?.avatars) {
+    return room.userDisplay.avatars[info.id] || defaultAvatar;
+  } else if (room.userDisplay?.randomIdentities) {
     return selectFromList(info.id, room.userDisplay?.randomIdentities).avatar;
   } else if (room.userDisplay?.randomAvatars) {
     return selectFromList(info.id, room.userDisplay.randomAvatars);
   } else {
-    return `/img/avatar-default.png`;
+    return defaultAvatar;
   }
 };
 
 const roomDisplayName = (info, room) => {
-  if (room.userDisplay?.randomIdentities) {
+  if (room.userDisplay?.identities) {
+    return (
+      room.userDisplay.identities[info.id].name ||
+      selectFromList(info.id, names)
+    );
+  } else if (room.userDisplay?.names) {
+    return room.userDisplay.names[info.id] || selectFromList(info.id, names);
+  } else if (room.userDisplay?.randomIdentities) {
     return selectFromList(info.id, room.userDisplay?.randomIdentities).name;
   } else if (room.userDisplay?.randomNames) {
     return selectFromList(info.id, room.userDisplay?.randomNames);
@@ -77,11 +90,8 @@ const names = [
   'Zero',
 ];
 
-const integerFromBytes = timeCodeBytes =>
-  timeCodeBytes[0] +
-  (timeCodeBytes[1] << 8) +
-  (timeCodeBytes[2] << 16) +
-  (timeCodeBytes[3] << 24);
+const integerFromBytes = rawBytes =>
+  rawBytes[0] + (rawBytes[1] << 8) + (rawBytes[2] << 16) + (rawBytes[3] << 24);
 
 function publicKeyToIndex(publicKey, range) {
   const bytes = decode(publicKey);
