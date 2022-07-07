@@ -5,7 +5,7 @@ export function InfoModal({roomId, room, close}) {
   return (
     <Modal close={close}>
       <div className="flex flex-row pt-4 pb-4">
-        <div className="flex-1 text-gray-600 pt-6">
+        <div className="flex-1 pt-6">
           Jam is an <span className="italic">audio&nbsp;space</span>
           <br />
           for chatting, brainstorming, debating, jamming,

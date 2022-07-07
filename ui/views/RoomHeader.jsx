@@ -5,6 +5,7 @@ import {useJamState} from '../jam-core-react/JamContext';
 import {MicOnSvg} from './Svg';
 
 export default function RoomHeader({
+  colors,
   name,
   description,
   logoURI,
@@ -22,6 +23,7 @@ export default function RoomHeader({
       {logoURI && (
         <div className="flex-none">
           <img
+            alt={'room icon'}
             className="w-16 h-16 border rounded p-1 m-2 mt-0"
             src={logoURI}
             style={{objectFit: 'cover'}}
@@ -44,9 +46,10 @@ export default function RoomHeader({
           >
             <a
               href={buttonURI}
-              className="select-none align-middle inline-block mt-2 py-2 px-6 text-lg text-gray-600 bg-gray-200 border border-gray-300 rounded-lg focus:shadow-outline active:bg-gray-300"
+              className="select-none align-middle inline-block mt-2 py-2 px-6 text-lg bg-gray-200 border border-gray-300 rounded-lg focus:shadow-outline active:bg-gray-300"
               target="_blank"
               rel="noreferrer"
+              style={{color: colors.text}}
             >
               {buttonText}
             </a>
@@ -69,6 +72,7 @@ export default function RoomHeader({
             aria-label="Room settings"
             className="w-8 h-6 cursor-pointer"
             onClick={editRoom}
+            style={{color: colors.text}}
           >
             <EditSvg />
           </div>
@@ -101,7 +105,7 @@ const customRenderers = {
 function EditSvg() {
   return (
     <svg
-      className="text-gray-500 w-6 h-6"
+      className="w-6 h-6"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"

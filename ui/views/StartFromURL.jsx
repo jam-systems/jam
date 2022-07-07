@@ -26,7 +26,7 @@ export default function StartFromURL({roomId, newRoom}) {
     <Container>
       <div className={mqp('p-2 pt-60 md:p-10 md:pt-60')}>
         <h1>Start a Room</h1>
-        <p className="mb-6 text-gray-600">
+        <p className="mb-6">
           The room with ID{' '}
           <code className="text-gray-900 bg-yellow-100">{roomId}</code> does not
           exist yet.

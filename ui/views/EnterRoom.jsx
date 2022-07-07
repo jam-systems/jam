@@ -4,6 +4,7 @@ import {useMqParser} from '../lib/tailwind-mqp';
 import Container from './Container';
 import RoomHeader from './RoomHeader';
 import {useJam} from '../jam-core-react';
+import {colors} from '../lib/theme.js';
 
 const iOS =
   /^iP/.test(navigator.platform) ||
@@ -24,10 +25,15 @@ export default function EnterRoom({
   const [state, {enterRoom, setProps}] = useJam();
   let mqp = useMqParser();
   let otherDevice = use(state, 'otherDeviceInRoom');
+  let room = use(state, 'room');
+  const roomColors = colors(room);
   return (
     <Container>
       <div className={mqp('p-2 pt-60 md:p-10 md:pt-60')}>
-        <RoomHeader {...{name, description, logoURI, buttonURI, buttonText}} />
+        <RoomHeader
+          colors={roomColors}
+          {...{name, description, logoURI, buttonURI, buttonText}}
+        />
         {/*
             optional (for future events:)
             when is this event?
@@ -71,6 +77,10 @@ export default function EnterRoom({
               ? 'hidden'
               : 'mt-5 select-none w-full h-12 px-6 text-lg text-white bg-gray-600 rounded-lg focus:shadow-outline active:bg-gray-600'
           }
+          style={{
+            backgroundColor: roomColors.buttonPrimary,
+            color: roomColors.background,
+          }}
         >
           Join
         </button>

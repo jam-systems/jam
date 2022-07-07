@@ -4,6 +4,7 @@ import slugify from 'slugify';
 import {navigate} from '../lib/use-location';
 import Container from './Container';
 import {useJam} from '../jam-core-react';
+import {colors} from '../lib/theme';
 
 export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
   const [, {enterRoom, setProps, createRoom}] = useJam();
@@ -45,6 +46,7 @@ export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
     return humins.sort(() => Math.random() - 0.5);
   }, []);
 
+  const roomColors = colors(newRoom);
   return (
     <Container style={{height: 'initial', minHeight: '100%'}}>
       <div className="p-6 md:p-10">
@@ -74,9 +76,7 @@ export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
 
         <h1>Start a Room</h1>
 
-        <p className="text-gray-600">
-          Click on the button below to start a room.
-        </p>
+        <p>Click on the button below to start a room.</p>
 
         <form className="pt-6" onSubmit={submit}>
           <div className="hidden">
@@ -214,7 +214,8 @@ export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
 
           <button
             onClick={submit}
-            className="select-none h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300"
+            className="select-none h-12 px-6 text-lg text-black rounded-lg focus:shadow-outline"
+            style={{backgroundColor: roomColors.buttonSecondary}}
           >
             🌱 Start room
           </button>
@@ -225,7 +226,7 @@ export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
         <h1>Welcome to Jam</h1>
 
         <div className="flex flex-row pt-4 pb-4">
-          <div className="flex-1 text-gray-600 pt-6">
+          <div className="flex-1 pt-6">
             Jam is an <span className="italic">audio&nbsp;space</span>
             <br />
             for chatting, brainstorming, debating, jamming,
@@ -235,9 +236,10 @@ export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
             <br />
             <a
               href="https://gitlab.com/jam-systems/jam"
-              className="underline text-blue-800 active:text-blue-600"
+              className="underline"
               target="_blank"
               rel="noreferrer"
+              style={{color: roomColors.link}}
             >
               Learn&nbsp;more&nbsp;about&nbsp;Jam.
             </a>
@@ -252,9 +254,10 @@ export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
             <br />
             <a
               href="https://pro.jam.systems"
-              className="underline text-blue-800 active:text-blue-600"
+              className="underline"
               target="_blank"
               rel="noreferrer"
+              style={{color: roomColors.link}}
             >
               Sign up for the Jam Pro Early Access Program.
             </a>

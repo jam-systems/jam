@@ -12,6 +12,7 @@ import {JamProvider, useJam} from './jam-core-react';
 import {createJam} from './jam-core';
 import {ShowInteractionModal} from './views/InteractionModal';
 import {parseUrlConfig} from './lib/url-utils';
+import {colors} from './lib/theme.js';
 
 let urlConfig = parseUrlConfig(location.search, location.hash);
 
@@ -37,13 +38,15 @@ export default function Jam(props) {
 function JamUI({style, className, route = null, dynamicConfig = {}, ...props}) {
   const [state, {setProps}] = useJam();
 
+  const defaultRoom = window.jamConfig.defaultRoom || {};
+
   let roomId = null;
 
   // routing
   const View = (() => {
     switch (route) {
       case null:
-        return <Start newRoom={dynamicConfig.room} />;
+        return <Start newRoom={{...defaultRoom, ...dynamicConfig.room}} />;
       case 'me':
         return <Me />;
       default:
@@ -84,11 +87,14 @@ function JamUI({style, className, route = null, dynamicConfig = {}, ...props}) {
   // TODO: the color should depend on the loading state of GET /room, to not flash orange before being in the room
   // => color should be only set here if the route is not a room id, otherwise <PossibleRoom> should set it
   // => pass a setColor prop to PossibleRoom
-  let {color} = use(state, 'room');
+  let {buttonPrimary} = colors(use(state, 'room'));
   let [width, , setContainer, mqp] = useProvideWidth();
   let backgroundColor = useMemo(
-    () => (color && color !== '#4B5563' ? hexToRGB(color, '0.123') : undefined),
-    [color]
+    () =>
+      buttonPrimary && buttonPrimary !== '#4B5563'
+        ? hexToRGB(buttonPrimary, '0.123')
+        : undefined,
+    [buttonPrimary]
   );
 
   return (
