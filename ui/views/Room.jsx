@@ -21,7 +21,7 @@ const inWebView =
       userAgent.browser?.name !== 'Mobile Safari'));
 
 export default function Room({room, roomId, uxConfig}) {
-  // room = {name, description, moderators: [peerId], speakers: [peerId]}
+  // room = {name, description, moderators: [peerId], speakers: [peerId], access}
   const [state] = useJam();
   useWakeLock();
   usePushToTalk();
@@ -34,6 +34,7 @@ export default function Room({room, roomId, uxConfig}) {
     speaking,
     iSpeak,
     iModerate,
+    iMayEnter,
     myIdentity,
     inRoom,
     peers,
@@ -47,6 +48,7 @@ export default function Room({room, roomId, uxConfig}) {
     'speaking',
     'iAmSpeaker',
     'iAmModerator',
+    'iAmAuthorized',
     'myIdentity',
     'inRoom',
     'peers',
@@ -76,6 +78,10 @@ export default function Room({room, roomId, uxConfig}) {
   } = room || {};
 
   let mqp = useMqParser();
+
+  if (!iMayEnter) {
+    return <EnterRoom roomId={roomId} name={name} forbidden={true} />;
+  }
 
   if (!iModerate && closed) {
     return (

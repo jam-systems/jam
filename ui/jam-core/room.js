@@ -15,6 +15,7 @@ function RoomState({roomId, myIdentity, peerState, myPeerState}) {
   let room = data ?? emptyRoom;
   let {moderators, stageOnly} = room;
   let myId = myIdentity.publicKey;
+  let accessRestricted = !!room.access?.identities;
 
   let speakers = use(Speakers, {
     roomId,
@@ -29,6 +30,8 @@ function RoomState({roomId, myIdentity, peerState, myPeerState}) {
 
   let iAmModerator = moderators.includes(myId);
   let iAmSpeaker = !!stageOnly || speakers.includes(myId);
+  let iAmAuthorized =
+    !accessRestricted || room.access?.identities.includes(myId);
 
   return {
     roomId,
@@ -37,6 +40,7 @@ function RoomState({roomId, myIdentity, peerState, myPeerState}) {
     isRoomLoading: isLoading,
     iAmSpeaker,
     iAmModerator,
+    iAmAuthorized,
   };
 }
 

@@ -25,9 +25,15 @@ export default function ConnectRoom({myIdentity, swarm}) {
   const identities = {};
   let update = useUpdate();
 
-  return function ConnectRoom({roomId, hasRoom, inRoom, myIdentity}) {
+  return function ConnectRoom({
+    roomId,
+    hasRoom,
+    inRoom,
+    myIdentity,
+    roomState,
+  }) {
     let myId = myIdentity.publicKey;
-    let shouldConnect = hasRoom && roomId;
+    let shouldConnect = hasRoom && roomId && roomState.iAmAuthorized;
 
     if (shouldConnect) {
       if (

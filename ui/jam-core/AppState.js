@@ -57,7 +57,14 @@ export default function AppState({hasMediasoup}) {
       {swarm, micMuted, handRaised, inRoom, myId, myIdentity},
       roomState,
       declare(PeerState, {swarm}),
-      declare(ConnectRoom, {roomId, hasRoom, inRoom, swarm, myIdentity}),
+      declare(ConnectRoom, {
+        roomId,
+        hasRoom,
+        inRoom,
+        swarm,
+        myIdentity,
+        roomState,
+      }),
       declare(AudioState, {
         myId,
         inRoom,

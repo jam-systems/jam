@@ -25,6 +25,12 @@ type IdentityType = {
   secretKey: string;
   info: IdentityInfo;
 };
+
+type AccessType = {
+  identities?: string[];
+  identitiesLocked?: boolean;
+}
+
 type RoomType = {
   name: string;
   description?: string;
@@ -33,6 +39,7 @@ type RoomType = {
   stageOnly?: boolean;
   color?: string;
   logoURI?: string;
+  access?: AccessType;
 };
 type PeerState = {
   inRoom: boolean;
