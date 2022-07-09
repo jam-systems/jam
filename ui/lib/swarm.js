@@ -246,7 +246,7 @@ async function connect(swarm, roomId, myPeerId) {
     });
   });
   on(hub, 'remove-peer', id => {
-    let [peerId, connId] = id.split(';');
+    let [peerId, connId] = id.split('.');
     if (getPeer(swarm, peerId) === undefined) return;
     removeConnection({swarm, peerId, connId});
   });

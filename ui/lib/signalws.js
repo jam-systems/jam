@@ -41,7 +41,7 @@ export default async function signalws({
     if (topic === 'opened' || topic === 'closed') return;
     let payload = d ?? {};
     if (p) {
-      let [peerId, connId] = p.split(';');
+      let [peerId, connId] = p.split('.');
       payload.peerId = peerId;
       payload.connId = connId;
     }
