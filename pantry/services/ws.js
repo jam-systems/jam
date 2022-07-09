@@ -220,11 +220,10 @@ function addWebsocket(server) {
   const wss = new WebSocket.Server({noServer: true});
   wss.on('connection', handleConnection);
 
-  server.on('upgrade', (req, socket, head) => {
+  server.on('upgrade', async (req, socket, head) => {
     let [path, query] = req.url.split('?');
     let [roomId] = path.split('/').filter(t => t);
     let params = querystring.parse(query);
-    // console.log(path, params);
     let {id: peerId, subs, token} = params;
 
     // this is for forwarding messages to other containers
@@ -234,10 +233,15 @@ function addWebsocket(server) {
       internal = true;
     }
 
-    let publicKey = peerId?.split(';')[0];
+    let roomInfo = await get('rooms/' + roomId);
+
+    let publicKey = peerId?.split('.')[0];
     if (
       peerId === undefined ||
-      ((roomId === undefined || !ssrVerifyToken(token, publicKey)) && !internal)
+      ((roomId === undefined || !ssrVerifyToken(token, publicKey)) &&
+        !internal) ||
+      (roomInfo.access?.identities &&
+        !roomInfo.access?.identities.includes(publicKey))
     ) {
       console.log('ws rejected!', req.url, 'room', roomId, 'peer', peerId);
       socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');

@@ -9,7 +9,7 @@ export default function Me() {
       <div className="p-6 md:p-10">
         <h1>Your Identity</h1>
 
-        <p className="mt-4 text-gray-600">
+        <p className="mt-4">
           This is your identity on {window.location.hostname}
         </p>
 

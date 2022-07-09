@@ -3,7 +3,7 @@ services:
   coturn:
     image: coturn/coturn:alpine
     volumes:
-      - "./turnserver.conf:/var/lib/coturn/turnserver.conf"
+      - "./turnserver.conf:/etc/coturn/turnserver.conf"
     network_mode: host
     restart: always
     profiles: ["coturn"]

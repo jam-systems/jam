@@ -115,7 +115,7 @@ export default function Mediasoup({swarm}) {
     );
     if (isConsumer) {
       let {peerId, producerId, id, kind, rtpParameters} = consumerPayload;
-      [peerId] = peerId.split(';');
+      [peerId] = peerId.split('.');
       receiveTransport
         ?.consume({id, producerId, kind, rtpParameters})
         .then(consumer => {

@@ -10,6 +10,7 @@ import {useMqParser} from '../lib/tailwind-mqp';
 import Container from './Container';
 import Navigation from './Navigation';
 import {userAgent} from '../lib/user-agent';
+import {colors} from '../lib/theme.js';
 import {usePushToTalk, useCtrlCombos} from '../lib/hotkeys';
 import {useJam} from '../jam-core-react';
 
@@ -20,7 +21,7 @@ const inWebView =
       userAgent.browser?.name !== 'Mobile Safari'));
 
 export default function Room({room, roomId, uxConfig}) {
-  // room = {name, description, moderators: [peerId], speakers: [peerId]}
+  // room = {name, description, moderators: [peerId], speakers: [peerId], access}
   const [state] = useJam();
   useWakeLock();
   usePushToTalk();
@@ -33,6 +34,7 @@ export default function Room({room, roomId, uxConfig}) {
     speaking,
     iSpeak,
     iModerate,
+    iMayEnter,
     myIdentity,
     inRoom,
     peers,
@@ -46,6 +48,7 @@ export default function Room({room, roomId, uxConfig}) {
     'speaking',
     'iAmSpeaker',
     'iAmModerator',
+    'iAmAuthorized',
     'myIdentity',
     'inRoom',
     'peers',
@@ -75,6 +78,10 @@ export default function Room({room, roomId, uxConfig}) {
   } = room || {};
 
   let mqp = useMqParser();
+
+  if (!iMayEnter) {
+    return <EnterRoom roomId={roomId} name={name} forbidden={true} />;
+  }
 
   if (!iModerate && closed) {
     return (
@@ -179,6 +186,7 @@ export default function Room({room, roomId, uxConfig}) {
           Room is closed
         </div>
         <RoomHeader
+          colors={colors(room)}
           {...{name, description, logoURI, buttonURI, buttonText}}
           editRoom={
             iModerate && (() => openModal(EditRoomModal, {roomId, room}))
@@ -219,7 +227,9 @@ export default function Room({room, roomId, uxConfig}) {
           {/* Audience */}
           {!stageOnly && (
             <>
-              <h3 className="text-gray-400 pl-4 pb-4">Audience</h3>
+              <h3 className="pl-4 pb-4" style={{color: colors(room).textLight}}>
+                Audience
+              </h3>
               <ol className="flex flex-wrap">
                 {!iSpeak && (
                   <AudienceAvatar

@@ -4,6 +4,7 @@ import {useMqParser} from '../lib/tailwind-mqp';
 import Container from './Container';
 import RoomHeader from './RoomHeader';
 import {useJam} from '../jam-core-react';
+import {colors} from '../lib/theme.js';
 
 const iOS =
   /^iP/.test(navigator.platform) ||
@@ -17,6 +18,7 @@ export default function EnterRoom({
   description,
   schedule,
   closed,
+  forbidden,
   buttonURI,
   buttonText,
   logoURI,
@@ -24,10 +26,15 @@ export default function EnterRoom({
   const [state, {enterRoom, setProps}] = useJam();
   let mqp = useMqParser();
   let otherDevice = use(state, 'otherDeviceInRoom');
+  let room = use(state, 'room');
+  const roomColors = colors(room);
   return (
     <Container>
       <div className={mqp('p-2 pt-60 md:p-10 md:pt-60')}>
-        <RoomHeader {...{name, description, logoURI, buttonURI, buttonText}} />
+        <RoomHeader
+          colors={roomColors}
+          {...{name, description, logoURI, buttonURI, buttonText}}
+        />
         {/*
             optional (for future events:)
             when is this event?
@@ -48,6 +55,18 @@ export default function EnterRoom({
             Join{`'`} to switch to this tab.
           </div>
         )}
+        {forbidden && (
+          <div
+            className={
+              'mt-5 mb--1 p-4 text-gray-700 rounded-lg border border-yellow-100 bg-yellow-50'
+            }
+          >
+            <span className="text-gray-900 bg-yellow-200">Warning:</span>
+            <br />
+            You are not allowed to enter this room. Move along!
+          </div>
+        )}
+
         {/*
             button for entering this room
             for now this is possible without
@@ -67,10 +86,14 @@ export default function EnterRoom({
             enterRoom(roomId);
           }}
           className={
-            closed
+            closed || forbidden
               ? 'hidden'
               : 'mt-5 select-none w-full h-12 px-6 text-lg text-white bg-gray-600 rounded-lg focus:shadow-outline active:bg-gray-600'
           }
+          style={{
+            backgroundColor: roomColors.buttonPrimary,
+            color: roomColors.background,
+          }}
         >
           Join
         </button>

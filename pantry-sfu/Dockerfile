@@ -1,5 +1,5 @@
 FROM node:14-alpine
-RUN apk add --no-cache linux-headers make python g++
+RUN apk add --no-cache linux-headers make python3 py3-pip g++
 ENV JAM_CONFIG_DIR=/jam-config
 RUN mkdir /pantry-sfu
 WORKDIR /pantry-sfu

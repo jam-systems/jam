@@ -25,9 +25,15 @@ export default function ConnectRoom({myIdentity, swarm}) {
   const identities = {};
   let update = useUpdate();
 
-  return function ConnectRoom({roomId, hasRoom, inRoom, myIdentity}) {
+  return function ConnectRoom({
+    roomId,
+    hasRoom,
+    inRoom,
+    myIdentity,
+    roomState,
+  }) {
     let myId = myIdentity.publicKey;
-    let shouldConnect = hasRoom && roomId;
+    let shouldConnect = hasRoom && roomId && roomState.iAmAuthorized;
 
     if (shouldConnect) {
       if (
@@ -141,7 +147,7 @@ function configSwarm(swarm, staticConfig) {
       iceTransportPolicy: 'all',
       iceServers: [
         // {urls: `stun:stun.jam.systems:3478`},
-        {urls: [`${staticConfig.urls.stun}`, `stun:stun.jam.systems:3478`]},
+        {urls: [`${staticConfig.urls.stun}`, `stun:coturn.jam.systems:3478`]},
         {
           ...staticConfig.urls.turnCredentials,
           urls: `${staticConfig.urls.turn}`,

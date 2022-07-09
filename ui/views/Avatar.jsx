@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {avatarUrl, displayName} from '../lib/avatar';
 import animateEmoji from '../lib/animate-emoji';
 import {useMqParser} from '../lib/tailwind-mqp';
+import {colors} from '../lib/theme';
 import {MicOffSvg} from './Svg';
 
 const reactionEmojis = ['❤️', '💯', '😂', '😅', '😳', '🤔'];
@@ -23,6 +24,7 @@ export function StageAvatar({
   info = info || {id: peerId};
   let isSpeaking = speaking.has(peerId);
   let isModerator = moderators.includes(peerId);
+  const roomColors = colors(room);
   return (
     inRoom && (
       <li
@@ -32,13 +34,17 @@ export function StageAvatar({
         style={onClick ? {cursor: 'pointer'} : undefined}
       >
         <div
-          className={
-            isSpeaking
-              ? 'human-radius p-1 bg-gray-300'
-              : 'human-radius p-1 bg-white'
-          }
+          className="human-radius p-1"
+          style={{
+            backgroundColor: isSpeaking
+              ? roomColors.textSuperLight
+              : roomColors.background,
+          }}
         >
-          <div className="human-radius p-1 bg-white relative flex justify-center">
+          <div
+            className="human-radius p-1 relative flex justify-center"
+            style={{backgroundColor: roomColors.background}}
+          >
             <img
               className={mqp(
                 'human-radius border border-gray-300 w-20 h-20 md:w-28 md:h-28 object-cover'
@@ -50,8 +56,9 @@ export function StageAvatar({
             <Reactions
               reactions={reactions_}
               className={mqp(
-                'absolute bg-white text-5xl md:text-7xl pt-4 md:pt-5 human-radius w-20 h-20 md:w-28 md:h-28 border text-center'
+                'absolute text-5xl md:text-7xl pt-4 md:pt-5 human-radius w-20 h-20 md:w-28 md:h-28 border text-center'
               )}
+              style={{backgroundColor: roomColors.buttonPrimary}}
             />
           </div>
         </div>
@@ -61,11 +68,12 @@ export function StageAvatar({
             className={mqp(
               'absolute w-10 h-10 right-0 top-12 md:top-20 rounded-full bg-white border-2 text-2xl border-gray-400 flex items-center justify-center'
             )}
+            style={{backgroundColor: roomColors.textLight}}
           >
             <MicOffSvg
-              className="w-5 h-5 text-gray-700"
-              stroke="white"
+              className="w-5 h-5"
               fill={!canSpeak ? 'red' : undefined}
+              stroke={roomColors.text}
             />
           </div>
         )}
@@ -74,8 +82,9 @@ export function StageAvatar({
             <div className={mqp('flex-none text-center pl-1 w-20 md:w-28')}>
               <span
                 className={mqp(
-                  'text-sm md:text-base whitespace-nowrap w-22 md:w-30 text-black font-medium'
+                  'text-sm md:text-base whitespace-nowrap w-22 md:w-30 font-medium'
                 )}
+                style={{color: roomColors.header}}
               >
                 <span
                   className={
@@ -83,6 +92,10 @@ export function StageAvatar({
                       ? 'flex-none inline-block leading-3 bg-gray-600 text-white w-3 h-3 rounded-full -ml-3'
                       : 'hidden'
                   }
+                  style={{
+                    backgroundColor: roomColors.text,
+                    color: roomColors.background,
+                  }}
                 >
                   <svg
                     className="inline-block w-2 h-2"

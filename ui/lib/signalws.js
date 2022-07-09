@@ -21,7 +21,7 @@ export default async function signalws({
   if (!url.endsWith('/')) url += '/';
   let token = encode(new TextEncoder().encode(JSON.stringify(await sign({}))));
   let subs = subscriptions.join(',');
-  url += `${roomId}?id=${myPeerId};${myConnId}&token=${token}&subs=${subs}`;
+  url += `${roomId}?id=${myPeerId}.${myConnId}&token=${token}&subs=${subs}`;
 
   let ws = new WebSocket(url);
 
@@ -41,7 +41,7 @@ export default async function signalws({
     if (topic === 'opened' || topic === 'closed') return;
     let payload = d ?? {};
     if (p) {
-      let [peerId, connId] = p.split(';');
+      let [peerId, connId] = p.split('.');
       payload.peerId = peerId;
       payload.connId = connId;
     }
