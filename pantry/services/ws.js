@@ -225,9 +225,6 @@ function addWebsocket(server) {
     let [roomId] = path.split('/').filter(t => t);
     let params = querystring.parse(query);
 
-    console.log('upgrading to websocket');
-    console.log(req.url, path, params);
-
     let {id: peerId, subs, token} = params;
 
     // this is for forwarding messages to other containers
@@ -250,8 +247,6 @@ function addWebsocket(server) {
     req.peerId = peerId;
     req.roomId = roomId;
     req.subs = subs?.split(',').filter(t => t) ?? []; // custom encoding, don't use "," in topic names
-
-    console.log('creating connection with peerId ' + peerId);
 
     wss.handleUpgrade(req, socket, head, ws => {
       wss.emit('connection', ws, req);
