@@ -237,7 +237,7 @@ function addWebsocket(server) {
       internal = true;
     }
 
-    let publicKey = peerId?.split(';')[0];
+    let publicKey = peerId?.split('.')[0];
     if (
       peerId === undefined ||
       ((roomId === undefined || !ssrVerifyToken(token, publicKey)) && !internal)
