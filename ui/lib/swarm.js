@@ -317,7 +317,7 @@ function initializePeer(swarm, peerId) {
 }
 
 function initializeConnection(swarm, combinedPeerId) {
-  let [peerId, connId] = combinedPeerId.split(';');
+  let [peerId, connId] = combinedPeerId.split('.');
   initializePeer(swarm, peerId);
   let connection = getConnection(swarm, peerId, connId);
   emit(swarm, 'newConnection', connection);
