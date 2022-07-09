@@ -226,7 +226,7 @@ function addWebsocket(server) {
     let params = querystring.parse(query);
 
     console.log('upgrading to websocket');
-    console.log(path, params);
+    console.log(req.url, path, params);
 
     let {id: peerId, subs, token} = params;
 
