@@ -22,6 +22,7 @@
     "autoprefixer": "^10.2.6",
     "ejs": "^3.1.6",
     "esbuild": "^0.12.5",
+    "escape-html": "^1.0.3",
     "eslint": "^7.19.0",
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0",

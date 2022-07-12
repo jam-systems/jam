@@ -5,6 +5,7 @@ import qs from 'qs';
 import fs from 'fs';
 import ical from 'ical-generator';
 import ejs from 'ejs';
+import escape_html from 'escape-html';
 
 export {app as default};
 
@@ -188,44 +189,22 @@ app.use(async (req, res) => {
 
   res.send(
     ejs.render(
-      `
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <link rel="modulepreload" href="/js/App.js" as="script" />
-    <link rel="modulepreload" href="/js/${preloadScript}" as="script" />
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta property="og:title" content="<%= metaInfo.ogTitle %>" />
-    <meta property="og:description" content="<%= metaInfo.ogDescription %>" />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="<%= metaInfo.ogUrl %>" />
-    <meta property="og:image" content="<%= metaInfo.ogImage %>" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="shortcut icon" type="image/png" href="<%= metaInfo.favIcon %>" />
-    <link rel="apple-touch-icon" href="<%= metaInfo.favIcon %>" />
-    <link href="/css/tailwind.css" rel="stylesheet" />
-    <link href="/css/main.css" rel="stylesheet" />
-    <link rel="manifest" href="<%= metaInfo.ogUrl %>/manifest.json">
-    <link rel="alternate" type="application/json+oembed" href="${
-      urls.jam
-    }/_/integrations/oembed?url=<%= metaInfo.ogUrl %>">
-    <title><%= metaInfo.ogTitle %></title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script>
-        window.jamConfig = ${JSON.stringify(jamConfig)};
-        window.existingRoomInfo = ${JSON.stringify(roomInfo ?? null)};
-        window.existingRoomId = ${JSON.stringify(roomId ?? null)};
-    </script>
-    <script type="module" src="/js/App.js"></script>
-  </body>
-</html>
-`,
-      {metaInfo}
+      fs.readFileSync('server/templates/index.ejs').toString('utf-8'),
+      {
+        metaInfo,
+        preloadScript,
+        urls,
+        jamConfigString: JSON.stringify(jamConfig ?? null, escapeHtmlReplacer),
+        roomInfoString: JSON.stringify(roomInfo ?? null, escapeHtmlReplacer),
+        roomIdString: JSON.stringify(roomId ?? null, escapeHtmlReplacer),
+      }
     )
   );
 });
+
+const escapeHtmlReplacer = function (key, value) {
+  return typeof value === 'string' ? escape_html(value) : value;
+};
 
 const pantryApiPrefix = `${urls.pantry}/api/v1/rooms`;
 const defaultMetaInfo = {

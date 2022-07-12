@@ -261,7 +261,7 @@ function addWebsocket(server) {
 // connection = {ws, peerId}
 
 function getPublicKey({peerId}) {
-  return peerId.split(';')[0];
+  return peerId.split('.')[0];
 }
 
 // peer connections per room
