@@ -208,7 +208,7 @@ async function connect(swarm, roomId, myPeerId) {
   log('connecting. conn id', myConnId);
   swarm.connectState = CONNECTING;
   let {sign, verify} = swarm;
-  let myCombinedPeerId = `${myPeerId};${myConnId}`;
+  let myCombinedPeerId = `${myPeerId}.${myConnId}`;
   let hub = await signalws({
     roomId: swarm.room,
     url: swarm.url,

@@ -112,7 +112,7 @@ async function broadcast(hub, topic, message) {
 
 async function sendDirect(hub, {peerId, connId}, message) {
   await until(hub, 'opened');
-  return send(hub, {t: 'direct', d: message, p: `${peerId};${connId}`});
+  return send(hub, {t: 'direct', d: message, p: `${peerId}.${connId}`});
 }
 
 async function sendRequest(hub, topic, message) {

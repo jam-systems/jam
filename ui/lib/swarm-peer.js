@@ -131,7 +131,7 @@ function handleSignal(connection, {data}) {
   }
 
   if (!peer || peer.destroyed) {
-    let pcUid = `${peerId};${connId};${from}`;
+    let pcUid = `${peerId}.${connId}.${from}`;
     if (!rejectedPeers.has(pcUid)) {
       rejectedPeers.add(pcUid);
       console.warn(
