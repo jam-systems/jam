@@ -240,8 +240,8 @@ function addWebsocket(server) {
       peerId === undefined ||
       ((roomId === undefined || !ssrVerifyToken(token, publicKey)) &&
         !internal) ||
-      (roomInfo.access?.identities &&
-        !roomInfo.access?.identities.includes(publicKey))
+      (roomInfo?.access?.identities &&
+        !roomInfo.access.identities.includes(publicKey))
     ) {
       console.log('ws rejected!', req.url, 'room', roomId, 'peer', peerId);
       socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
