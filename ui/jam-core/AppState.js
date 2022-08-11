@@ -6,10 +6,11 @@ import {StoredState} from '../lib/local-storage';
 import {Identity} from './identity';
 import {actions} from './state';
 import {AudioState} from './audio';
+import {VideoState} from './video';
 import {Reactions} from './reactions';
 import {RoomState} from './room';
 import ModeratorState from './room/ModeratorState';
-import ConnectAudio from './connections/ConnectAudio';
+import ConnectMedia from './connections/ConnectMedia.js';
 import ConnectRoom from './connections/ConnectRoom';
 import {useStableArray, useStableObject} from '../lib/state-diff';
 
@@ -43,12 +44,12 @@ export default function AppState({hasMediasoup}) {
       peerState,
       myPeerState,
     });
-    let {room, iAmSpeaker, iAmModerator, hasRoom} = roomState;
+    let {room, iAmSpeaker, iAmModerator, iAmPresenter, hasRoom} = roomState;
     let inRoom = use(InRoom, {roomState, autoJoin, autoRejoin});
 
     declare(ModeratorState, {swarm, moderators: room.moderators, handRaised});
 
-    let remoteStreams = use(ConnectAudio, {roomState, hasMediasoup, swarm});
+    let remoteStreams = use(ConnectMedia, {roomState, hasMediasoup, swarm});
 
     is(myPeerState, {micMuted, inRoom: !!inRoom});
     declare(Reactions, {swarm});
@@ -78,6 +79,10 @@ export default function AppState({hasMediasoup}) {
         handRaised,
         customStream,
       })
+      // declare(VideoState, {
+      //   inRoom,
+      //   iAmPresenter,
+      // })
     );
   };
 }

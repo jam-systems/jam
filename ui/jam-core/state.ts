@@ -36,6 +36,7 @@ type RoomType = {
   description?: string;
   speakers: string[];
   moderators: string[];
+  presenters: string[];
   stageOnly?: boolean;
   color?: string;
   logoURI?: string;
@@ -54,11 +55,12 @@ const defaultState = {
 
   roomId: null as string | null,
   inRoom: null as string | null, // === roomId if user joined, null otherwise
-  room: {name: '', description: '', speakers: [], moderators: []} as RoomType,
+  room: {name: '', description: '', speakers: [], moderators: [], presenters: []} as RoomType,
   hasRoom: false,
   isRoomLoading: false,
   iAmSpeaker: false,
   iAmModerator: false,
+  iAmPresenter: true,
   identities: {} as Record<string, IdentityInfo>,
   otherDeviceInRoom: false,
 
@@ -80,6 +82,7 @@ const defaultState = {
   audioFile: null,
   audioFileElement: null,
   myAudio: null as MediaStream | null,
+  myVideo: null as MediaStream | null,
   audioPlayError: false,
   hasMicFailed: false,
 
