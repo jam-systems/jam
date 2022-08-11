@@ -5,14 +5,14 @@ export default function P2pMedia({swarm}) {
   let sendingAudioStream = null;
   let sendingVideoStream = null;
 
-  return function P2pAudio({
+  return function P2pMedia({
     localVideoStream,
     localAudioStream,
     iAmSpeaker,
     iAmPresenter,
   }) {
     let shouldSendAudio = localAudioStream && iAmSpeaker;
-    let shouldSendVideo = localAudioStream && iAmPresenter;
+    let shouldSendVideo = localVideoStream && iAmPresenter;
 
     let remoteStreams = use(swarm, 'remoteStreams');
 

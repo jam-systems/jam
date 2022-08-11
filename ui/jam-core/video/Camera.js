@@ -50,7 +50,7 @@ export default function Camera() {
       case 'initial':
         if (shouldHaveCam) {
           camState = 'requesting';
-          requestMic();
+          requestCam();
         }
         break;
       case 'requesting':

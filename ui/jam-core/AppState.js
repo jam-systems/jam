@@ -78,11 +78,12 @@ export default function AppState({hasMediasoup}) {
         micMuted,
         handRaised,
         customStream,
+      }),
+      declare(VideoState, {
+        inRoom,
+        iAmPresenter,
+        remoteStreams,
       })
-      // declare(VideoState, {
-      //   inRoom,
-      //   iAmPresenter,
-      // })
     );
   };
 }
