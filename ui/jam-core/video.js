@@ -1,22 +1,22 @@
-import {use} from '../lib/state-tree';
+import {use, useRootState} from '../lib/state-tree';
 import Camera from './video/Camera';
 
 export {VideoState};
 
-function VideoState({swarm}) {
-  return function VideoState({inRoom, iAmPresenter}) {
+function VideoState() {
+  return function VideoState({inRoom, iAmPresenter, remoteStreams}) {
     let shouldHaveCamera = !!(inRoom && iAmPresenter);
 
-    console.log(
-      'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-      shouldHaveCamera,
-      'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
-    );
-
-    let {cameraStream, hasRequestedOnce, hasCamFailed} = use(Camera, {
+    let result = use(Camera, {
       shouldHaveCamera,
     });
 
-    return {myVideo: cameraStream, hasCamFailed};
+    let {camStream, hasRequestedOnce, hasCamFailed} = result;
+
+    const remoteVideoStreams = remoteStreams.filter(
+      stream => (stream.name = 'video')
+    );
+
+    return {myVideo: camStream, hasCamFailed, remoteVideoStreams};
   };
 }
