@@ -102,6 +102,7 @@ type StateType = typeof defaultState & {swarm: any};
 export const actions = {
   JOIN: Action('join'),
   LEAVE_STAGE: Action('leave-stage'),
+  RETRY_CAM: Action('retry-cam'),
   RETRY_MIC: Action('retry-mic'),
   RETRY_AUDIO: Action('retry-audio'),
   REACTION: Action('reaction'),

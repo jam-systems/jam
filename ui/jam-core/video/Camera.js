@@ -44,7 +44,7 @@ export default function Camera() {
   // TODO poll/listen to micStream.active state, switch to failed if not active but should
 
   return function Camera({shouldHaveCam = true}) {
-    let [isRetry] = useAction(actions.RETRY_MIC);
+    let [isRetry] = useAction(actions.RETRY_CAM);
 
     switch (camState) {
       case 'initial':

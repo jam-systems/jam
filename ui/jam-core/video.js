@@ -5,10 +5,10 @@ export {VideoState};
 
 function VideoState() {
   return function VideoState({inRoom, iAmPresenter, remoteStreams}) {
-    let shouldHaveCamera = !!(inRoom && iAmPresenter);
+    let shouldHaveCam = !!(inRoom && iAmPresenter);
 
     let result = use(Camera, {
-      shouldHaveCamera,
+      shouldHaveCam,
     });
 
     let {camStream, hasRequestedOnce, hasCamFailed} = result;
