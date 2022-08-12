@@ -91,17 +91,19 @@ function AudioState({swarm}) {
 
     let soundMuted = !inRoom || (iAmSpeaker && !hasRequestedOnce);
 
-    remoteStreams.map(({peerId, stream}) =>
-      declare(PlayingAudio, {
-        key: peerId,
-        peerId,
-        audioContext,
-        audioElements,
-        stream,
-        soundMuted,
-        shouldPlay: !!inRoom,
-      })
-    );
+    remoteStreams.map(remoteStream => {
+      let {peerId, stream, name} = remoteStream;
+      if (name === 'audio')
+        return declare(PlayingAudio, {
+          key: peerId,
+          peerId,
+          audioContext,
+          audioElements,
+          stream,
+          soundMuted,
+          shouldPlay: !!inRoom,
+        });
+    });
 
     return merge(
       {myAudio, soundMuted, audioFileElement, hasMicFailed},
