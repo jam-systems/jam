@@ -7,13 +7,14 @@ import Speakers from './room/Speakers';
 
 export {RoomState, addModerator, removeModerator, emptyRoom};
 export {addSpeaker, removeSpeaker} from './room/Speakers';
+export {addPresenter, removePresenter} from './room/Presenters';
 
 function RoomState({roomId, myIdentity, peerState, myPeerState}) {
   const path = roomId && `${apiUrl()}/rooms/${roomId}`;
   let {data, isLoading} = use(GetRequest, {path});
   let hasRoom = !!data;
   let room = data ?? emptyRoom;
-  let {moderators, stageOnly} = room;
+  let {moderators, presenters, stageOnly} = room;
   let myId = myIdentity.publicKey;
   let accessRestricted = !!room.access?.identities;
 
@@ -30,6 +31,7 @@ function RoomState({roomId, myIdentity, peerState, myPeerState}) {
 
   let iAmModerator = moderators.includes(myId);
   let iAmSpeaker = !!stageOnly || speakers.includes(myId);
+  let iAmPresenter = presenters.includes(myId);
   let iAmAuthorized =
     !accessRestricted || room.access?.identities.includes(myId);
 
@@ -41,6 +43,7 @@ function RoomState({roomId, myIdentity, peerState, myPeerState}) {
     iAmSpeaker,
     iAmModerator,
     iAmAuthorized,
+    iAmPresenter,
   };
 }
 
@@ -50,6 +53,7 @@ const emptyRoom = {
   ...(staticConfig.defaultRoom ?? null),
   speakers: [],
   moderators: [],
+  presenters: [],
 };
 
 function getCachedRoom(roomId) {
