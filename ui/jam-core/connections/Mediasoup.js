@@ -48,9 +48,10 @@ export default function Mediasoup({swarm}) {
     let wsConnected = use(swarm, 'connected');
     const {hub} = swarm;
 
-    let shouldSend = shouldSendAudio || shouldSendVideo;
-
     shouldSendAudio = shouldSendAudio && !!localAudioStream;
+    shouldSendVideo = shouldSendVideo && !!localVideoStream;
+
+    let shouldSend = shouldSendAudio || shouldSendVideo;
 
     let [isMediasoupInfo, infoPayload] = useEvent(
       serverEvent,
@@ -72,7 +73,7 @@ export default function Mediasoup({swarm}) {
               await mediasoupDevice.load({routerRtpCapabilities});
             }
             canSendAudio = mediasoupDevice.canProduce('audio');
-            canSendAudio = mediasoupDevice.canProduce('video');
+            canSendVideo = mediasoupDevice.canProduce('video');
             if (!canSendAudio) console.warn('Mediasoup: cannot send audio');
             if (!canSendVideo) console.warn('Mediasoup: cannot send video');
 
@@ -80,7 +81,7 @@ export default function Mediasoup({swarm}) {
 
             mediasoupState = READY;
             if (shouldReceive) initializeReceiving(hub);
-            if (shouldSendAudio && canSend) initializeSending(hub);
+            if (shouldSend && canSend) initializeSending(hub);
           })();
         }
         break;
@@ -113,12 +114,12 @@ export default function Mediasoup({swarm}) {
               sendingAudioStream = null;
               removeLocalAudioStream(hub);
             }
-            if (shouldSendVideo && sendingAudioStream !== localVideoStream) {
-              log('mediasoup: sending audio stream');
+            if (shouldSendVideo && sendingVideoStream !== localVideoStream) {
+              log('mediasoup: sending video stream');
               sendingVideoStream = localVideoStream;
               sendLocalVideoStream(hub, localVideoStream);
             } else if (!shouldSend && sendingAudioStream) {
-              log('mediasoup: removing audio stream');
+              log('mediasoup: removing video stream');
               sendingVideoStream = null;
               removeLocalVideoStream(hub);
             }
