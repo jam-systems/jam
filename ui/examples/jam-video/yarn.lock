@@ -369,10 +369,8 @@ isexe@^2.0.0:
   resolved "https://registry.yarnpkg.com/isexe/-/isexe-2.0.0.tgz#e8fbf374dc556ff8947a10dcb0572d633f2cfa10"
   integrity sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==
 
-jam-core-react@^0.4.1:
+"jam-core-react@file:../../packages/jam-core-react":
   version "0.4.1"
-  resolved "https://registry.yarnpkg.com/jam-core-react/-/jam-core-react-0.4.1.tgz#7cda9cf89acbcde74b4227952376fc8ba7c382db"
-  integrity sha512-L9jyUeJlc8qbfxyEg3SEPo+BrW2iacX9Yzfs7xOc/ymEcMz4TsP71cAA2fPi3IFO89bUrF6+kQ4nT95gXppNug==
   dependencies:
     fast-base64 "^0.1.8"
     jam-core "0.4.1"
@@ -380,10 +378,8 @@ jam-core-react@^0.4.1:
     use-minimal-state "^3.5.0"
     watsign "^0.1.8"
 
-jam-core@0.4.1:
+jam-core@0.4.1, "jam-core@file:../../packages/jam-core":
   version "0.4.1"
-  resolved "https://registry.yarnpkg.com/jam-core/-/jam-core-0.4.1.tgz#7fda94aefdc4a5c1fc74d3de657eed25a0d2603b"
-  integrity sha512-cKR4zd2fkTJ7y8PErYi+ulVgXIa742pt1vCSdb//JZ9m6nuADIWK688XK4b8WiL1PQEwlF6paqJZXuYi6k7smQ==
   dependencies:
     fast-base64 "^0.1.8"
     mediasoup-client "^3.6.31"
