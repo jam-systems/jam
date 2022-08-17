@@ -8,8 +8,8 @@
     "build": "esbuild --minify --bundle ./App.jsx --outfile=./public/bundle.js --format=esm"
   },
   "dependencies": {
-    "jam-core": "^0.4.1",
-    "jam-core-react": "^0.4.1",
+    "jam-core": "^0.5.0",
+    "jam-core-react": "^0.5.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
   },
