@@ -223,55 +223,59 @@ export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
 
         <hr className="mt-14 mb-14" />
 
-        <h1>Welcome to Jam</h1>
+        {!window.jamConfig.hideJamInfo && (
+          <div>
+            <h1>Welcome to Jam</h1>
 
-        <div className="flex flex-row pt-4 pb-4">
-          <div className="flex-1 pt-6">
-            Jam is an <span className="italic">audio&nbsp;space</span>
-            <br />
-            for chatting, brainstorming, debating, jamming,
-            <br />
-            micro-conferences and more.
-            <br />
-            <br />
-            <a
-              href="https://gitlab.com/jam-systems/jam"
-              className="underline"
-              target="_blank"
-              rel="noreferrer"
-              style={{color: roomColors.link}}
-            >
-              Learn&nbsp;more&nbsp;about&nbsp;Jam.
-            </a>
-            <br />
-            <br />
-            <br />
-            Jam <b className="font-semibold">Pro</b> (Early Access): Make Jam
-            your own.
-            <br />
-            Set your own colors and logo, use your own domain.
-            <br />
-            <br />
-            <a
-              href="https://pro.jam.systems"
-              className="underline"
-              target="_blank"
-              rel="noreferrer"
-              style={{color: roomColors.link}}
-            >
-              Sign up for the Jam Pro Early Access Program.
-            </a>
+            <div className="flex flex-row pt-4 pb-4">
+              <div className="flex-1 pt-6">
+                Jam is an <span className="italic">audio&nbsp;space</span>
+                <br />
+                for chatting, brainstorming, debating, jamming,
+                <br />
+                micro-conferences and more.
+                <br />
+                <br />
+                <a
+                  href="https://gitlab.com/jam-systems/jam"
+                  className="underline"
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{color: roomColors.link}}
+                >
+                  Learn&nbsp;more&nbsp;about&nbsp;Jam.
+                </a>
+                <br />
+                <br />
+                <br />
+                Jam <b className="font-semibold">Pro</b> (Early Access): Make
+                Jam your own.
+                <br />
+                Set your own colors and logo, use your own domain.
+                <br />
+                <br />
+                <a
+                  href="https://pro.jam.systems"
+                  className="underline"
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{color: roomColors.link}}
+                >
+                  Sign up for the Jam Pro Early Access Program.
+                </a>
+              </div>
+              <div className="flex-initial">
+                <img
+                  className="mt-8 md:mt-4 md:mb-4 md:mr-8"
+                  style={{width: 130, height: 130}}
+                  alt="Jam mascot by @eejitlikeme"
+                  title="Jam mascot by @eejitlikeme"
+                  src="/img/jam.jpg"
+                />
+              </div>
+            </div>
           </div>
-          <div className="flex-initial">
-            <img
-              className="mt-8 md:mt-4 md:mb-4 md:mr-8"
-              style={{width: 130, height: 130}}
-              alt="Jam mascot by @eejitlikeme"
-              title="Jam mascot by @eejitlikeme"
-              src="/img/jam.jpg"
-            />
-          </div>
-        </div>
+        )}
 
         <div className="pt-32 text-xs text-gray-400 text-center">
           <a

@@ -46,6 +46,7 @@ const jamConfig = {
   urls,
   development: !!process.env.DEVELOPMENT,
   sfu: ['true', '1'].includes(process.env.JAM_SFU),
+  hideJamInfo: ['true', '1'].includes(process.env.JAM_HIDE_JAM_INFO),
 };
 console.log(jamConfig);
 app.use('/config.json', (_, res) => {
