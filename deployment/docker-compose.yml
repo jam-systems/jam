@@ -51,6 +51,7 @@ services:
       - JAM_TURN_SERVER_CREDENTIAL
       - JAM_RESTRICT_ROOM_CREATION
       - JAM_SFU
+      - JAM_HIDE_JAM_INFO
       - SLACK_CLIENT_ID
       - SLACK_CLIENT_SECRET
       - SLACK_API_URL
@@ -71,7 +72,7 @@ services:
     image: registry.gitlab.com/jam-systems/jam/pantry-sfu:${CHANNEL}
     restart: always
     network_mode: host
-    depends_on: 
+    depends_on:
       - pantry
     environment:
       - JAM_HOST
@@ -83,7 +84,7 @@ services:
     #build: ../pantry
     image: registry.gitlab.com/jam-systems/jam/pantry:${CHANNEL}
     restart: always
-    depends_on: 
+    depends_on:
       - pantryredis
     environment:
       - JAM_HOST
