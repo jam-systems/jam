@@ -14,7 +14,7 @@ function RoomState({roomId, myIdentity, peerState, myPeerState}) {
   let {data, isLoading} = use(GetRequest, {path});
   let hasRoom = !!data;
   let room = data ?? emptyRoom;
-  let {moderators, presenters, stageOnly} = room;
+  let {moderators, presenters, stageOnly, videoCall} = room;
   let myId = myIdentity.publicKey;
   let accessRestricted = !!room.access?.identities;
 
@@ -31,7 +31,7 @@ function RoomState({roomId, myIdentity, peerState, myPeerState}) {
 
   let iAmModerator = moderators.includes(myId);
   let iAmSpeaker = !!stageOnly || speakers.includes(myId);
-  let iAmPresenter = presenters.includes(myId);
+  let iAmPresenter = !!videoCall || presenters.includes(myId);
   let iAmAuthorized =
     !accessRestricted || room.access?.identities.includes(myId);
 
