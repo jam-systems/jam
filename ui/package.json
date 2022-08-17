@@ -15,7 +15,8 @@
     "packages/jam-core",
     "packages/jam-core-react",
     "examples/minimal-jam-bundled",
-    "examples/tiny-jam-react"
+    "examples/tiny-jam-react",
+    "examples/jam-video"
   ],
   "devDependencies": {
     "@types/react": "^17.0.11",

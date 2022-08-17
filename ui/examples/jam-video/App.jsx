@@ -15,59 +15,61 @@ render(
   document.querySelector('#root')
 );
 
-const Video = ({stream}) => {
-  const videoRef = React.createRef();
+const videoStyle = {
+  height: '100px',
+  width: '100px',
+  borderRadius: '50px',
+  border: '3px solid red',
+  position: 'absolute',
+};
 
-  useEffect(() => {
-    if (videoRef.current) videoRef.current.srcObject = stream;
-  }, [stream, videoRef]);
+const Video = ({stream, x, y}) => {
+  const style = {...videoStyle, left: `${x}px`, top: `${y}px`};
 
-  return <video style={{height: 100, width: 100}} ref={videoRef} autoPlay />;
+  if (stream) {
+    const videoRef = React.createRef();
+
+    useEffect(() => {
+      if (videoRef.current) videoRef.current.srcObject = stream;
+    }, [stream, videoRef]);
+
+    return <video style={style} ref={videoRef} autoPlay />;
+  } else {
+    return <div style={style}>NP</div>;
+  }
 };
 
 function App() {
-  const [
-    state,
-    {createRoom, setProps, enterRoom, leaveRoom, addPresenter},
-  ] = useJam();
+  const [state, {createRoom, setProps, enterRoom, leaveRoom}] = useJam();
   let [
     roomId,
     speaking,
     myId,
     inRoom,
     iAmSpeaker,
+    iAmPresenter,
     peers,
     peerState,
     myVideo,
     remoteVideoStreams,
+    room,
   ] = use(state, [
     'roomId',
     'speaking',
     'myId',
     'inRoom',
     'iAmSpeaker',
+    'iAmPresenter',
     'peers',
     'peerState',
     'myVideo',
     'remoteVideoStreams',
+    'room',
   ]);
-
-  const myVideoRef = React.createRef();
-  useEffect(() => {
-    // Let's update the srcObject only after the ref has been set
-    // and then every time the stream prop updates
-    if (myVideoRef.current) myVideoRef.current.srcObject = myVideo;
-  }, [myVideo, myVideoRef]);
 
   let hash = location.hash.slice(1) || null;
   let [potentialRoomId, setPotentialRoomId] = useState(hash);
   let nJoinedPeers = peers.filter(id => peerState[id]?.inRoom).length;
-
-  function stream(e) {
-    setProps({userInteracted: true});
-    e.preventDefault();
-    addPresenter(roomId, myId);
-  }
 
   function submit(e) {
     setProps({userInteracted: true});
@@ -76,7 +78,7 @@ function App() {
       leaveRoom();
       setProps('roomId', null);
     } else {
-      createRoom(potentialRoomId, {stageOnly: true});
+      createRoom(potentialRoomId, {stageOnly: true, videoCall: true});
       setProps('roomId', potentialRoomId);
       enterRoom(potentialRoomId);
       location.hash = potentialRoomId;
@@ -97,9 +99,27 @@ function App() {
     };
   }, [setProps, state]);
 
-  const videoElements = remoteVideoStreams.map(stream => (
-    <Video stream={stream.stream} />
-  ));
+  const allVideoStreams = [
+    ...remoteVideoStreams,
+    {peerId: myId, stream: myVideo},
+  ].sort(function (a, b) {
+    return a.peerId.localeCompare(b.peerId);
+  });
+
+  const videoElements = allVideoStreams.map((stream, n) => {
+    const radius = 150;
+
+    const count = allVideoStreams.length;
+
+    const angle = (Math.PI * 2) / count;
+
+    const x = 150 + radius * Math.sin(angle * n);
+    const y = 150 + radius * Math.cos(angle * n);
+
+    console.log(count, angle, x, y);
+
+    return <Video stream={stream.stream} x={x} y={y} />;
+  });
 
   return (
     <>
@@ -115,27 +135,20 @@ function App() {
         <button onClick={submit} disabled={!(potentialRoomId?.length > 3)}>
           {inRoom ? 'Leave' : 'Join'}
         </button>
-        <button onClick={stream} disabled={!inRoom}>
-          Start Video
-        </button>
       </form>
       <div>
         <b style={speaking.has(myId) ? {color: 'green'} : undefined}>
           {iAmSpeaker ? 'Speaking' : 'Not speaking'}
-        </b>{' '}
-        with <b>{nJoinedPeers}</b> other peer{nJoinedPeers === 1 ? '' : 's'}.
+        </b>
+        and
+        <b>{iAmPresenter ? 'Presenting' : 'Not presenting'}</b> with{' '}
+        <b>{nJoinedPeers}</b> other peer{nJoinedPeers === 1 ? '' : 's'}.
       </div>
-      <div>
-        <video
-          style={{height: 100, width: 100, border: '1px solid black'}}
-          ref={myVideoRef}
-          autoPlay
-        />
-      </div>
-      <div>
-        <h3> Remote Videos </h3>
-        {videoElements}
-      </div>
+      {inRoom && (
+        <div style={{width: '300px', height: '300px', position: 'relative'}}>
+          {videoElements}
+        </div>
+      )}
     </>
   );
 }
