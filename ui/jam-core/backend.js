@@ -95,6 +95,7 @@ async function createRoom(
     logoURI = undefined,
     color = undefined,
     stageOnly = false,
+    videoCall = false,
   } = {}
 ) {
   let {myId} = state;
@@ -105,6 +106,7 @@ async function createRoom(
     logoURI,
     color,
     stageOnly: !!stageOnly,
+    videoCall: !!videoCall,
     moderators: [myId],
     speakers: [myId],
   };
