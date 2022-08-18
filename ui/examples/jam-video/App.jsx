@@ -15,16 +15,17 @@ render(
   document.querySelector('#root')
 );
 
-const videoStyle = {
+const videoContainerStyle = {
   height: '100px',
   width: '100px',
   borderRadius: '50px',
   border: '3px solid red',
   position: 'absolute',
+  overflow: 'hidden',
 };
 
 const Video = ({stream, x, y}) => {
-  const style = {...videoStyle, left: `${x}px`, top: `${y}px`};
+  const style = {...videoContainerStyle, left: `${x}px`, top: `${y}px`};
 
   if (stream) {
     const videoRef = React.createRef();
@@ -33,14 +34,36 @@ const Video = ({stream, x, y}) => {
       if (videoRef.current) videoRef.current.srcObject = stream;
     }, [stream, videoRef]);
 
-    return <video style={style} ref={videoRef} autoPlay />;
+    const videoSize = 200;
+
+    const videoHeight = stream.getVideoTracks()[0].getSettings().height;
+    const videoWidth = stream.getVideoTracks()[0].getSettings().width;
+    const videoAspectRatio = stream.getVideoTracks()[0].getSettings()
+      .aspectRatio;
+
+    let videoStyle = {};
+
+    if (videoWidth > videoHeight) {
+      videoStyle.height = `${videoSize}px`;
+      videoStyle.marginTop = `-${(videoSize - 100) / 2}px`;
+      videoStyle.marginLeft = `-${(videoSize * videoAspectRatio) / 2 - 50}px`;
+    }
+
+    return (
+      <div style={style}>
+        <video style={videoStyle} ref={videoRef} autoPlay />
+      </div>
+    );
   } else {
     return <div style={style}>NP</div>;
   }
 };
 
 function App() {
-  const [state, {createRoom, setProps, enterRoom, leaveRoom}] = useJam();
+  const [
+    state,
+    {createRoom, setProps, enterRoom, leaveRoom, switchCamera},
+  ] = useJam();
   let [
     roomId,
     speaking,
@@ -70,6 +93,21 @@ function App() {
   let hash = location.hash.slice(1) || null;
   let [potentialRoomId, setPotentialRoomId] = useState(hash);
   let nJoinedPeers = peers.filter(id => peerState[id]?.inRoom).length;
+
+  async function switchCam(e) {
+    e.preventDefault();
+    switchCamera();
+  }
+
+  function createRandomRoomId(e) {
+    setProps({userInteracted: true});
+    e.preventDefault();
+    setPotentialRoomId(
+      Math.abs((Math.random() * 16 ** 8) | 0)
+        .toString(16)
+        .padStart(8, '0')
+    );
+  }
 
   function submit(e) {
     setProps({userInteracted: true});
@@ -116,8 +154,6 @@ function App() {
     const x = 150 + radius * Math.sin(angle * n);
     const y = 150 + radius * Math.cos(angle * n);
 
-    console.log(count, angle, x, y);
-
     return <Video stream={stream.stream} x={x} y={y} />;
   });
 
@@ -135,6 +171,10 @@ function App() {
         <button onClick={submit} disabled={!(potentialRoomId?.length > 3)}>
           {inRoom ? 'Leave' : 'Join'}
         </button>
+        {!inRoom && (
+          <button onClick={createRandomRoomId}>Create random room</button>
+        )}
+        {inRoom && <button onClick={switchCam}>Switch camera</button>}
       </form>
       <div>
         <b style={speaking.has(myId) ? {color: 'green'} : undefined}>

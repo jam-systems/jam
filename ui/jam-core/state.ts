@@ -104,6 +104,7 @@ export const actions = {
   JOIN: Action('join'),
   LEAVE_STAGE: Action('leave-stage'),
   RETRY_CAM: Action('retry-cam'),
+  SWITCH_CAM: Action('switch-cam'),
   RETRY_MIC: Action('retry-mic'),
   RETRY_AUDIO: Action('retry-audio'),
   REACTION: Action('reaction'),

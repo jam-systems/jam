@@ -111,6 +111,8 @@ function createApi<T>(
     retryAudio: () => dispatch(actions.RETRY_AUDIO),
     autoJoinOnce: () => dispatch(actions.AUTO_JOIN),
 
+    switchCamera: () => dispatch(actions.SWITCH_CAM),
+
     startRecording: () => dispatch('start-recording'),
     stopRecording: () => dispatch('stop-recording'),
     downloadRecording: (fileName?: string) =>
