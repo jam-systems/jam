@@ -14,7 +14,7 @@ function VideoState() {
     let {camStream, hasRequestedOnce, hasCamFailed} = result;
 
     const remoteVideoStreams = remoteStreams.filter(
-      stream => (stream.name = 'video')
+      stream => stream.name === 'video'
     );
 
     return {myVideo: camStream, hasCamFailed, remoteVideoStreams};
