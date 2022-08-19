@@ -6,7 +6,7 @@ export default function Camera() {
   let camState = 'initial'; // 'requesting', 'active', 'failed'
   let camStream = null;
   let hasRequestedOnce = false;
-  let rejectedCameraIds = new Set();
+  let usedCameraIds = new Set();
   const update = useUpdate();
 
   useUnmount(() => {
@@ -15,14 +15,31 @@ export default function Camera() {
 
   async function requestCam() {
     try {
-      let stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: false,
-      });
-      hasRequestedOnce = true;
-      if (camState !== 'requesting') return;
+      const availableCameraIds = (
+        await navigator.mediaDevices.enumerateDevices()
+      )
+        .filter(d => d.kind === 'videoinput')
+        .map(d => d.deviceId);
+
+      if (availableCameraIds.length === 0) {
+        console.log('no cameras available');
+        camState = 'failed';
+        camStream = null;
+        return;
+      }
+
+      let newCameraId = availableCameraIds[0];
+      usedCameraIds.add(newCameraId);
+
+      camStream?.getTracks().forEach(track => track.stop());
       camState = 'active';
-      camStream = stream;
+      camStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          deviceId: {
+            exact: newCameraId,
+          },
+        },
+      });
     } catch (err) {
       if (camState !== 'requesting') return;
       console.error('error getting cam', err);
@@ -38,7 +55,7 @@ export default function Camera() {
       location.reload();
     } else {
       camState = 'requesting';
-      requestCam();
+      switchCamera();
     }
   }
 
@@ -49,18 +66,25 @@ export default function Camera() {
       )
         .filter(d => d.kind === 'videoinput')
         .map(d => d.deviceId);
-      const currentCameraId = camStream.getVideoTracks()[0].getSettings()
-        .deviceId;
-      rejectedCameraIds.add(currentCameraId);
 
-      let newCameraId = availableCameraIds.find(
-        id => !rejectedCameraIds.has(id)
-      );
+      if (availableCameraIds.length === 0) {
+        console.log('no cameras available');
+        camState = 'failed';
+        camStream = null;
+        return;
+      }
+
+      let newCameraId = availableCameraIds.find(id => !usedCameraIds.has(id));
 
       if (newCameraId === undefined) {
-        rejectedCameraIds.clear();
+        usedCameraIds.clear();
         newCameraId = availableCameraIds[0];
       }
+
+      usedCameraIds.add(newCameraId);
+
+      camStream?.getTracks().forEach(track => track.stop());
+
       camState = 'active';
       camStream = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -70,7 +94,6 @@ export default function Camera() {
         },
       });
     } catch (err) {
-      if (camState !== 'requesting') return;
       console.error('error getting cam', err);
       camState = 'failed';
       camStream = null;
@@ -113,6 +136,9 @@ export default function Camera() {
           camState = 'initial';
         } else if (isRetry) {
           forceRetryCam();
+        } else if (isSwitchCam) {
+          camState = 'requesting';
+          switchCamera();
         }
         break;
     }

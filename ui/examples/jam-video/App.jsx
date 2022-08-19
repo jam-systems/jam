@@ -92,7 +92,9 @@ function App() {
 
   let hash = location.hash.slice(1) || null;
   let [potentialRoomId, setPotentialRoomId] = useState(hash);
-  let nJoinedPeers = peers.filter(id => peerState[id]?.inRoom).length;
+  const joinedPeers = peers.filter(id => peerState[id]?.inRoom);
+  console.log('Joined Peers', joinedPeers);
+  let nJoinedPeers = joinedPeers.length;
 
   async function switchCam(e) {
     e.preventDefault();
@@ -137,17 +139,21 @@ function App() {
     };
   }, [setProps, state]);
 
-  const allVideoStreams = [
-    ...remoteVideoStreams,
+  const allParticipants = [
+    ...joinedPeers.map(
+      peerId => remoteVideoStreams.find(s => s.peerId === peerId) || {peerId}
+    ),
     {peerId: myId, stream: myVideo},
-  ].sort(function (a, b) {
+  ];
+
+  const sortedParticipants = allParticipants.sort(function (a, b) {
     return a.peerId.localeCompare(b.peerId);
   });
 
-  const videoElements = allVideoStreams.map((stream, n) => {
+  const videoElements = sortedParticipants.map((stream, n) => {
     const radius = 150;
 
-    const count = allVideoStreams.length;
+    const count = sortedParticipants.length;
 
     const angle = (Math.PI * 2) / count;
 
