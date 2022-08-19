@@ -14,6 +14,8 @@ export default function Camera() {
   });
 
   async function requestCam() {
+    await navigator.mediaDevices.getUserMedia({video: true});
+
     try {
       const availableCameraIds = (
         await navigator.mediaDevices.enumerateDevices()
@@ -41,7 +43,6 @@ export default function Camera() {
         },
       });
     } catch (err) {
-      if (camState !== 'requesting') return;
       console.error('error getting cam', err);
       camState = 'failed';
       camStream = null;
