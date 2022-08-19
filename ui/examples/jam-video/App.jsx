@@ -19,44 +19,44 @@ const videoContainerStyle = {
   height: '100px',
   width: '100px',
   borderRadius: '50px',
-  border: '3px solid red',
   position: 'absolute',
   overflow: 'hidden',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
 };
 
-const Video = ({stream, x, y}) => {
+const SpeakerRing = ({peerId}) => {
+  const [state] = useJam();
+  let [speaking] = use(state, ['speaking']);
+  const style = {
+    left: 0,
+    top: 0,
+    position: 'absolute',
+    width: '94px',
+    height: '94px',
+    border: `3px solid ${speaking.has(peerId) ? 'green' : 'transparent'}`,
+    borderRadius: '50%',
+    //zIndex: 100,
+  };
+
+  return <div style={style} />;
+};
+
+const Video = ({peerStream, x, y}) => {
   const style = {...videoContainerStyle, left: `${x}px`, top: `${y}px`};
+  const {stream, peerId} = peerStream;
+  const videoRef = React.createRef();
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.srcObject = stream;
+  }, [stream, videoRef]);
 
-  if (stream) {
-    const videoRef = React.createRef();
-
-    useEffect(() => {
-      if (videoRef.current) videoRef.current.srcObject = stream;
-    }, [stream, videoRef]);
-
-    const videoSize = 200;
-
-    const videoHeight = stream.getVideoTracks()[0].getSettings().height;
-    const videoWidth = stream.getVideoTracks()[0].getSettings().width;
-    const videoAspectRatio = stream.getVideoTracks()[0].getSettings()
-      .aspectRatio;
-
-    let videoStyle = {};
-
-    if (videoWidth > videoHeight) {
-      videoStyle.height = `${videoSize}px`;
-      videoStyle.marginTop = `-${(videoSize - 100) / 2}px`;
-      videoStyle.marginLeft = `-${(videoSize * videoAspectRatio) / 2 - 50}px`;
-    }
-
-    return (
-      <div style={style}>
-        <video style={videoStyle} ref={videoRef} autoPlay />
-      </div>
-    );
-  } else {
-    return <div style={style}>NP</div>;
-  }
+  return (
+    <div style={style}>
+      <video style={{height: '200px'}} ref={videoRef} autoPlay />
+      <SpeakerRing peerId={peerId} />
+    </div>
+  );
 };
 
 function App() {
@@ -66,35 +66,26 @@ function App() {
   ] = useJam();
   let [
     roomId,
-    speaking,
     myId,
     inRoom,
-    iAmSpeaker,
-    iAmPresenter,
     peers,
     peerState,
     myVideo,
     remoteVideoStreams,
-    room,
   ] = use(state, [
     'roomId',
-    'speaking',
     'myId',
     'inRoom',
-    'iAmSpeaker',
-    'iAmPresenter',
     'peers',
     'peerState',
     'myVideo',
     'remoteVideoStreams',
-    'room',
   ]);
 
   let hash = location.hash.slice(1) || null;
   let [potentialRoomId, setPotentialRoomId] = useState(hash);
   const joinedPeers = peers.filter(id => peerState[id]?.inRoom);
   console.log('Joined Peers', joinedPeers);
-  let nJoinedPeers = joinedPeers.length;
 
   async function switchCam(e) {
     e.preventDefault();
@@ -152,15 +143,12 @@ function App() {
 
   const videoElements = sortedParticipants.map((stream, n) => {
     const radius = 150;
-
     const count = sortedParticipants.length;
-
     const angle = (Math.PI * 2) / count;
-
     const x = 150 + radius * Math.sin(angle * n);
     const y = 150 + radius * Math.cos(angle * n);
 
-    return <Video stream={stream.stream} x={x} y={y} />;
+    return <Video peerStream={stream} x={x} y={y} />;
   });
 
   return (
@@ -182,14 +170,6 @@ function App() {
         )}
         {inRoom && <button onClick={switchCam}>Switch camera</button>}
       </form>
-      <div>
-        <b style={speaking.has(myId) ? {color: 'green'} : undefined}>
-          {iAmSpeaker ? 'Speaking' : 'Not speaking'}
-        </b>
-        and
-        <b>{iAmPresenter ? 'Presenting' : 'Not presenting'}</b> with{' '}
-        <b>{nJoinedPeers}</b> other peer{nJoinedPeers === 1 ? '' : 's'}.
-      </div>
       {inRoom && (
         <div style={{width: '300px', height: '300px', position: 'relative'}}>
           {videoElements}
