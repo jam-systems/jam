@@ -112,6 +112,7 @@ function createApi<T>(
     autoJoinOnce: () => dispatch(actions.AUTO_JOIN),
 
     switchCamera: () => dispatch(actions.SWITCH_CAM),
+    selectMicrophone: (mic: InputDeviceInfo) => dispatch(actions.SELECT_MIC, mic),
 
     startRecording: () => dispatch('start-recording'),
     stopRecording: () => dispatch('stop-recording'),

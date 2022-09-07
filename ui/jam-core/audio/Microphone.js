@@ -1,8 +1,12 @@
+import {is} from 'minimal-state';
 import {actions} from '../state';
 import {userAgent} from '../../lib/user-agent';
 import {useUpdate, useAction, useUnmount} from '../../lib/state-tree';
+import {StoredState} from '../../lib/local-storage.js';
 
 export default function Microphone() {
+  const selectedMicrophoneState = StoredState('jam.selectedMicrophone');
+  let availableMicrophones = [];
   let micState = 'initial'; // 'requesting', 'active', 'failed'
   let micStream = null;
   let hasRequestedOnce = false;
@@ -14,10 +18,22 @@ export default function Microphone() {
 
   async function requestMic() {
     try {
-      let stream = await navigator.mediaDevices.getUserMedia({
-        video: false,
-        audio: true,
-      });
+      const constraints = !!selectedMicrophoneState.deviceId
+        ? {
+            audio: {
+              deviceId: {
+                exact: selectedMicrophoneState.deviceId,
+              },
+            },
+          }
+        : {
+            video: false,
+            audio: true,
+          };
+      let stream = await navigator.mediaDevices.getUserMedia(constraints);
+      availableMicrophones = (
+        await navigator.mediaDevices.enumerateDevices()
+      ).filter(d => d.kind === 'audioinput');
       hasRequestedOnce = true;
       if (micState !== 'requesting') return;
       micState = 'active';
@@ -45,6 +61,13 @@ export default function Microphone() {
 
   return function Microphone({shouldHaveMic = true}) {
     let [isRetry] = useAction(actions.RETRY_MIC);
+    let [isSelectMicrophone, selectedMicrophone] = useAction(
+      actions.SELECT_MIC
+    );
+
+    if (isSelectMicrophone) {
+      is(selectedMicrophoneState, 'deviceId', selectedMicrophone.deviceId);
+    }
 
     switch (micState) {
       case 'initial':
@@ -63,6 +86,11 @@ export default function Microphone() {
           micStream.getTracks().forEach(track => track.stop());
           micStream = null;
           micState = 'initial';
+        } else if (isSelectMicrophone) {
+          micStream.getTracks().forEach(track => track.stop());
+          micStream = null;
+          micState = 'requesting';
+          requestMic();
         } else if (isRetry && !micStream.active) {
           forceRetryMic();
         }
@@ -76,6 +104,11 @@ export default function Microphone() {
         break;
     }
 
-    return {micStream, hasRequestedOnce, hasMicFailed: micState === 'failed'};
+    return {
+      micStream,
+      hasRequestedOnce,
+      hasMicFailed: micState === 'failed',
+      availableMicrophones,
+    };
   };
 }

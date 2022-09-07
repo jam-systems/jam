@@ -16,7 +16,10 @@ render(
 );
 
 function App() {
-  const [state, {createRoom, setProps, enterRoom, leaveRoom}] = useJam();
+  const [
+    state,
+    {createRoom, setProps, enterRoom, leaveRoom, selectMicrophone},
+  ] = useJam();
   let [
     roomId,
     speaking,
@@ -25,6 +28,7 @@ function App() {
     iAmSpeaker,
     peers,
     peerState,
+    availableMicrophones,
   ] = use(state, [
     'roomId',
     'speaking',
@@ -33,6 +37,7 @@ function App() {
     'iAmSpeaker',
     'peers',
     'peerState',
+    'availableMicrophones',
   ]);
 
   let hash = location.hash.slice(1) || null;
@@ -87,6 +92,15 @@ function App() {
           {iAmSpeaker ? 'Speaking' : 'Not speaking'}
         </b>{' '}
         with <b>{nJoinedPeers}</b> other peer{nJoinedPeers === 1 ? '' : 's'}.
+      </div>
+      <div>
+        {availableMicrophones.map(mic => {
+          return (
+            <button onClick={() => selectMicrophone(mic)} key={mic.deviceId}>
+              {mic.label}
+            </button>
+          );
+        })}
       </div>
     </>
   );
