@@ -11,16 +11,14 @@ import {
 import {get, populateApiCache} from '../backend';
 import {staticConfig} from '../config';
 import {actions} from '../state';
-import {domEvent} from '../../lib/util';
 import {DISCONNECTED, INITIAL} from '../../lib/swarm-health';
 import {useStableObject} from '../../lib/state-diff';
-let onload = domEvent(window, 'load');
 
 export default function ConnectRoom({myIdentity, swarm}) {
   let connectedRoomId = null;
   configSwarmIdentity(swarm, myIdentity);
   configSwarm(swarm, staticConfig);
-  useOn(staticConfig, conf => configSwarm(swarm, conf));
+  useOn(staticConfig, () => configSwarm(swarm, staticConfig));
 
   const identities = {};
   let update = useUpdate();

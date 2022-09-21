@@ -78,7 +78,7 @@ function createApi<T>(
     },
     // create room with the own identity as the only moderator and speaker
     createRoom: (roomId: string, partialRoom?: Partial<RoomType>) =>
-      createRoom(state, roomId, partialRoom) as Promise<boolean>,
+      createRoom(state, roomId, partialRoom as any) as Promise<boolean>,
 
     // completely replaces the room, rejects if moderator/speaker array is not set
     // only possible for moderators
@@ -90,13 +90,13 @@ function createApi<T>(
     addModerator: (roomId: string, peerId: string) =>
       addModerator(state, roomId, peerId) as Promise<boolean>,
     addPresenter: (roomId: string, peerId: string) =>
-        addPresenter(state, roomId, peerId) as Promise<boolean>,
+      addPresenter(state, roomId, peerId) as Promise<boolean>,
     removeSpeaker: (roomId: string, peerId: string) =>
       removeSpeaker(state, roomId, peerId) as Promise<boolean>,
     removeModerator: (roomId: string, peerId: string) =>
       removeModerator(state, roomId, peerId) as Promise<boolean>,
     removePresenter: (roomId: string, peerId: string) =>
-        removePresenter(state, roomId, peerId) as Promise<boolean>,
+      removePresenter(state, roomId, peerId) as Promise<boolean>,
     addAdmin: (peerId: string) => addAdmin(state, peerId) as Promise<boolean>,
     removeAdmin: (peerId: string) =>
       removeAdmin(state, peerId) as Promise<boolean>,
@@ -112,7 +112,8 @@ function createApi<T>(
     autoJoinOnce: () => dispatch(actions.AUTO_JOIN),
 
     switchCamera: () => dispatch(actions.SWITCH_CAM),
-    selectMicrophone: (mic: InputDeviceInfo) => dispatch(actions.SELECT_MIC, mic),
+    selectMicrophone: (mic: InputDeviceInfo) =>
+      dispatch(actions.SELECT_MIC, mic),
 
     startRecording: () => dispatch('start-recording'),
     stopRecording: () => dispatch('stop-recording'),
@@ -163,7 +164,7 @@ function createJam(
     ...initialProps,
     hasMediasoup: !!staticConfig.sfu,
   };
-  const {state, dispatch, setProps} = declareStateRoot(AppState, props, {
+  const {state, dispatch, setProps} = declareStateRoot(AppState, props as any, {
     state: undefined,
     defaultState,
   }) as {
