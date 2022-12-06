@@ -53,7 +53,7 @@ const Video = ({peerStream, x, y}) => {
 
   return (
     <div style={style}>
-      <video style={{height: '200px'}} ref={videoRef} autoPlay />
+      <video style={{height: '200px'}} ref={videoRef} autoPlay playsInline />
       <SpeakerRing peerId={peerId} />
     </div>
   );
