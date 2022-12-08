@@ -141,12 +141,12 @@ function App() {
     return a.peerId.localeCompare(b.peerId);
   });
 
+  const radius = 55 / Math.sin(Math.PI / sortedParticipants.length);
   const videoElements = sortedParticipants.map((stream, n) => {
-    const radius = 150;
     const count = sortedParticipants.length;
     const angle = (Math.PI * 2) / count;
-    const x = 150 + radius * Math.sin(angle * n);
-    const y = 150 + radius * Math.cos(angle * n);
+    const x = 50 + radius + radius * Math.sin(angle * n);
+    const y = 50 + radius + radius * Math.cos(angle * n);
 
     return <Video peerStream={stream} x={x} y={y} />;
   });
