@@ -135,13 +135,18 @@ function App() {
       peerId => remoteVideoStreams.find(s => s.peerId === peerId) || {peerId}
     ),
     {peerId: myId, stream: myVideo},
+    //{peerId: myId, stream: myVideo},
   ];
 
   const sortedParticipants = allParticipants.sort(function (a, b) {
     return a.peerId.localeCompare(b.peerId);
   });
 
-  const radius = 55 / Math.sin(Math.PI / sortedParticipants.length);
+  const radius =
+    sortedParticipants.length === 1
+      ? 0
+      : 55 / Math.sin(Math.PI / sortedParticipants.length);
+  console.log(radius);
   const videoElements = sortedParticipants.map((stream, n) => {
     const count = sortedParticipants.length;
     const angle = (Math.PI * 2) / count;
