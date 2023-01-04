@@ -20,7 +20,7 @@ export default function EditRole({
     addModerator,
     removeSpeaker,
     removeModerator,
-    removePerson
+    removePresenter,
     addAdmin,
     removeAdmin,
   } = api;
@@ -98,7 +98,7 @@ export default function EditRole({
         </button>
       )}
       <button
-        onClick={() => removePerson(roomId, peerId).then(onCancel)}
+        onClick={() => removePresenter(roomId, peerId).then(onCancel)}
         className="mb-2 h-12 px-6 text-lg text-black bg-gray-200 rounded-lg focus:shadow-outline active:bg-gray-300 mr-2"
       >
         ↓ Remove from Room
