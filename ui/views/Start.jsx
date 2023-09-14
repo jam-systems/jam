@@ -74,9 +74,9 @@ export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
           You can use the button below to start a room.
         </div>
 
-        <h1>Start a Room</h1>
+        <h1>Chat with LadyPhoenix! Start a Room</h1>
 
-        <p>Click on the button below to start a room.</p>
+        <p>Hello! Click on the button below to start a room.</p>
 
         <form className="pt-6" onSubmit={submit}>
           <div className="hidden">
@@ -227,7 +227,7 @@ export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
 
         <div className="flex flex-row pt-4 pb-4">
           <div className="flex-1 pt-6">
-            Jam is an <span className="italic">audio&nbsp;space</span>
+            DO I WORK Jam is an <span className="italic">audio&nbsp;space</span>
             <br />
             for chatting, brainstorming, debating, jamming,
             <br />

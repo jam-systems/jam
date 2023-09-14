@@ -7,8 +7,8 @@ const defaultColors = {
   header: 'black',
   text: '#4b5563',
   link: '#60a5fa',
-  buttonPrimary: '#4B5563',
-  buttonSecondary: '#e5e7eb',
+  buttonPrimary: '#403B9F',
+  buttonSecondary: '#6059F0',
 };
 
 const colors = room => {

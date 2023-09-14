@@ -27,7 +27,7 @@ export function InfoModal({roomId, room, close}) {
           Jam <b className="font-semibold">Pro</b> (Early Access): Make Jam your
           own.
           <br />
-          Set your own colors and logo, use your own domain.
+          DO I WORK Set your own colors and logo, use your own domain.
           <br />
           <br />
           <a
