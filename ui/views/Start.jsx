@@ -61,14 +61,7 @@ export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
           <code className="text-gray-900 bg-yellow-200">{urlRoomId}</code> is
           not valid.
           <br />
-          <a
-            href="https://gitlab.com/jam-systems/jam"
-            target="_blank"
-            rel="noreferrer"
-            className="underline text-blue-800 active:text-blue-600"
-          >
-            Learn more about Room IDs
-          </a>
+          Please check with the room owner to verify your link.
           <br />
           <br />
           You can use the button below to start a room.
@@ -85,7 +78,7 @@ export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
               type="text"
               placeholder="Room topic"
               value={name}
-              name="jam-room-topic"
+              name="Room Topic"
               autoComplete="off"
               onChange={e => {
                 setName(e.target.value);
@@ -100,7 +93,7 @@ export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
               className="rounded placeholder-gray-400 bg-gray-50 w-full md:w-full"
               placeholder="Room description"
               value={description}
-              name="jam-room-description"
+              name="Room Description"
               autoComplete="off"
               rows="2"
               onChange={e => {
@@ -214,6 +207,7 @@ export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
 
           <button
             onClick={submit}
+            name="Start Room"
             className="select-none h-12 px-6 text-lg text-black rounded-lg focus:shadow-outline"
             style={{backgroundColor: roomColors.buttonSecondary}}
           >
@@ -223,85 +217,36 @@ export default function Start({newRoom = {}, urlRoomId, roomFromURIError}) {
 
         <hr className="mt-14 mb-14" />
 
-        <h1>Welcome to Jam</h1>
+        <h1>Welcome to our Audio Chat Space!</h1>
 
         <div className="flex flex-row pt-4 pb-4">
           <div className="flex-1 pt-6">
-            DO I WORK Jam is an <span className="italic">audio&nbsp;space</span>
-            <br />
-            for chatting, brainstorming, debating, jamming,
-            <br />
-            micro-conferences and more.
-            <br />
-            <br />
-            <a
-              href="https://gitlab.com/jam-systems/jam"
-              className="underline"
-              target="_blank"
-              rel="noreferrer"
-              style={{color: roomColors.link}}
-            >
-              Learn&nbsp;more&nbsp;about&nbsp;Jam.
-            </a>
-            <br />
-            <br />
-            <br />
-            Jam <b className="font-semibold">Pro</b> (Early Access): Make Jam
-            your own.
-            <br />
-            Set your own colors and logo, use your own domain.
-            <br />
-            <br />
-            <a
-              href="https://pro.jam.systems"
-              className="underline"
-              target="_blank"
-              rel="noreferrer"
-              style={{color: roomColors.link}}
-            >
-              Sign up for the Jam Pro Early Access Program.
-            </a>
+            Join us in testing out this possible audio chat solution!
+
           </div>
           <div className="flex-initial">
             <img
               className="mt-8 md:mt-4 md:mb-4 md:mr-8"
               style={{width: 130, height: 130}}
-              alt="Jam mascot by @eejitlikeme"
-              title="Jam mascot by @eejitlikeme"
-              src="/img/jam.jpg"
+              alt="Lady Phoenix Endeavors Logo"
+              title="Lady Phoenix Endeavors Logo"
+              src="/img/logo.png"
             />
           </div>
         </div>
 
         <div className="pt-32 text-xs text-gray-400 text-center">
+          Provided by 
+          {' '} 
           <a
-            href="https://gitlab.com/jam-systems/jam"
+            href="https://ladyphoenixendeavors.com"
             target="_blank"
             rel="noreferrer"
           >
-            built
-          </a>{' '}
-          w/ ♥ by{' '}
-          {humins.map((humin, idx) => (
-            <span key={idx}>
-              {' '}
-              <a
-                href={'https://twitter.com/' + humin}
-                target="_blank"
-                rel="noreferrer"
-              >
-                @{humin}
-              </a>
-            </span>
-          ))}{' '}
-          in Berlin &amp; Vienna,{' '}
-          <a
-            href="https://www.digitalocean.com"
-            target="_blank"
-            rel="noreferrer"
-          >
-            hosted in Frankfurt
+            Lady Phoenix Endeavors
           </a>
+          <br />
+          
         </div>
       </div>
     </Container>

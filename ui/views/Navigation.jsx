@@ -102,7 +102,7 @@ export default function Navigation({
             backgroundColor: roomColors.buttonPrimary,
             color: isColorDark ? 'white' : 'black',
           }}
-        >
+          >
           {iSpeak && (
             <>
               {micOn && micMuted && (
@@ -143,6 +143,7 @@ export default function Navigation({
           onClick={() => setShowReactions(s => !s)}
           className="flex-grow select-none text-center h-12 px-6 text-lg text-black rounded-lg focus:shadow-outline"
           style={{backgroundColor: roomColors.buttonSecondary}}
+          aria-label='Show Reactions'
         >
           {/* heroicons/emoji-happy */}
           <svg
@@ -206,6 +207,7 @@ export default function Navigation({
         {!noLeave && (
           <button
             className="flex-shrink ml-3 select-none h-12 px-6 text-lg text-black rounded-lg focus:shadow-outline"
+            aria-label='Leave Room'
             onClick={() => leaveRoom(roomId)}
             style={{backgroundColor: roomColors.buttonSecondary}}
           >

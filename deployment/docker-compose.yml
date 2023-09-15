@@ -41,7 +41,8 @@ services:
       - traefik.enable=true
     profiles: [ "metrics" ]
   ui:
-    image: registry.gitlab.com/jam-systems/jam/ui:${CHANNEL}
+    build: ../ui
+    #image: registry.gitlab.com/jam-systems/jam/ui:${CHANNEL}
     restart: always
     environment:
       - JAM_HOST
@@ -67,8 +68,8 @@ services:
       - "../data/pantryredis:/data"
     command: "redis-server --appendonly yes"
   pantry-sfu:
-    #build: ../pantry-sfu
-    image: registry.gitlab.com/jam-systems/jam/pantry-sfu:${CHANNEL}
+    build: ../pantry-sfu
+    #image: registry.gitlab.com/jam-systems/jam/pantry-sfu:${CHANNEL}
     restart: always
     network_mode: host
     depends_on: 
@@ -80,8 +81,8 @@ services:
       - MEDIASOUP_MAX_PORT
     profiles: [ "sfu" ]
   pantry:
-    #build: ../pantry
-    image: registry.gitlab.com/jam-systems/jam/pantry:${CHANNEL}
+    build: ../pantry
+    #image: registry.gitlab.com/jam-systems/jam/pantry:${CHANNEL}
     restart: always
     depends_on: 
       - pantryredis

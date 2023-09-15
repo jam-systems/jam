@@ -167,13 +167,13 @@ app.use(async (req, res) => {
       name: metaInfo.ogTitle,
       icons: [
         {
-          src: `${urls.jam}/img/jam-app-icon-512.png`,
+          src: `${urls.jam}/img/logo_512.png`,
           type: 'image/png',
           sizes: '512x512',
           purpose: 'any',
         },
         {
-          src: `${urls.jam}/img/jam-app-icon-192.png`,
+          src: `${urls.jam}/img/logo_192.png`,
           type: 'image/png',
           sizes: '192x192',
           purpose: 'any',
@@ -211,8 +211,8 @@ const defaultMetaInfo = {
   ogTitle: 'Jam',
   ogDescription: 'Join this audio room',
   ogUrl: urls.jam,
-  ogImage: `${urls.jam}/img/jam-app-icon.jpg`,
-  favIcon: '/img/jam-app-icon.jpg',
+  ogImage: `${urls.jam}/img/logo.png`,
+  favIcon: '/img/logo.png',
 };
 const reservedRoutes = ['me', null];
 
@@ -228,10 +228,10 @@ async function getRoomMetaInfo(route) {
         ogTitle: roomInfo.name,
         ogDescription: roomInfo.description,
         ogUrl: `${urls.jam}/${roomId}`,
-        ogImage: roomInfo.logoURI || `${urls.jam}/img/jam-app-icon.jpg`,
+        ogImage: roomInfo.logoURI || `${urls.jam}/img/logo.png`,
         color: roomInfo.color || '',
         id: roomId || '',
-        favIcon: roomInfo.logoURI || '/img/jam-app-icon.jpg',
+        favIcon: roomInfo.logoURI || '/img/logo.png',
         schedule: roomInfo.schedule,
       },
       roomInfo,

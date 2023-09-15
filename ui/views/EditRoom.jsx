@@ -91,6 +91,7 @@ export function EditRoomModal({roomId, room, close}) {
             placeholder="Room topic"
             value={name}
             name="jam-room-topic"
+            aria-label="Room Topic"
             autoComplete="off"
             onChange={e => {
               setName(e.target.value);
@@ -109,6 +110,7 @@ export function EditRoomModal({roomId, room, close}) {
             placeholder="Room description"
             value={description}
             name="jam-room-description"
+            aria-label="Room Description"
             autoComplete="off"
             rows="2"
             onChange={e => {
@@ -206,29 +208,6 @@ export function EditRoomModal({roomId, room, close}) {
                   setButtonURI(e.target.value);
                 }}
               ></input>
-              <div className="p-2 text-gray-500 italic">
-                Set the link for the {`'call to action'`} button.{' '}
-                <span className="text-gray-400">(optional)</span>
-              </div>
-
-              <br />
-              <input
-                className={mqp(
-                  'rounded placeholder-gray-400 bg-gray-50 w-full md:w-96'
-                )}
-                type="text"
-                placeholder="Button Text"
-                value={buttonText}
-                name="jam-room-button-text"
-                autoComplete="off"
-                onChange={e => {
-                  setButtonText(e.target.value);
-                }}
-              ></input>
-              <div className="p-2 text-gray-500 italic">
-                Set the text for the {`'call to action'`} button.{' '}
-                <span className="text-gray-400">(optional)</span>
-              </div>
 
               <br />
               <input
@@ -256,6 +235,7 @@ export function EditRoomModal({roomId, room, close}) {
                 className="ml-2"
                 type="checkbox"
                 name="jam-room-closed"
+                aria-label={closed ? "Room is Closed" : "Room is Open"}
                 id="jam-room-closed"
                 onChange={() => {
                   setClosed(!closed);
@@ -268,8 +248,7 @@ export function EditRoomModal({roomId, room, close}) {
                 <div className="p-2 pl-9 text-gray-500">
                   Closed rooms can only be joined by moderators.
                   <br />
-                  Everyone else sees the description and the&nbsp;
-                  {`'call to action'`} button.
+                  Everyone else sees the description.
                 </div>
               </label>
             </div>
@@ -278,13 +257,15 @@ export function EditRoomModal({roomId, room, close}) {
             <button
               onClick={submit}
               className="flex-grow mt-5 h-12 px-6 text-lg text-white bg-gray-600 rounded-lg focus:shadow-outline active:bg-gray-600 mr-2"
+              aria-label="Update Room Settings"
             >
               Update Room
             </button>
             <button
               onClick={close}
               className="mt-5 h-12 px-6 text-lg text-black bg-gray-100 rounded-lg focus:shadow-outline active:bg-gray-300"
-            >
+              aria-label="Cancel"
+              >
               Cancel
             </button>
           </div>
@@ -412,22 +393,6 @@ export function EditRoomModal({roomId, room, close}) {
         <br />
         <hr />
         <br />
-        <input
-          className="rounded bg-gray-50 text-gray-400 w-full"
-          defaultValue={`<iframe src="${window.location.href}" allow="microphone *;" width="420" height="600"></iframe>`}
-        />
-        <div className="p-2 text-gray-500 italic">
-          Embed this room using an iFrame. (
-          <a
-            className="underline"
-            href="https://gitlab.com/jam-systems/jam"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Learn more
-          </a>
-          )
-        </div>
       </div>
     </Modal>
   );

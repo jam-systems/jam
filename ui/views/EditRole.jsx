@@ -154,6 +154,7 @@ export function EditSelf({onCancel}) {
               openModal(EditIdentity);
               onCancel();
             }}
+            name="Edit Profile"
           >
             Edit Profile
           </SecondaryButton>
@@ -161,6 +162,7 @@ export function EditSelf({onCancel}) {
         {!stageOnly && iModerate && !iSpeak && (
           <SecondaryButton
             onClick={() => addSpeaker(roomId, myId).then(onCancel)}
+            name="Move to Stage"
           >
             ↑ Move to Stage
           </SecondaryButton>
@@ -168,6 +170,7 @@ export function EditSelf({onCancel}) {
         {!stageOnly && iModerate && iSpeak && (
           <SecondaryButton
             onClick={() => removeSpeaker(roomId, myId).then(onCancel)}
+            name="Leave Stage"
           >
             ↓ Leave Stage
           </SecondaryButton>
@@ -178,6 +181,7 @@ export function EditSelf({onCancel}) {
               leaveStage();
               onCancel();
             }}
+            name="Leave Stage"
           >
             ↓ Leave Stage
           </SecondaryButton>
@@ -188,6 +192,7 @@ export function EditSelf({onCancel}) {
               openModal(StreamingModal);
               onCancel();
             }}
+            name="Stream Audio"
           >
             Stream Audio
           </SecondaryButton>
@@ -203,8 +208,9 @@ export function EditSelf({onCancel}) {
               }
               onCancel();
             }}
+            name={isRecording ? "Stop Room Recording" : 'Start Room Recording'}
           >
-            {isRecording ? 'Stop Room Recording' : 'Start Room Recording'}
+            {isRecording ? "Stop Room Recording" : 'Start Room Recording'}
           </SecondaryButton>
         )}
         {iModerate && (
@@ -217,13 +223,14 @@ export function EditSelf({onCancel}) {
               }
               onCancel();
             }}
+            name={isPodcasting ? 'Stop Podcast Recording' : 'Start Podcast Recording'}
           >
             {isPodcasting
               ? 'Stop Podcast Recording'
               : 'Start Podcast Recording'}
           </SecondaryButton>
         )}
-        <SecondaryButton light onClick={onCancel}>
+        <SecondaryButton light onClick={onCancel} name='Cancel'>
           Cancel
         </SecondaryButton>
       </ButtonContainer>
